@@ -121,6 +121,16 @@
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
+        
+        .color-preview {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            margin-left: 5px;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
@@ -220,6 +230,27 @@
                             <option value="">Выберите лиру</option>
                         </select>
                     </div>
+                    
+                    <!-- НОВЫЕ ПОЛЯ: ЦВЕТ RAL И ТЕКСТУРА -->
+                    <div class="form-group">
+                        <label>🎨 Цвет RAL:</label>
+                        <select id="ralSelect">
+                            <option value="">Выберите цвет RAL</option>
+                        </select>
+                        <div id="ralPreview" class="color-preview" style="display: none;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>🧵 Текстура:</label>
+                        <select id="textureSelect">
+                            <option value="">Выберите текстуру</option>
+                            <option value="матовая">Матовая</option>
+                            <option value="глянцевая">Глянцевая</option>
+                            <option value="сатиновая">Сатиновая</option>
+                            <option value="структурированная">Структурированная</option>
+                            <option value="антик">Антик</option>
+                        </select>
+                    </div>
+                    
                     <div class="form-group">
                         <label>📝 Дополнительные детали:</label>
                         <textarea id="additionalDetails" rows="3" placeholder="Особые требования или примечания..."></textarea>
