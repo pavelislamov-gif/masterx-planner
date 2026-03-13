@@ -597,7 +597,6 @@ function filterOrders(searchText, statusFilter) {
         card.style.display = show ? 'block' : 'none';
     });
 }
-}
 
 // Экспорт заказов в CSV
 function exportOrders() {
