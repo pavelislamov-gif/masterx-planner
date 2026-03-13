@@ -10,10 +10,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     showLoading();
     try {
         await loadAllData();
-        loadOrders();
-        populateSelects();
-        updateStatistics();
-        setupEventListeners();
     } catch (error) {
         showError('Ошибка загрузки данных: ' + error.message);
     } finally {
@@ -51,17 +47,190 @@ function showError(message) {
     alert('❌ ' + message);
 }
 
+// Загрузка всех данных
+async function loadAllData() {
+    try {
+        console.log('=== НАЧАЛО ЗАГРУЗКИ ДАННЫХ ===');
+        
+        // Загружаем продукты
+        products = await loadProducts();
+        console.log('1. Продукты загружены:', products ? products.length : 0);
+        
+        // Загружаем кронштейны
+        brackets = await loadBrackets();
+        console.log('2. Кронштейны загружены:', brackets ? brackets.length : 0);
+        
+        // Загружаем лиры
+        lyres = await loadLyres();
+        console.log('3. Лиры загружены:', lyres ? lyres.length : 0);
+        
+        // Загружаем заказы
+        orders = loadOrdersFromStorage();
+        console.log('4. Заказы загружены:', orders ? orders.length : 0);
+        
+        // Проверяем, что данные действительно есть
+        console.log('5. Проверка продуктов:', products[0]?.name);
+        console.log('6. Проверка кронштейнов:', brackets[0]?.name);
+        console.log('7. Проверка лир:', lyres[0]?.name);
+        
+        // Заполняем выпадающие списки
+        console.log('8. Заполняем select-ы...');
+        populateSelects();
+        
+        // Загружаем заказы на страницу
+        loadOrders();
+        
+        // Обновляем статистику
+        updateStatistics();
+        
+        // Инициализируем отчет по материалам
+        if (typeof MaterialsReport !== 'undefined') {
+            materialsReport = new MaterialsReport();
+            await materialsReport.loadMaterialsData();
+        }
+        
+        setupEventListeners();
+        
+        console.log('=== ВСЕ ДАННЫЕ УСПЕШНО ЗАГРУЖЕНЫ ===');
+    } catch (error) {
+        console.error('❌ ОШИБКА загрузки данных:', error);
+        showError('Ошибка загрузки данных: ' + error.message);
+    }
+}
+
+// Заполнение выпадающих списков
+function populateSelects() {
+    console.log('=== ЗАПОЛНЕНИЕ SELECT-ОВ ===');
+    
+    // Проверяем, что данные существуют
+    if (!products || products.length === 0) {
+        console.error('❌ products пуст или не загружен!');
+        return;
+    }
+    
+    console.log('products длина:', products.length);
+    console.log('Первый продукт:', products[0]);
+    
+    const productSelect = document.getElementById('productSelect');
+    if (!productSelect) {
+        console.error('❌ productSelect не найден в DOM!');
+        return;
+    }
+    
+    productSelect.innerHTML = '<option value="">Выберите изделие</option>';
+    
+    // Сортируем продукты по алфавиту
+    products.sort((a, b) => a.name.localeCompare(b.name));
+    
+    let count = 0;
+    products.forEach(product => {
+        if (product && product.name) {
+            const option = document.createElement('option');
+            option.value = product.name;
+            option.textContent = product.name;
+            productSelect.appendChild(option);
+            count++;
+        }
+    });
+    
+    console.log(`✅ Добавлено ${count} опций в productSelect`);
+    
+    // Кронштейны
+    if (brackets && brackets.length > 0) {
+        const bracketSelect = document.getElementById('bracketSelect');
+        if (bracketSelect) {
+            bracketSelect.innerHTML = '<option value="">Выберите кронштейн</option>';
+            brackets.sort((a, b) => a.name.localeCompare(b.name));
+            let bracketCount = 0;
+            brackets.forEach(bracket => {
+                if (bracket && bracket.name) {
+                    const option = document.createElement('option');
+                    option.value = bracket.name;
+                    option.textContent = bracket.name;
+                    bracketSelect.appendChild(option);
+                    bracketCount++;
+                }
+            });
+            console.log(`✅ Добавлено ${bracketCount} опций в bracketSelect`);
+        }
+    } else {
+        console.error('❌ brackets пуст или не загружен!');
+    }
+    
+    // Лиры
+    if (lyres && lyres.length > 0) {
+        const lyreSelect = document.getElementById('lyreSelect');
+        if (lyreSelect) {
+            lyreSelect.innerHTML = '<option value="">Выберите лиру</option>';
+            lyres.sort((a, b) => a.name.localeCompare(b.name));
+            let lyreCount = 0;
+            lyres.forEach(lyre => {
+                if (lyre && lyre.name) {
+                    const option = document.createElement('option');
+                    option.value = lyre.name;
+                    option.textContent = lyre.name;
+                    lyreSelect.appendChild(option);
+                    lyreCount++;
+                }
+            });
+            console.log(`✅ Добавлено ${lyreCount} опций в lyreSelect`);
+        }
+    } else {
+        console.error('❌ lyres пуст или не загружен!');
+    }
+    
+    console.log('=== ЗАПОЛНЕНИЕ SELECT-ОВ ЗАВЕРШЕНО ===');
+}
+
+// Загрузка размеров для выбранного изделия
+async function loadProductSizes() {
+    const productName = document.getElementById('productSelect').value;
+    console.log('Выбран продукт:', productName);
+    
+    const product = products.find(p => p.name === productName);
+    console.log('Найден продукт:', product);
+    
+    const sizeSelect = document.getElementById('sizeSelect');
+    
+    sizeSelect.innerHTML = '<option value="">Загрузка размеров...</option>';
+    sizeSelect.disabled = true;
+    
+    setTimeout(() => {
+        sizeSelect.innerHTML = '<option value="">Выберите размер</option>';
+        
+        if (product && product.sizes && product.sizes.length > 0) {
+            console.log('Размеры:', product.sizes);
+            product.sizes.forEach(size => {
+                const option = document.createElement('option');
+                option.value = size;
+                option.textContent = size;
+                sizeSelect.appendChild(option);
+            });
+        } else {
+            sizeSelect.innerHTML = '<option value="">Нет доступных размеров</option>';
+        }
+        
+        sizeSelect.disabled = false;
+    }, 100);
+}
+
 // Настройка обработчиков событий
 function setupEventListeners() {
     // Поиск
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-        filterOrders(e.target.value, document.getElementById('statusFilter').value);
-    });
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            filterOrders(e.target.value, document.getElementById('statusFilter').value);
+        });
+    }
 
     // Фильтр по статусу
-    document.getElementById('statusFilter').addEventListener('change', function(e) {
-        filterOrders(document.getElementById('searchInput').value, e.target.value);
-    });
+    const statusFilter = document.getElementById('statusFilter');
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function(e) {
+            filterOrders(document.getElementById('searchInput').value, e.target.value);
+        });
+    }
 
     // Синхронизация между вкладками
     window.addEventListener('storage', function(e) {
@@ -71,129 +240,22 @@ function setupEventListeners() {
             updateStatistics();
         }
     });
-
-    // Слушаем изменения статусов задач из цехов
-    window.addEventListener('taskStatusChanged', function(e) {
-        updateSiteSquare(e.detail.taskId, e.detail.status);
-    });
-}
-
-// Загрузка всех данных
-async function loadAllData() {
-    try {
-        // Загружаем продукты
-        products = await loadProducts();
-        console.log('Загружено продуктов:', products.length);
-
-        // Загружаем кронштейны
-        brackets = await loadBrackets();
-        console.log('Загружено кронштейнов:', brackets.length);
-
-        // Загружаем лиры
-        lyres = await loadLyres();
-        console.log('Загружено лир:', lyres.length);
-
-        // Загружаем заказы
-        orders = loadOrdersFromStorage();
-        
-        // Инициализируем отчет по материалам
-        materialsReport = new MaterialsReport();
-        await materialsReport.loadMaterialsData();
-        
-        console.log('Все данные успешно загружены');
-    } catch (error) {
-        console.error('Ошибка загрузки данных:', error);
-        throw error;
-    }
-}
-
-// Заполнение выпадающих списков
-function populateSelects() {
-    const productSelect = document.getElementById('productSelect');
-    productSelect.innerHTML = '<option value="">Выберите изделие</option>';
-    
-    // Сортируем продукты по алфавиту
-    products.sort((a, b) => a.name.localeCompare(b.name));
-    
-    products.forEach(product => {
-        const option = document.createElement('option');
-        option.value = product.name;
-        option.textContent = product.name;
-        productSelect.appendChild(option);
-    });
-    
-    // Кронштейны
-    const bracketSelect = document.getElementById('bracketSelect');
-    bracketSelect.innerHTML = '<option value="">Выберите кронштейн</option>';
-    
-    brackets.sort((a, b) => a.name.localeCompare(b.name));
-    brackets.forEach(bracket => {
-        const option = document.createElement('option');
-        option.value = bracket.name;
-        option.textContent = bracket.name;
-        bracketSelect.appendChild(option);
-    });
-    
-    // Лиры
-    const lyreSelect = document.getElementById('lyreSelect');
-    lyreSelect.innerHTML = '<option value="">Выберите лиру</option>';
-    
-    lyres.sort((a, b) => a.name.localeCompare(b.name));
-    lyres.forEach(lyre => {
-        const option = document.createElement('option');
-        option.value = lyre.name;
-        option.textContent = lyre.name;
-        lyreSelect.appendChild(option);
-    });
-}
-
-// Загрузка размеров для выбранного изделия
-async function loadProductSizes() {
-    const productName = document.getElementById('productSelect').value;
-    const product = products.find(p => p.name === productName);
-    const sizeSelect = document.getElementById('sizeSelect');
-    
-    sizeSelect.innerHTML = '<option value="">Загрузка размеров...</option>';
-    sizeSelect.disabled = true;
-    
-    try {
-        let sizes = [];
-        if (product && product.file) {
-            sizes = await loadProductSizesFromCSV(product.file);
-        }
-        
-        sizeSelect.innerHTML = '<option value="">Выберите размер</option>';
-        
-        if (sizes && sizes.length > 0) {
-            sizes.forEach(size => {
-                const option = document.createElement('option');
-                option.value = size;
-                option.textContent = size;
-                sizeSelect.appendChild(option);
-            });
-        } else {
-            sizeSelect.innerHTML = '<option value="">Нет доступных размеров</option>';
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки размеров:', error);
-        sizeSelect.innerHTML = '<option value="">Ошибка загрузки размеров</option>';
-    } finally {
-        sizeSelect.disabled = false;
-    }
 }
 
 // Открытие модального окна
 function openOrderModal() {
     const modal = document.getElementById('orderModal');
-    modal.style.display = 'block';
-    
-    // Устанавливаем сегодняшнюю дату
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('orderDate').value = today;
-    
-    // Генерируем номер заказа
-    const orderNumber = generateOrderNumber();
-    document.getElementById('orderNumber').value = orderNumber;
+    if (modal) {
+        modal.style.display = 'block';
+        
+        // Устанавливаем сегодняшнюю дату
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('orderDate').value = today;
+        
+        // Генерируем номер заказа
+        const orderNumber = generateOrderNumber();
+        document.getElementById('orderNumber').value = orderNumber;
+    }
 }
 
 // Генерация номера заказа
@@ -232,7 +294,7 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
         status: 'active',
         createdAt: new Date().toISOString(),
         completedAt: null,
-        tasks: {} // Для хранения статусов задач
+        tasks: {}
     };
     
     orders.push(order);
@@ -272,6 +334,8 @@ function showNotification(message, type = 'info') {
 // Загрузка и отображение заказов
 function loadOrders() {
     const ordersList = document.getElementById('ordersList');
+    if (!ordersList) return;
+    
     ordersList.innerHTML = '';
     
     if (orders.length === 0) {
@@ -284,7 +348,6 @@ function loadOrders() {
         return;
     }
     
-    // Сортируем по дате (сначала новые)
     orders.sort((a, b) => new Date(b.date) - new Date(a.date));
     
     orders.forEach(order => {
@@ -302,13 +365,13 @@ function createOrderCard(order) {
     const header = document.createElement('div');
     header.className = 'order-header';
     
-    const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
+    const totalItems = order.items ? order.items.reduce((sum, item) => sum + (item.quantity || 0), 0) : 0;
     const completedTasks = countCompletedTasks(order);
     const totalTasks = countTotalTasks(order);
     const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
     
     header.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 20px;">
+        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
             <h3>📦 Заказ №${order.number} от ${formatDate(order.date)}</h3>
             <span style="background: ${getStatusColor(order.status)}; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px;">
                 ${order.status === 'active' ? 'В работе' : 'Завершен'}
@@ -330,7 +393,6 @@ function createOrderCard(order) {
     content.className = 'order-content';
     content.style.display = 'none';
     
-    // Прогресс-бар
     const progressBar = document.createElement('div');
     progressBar.style.cssText = `
         width: 100%;
@@ -343,7 +405,6 @@ function createOrderCard(order) {
     progressBar.innerHTML = `<div style="width: ${progress}%; height: 100%; background: #28a745; transition: width 0.3s;"></div>`;
     content.appendChild(progressBar);
     
-    // Таблица с позициями
     const itemsTable = document.createElement('table');
     itemsTable.className = 'items-table';
     itemsTable.innerHTML = `
@@ -360,11 +421,11 @@ function createOrderCard(order) {
         <tbody>
             ${order.items.map(item => `
                 <tr>
-                    <td><strong>${item.product}</strong></td>
-                    <td>${item.size}</td>
-                    <td>${item.quantity} шт</td>
-                    <td>${item.bracket}</td>
-                    <td>${item.lyre}</td>
+                    <td><strong>${item.product || '-'}</strong></td>
+                    <td>${item.size || '-'}</td>
+                    <td>${item.quantity || 0} шт</td>
+                    <td>${item.bracket || '-'}</td>
+                    <td>${item.lyre || '-'}</td>
                     <td>${item.additional || '-'}</td>
                 </tr>
             `).join('')}
@@ -372,7 +433,6 @@ function createOrderCard(order) {
     `;
     content.appendChild(itemsTable);
     
-    // Участки
     const sitesSection = document.createElement('div');
     sitesSection.className = 'sites-section';
     sitesSection.innerHTML = `
@@ -401,6 +461,10 @@ function createOrderCard(order) {
 
 // Создание блока участка
 function createSiteBlock(siteName, order, siteKey) {
+    if (!order.items || !order.items[0]) {
+        return `<div class="site-item"><div class="site-name">${siteName}</div><div class="squares"><div class="square"></div></div></div>`;
+    }
+    
     const operations = getOperationsForProduct(order.items[0].product, siteKey);
     const squares = [];
     
@@ -436,31 +500,15 @@ function countCompletedTasks(order) {
 
 // Подсчет всех задач
 function countTotalTasks(order) {
+    if (!order || !order.items || !order.items[0]) return 0;
     const operations = getOperationsForProduct(order.items[0].product, 'all');
-    return operations.length * order.items.reduce((sum, item) => sum + item.quantity, 0);
+    const totalItems = order.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+    return operations.length * totalItems;
 }
 
 // Получение цвета статуса
 function getStatusColor(status) {
     return status === 'active' ? '#007bff' : '#28a745';
-}
-
-// Обновление квадратика
-function updateSiteSquare(taskId, status) {
-    const square = document.querySelector(`[data-task-id="${taskId}"] .square`);
-    if (square) {
-        square.className = `square ${status}`;
-    }
-    
-    // Обновляем статус в заказе
-    const [orderId] = taskId.split('_');
-    const order = orders.find(o => o.id == orderId);
-    if (order) {
-        if (!order.tasks) order.tasks = {};
-        order.tasks[taskId] = status;
-        saveOrdersToStorage(orders);
-        updateStatistics();
-    }
 }
 
 // Показать отчет по материалам
@@ -471,12 +519,18 @@ async function showMaterialsReport(orderId) {
     const modal = document.getElementById('materialsModal');
     const reportDiv = document.getElementById('materialsReport');
     
+    if (!modal || !reportDiv) return;
+    
     reportDiv.innerHTML = '<div style="text-align: center; padding: 20px;">⏳ Загрузка отчета...</div>';
     modal.style.display = 'block';
     
     try {
-        const reportHTML = await materialsReport.generateReportHTML(order);
-        reportDiv.innerHTML = reportHTML;
+        if (materialsReport) {
+            const reportHTML = await materialsReport.generateReportHTML(order);
+            reportDiv.innerHTML = reportHTML;
+        } else {
+            reportDiv.innerHTML = '<div style="color: red; padding: 20px;">❌ Отчет по материалам не инициализирован</div>';
+        }
     } catch (error) {
         reportDiv.innerHTML = `<div style="color: red; padding: 20px;">❌ Ошибка загрузки отчета: ${error.message}</div>`;
     }
@@ -498,13 +552,11 @@ function filterOrders(searchText, statusFilter) {
         
         let show = true;
         
-        // Поиск по тексту
         if (searchText) {
             const searchable = `${order.number} ${order.items.map(i => i.product).join(' ')}`.toLowerCase();
             show = searchable.includes(searchText);
         }
         
-        // Фильтр по статусу
         if (show && statusFilter !== 'all') {
             show = order.status === statusFilter;
         }
@@ -538,11 +590,16 @@ function exportOrders() {
 
 // Обновление статистики
 function updateStatistics() {
-    document.getElementById('totalOrders').textContent = orders.length;
+    const totalOrdersEl = document.getElementById('totalOrders');
+    const totalItemsEl = document.getElementById('totalItems');
+    const activeTasksEl = document.getElementById('activeTasks');
+    const completedTasksEl = document.getElementById('completedTasks');
+    
+    if (totalOrdersEl) totalOrdersEl.textContent = orders.length;
     
     const totalItems = orders.reduce((sum, order) => 
-        sum + order.items.reduce((s, item) => s + item.quantity, 0), 0);
-    document.getElementById('totalItems').textContent = totalItems;
+        sum + (order.items ? order.items.reduce((s, item) => s + (item.quantity || 0), 0) : 0), 0);
+    if (totalItemsEl) totalItemsEl.textContent = totalItems;
     
     let activeTasks = 0;
     let completedTasks = 0;
@@ -556,8 +613,8 @@ function updateStatistics() {
         }
     });
     
-    document.getElementById('activeTasks').textContent = activeTasks;
-    document.getElementById('completedTasks').textContent = completedTasks;
+    if (activeTasksEl) activeTasksEl.textContent = activeTasks;
+    if (completedTasksEl) completedTasksEl.textContent = completedTasks;
 }
 
 // Вспомогательные функции
