@@ -706,7 +706,7 @@ window.onclick = function(event) {
     if (event.target === materialsModal) {
         closeMaterialsModal();
     }
-};  // <-- ЭТО ЗАКРЫТИЕ window.onclick
+};
 
 // Добавляем анимации
 const style = document.createElement('style');
@@ -764,7 +764,7 @@ style.textContent = `
         transform: translateY(-2px);
         box-shadow: 0 8px 16px rgba(0,0,0,0.1);
     }
-`;  // <-- ЭТО ЗАКРЫТИЕ style.textContent
+`;
 
 document.head.appendChild(style);
 
