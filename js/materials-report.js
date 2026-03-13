@@ -167,6 +167,26 @@ class MaterialsReport {
                 }
             },
             
+            // XSMART mini - Тех карта XSMART mini.csv
+            'XSMART mini': {
+                'XSMART mini 1': { 'Профиль НП 455015': { value: 71, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
+                'XSMART mini 2': { 'Профиль НП 455015': { value: 91, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
+                'XSMART mini 3': { 'Профиль НП 455015': { value: 131, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
+                'XSMART mini 4': { 'Профиль НП 455015': { value: 171, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
+                'XSMART mini 5': { 'Профиль НП 455015': { value: 206, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
+                'XSMART mini 6': { 'Профиль НП 455015': { value: 246, unit: 'мм', material: 'Алюминий', thickness: '2мм' } }
+            },
+            
+            // XLUMO Двунаправленный - Тех карта XLUMO Двунаправленный.csv
+            'XLUMO Двунаправленный': {
+                'XLUMOx2-1': { 'Профиль НПС 3362': { value: 71, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
+                'XLUMOx2-2': { 'Профиль НПС 3362': { value: 108, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
+                'XLUMOx2-3': { 'Профиль НПС 3362': { value: 148, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
+                'XLUMOx2-4': { 'Профиль НПС 3362': { value: 188, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
+                'XLUMOx2-5': { 'Профиль НПС 3362': { value: 223, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
+                'XLUMOx2-6': { 'Профиль НПС 3362': { value: 263, unit: 'мм', material: 'Алюминий', thickness: '2мм' } }
+            },
+            
             // XYELLOW - Тех карта XYELLOW.csv
             'XYELLOW': {
                 '116': {
@@ -248,95 +268,116 @@ class MaterialsReport {
         };
     }
     
-    // Расчет материалов для заказа (только AISI с группировкой по толщине)
+    // Расчет материалов для заказа
     calculateMaterials(order) {
-        // Объект для группировки AISI по толщине
-        const aisiByThickness = {
-            '1мм': { total: 0, items: [] },
-            '1.5мм': { total: 0, items: [] },
-            '2мм': { total: 0, items: [] },
-            '3мм': { total: 0, items: [] }
-        };
-        
-        // Массив для других материалов (не AISI)
-        const otherMaterials = [];
+        const materials = [];
+        const aisiByThickness = {};
         
         order.items.forEach(item => {
             const quantity = item.quantity || 1;
             const productName = item.product;
             const size = item.size;
             
-            console.log(`Расчет AISI материалов для ${productName} размер ${size}, кол-во ${quantity}`);
+            console.log(`Расчет материалов для ${productName} размер ${size}, кол-во ${quantity}`);
             
-            // 1. Обрабатываем кронштейн (AISI)
+            // 1. Кронштейн (AISI, в кг)
             if (item.bracket && item.bracket !== 'отсутствует') {
                 const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket);
                 if (bracket) {
                     const thickness = bracket.thickness || '2мм';
-                    const weight = bracket.weight || 0;
-                    const totalWeight = weight * quantity;
+                    const key = `AISI 430 ${thickness}`;
                     
-                    if (aisiByThickness[thickness]) {
-                        aisiByThickness[thickness].total += totalWeight;
-                        aisiByThickness[thickness].items.push({
-                            name: `Кронштейн ${item.bracket}`,
+                    if (!aisiByThickness[key]) {
+                        aisiByThickness[key] = {
+                            name: key,
+                            material: 'AISI 430',
                             thickness: thickness,
-                            weight: weight,
-                            quantity: quantity,
-                            totalWeight: totalWeight
-                        });
+                            totalValue: 0,
+                            quantity: 0,
+                            unit: 'кг',
+                            items: []
+                        };
                     }
+                    
+                    const weight = bracket.weight || 0;
+                    aisiByThickness[key].totalValue += weight * quantity;
+                    aisiByThickness[key].quantity += quantity;
+                    aisiByThickness[key].items.push({
+                        name: `Кронштейн ${item.bracket}`,
+                        value: weight,
+                        quantity: quantity,
+                        unit: 'кг'
+                    });
                 }
             }
             
-            // 2. Обрабатываем лиру (AISI)
+            // 2. Лира (AISI, в кг)
             if (item.lyre && item.lyre !== 'отсутствует') {
                 const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre);
                 if (lyre) {
                     const thickness = lyre.thickness || '1.5мм';
-                    const weight = lyre.weight || 0;
-                    const totalWeight = weight * quantity;
+                    const key = `AISI 430 ${thickness}`;
                     
-                    if (aisiByThickness[thickness]) {
-                        aisiByThickness[thickness].total += totalWeight;
-                        aisiByThickness[thickness].items.push({
-                            name: `Лира ${item.lyre}`,
+                    if (!aisiByThickness[key]) {
+                        aisiByThickness[key] = {
+                            name: key,
+                            material: 'AISI 430',
                             thickness: thickness,
-                            weight: weight,
-                            quantity: quantity,
-                            totalWeight: totalWeight
-                        });
+                            totalValue: 0,
+                            quantity: 0,
+                            unit: 'кг',
+                            items: []
+                        };
                     }
+                    
+                    const weight = lyre.weight || 0;
+                    aisiByThickness[key].totalValue += weight * quantity;
+                    aisiByThickness[key].quantity += quantity;
+                    aisiByThickness[key].items.push({
+                        name: `Лира ${item.lyre}`,
+                        value: weight,
+                        quantity: quantity,
+                        unit: 'кг'
+                    });
                 }
             }
             
-            // 3. Обрабатываем детали из техкарты изделия
+            // 3. Материалы из техкарты изделия
             const productSpec = this.materialsDB.productSpecs[productName];
             if (productSpec && productSpec[size]) {
                 const spec = productSpec[size];
                 
                 Object.entries(spec).forEach(([key, data]) => {
-                    // Проверяем, что это AISI 430
+                    // AISI материалы - в кг (группируем по толщине)
                     if (data.material === 'AISI 430') {
                         const thickness = data.thickness || '2мм';
+                        const aisiKey = `AISI 430 ${thickness}`;
+                        
+                        if (!aisiByThickness[aisiKey]) {
+                            aisiByThickness[aisiKey] = {
+                                name: aisiKey,
+                                material: 'AISI 430',
+                                thickness: thickness,
+                                totalValue: 0,
+                                quantity: 0,
+                                unit: 'кг',
+                                items: []
+                            };
+                        }
+                        
                         // Переводим мм в кг (условно, нужно уточнить коэффициент)
                         // Пока используем значение как есть
-                        const totalValue = data.value * quantity;
-                        
-                        if (aisiByThickness[thickness]) {
-                            aisiByThickness[thickness].total += totalValue;
-                            aisiByThickness[thickness].items.push({
-                                name: `${key} (${productName})`,
-                                thickness: thickness,
-                                value: data.value,
-                                unit: data.unit,
-                                quantity: quantity,
-                                totalValue: totalValue
-                            });
-                        }
+                        aisiByThickness[aisiKey].totalValue += data.value * quantity;
+                        aisiByThickness[aisiKey].quantity += quantity;
+                        aisiByThickness[aisiKey].items.push({
+                            name: `${key} (${productName})`,
+                            value: data.value,
+                            quantity: quantity,
+                            unit: 'мм'
+                        });
                     } else {
-                        // Не AISI материалы
-                        otherMaterials.push({
+                        // Другие материалы - в мм
+                        materials.push({
                             name: `${key} (${productName})`,
                             material: data.material || 'Другой',
                             thickness: data.thickness,
@@ -350,29 +391,44 @@ class MaterialsReport {
             }
         });
         
-        // Формируем результат: только сгруппированные AISI материалы
-        const result = [];
-        
-        Object.entries(aisiByThickness).forEach(([thickness, data]) => {
-            if (data.total > 0) {
-                result.push({
-                    thickness: thickness,
-                    totalWeight: data.total,
-                    items: data.items,
-                    quantity: order.items.reduce((sum, item) => sum + item.quantity, 0)
-                });
-            }
+        // Добавляем сгруппированные AISI материалы
+        Object.values(aisiByThickness).forEach(aisi => {
+            materials.push({
+                name: aisi.name,
+                material: 'AISI 430',
+                thickness: aisi.thickness,
+                unit: 'кг',
+                value: aisi.totalValue / aisi.quantity,
+                quantity: aisi.quantity,
+                totalValue: aisi.totalValue,
+                items: aisi.items
+            });
         });
         
-        return {
-            aisi: result,
-            other: otherMaterials
-        };
+        return materials;
     }
     
     // Формирование HTML отчета
     async generateReportHTML(order) {
         const materials = this.calculateMaterials(order);
+        
+        if (materials.length === 0) {
+            return `
+                <div class="materials-report">
+                    <h3>📊 Отчет по материалам для заказа №${order.number}</h3>
+                    <p style="color: #666; text-align: center; padding: 20px;">
+                        Нет данных о материалах для данного заказа
+                    </p>
+                </div>
+            `;
+        }
+        
+        // Группируем материалы по типу
+        const byType = {};
+        materials.forEach(m => {
+            if (!byType[m.material]) byType[m.material] = [];
+            byType[m.material].push(m);
+        });
         
         let html = `
             <div class="materials-report">
@@ -404,98 +460,19 @@ class MaterialsReport {
                         `).join('')}
                     </tbody>
                 </table>
-                
-                <h4>🔩 AISI 430 материалы (сгруппированы по толщине):</h4>
         `;
         
-        if (materials.aisi.length === 0) {
-            html += `<p style="color: #999;">Нет AISI материалов в заказе</p>`;
-        } else {
-            materials.aisi.forEach(group => {
-                html += `
-                    <div style="margin-bottom: 20px; padding: 10px; background: #f5f5f5; border-radius: 5px;">
-                        <h5 style="margin-bottom: 10px;">Толщина ${group.thickness}</h5>
-                        <table class="materials-table">
-                            <thead>
-                                <tr>
-                                    <th>Наименование</th>
-                                    <th>Расход на ед. (кг)</th>
-                                    <th>Кол-во</th>
-                                    <th>Общий вес (кг)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${group.items.map(item => `
-                                    <tr>
-                                        <td>${item.name}</td>
-                                        <td>${(item.weight || item.value || 0).toFixed(4)}</td>
-                                        <td>${item.quantity}</td>
-                                        <td>${(item.totalWeight || item.totalValue || 0).toFixed(4)}</td>
-                                    </tr>
-                                `).join('')}
-                                <tr style="font-weight: bold; background: #e8f4f8;">
-                                    <td colspan="3">ИТОГО AISI ${group.thickness}:</td>
-                                    <td>${group.totalWeight.toFixed(4)} кг</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            });
-            
-            // Общий итог по всем AISI
-            const totalAISI = materials.aisi.reduce((sum, g) => sum + g.totalWeight, 0);
+        // Таблица для AISI 430 (кг)
+        if (byType['AISI 430'] && byType['AISI 430'].length > 0) {
             html += `
-                <div style="margin-top: 20px; padding: 15px; background: #d4edda; border-radius: 5px;">
-                    <h4 style="margin-bottom: 10px;">📋 Общий расход AISI 430:</h4>
-                    <ul style="list-style: none; padding: 0;">
-                        ${materials.aisi.map(g => `
-                            <li style="margin-bottom: 5px;">
-                                <strong>Толщина ${g.thickness}:</strong> ${g.totalWeight.toFixed(4)} кг
-                            </li>
-                        `).join('')}
-                        <li style="margin-top: 10px; font-size: 1.2em; font-weight: bold;">
-                            ВСЕГО AISI 430: ${totalAISI.toFixed(4)} кг
-                        </li>
-                    </ul>
-                </div>
-            `;
-        }
-        
-        // Другие материалы (если есть)
-        if (materials.other && materials.other.length > 0) {
-            html += `
-                <h4 style="margin-top: 30px;">📦 Прочие материалы:</h4>
+                <h4 style="margin-top: 20px;">🔩 AISI 430:</h4>
                 <table class="materials-table">
                     <thead>
                         <tr>
-                            <th>Материал</th>
-                            <th>Наименование</th>
                             <th>Толщина</th>
-                            <th>Расход на ед.</th>
-                            <th>Ед.</th>
-                            <th>Кол-во</th>
-                            <th>Общий расход</th>
+                            <th>Составляющие</th>
+                            <th>Расход на ед. (кг)</th>
+                            <th>Кол-во изд.</th>
+                            <th>Общий вес (кг)</th>
                         </tr>
-                    </thead>
-                    <tbody>
-                        ${materials.other.map(item => `
-                            <tr>
-                                <td>${item.material}</td>
-                                <td>${item.name}</td>
-                                <td>${item.thickness || '-'}</td>
-                                <td>${item.value.toFixed(3)}</td>
-                                <td>${item.unit}</td>
-                                <td>${item.quantity}</td>
-                                <td>${item.totalValue.toFixed(3)}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-        }
-        
-        html += `</div>`;
-        return html;
-    }
-}
+                    </thead
