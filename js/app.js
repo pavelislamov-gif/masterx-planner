@@ -1,3 +1,10 @@
+// Перехват ошибок для отладки
+window.addEventListener('error', function(e) {
+    console.error('❌ Поймана ошибка:', e.error);
+    console.error('Стек вызовов:', e.error.stack);
+    alert('Ошибка: ' + e.error.message + '\n\nСмотри консоль (F12) для деталей');
+});
+
 // Глобальные переменные
 let products = [];
 let brackets = [];
