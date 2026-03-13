@@ -67,14 +67,6 @@ async function loadAllData() {
         console.log('✅ Кронштейны загружены:', brackets.length);
         console.log('✅ Лиры загружены:', lyres.length);
         
-        // Показываем первые элементы для проверки
-        if (brackets.length > 0) {
-            console.log('Пример кронштейна:', brackets[0]);
-        }
-        if (lyres.length > 0) {
-            console.log('Пример лиры:', lyres[0]);
-        }
-        
         // Загружаем заказы
         orders = loadOrdersFromStorage();
         console.log('✅ Заказы загружены:', orders.length);
@@ -111,11 +103,6 @@ async function loadAllData() {
 function populateSelects() {
     console.log('=== ЗАПОЛНЕНИЕ SELECT-ОВ ===');
     
-    // ПРОВЕРКА: есть ли данные
-    console.log('products длина:', products?.length || 0);
-    console.log('brackets длина:', brackets?.length || 0);
-    console.log('lyres длина:', lyres?.length || 0);
-    
     // Заполняем изделия
     const productSelect = document.getElementById('productSelect');
     if (productSelect) {
@@ -132,15 +119,19 @@ function populateSelects() {
                 }
             });
             console.log('✅ Изделий добавлено:', products.length);
-        } else {
-            console.error('❌ Нет данных об изделиях');
         }
     }
     
-    // Заполняем кронштейны
+    // Заполняем кронштейны с опцией "отсутствует"
     const bracketSelect = document.getElementById('bracketSelect');
     if (bracketSelect) {
         bracketSelect.innerHTML = '<option value="">Выберите кронштейн</option>';
+        
+        // Добавляем опцию "отсутствует"
+        const absentOption = document.createElement('option');
+        absentOption.value = "отсутствует";
+        absentOption.textContent = "🚫 отсутствует";
+        bracketSelect.appendChild(absentOption);
         
         if (brackets && brackets.length > 0) {
             brackets.sort((a, b) => a.name.localeCompare(b.name));
@@ -152,10 +143,9 @@ function populateSelects() {
                     bracketSelect.appendChild(option);
                 }
             });
-            console.log('✅ Кронштейнов добавлено:', brackets.length);
+            console.log('✅ Кронштейнов добавлено:', brackets.length + 1); // +1 за "отсутствует"
         } else {
-            console.error('❌ Нет данных о кронштейнах');
-            // Добавляем тестовые данные, если нет настоящих
+            // Если нет данных, добавляем тестовые
             const testBrackets = ['PU-5', 'PU-6', 'LU-5', 'ACENTO'];
             testBrackets.forEach(name => {
                 const option = document.createElement('option');
@@ -167,10 +157,16 @@ function populateSelects() {
         }
     }
     
-    // Заполняем лиры
+    // Заполняем лиры с опцией "отсутствует"
     const lyreSelect = document.getElementById('lyreSelect');
     if (lyreSelect) {
         lyreSelect.innerHTML = '<option value="">Выберите лиру</option>';
+        
+        // Добавляем опцию "отсутствует"
+        const absentOption = document.createElement('option');
+        absentOption.value = "отсутствует";
+        absentOption.textContent = "🚫 отсутствует";
+        lyreSelect.appendChild(absentOption);
         
         if (lyres && lyres.length > 0) {
             lyres.sort((a, b) => a.name.localeCompare(b.name));
@@ -182,10 +178,9 @@ function populateSelects() {
                     lyreSelect.appendChild(option);
                 }
             });
-            console.log('✅ Лир добавлено:', lyres.length);
+            console.log('✅ Лир добавлено:', lyres.length + 1); // +1 за "отсутствует"
         } else {
-            console.error('❌ Нет данных о лирах');
-            // Добавляем тестовые данные, если нет настоящих
+            // Если нет данных, добавляем тестовые
             const testLyres = ['(L-серия) лира', '(P-серия) лира', 'Лира PZ-6'];
             testLyres.forEach(name => {
                 const option = document.createElement('option');
@@ -206,7 +201,6 @@ async function loadProductSizes() {
     console.log('Выбран продукт:', productName);
     
     const product = products.find(p => p.name === productName);
-    console.log('Найден продукт:', product);
     
     const sizeSelect = document.getElementById('sizeSelect');
     
@@ -217,7 +211,6 @@ async function loadProductSizes() {
         sizeSelect.innerHTML = '<option value="">Выберите размер</option>';
         
         if (product && product.sizes && product.sizes.length > 0) {
-            console.log('Размеры:', product.sizes);
             product.sizes.forEach(size => {
                 const option = document.createElement('option');
                 option.value = size;
@@ -442,8 +435,8 @@ function createOrderCard(order) {
                     <td><strong>${item.product || '-'}</strong></td>
                     <td>${item.size || '-'}</td>
                     <td>${item.quantity || 0} шт</td>
-                    <td>${item.bracket || '-'}</td>
-                    <td>${item.lyre || '-'}</td>
+                    <td>${item.bracket === 'отсутствует' ? '🚫 отсутствует' : (item.bracket || '-')}</td>
+                    <td>${item.lyre === 'отсутствует' ? '🚫 отсутствует' : (item.lyre || '-')}</td>
                     <td>${item.additional || '-'}</td>
                 </tr>
             `).join('')}
