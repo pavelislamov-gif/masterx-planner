@@ -768,3 +768,14 @@ style.textContent = `
 `;
 
 document.head.appendChild(style);
+
+// ============================================
+// Глобальные функции для вызова из HTML
+// ============================================
+window.openOrderModal = openOrderModal;
+window.closeOrderModal = closeOrderModal;
+window.closeMaterialsModal = closeMaterialsModal;
+window.loadProductSizes = loadProductSizes;
+window.exportOrders = exportOrders;
+window.showMaterialsReport = showMaterialsReport;
+window.deleteOrder = deleteOrder;
