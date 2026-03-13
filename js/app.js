@@ -237,39 +237,32 @@ function setupEventListeners() {
     });
 }
 
-// Открытие модального окна
+// Открытие модального окна для создания нового заказа
 function openOrderModal() {
+    // Сбрасываем форму
+    document.getElementById('orderForm').reset();
+    
+    // Устанавливаем сегодняшнюю дату
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('orderDate').value = today;
+    
+    // Генерируем номер заказа
+    const orderNumber = generateOrderNumber();
+    document.getElementById('orderNumber').value = orderNumber;
+    
+    // Устанавливаем обработчик на создание
+    const form = document.getElementById('orderForm');
+    form.onsubmit = createOrderHandler;
+    
+    // Открываем модальное окно
     const modal = document.getElementById('orderModal');
     if (modal) {
         modal.style.display = 'block';
-        
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('orderDate').value = today;
-        
-        const orderNumber = generateOrderNumber();
-        document.getElementById('orderNumber').value = orderNumber;
     }
 }
 
-// Генерация номера заказа
-function generateOrderNumber() {
-    const date = new Date();
-    const year = date.getFullYear().toString().slice(-2);
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    const count = (orders.length + 1).toString().padStart(3, '0');
-    
-    return `З-${year}${month}${day}-${count}`;
-}
-
-// Закрытие модального окна
-function closeOrderModal() {
-    document.getElementById('orderModal').style.display = 'none';
-    document.getElementById('orderForm').reset();
-}
-
-// Обработка формы заказа
-document.getElementById('orderForm').addEventListener('submit', async function(e) {
+// Обработчик создания нового заказа
+async function createOrderHandler(e) {
     e.preventDefault();
     
     const bracket = document.getElementById('bracketSelect').value;
@@ -302,7 +295,92 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
     closeOrderModal();
     
     showNotification('Заказ успешно создан!', 'success');
-});
+}
+
+// Открыть модальное окно редактирования заказа
+function editOrder(orderId) {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    // Заполняем форму данными заказа
+    document.getElementById('orderDate').value = order.date;
+    document.getElementById('orderNumber').value = order.number;
+
+    // Выбираем изделие
+    const productSelect = document.getElementById('productSelect');
+    productSelect.value = order.items[0].product;
+    loadProductSizes(); // загружаем размеры
+
+    // Небольшая задержка, чтобы размеры успели загрузиться
+    setTimeout(() => {
+        document.getElementById('sizeSelect').value = order.items[0].size;
+    }, 200);
+
+    document.getElementById('quantity').value = order.items[0].quantity;
+    document.getElementById('bracketSelect').value = order.items[0].bracket;
+    document.getElementById('lyreSelect').value = order.items[0].lyre;
+    document.getElementById('additionalDetails').value = order.items[0].additional || '';
+
+    // Открываем модальное окно
+    const modal = document.getElementById('orderModal');
+    modal.style.display = 'block';
+
+    // Меняем обработчик отправки формы на редактирование
+    const form = document.getElementById('orderForm');
+    form.onsubmit = function(e) {
+        e.preventDefault();
+        saveEditedOrder(orderId);
+    };
+}
+
+// Сохранить изменения в заказе
+function saveEditedOrder(orderId) {
+    const orderIndex = orders.findIndex(o => o.id === orderId);
+    if (orderIndex === -1) return;
+
+    const updatedOrder = {
+        id: orderId,
+        date: document.getElementById('orderDate').value,
+        number: document.getElementById('orderNumber').value,
+        items: [{
+            product: document.getElementById('productSelect').value,
+            size: document.getElementById('sizeSelect').value,
+            quantity: parseInt(document.getElementById('quantity').value) || 1,
+            bracket: document.getElementById('bracketSelect').value,
+            lyre: document.getElementById('lyreSelect').value,
+            additional: document.getElementById('additionalDetails').value || ''
+        }],
+        status: orders[orderIndex].status,
+        createdAt: orders[orderIndex].createdAt,
+        completedAt: orders[orderIndex].completedAt,
+        tasks: orders[orderIndex].tasks || {}
+    };
+
+    orders[orderIndex] = updatedOrder;
+    saveOrdersToStorage(orders);
+    loadOrders();
+    updateStatistics();
+    closeOrderModal();
+
+    showNotification('Заказ обновлён', 'success');
+}
+
+// Генерация номера заказа
+function generateOrderNumber() {
+    const date = new Date();
+    const year = date.getFullYear().toString().slice(-2);
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const count = (orders.length + 1).toString().padStart(3, '0');
+    
+    return `З-${year}${month}${day}-${count}`;
+}
+
+// Закрытие модального окна
+function closeOrderModal() {
+    document.getElementById('orderModal').style.display = 'none';
+    document.getElementById('orderForm').reset();
+}
 
 // Показать уведомление
 function showNotification(message, type = 'info') {
@@ -392,6 +470,7 @@ function createOrderCard(order) {
         </div>
         <div style="display: flex; gap: 10px;">
             <button class="btn btn-info" onclick="event.stopPropagation(); showMaterialsReport(${order.id})">📊 Материалы</button>
+            <button class="btn btn-warning" onclick="event.stopPropagation(); editOrder(${order.id})">✏️ Ред.</button>
             <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
         </div>
     `;
@@ -664,9 +743,7 @@ function formatDate(dateString) {
     return new Date(dateString).toLocaleDateString('ru-RU', options);
 }
 
-// ============================================
-// УДАЛЕНИЕ ЗАКАЗА С ДВОЙНЫМ ПОДТВЕРЖДЕНИЕМ
-// ============================================
+// Удаление заказа с подтверждением
 function deleteOrder(orderId) {
     console.log('Попытка удалить заказ с ID:', orderId);
     
@@ -827,6 +904,15 @@ style.textContent = `
         transform: translateY(-2px);
         box-shadow: 0 8px 16px rgba(0,0,0,0.1);
     }
+    
+    .btn-warning {
+        background: #ffc107;
+        color: #000;
+    }
+    
+    .btn-warning:hover {
+        background: #e0a800;
+    }
 `;
 
 document.head.appendChild(style);
@@ -841,3 +927,4 @@ window.loadProductSizes = loadProductSizes;
 window.exportOrders = exportOrders;
 window.showMaterialsReport = showMaterialsReport;
 window.deleteOrder = deleteOrder;
+window.editOrder = editOrder;
