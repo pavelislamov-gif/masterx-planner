@@ -52,29 +52,35 @@ async function loadAllData() {
     try {
         console.log('=== НАЧАЛО ЗАГРУЗКИ ДАННЫХ ===');
         
-        // Загружаем продукты
-        products = await loadProducts();
-        console.log('1. Продукты загружены:', products ? products.length : 0);
+        // Загружаем ВСЕ данные параллельно
+        const [productsData, bracketsData, lyresData] = await Promise.all([
+            loadProducts(),
+            loadBrackets(),
+            loadLyres()
+        ]);
         
-        // Загружаем кронштейны
-        brackets = await loadBrackets();
-        console.log('2. Кронштейны загружены:', brackets ? brackets.length : 0);
+        products = productsData;
+        brackets = bracketsData;
+        lyres = lyresData;
         
-        // Загружаем лиры
-        lyres = await loadLyres();
-        console.log('3. Лиры загружены:', lyres ? lyres.length : 0);
+        console.log('✅ Продукты загружены:', products.length);
+        console.log('✅ Кронштейны загружены:', brackets.length);
+        console.log('✅ Лиры загружены:', lyres.length);
+        
+        // Показываем первые элементы для проверки
+        if (brackets.length > 0) {
+            console.log('Пример кронштейна:', brackets[0]);
+        }
+        if (lyres.length > 0) {
+            console.log('Пример лиры:', lyres[0]);
+        }
         
         // Загружаем заказы
         orders = loadOrdersFromStorage();
-        console.log('4. Заказы загружены:', orders ? orders.length : 0);
-        
-        // Проверяем, что данные действительно есть
-        console.log('5. Проверка продуктов:', products[0]?.name);
-        console.log('6. Проверка кронштейнов:', brackets[0]?.name);
-        console.log('7. Проверка лир:', lyres[0]?.name);
+        console.log('✅ Заказы загружены:', orders.length);
         
         // Заполняем выпадающие списки
-        console.log('8. Заполняем select-ы...');
+        console.log('Заполняем select-ы...');
         populateSelects();
         
         // Загружаем заказы на страницу
@@ -86,6 +92,9 @@ async function loadAllData() {
         // Инициализируем отчет по материалам
         if (typeof MaterialsReport !== 'undefined') {
             materialsReport = new MaterialsReport();
+            // Передаем загруженные данные
+            materialsReport.materialsDB.brackets = brackets;
+            materialsReport.materialsDB.lyres = lyres;
             await materialsReport.loadMaterialsData();
         }
         
@@ -102,81 +111,90 @@ async function loadAllData() {
 function populateSelects() {
     console.log('=== ЗАПОЛНЕНИЕ SELECT-ОВ ===');
     
-    // Проверяем, что данные существуют
-    if (!products || products.length === 0) {
-        console.error('❌ products пуст или не загружен!');
-        return;
-    }
+    // ПРОВЕРКА: есть ли данные
+    console.log('products длина:', products?.length || 0);
+    console.log('brackets длина:', brackets?.length || 0);
+    console.log('lyres длина:', lyres?.length || 0);
     
-    console.log('products длина:', products.length);
-    console.log('Первый продукт:', products[0]);
-    
+    // Заполняем изделия
     const productSelect = document.getElementById('productSelect');
-    if (!productSelect) {
-        console.error('❌ productSelect не найден в DOM!');
-        return;
+    if (productSelect) {
+        productSelect.innerHTML = '<option value="">Выберите изделие</option>';
+        
+        if (products && products.length > 0) {
+            products.sort((a, b) => a.name.localeCompare(b.name));
+            products.forEach(product => {
+                if (product && product.name) {
+                    const option = document.createElement('option');
+                    option.value = product.name;
+                    option.textContent = product.name;
+                    productSelect.appendChild(option);
+                }
+            });
+            console.log('✅ Изделий добавлено:', products.length);
+        } else {
+            console.error('❌ Нет данных об изделиях');
+        }
     }
     
-    productSelect.innerHTML = '<option value="">Выберите изделие</option>';
-    
-    // Сортируем продукты по алфавиту
-    products.sort((a, b) => a.name.localeCompare(b.name));
-    
-    let count = 0;
-    products.forEach(product => {
-        if (product && product.name) {
-            const option = document.createElement('option');
-            option.value = product.name;
-            option.textContent = product.name;
-            productSelect.appendChild(option);
-            count++;
-        }
-    });
-    
-    console.log(`✅ Добавлено ${count} опций в productSelect`);
-    
-    // Кронштейны
-    if (brackets && brackets.length > 0) {
-        const bracketSelect = document.getElementById('bracketSelect');
-        if (bracketSelect) {
-            bracketSelect.innerHTML = '<option value="">Выберите кронштейн</option>';
+    // Заполняем кронштейны
+    const bracketSelect = document.getElementById('bracketSelect');
+    if (bracketSelect) {
+        bracketSelect.innerHTML = '<option value="">Выберите кронштейн</option>';
+        
+        if (brackets && brackets.length > 0) {
             brackets.sort((a, b) => a.name.localeCompare(b.name));
-            let bracketCount = 0;
             brackets.forEach(bracket => {
                 if (bracket && bracket.name) {
                     const option = document.createElement('option');
                     option.value = bracket.name;
                     option.textContent = bracket.name;
                     bracketSelect.appendChild(option);
-                    bracketCount++;
                 }
             });
-            console.log(`✅ Добавлено ${bracketCount} опций в bracketSelect`);
+            console.log('✅ Кронштейнов добавлено:', brackets.length);
+        } else {
+            console.error('❌ Нет данных о кронштейнах');
+            // Добавляем тестовые данные, если нет настоящих
+            const testBrackets = ['PU-5', 'PU-6', 'LU-5', 'ACENTO'];
+            testBrackets.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                bracketSelect.appendChild(option);
+            });
+            console.log('✅ Добавлены тестовые кронштейны');
         }
-    } else {
-        console.error('❌ brackets пуст или не загружен!');
     }
     
-    // Лиры
-    if (lyres && lyres.length > 0) {
-        const lyreSelect = document.getElementById('lyreSelect');
-        if (lyreSelect) {
-            lyreSelect.innerHTML = '<option value="">Выберите лиру</option>';
+    // Заполняем лиры
+    const lyreSelect = document.getElementById('lyreSelect');
+    if (lyreSelect) {
+        lyreSelect.innerHTML = '<option value="">Выберите лиру</option>';
+        
+        if (lyres && lyres.length > 0) {
             lyres.sort((a, b) => a.name.localeCompare(b.name));
-            let lyreCount = 0;
             lyres.forEach(lyre => {
                 if (lyre && lyre.name) {
                     const option = document.createElement('option');
                     option.value = lyre.name;
                     option.textContent = lyre.name;
                     lyreSelect.appendChild(option);
-                    lyreCount++;
                 }
             });
-            console.log(`✅ Добавлено ${lyreCount} опций в lyreSelect`);
+            console.log('✅ Лир добавлено:', lyres.length);
+        } else {
+            console.error('❌ Нет данных о лирах');
+            // Добавляем тестовые данные, если нет настоящих
+            const testLyres = ['(L-серия) лира', '(P-серия) лира', 'Лира PZ-6'];
+            testLyres.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                lyreSelect.appendChild(option);
+            });
+            console.log('✅ Добавлены тестовые лиры');
         }
-    } else {
-        console.error('❌ lyres пуст или не загружен!');
     }
     
     console.log('=== ЗАПОЛНЕНИЕ SELECT-ОВ ЗАВЕРШЕНО ===');
@@ -216,7 +234,6 @@ async function loadProductSizes() {
 
 // Настройка обработчиков событий
 function setupEventListeners() {
-    // Поиск
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('input', function(e) {
@@ -224,7 +241,6 @@ function setupEventListeners() {
         });
     }
 
-    // Фильтр по статусу
     const statusFilter = document.getElementById('statusFilter');
     if (statusFilter) {
         statusFilter.addEventListener('change', function(e) {
@@ -232,7 +248,6 @@ function setupEventListeners() {
         });
     }
 
-    // Синхронизация между вкладками
     window.addEventListener('storage', function(e) {
         if (e.key === 'masterx_orders') {
             orders = JSON.parse(e.newValue || '[]');
@@ -248,11 +263,9 @@ function openOrderModal() {
     if (modal) {
         modal.style.display = 'block';
         
-        // Устанавливаем сегодняшнюю дату
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('orderDate').value = today;
         
-        // Генерируем номер заказа
         const orderNumber = generateOrderNumber();
         document.getElementById('orderNumber').value = orderNumber;
     }
@@ -279,6 +292,11 @@ function closeOrderModal() {
 document.getElementById('orderForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
+    const bracket = document.getElementById('bracketSelect').value;
+    const lyre = document.getElementById('lyreSelect').value;
+    
+    console.log('Создание заказа с:', { bracket, lyre });
+    
     const order = {
         id: Date.now(),
         date: document.getElementById('orderDate').value,
@@ -287,8 +305,8 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
             product: document.getElementById('productSelect').value,
             size: document.getElementById('sizeSelect').value,
             quantity: parseInt(document.getElementById('quantity').value),
-            bracket: document.getElementById('bracketSelect').value,
-            lyre: document.getElementById('lyreSelect').value,
+            bracket: bracket,
+            lyre: lyre,
             additional: document.getElementById('additionalDetails').value
         }],
         status: 'active',
@@ -526,12 +544,17 @@ async function showMaterialsReport(orderId) {
     
     try {
         if (materialsReport) {
+            // Обновляем данные в отчете
+            materialsReport.materialsDB.brackets = brackets;
+            materialsReport.materialsDB.lyres = lyres;
+            
             const reportHTML = await materialsReport.generateReportHTML(order);
             reportDiv.innerHTML = reportHTML;
         } else {
             reportDiv.innerHTML = '<div style="color: red; padding: 20px;">❌ Отчет по материалам не инициализирован</div>';
         }
     } catch (error) {
+        console.error('Ошибка отчета:', error);
         reportDiv.innerHTML = `<div style="color: red; padding: 20px;">❌ Ошибка загрузки отчета: ${error.message}</div>`;
     }
 }
