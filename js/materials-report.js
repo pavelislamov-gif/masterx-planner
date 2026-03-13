@@ -188,13 +188,83 @@ class MaterialsReport {
     
     loadAllProductSpecs() {
         return {
+            // XGRAY v.1 - Тех карта XGRAY v.1.csv
             'XGRAY v.1': {
                 '116': {
                     'Профиль МП 1928 XGRAY': { value: 117, unit: 'мм' },
                     'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 113, unit: 'мм' },
                     'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм' }
+                },
+                '216': {
+                    'Профиль МП 1928 XGRAY': { value: 217, unit: 'мм' },
+                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 213, unit: 'мм' },
+                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм' }
+                },
+                '316': {
+                    'Профиль МП 1928 XGRAY': { value: 317, unit: 'мм' },
+                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 313, unit: 'мм' },
+                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм' }
+                },
+                '416': {
+                    'Профиль МП 1928 XGRAY': { value: 417, unit: 'мм' },
+                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 413, unit: 'мм' },
+                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм' }
+                },
+                '516': {
+                    'Профиль МП 1928 XGRAY': { value: 517, unit: 'мм' },
+                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 513, unit: 'мм' },
+                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм' }
+                },
+                '612': {
+                    'Профиль МП 1928 XGRAY': { value: 613, unit: 'мм' },
+                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 609, unit: 'мм' },
+                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм' }
+                },
+                '712': {
+                    'Профиль МП 1928 XGRAY': { value: 713, unit: 'мм' },
+                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 709, unit: 'мм' },
+                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм' }
+                },
+                '812': {
+                    'Профиль МП 1928 XGRAY': { value: 813, unit: 'мм' },
+                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 809, unit: 'мм' },
+                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм' }
+                },
+                '912': {
+                    'Профиль МП 1928 XGRAY': { value: 913, unit: 'мм' },
+                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 909, unit: 'мм' },
+                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм' }
+                },
+                '1 012': {
+                    'Профиль МП 1928 XGRAY': { value: 1013, unit: 'мм' },
+                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1009, unit: 'мм' },
+                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм' }
+                },
+                '1 108': {
+                    'Профиль МП 1928 XGRAY': { value: 1109, unit: 'мм' },
+                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1105, unit: 'мм' },
+                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм' }
+                },
+                '1 208': {
+                    'Профиль МП 1928 XGRAY': { value: 1209, unit: 'мм' },
+                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1205, unit: 'мм' },
+                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм' }
+                },
+                '1 308': {
+                    'Профиль МП 1928 XGRAY': { value: 1309, unit: 'мм' },
+                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1305, unit: 'мм' },
+                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм' }
+                },
+                '1 408': {
+                    'Профиль МП 1928 XGRAY': { value: 1409, unit: 'мм' },
+                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1405, unit: 'мм' },
+                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм' }
+                },
+                '1 508': {
+                    'Профиль МП 1928 XGRAY': { value: 1509, unit: 'мм' },
+                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1505, unit: 'мм' },
+                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм' }
                 }
-                // Здесь будут все размеры для XGRAY v.1
             }
             // Здесь будут все остальные изделия
         };
@@ -210,6 +280,8 @@ class MaterialsReport {
             const quantity = item.quantity || 1;
             const productName = item.product;
             const size = item.size;
+            
+            console.log(`Расчет материалов для ${productName} размер ${size}, кол-во ${quantity}`);
             
             // 1. Листовые материалы (алюминий, сталь, нержавейка, ПВХ, поликарбонат)
             const allSheetMaterials = [
@@ -239,7 +311,7 @@ class MaterialsReport {
                     sheetMaterials.push({
                         name: `Кронштейн ${item.bracket}`,
                         thickness: bracket.thickness || '2мм',
-                        areaPerUnit: bracket.area || bracket.weight, // предполагаем, что в loadBrackets() уже м²
+                        areaPerUnit: bracket.area || bracket.weight,
                         quantity: quantity,
                         totalArea: (bracket.area || bracket.weight) * quantity
                     });
@@ -253,7 +325,7 @@ class MaterialsReport {
                     sheetMaterials.push({
                         name: `Лира ${item.lyre}`,
                         thickness: lyre.thickness || '1.5мм',
-                        areaPerUnit: lyre.area || lyre.weight, // предполагаем, что в loadLyres() уже м²
+                        areaPerUnit: lyre.area || lyre.weight,
                         quantity: quantity,
                         totalArea: (lyre.area || lyre.weight) * quantity
                     });
@@ -274,6 +346,8 @@ class MaterialsReport {
                         totalValue: data.value * quantity
                     });
                 });
+            } else {
+                console.warn(`Не найдены спецификации для ${productName} размер ${size}`);
             }
         });
         
@@ -281,11 +355,11 @@ class MaterialsReport {
     }
     
     getMaterialType(material) {
-        if (material.area === this.materialsDB.aluminum.find(a => a.area === material.area)) return 'Алюминий';
-        if (material.area === this.materialsDB.steel.find(s => s.area === material.area)) return 'Сталь';
-        if (material.area === this.materialsDB.stainless.find(s => s.area === material.area)) return 'Нержавейка';
-        if (material.area === this.materialsDB.pvc.find(p => p.area === material.area)) return 'ПВХ';
-        if (material.area === this.materialsDB.polycarbonate.find(p => p.area === material.area)) return 'Поликарбонат';
+        if (this.materialsDB.aluminum.find(a => a.area === material.area)) return 'Алюминий';
+        if (this.materialsDB.steel.find(s => s.area === material.area)) return 'Сталь';
+        if (this.materialsDB.stainless.find(s => s.area === material.area)) return 'Нержавейка';
+        if (this.materialsDB.pvc.find(p => p.area === material.area)) return 'ПВХ';
+        if (this.materialsDB.polycarbonate.find(p => p.area === material.area)) return 'Поликарбонат';
         return 'Листовой материал';
     }
     
@@ -321,6 +395,8 @@ class MaterialsReport {
                             <th style="padding: 8px; text-align: left;">Кол-во</th>
                             <th style="padding: 8px; text-align: left;">Кронштейн</th>
                             <th style="padding: 8px; text-align: left;">Лира</th>
+                            <th style="padding: 8px; text-align: left;">RAL</th>
+                            <th style="padding: 8px; text-align: left;">Текстура</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -331,6 +407,8 @@ class MaterialsReport {
                                 <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.quantity}</td>
                                 <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.bracket === 'отсутствует' ? '🚫' : item.bracket}</td>
                                 <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.lyre === 'отсутствует' ? '🚫' : item.lyre}</td>
+                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.ral || '-'}</td>
+                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.texture || '-'}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -339,22 +417,6 @@ class MaterialsReport {
         
         // Листовые материалы (м²)
         if (sheetMaterials.length > 0) {
-            // Группируем по типу материала
-            const grouped = {};
-            sheetMaterials.forEach(m => {
-                const key = `${m.name} ${m.thickness}`;
-                if (!grouped[key]) {
-                    grouped[key] = {
-                        name: m.name,
-                        thickness: m.thickness,
-                        totalArea: 0,
-                        items: []
-                    };
-                }
-                grouped[key].totalArea += m.totalArea;
-                grouped[key].items.push(m);
-            });
-            
             html += `
                 <h4 style="margin-top: 30px;">📋 Листовые материалы (расход в м²)</h4>
                 <table class="materials-table" style="width: 100%; border-collapse: collapse;">
@@ -370,18 +432,16 @@ class MaterialsReport {
                     <tbody>
             `;
             
-            Object.values(grouped).forEach(group => {
-                group.items.forEach(item => {
-                    html += `
-                        <tr>
-                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name}</td>
-                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.thickness || '—'}</td>
-                            <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.areaPerUnit.toFixed(4)}</td>
-                            <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.quantity}</td>
-                            <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.totalArea.toFixed(4)}</td>
-                        </tr>
-                    `;
-                });
+            sheetMaterials.forEach(item => {
+                html += `
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.thickness || '—'}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.areaPerUnit.toFixed(4)}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.quantity}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.totalArea.toFixed(4)}</td>
+                    </tr>
+                `;
             });
             
             html += `</tbody></table>`;
