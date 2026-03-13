@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MasterX - Полимерный участок</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .date-navigation {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        
+        .task-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #007bff;
+        }
+        
+        .task-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .task-order-info {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .executor-list {
+            margin: 15px 0;
+        }
+        
+        .executor-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin-bottom: 8px;
+        }
+        
+        .executor-name {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .executor-quantity {
+            background: #e9ecef;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+        }
+        
+        .btn-work {
+            background: #ffc107;
+            color: #000;
+            padding: 5px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-work.active {
+            background: #fd7e14;
+            color: white;
+        }
+        
+        .btn-work.completed {
+            background: #28a745;
+            color: white;
+            cursor: not-allowed;
+        }
+        
+        .btn-ready {
+            background: #28a745;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        .btn-ready.completed {
+            background: #218838;
+            cursor: not-allowed;
+        }
+        
+        .btn-add-executor {
+            background: #6c757d;
+            color: white;
+            padding: 5px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .new-executor-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+        }
+        
+        .new-executor-form input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+        
+        .site-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="site-header">
+            <h1>🔧 Полимерный участок</h1>
+            <div class="nav-buttons">
+                <button class="btn btn-primary" onclick="changeDate(-1)">← Вчера</button>
+                <button class="btn btn-success" onclick="changeDate(0)">Сегодня</button>
+                <button class="btn btn-primary" onclick="changeDate(1)">Завтра →</button>
+            </div>
+        </div>
+        
+        <div class="date-navigation">
+            <h2 id="currentDateDisplay"></h2>
+        </div>
+        
+        <div id="tasksList" class="tasks-list">
+            <!-- Задачи будут загружаться сюда -->
+        </div>
+    </div>
+    
+    <script src="../js/storage.js"></script>
+    <script src="../js/data-loader.js"></script>
+    <script src="../js/tokarniy.js"></script>
+</body>
+</html>
