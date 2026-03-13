@@ -2,8 +2,19 @@
 class MaterialsReport {
     constructor() {
         this.materialsDB = {
+            // Листовые материалы (в м²)
+            aluminum: [],
+            steel: [],
+            stainless: [],
+            pvc: [],
+            polycarbonate: [],
+            other: [],
+            
+            // Кронштейны и лиры (в м²)
             brackets: [],
             lyres: [],
+            
+            // Профили из техкарт изделий (в мм)
             productSpecs: {}
         };
     }
@@ -11,739 +22,253 @@ class MaterialsReport {
     async loadMaterialsData() {
         console.log('Загрузка данных о материалах...');
         
+        // Загружаем листовые материалы
+        this.materialsDB.aluminum = this.loadAluminumData();
+        this.materialsDB.steel = this.loadSteelData();
+        this.materialsDB.stainless = this.loadStainlessData();
+        this.materialsDB.pvc = this.loadPVCData();
+        this.materialsDB.polycarbonate = this.loadPolycarbonateData();
+        this.materialsDB.other = this.loadOtherData();
+        
         // Загружаем кронштейны и лиры
         this.materialsDB.brackets = await loadBrackets();
         this.materialsDB.lyres = await loadLyres();
         
-        // Загружаем все спецификации продуктов
+        // Загружаем все спецификации продуктов (профили в мм)
         this.materialsDB.productSpecs = this.loadAllProductSpecs();
         
         console.log('Данные о материалах загружены');
     }
     
-    // Загрузка всех спецификаций из техкарт
+    // ============== ЛИСТОВЫЕ МАТЕРИАЛЫ (в м²) ==============
+    
+    loadAluminumData() {
+        return [
+            { product: 'XGRAY v.1', thickness: '3мм', area: 0.0032 },
+            { product: 'XGRAY v.2', thickness: '3мм', area: 0.0032 },
+            { product: 'ACENTO 3T', thickness: '3мм', area: 0.0033 },
+            { product: 'ACENTO 4', thickness: '4мм', area: 0.0064 },
+            { product: 'XBAR-SW', thickness: '3мм', area: 0.0001 },
+            { product: 'XEYES 130*120 1', thickness: '2мм', area: 0.044 },
+            { product: 'XEYES 130*120 2', thickness: '2мм', area: 0.044 },
+            { product: 'XEYES mini-1', thickness: '3мм', area: 0.0092 },
+            { product: 'XEYES mini-1', thickness: '4мм', area: 0.0044 },
+            { product: 'XFOCUS', thickness: '3мм', area: 0.0006 },
+            { product: 'XGIRO', thickness: '3мм', area: 0.002 },
+            { product: 'XGLOW', thickness: '8мм', area: 0.0007 },
+            { product: 'XLITE', thickness: '3мм', area: 0.006 },
+            { product: 'XLUMO', thickness: '3мм', area: 0.006 },
+            { product: 'XLUMO 1-6', thickness: '3мм', area: 0.006 },
+            { product: 'XLUMO Двунаправленный', thickness: '3мм', area: 0.008 },
+            { product: 'XLUMO PROV', thickness: '3мм', area: 0.006 },
+            { product: 'XMODULE-2x2', thickness: '1.5мм', area: 0.0086 },
+            { product: 'XMODULE-2x2', thickness: '3мм', area: 0.0048 },
+            { product: 'XMODULE-6x2', thickness: '1.5мм', area: 0.019 },
+            { product: 'XPIXEL OVHD', thickness: '1мм', area: 0.0011 },
+            { product: 'XRAY 12S', thickness: '4мм', area: 0.0094 },
+            { product: 'XRAY 18S', thickness: '4мм', area: 0.012 },
+            { product: 'XRAY 36S', thickness: '8мм', area: 0.023 },
+            { product: 'XRAY 6-T2 BT 180', thickness: '3мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BT 200', thickness: '3мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BT 220', thickness: '3мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BT 220 Шторка х2', thickness: '3мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BT 240 Шторка', thickness: '3мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BZ 240 Шторка х2', thickness: '3мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BZ 180', thickness: '3мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BZ 200 Шторка', thickness: '3мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BZ 220', thickness: '3мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BZ 220 Шторка х2', thickness: '3мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BZ 240 Шторка', thickness: '3мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BZ 240 Шторка х2', thickness: '3мм', area: 0.0033 },
+            { product: 'XRAY 6T Накладной', thickness: '3мм', area: 0.0072 },
+            { product: 'XRAY 6T BZ 120', thickness: '3мм', area: 0.0072 },
+            { product: 'XRAY 6T BT 140 Шторка', thickness: '3мм', area: 0.0072 },
+            { product: 'XRAY 6T RGBW BT 150', thickness: '3мм', area: 0.0072 },
+            { product: 'XRAY 9S', thickness: '3мм', area: 0.0069 },
+            { product: 'XROLL-lite P', thickness: '3мм', area: 0.0036 },
+            { product: 'XROLL-lite K', thickness: '3мм', area: 0.0036 },
+            { product: 'XSLOPE', thickness: '4мм', area: 0.0001 },
+            { product: 'XSMART', thickness: '3мм', area: 0.01 },
+            { product: 'XSMART MINI', thickness: '3мм', area: 0.005 },
+            { product: 'XSTRONG', thickness: '3мм', area: 0.0012 },
+            { product: 'XYELLOW', thickness: '3мм', area: 0.004 },
+            { product: 'XEYES 130*90 1', thickness: '2мм', area: 0.044 },
+            { product: 'XEYES 130*90 2', thickness: '2мм', area: 0.044 },
+            { product: 'XEYES 130*90 3', thickness: '2мм', area: 0.044 },
+            { product: 'XEYES 130*90 4', thickness: '2мм', area: 0.044 },
+            { product: 'XEYES 130*120 3', thickness: '2мм', area: 0.044 },
+            { product: 'XEYES 130*120 4', thickness: '2мм', area: 0.044 },
+            { product: 'XGRAY v.2', thickness: '3мм', area: 0.0032 },
+            { product: 'XLINE', thickness: '4мм', area: 0.008 }
+        ];
+    }
+    
+    loadSteelData() {
+        return [
+            { product: 'ACENTO 3T', thickness: '0.5мм', area: 0.0033 },
+            { product: 'ACENTO 4', thickness: '0.5мм', area: 0.0064 },
+            { product: 'XRAY 12S', thickness: '0.5мм', area: 0.01 },
+            { product: 'XRAY 18', thickness: '0.5мм', area: 0.01 },
+            { product: 'XRAY 18S', thickness: '0.5мм', area: 0.013 },
+            { product: 'XRAY 36', thickness: '0.5мм', area: 0.02 },
+            { product: 'XRAY 36S', thickness: '0.5мм', area: 0.02 },
+            { product: 'XRAY 6', thickness: '0.5мм', area: 0.0022 },
+            { product: 'XRAY 6 RGBW', thickness: '0.5мм', area: 0.0022 },
+            { product: 'XRAY 6-T2 BT 180', thickness: '0.5мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BT 200', thickness: '0.5мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BT 220', thickness: '0.5мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BT 220 Шторка х2', thickness: '0.5мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BT 240 Шторка', thickness: '0.5мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BZ 240 Шторка х2', thickness: '0.5мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BZ 180', thickness: '0.5мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BZ 200 Шторка', thickness: '0.5мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BZ 220', thickness: '0.5мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BZ 220 Шторка х2', thickness: '0.5мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BZ 240 Шторка', thickness: '0.5мм', area: 0.0033 },
+            { product: 'XRAY 6-T2 BZ 240 Шторка х2', thickness: '0.5мм', area: 0.0033 },
+            { product: 'XRAY 6T Накладной', thickness: '0.5мм', area: 0.0033 },
+            { product: 'XRAY 6T BZ 120', thickness: '0.5мм', area: 0.0033 },
+            { product: 'XRAY 6T BT 140 Шторка', thickness: '0.5мм', area: 0.0033 },
+            { product: 'XRAY 6T RGBW BT 150', thickness: '0.5мм', area: 0.0033 },
+            { product: 'XRAY 9S', thickness: '0.5мм', area: 0.0083 }
+        ];
+    }
+    
+    loadStainlessData() {
+        return [
+            { product: 'XGRAY v.1', thickness: '1мм', area: 0.0002 },
+            { product: 'XGRAY v.2', thickness: '1мм', area: 0.0002 },
+            { product: 'XSLOPE', thickness: '1мм', area: 0.0002 },
+            { product: 'XYELLOW', thickness: '1мм', area: 0.0002 }
+        ];
+    }
+    
+    loadPVCData() {
+        return [
+            { product: 'XDISK', thickness: '10мм', area: 0.0003 },
+            { product: 'XBAR-SW', thickness: '3мм', area: 0.0005 },
+            { product: 'XFOCUS', thickness: '3мм', area: 0.003 },
+            { product: 'XGIRO', thickness: '3мм', area: 0.0004 },
+            { product: 'XLITE', thickness: '3мм', area: 0.0005 },
+            { product: 'XLUMO', thickness: '3мм', area: 0.003 },
+            { product: 'XLUMO 1-6', thickness: '3мм', area: 0.003 },
+            { product: 'XLUMO Двунаправленный', thickness: '3мм', area: 0.0044 },
+            { product: 'XLUMO PROV', thickness: '3мм', area: 0.003 },
+            { product: 'XSMART', thickness: '3мм', area: 0.003 },
+            { product: 'XSMART mini', thickness: '3мм', area: 0.0007 }
+        ];
+    }
+    
+    loadPolycarbonateData() {
+        return [
+            { product: 'XEYES 130*120 1', material: 'Поликарбонат 3мм', thickness: '3мм', area: 0.001 },
+            { product: 'XEYES 130*120 2', material: 'Поликарбонат 3мм', thickness: '3мм', area: 0.002 },
+            { product: 'XEYES 130*120 3', material: 'Поликарбонат 3мм', thickness: '3мм', area: 0.003 },
+            { product: 'XEYES 130*120 4', material: 'Поликарбонат 3мм', thickness: '3мм', area: 0.004 },
+            { product: 'XEYES 130*90 1', material: 'Поликарбонат 3мм', thickness: '3мм', area: 0.001 },
+            { product: 'XEYES 130*90 2', material: 'Поликарбонат 3мм', thickness: '3мм', area: 0.002 },
+            { product: 'XEYES 130*90 3', material: 'Поликарбонат 3мм', thickness: '3мм', area: 0.003 },
+            { product: 'XEYES 130*90 4', material: 'Поликарбонат 3мм', thickness: '3мм', area: 0.004 },
+            { product: 'XRAY 3', material: 'Поликарбонат 6мм', thickness: '6мм', area: 0.0016 },
+            { product: 'XRAY 3-2', material: 'Поликарбонат 6мм', thickness: '6мм', area: 0.0032 },
+            { product: 'XRAY 9', material: 'Поликарбонат 6мм', thickness: '6мм', area: 0.0076 }
+        ];
+    }
+    
+    loadOtherData() {
+        return [
+            { product: 'XPIXEL BIN v.1', material: 'Оргстекло опал 30%', thickness: '2мм', area: 0.004 },
+            { product: 'XPIXEL BIN v.2', material: 'Оргстекло опал 30%', thickness: '2мм', area: 0.004 },
+            { product: 'XPIXEL BIN v.3', material: 'Оргстекло опал 30%', thickness: '2мм', area: 0.004 },
+            { product: 'XSPOT', material: 'Полистирол Черный', thickness: '2мм', area: 0.001 }
+        ];
+    }
+    
+    // ============== ПРОФИЛИ ИЗ ТЕХКАРТ (в мм) ==============
+    
     loadAllProductSpecs() {
         return {
-            // XGRAY v.1 - Тех карта XGRAY v.1.csv
             'XGRAY v.1': {
                 '116': {
-                    'Профиль МП 1928 XGRAY': { value: 117, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 113, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '216': {
-                    'Профиль МП 1928 XGRAY': { value: 217, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 213, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '316': {
-                    'Профиль МП 1928 XGRAY': { value: 317, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 313, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '416': {
-                    'Профиль МП 1928 XGRAY': { value: 417, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 413, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '516': {
-                    'Профиль МП 1928 XGRAY': { value: 517, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 513, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '612': {
-                    'Профиль МП 1928 XGRAY': { value: 613, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 609, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '712': {
-                    'Профиль МП 1928 XGRAY': { value: 713, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 709, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '812': {
-                    'Профиль МП 1928 XGRAY': { value: 813, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 809, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '912': {
-                    'Профиль МП 1928 XGRAY': { value: 913, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 909, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 012': {
-                    'Профиль МП 1928 XGRAY': { value: 1013, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1009, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 108': {
-                    'Профиль МП 1928 XGRAY': { value: 1109, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1105, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 208': {
-                    'Профиль МП 1928 XGRAY': { value: 1209, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1205, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 308': {
-                    'Профиль МП 1928 XGRAY': { value: 1309, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1305, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 408': {
-                    'Профиль МП 1928 XGRAY': { value: 1409, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1405, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 508': {
-                    'Профиль МП 1928 XGRAY': { value: 1509, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1505, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
+                    'Профиль МП 1928 XGRAY': { value: 117, unit: 'мм' },
+                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 113, unit: 'мм' },
+                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм' }
                 }
-            },
-            
-            // XGRAY v.2 - Тех карта XGRAY v.2.csv
-            'XGRAY v.2': {
-                '116': {
-                    'Профиль МП 1928 XGRAY': { value: 117, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 113, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '216': {
-                    'Профиль МП 1928 XGRAY': { value: 217, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 213, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '316': {
-                    'Профиль МП 1928 XGRAY': { value: 317, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 313, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '416': {
-                    'Профиль МП 1928 XGRAY': { value: 417, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 413, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '516': {
-                    'Профиль МП 1928 XGRAY': { value: 517, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 513, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '612': {
-                    'Профиль МП 1928 XGRAY': { value: 613, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 609, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '712': {
-                    'Профиль МП 1928 XGRAY': { value: 713, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 709, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '812': {
-                    'Профиль МП 1928 XGRAY': { value: 813, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 809, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '912': {
-                    'Профиль МП 1928 XGRAY': { value: 913, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 909, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 012': {
-                    'Профиль МП 1928 XGRAY': { value: 1013, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1009, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 108': {
-                    'Профиль МП 1928 XGRAY': { value: 1109, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1105, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 208': {
-                    'Профиль МП 1928 XGRAY': { value: 1209, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1205, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 308': {
-                    'Профиль МП 1928 XGRAY': { value: 1309, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1305, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 408': {
-                    'Профиль МП 1928 XGRAY': { value: 1409, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1405, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 508': {
-                    'Профиль МП 1928 XGRAY': { value: 1509, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1505, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                }
-            },
-            
-            // XSMART mini - Тех карта XSMART mini.csv
-            'XSMART mini': {
-                'XSMART mini 1': { 'Профиль НП 455015': { value: 71, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                'XSMART mini 2': { 'Профиль НП 455015': { value: 91, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                'XSMART mini 3': { 'Профиль НП 455015': { value: 131, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                'XSMART mini 4': { 'Профиль НП 455015': { value: 171, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                'XSMART mini 5': { 'Профиль НП 455015': { value: 206, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                'XSMART mini 6': { 'Профиль НП 455015': { value: 246, unit: 'мм', material: 'Алюминий', thickness: '2мм' } }
-            },
-            
-            // XLUMO Двунаправленный - Тех карта XLUMO Двунаправленный.csv
-            'XLUMO Двунаправленный': {
-                'XLUMOx2-1': { 'Профиль НПС 3362': { value: 71, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                'XLUMOx2-2': { 'Профиль НПС 3362': { value: 108, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                'XLUMOx2-3': { 'Профиль НПС 3362': { value: 148, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                'XLUMOx2-4': { 'Профиль НПС 3362': { value: 188, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                'XLUMOx2-5': { 'Профиль НПС 3362': { value: 223, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                'XLUMOx2-6': { 'Профиль НПС 3362': { value: 263, unit: 'мм', material: 'Алюминий', thickness: '2мм' } }
-            },
-            
-            // XSMART - Тех карта XSMART.csv
-            'XSMART': {
-                'XSMART-2': {
-                    'КП 453785': { value: 91, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'КП 453784': { value: 82, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                'XSMART-3': {
-                    'КП 453785': { value: 131, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'КП 453784': { value: 122, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                'XSMART-4': {
-                    'КП 453785': { value: 171, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'КП 453784': { value: 162, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                'XSMART-5': {
-                    'КП 453785': { value: 206, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'КП 453784': { value: 197, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                'XSMART-6': {
-                    'КП 453785': { value: 246, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'КП 453784': { value: 237, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '500': {
-                    'КП 453785': { value: 500, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'КП 453784': { value: 500, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1000': {
-                    'КП 453785': { value: 1000, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'КП 453784': { value: 1000, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1500': {
-                    'КП 453785': { value: 1500, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'КП 453784': { value: 1500, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                }
-            },
-            
-            // XLUMO 1-6 - Тех карта XLUMO 1-6.csv
-            'XLUMO 1-6': {
-                'XLUMO-1': { 'Профиль НПС 2967 (XLUMO)': { value: 71, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                'XLUMO-2': { 'Профиль НПС 2967 (XLUMO)': { value: 108, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                'XLUMO-3': { 'Профиль НПС 2967 (XLUMO)': { value: 148, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                'XLUMO-4': { 'Профиль НПС 2967 (XLUMO)': { value: 188, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                'XLUMO-5': { 'Профиль НПС 2967 (XLUMO)': { value: 223, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                'XLUMO-6': { 'Профиль НПС 2967 (XLUMO)': { value: 263, unit: 'мм', material: 'Алюминий', thickness: '2мм' } }
-            },
-            
-            // XGIRO - Тех карта XGIRO.csv
-            'XGIRO': {
-                '130': { 'Профиль МП 0923-081': { value: 130, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '220': { 'Профиль МП 0923-081': { value: 220, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '310': { 'Профиль МП 0923-081': { value: 310, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '410': { 'Профиль МП 0923-081': { value: 410, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '510': { 'Профиль МП 0923-081': { value: 510, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '600': { 'Профиль МП 0923-081': { value: 600, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '700': { 'Профиль МП 0923-081': { value: 700, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '800': { 'Профиль МП 0923-081': { value: 800, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '900': { 'Профиль МП 0923-081': { value: 900, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '1000': { 'Профиль МП 0923-081': { value: 1000, unit: 'мм', material: 'Алюминий', thickness: '2мм' } }
-            },
-            
-            // XVISION - Тех карта XVISION.csv
-            'XVISION': {
-                '110': { 'КП 453849': { value: 103, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '125': { 'КП 453849': { value: 118, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '210': { 'КП 453849': { value: 203, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '250': { 'КП 453849': { value: 243, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '310': { 'КП 453849': { value: 303, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '375': { 'КП 453849': { value: 368, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '410': { 'КП 453849': { value: 403, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '500': { 'КП 453849': { value: 493, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '510': { 'КП 453849': { value: 503, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '600': { 'КП 453849': { value: 593, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '625': { 'КП 453849': { value: 618, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '700': { 'КП 453849': { value: 693, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '750': { 'КП 453849': { value: 743, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '800': { 'КП 453849': { value: 793, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '875': { 'КП 453849': { value: 868, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '900': { 'КП 453849': { value: 893, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '1000': { 'КП 453849': { value: 993, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '1125': { 'КП 453849': { value: 1138, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '1250': { 'КП 453849': { value: 1243, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '1375': { 'КП 453849': { value: 1368, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '1500': { 'КП 453849': { value: 1493, unit: 'мм', material: 'AISI 430', thickness: '2мм' } }
-            },
-            
-            // XBAR-SW - Тех карта XBAR-SW.csv
-            'XBAR-SW': {
-                '1000': { 'КП 453054': { value: 998, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                '1500': { 'КП 453054': { value: 1498, unit: 'мм', material: 'AISI 430', thickness: '2мм' } }
-            },
-            
-            // XLITE - Тех карта XLITE.csv
-            'XLITE': {
-                '125': { 'Профиль НПС 2966': { value: 125, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '250': { 'Профиль НПС 2966': { value: 250, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '375': { 'Профиль НПС 2966': { value: 375, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '500': { 'Профиль НПС 2966': { value: 500, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '625': { 'Профиль НПС 2966': { value: 625, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '750': { 'Профиль НПС 2966': { value: 750, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '875': { 'Профиль НПС 2966': { value: 875, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '1000': { 'Профиль НПС 2966': { value: 1000, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '1125': { 'Профиль НПС 2966': { value: 1125, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '1250': { 'Профиль НПС 2966': { value: 1250, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '1375': { 'Профиль НПС 2966': { value: 1375, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '1500': { 'Профиль НПС 2966': { value: 1500, unit: 'мм', material: 'Алюминий', thickness: '2мм' } }
-            },
-            
-            // XROLL-lite P - Тех карта XROLL-lite P.csv
-            'XROLL-lite P': {
-                '205': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 208, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 210, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '305': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 308, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 310, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '405': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 408, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 410, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '505': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 508, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 510, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '600': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 603, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 605, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '700': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 703, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 705, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '800': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 803, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 805, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '900': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 903, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 905, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1000': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 1003, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 1005, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1100': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 1103, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 1105, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1200': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 1203, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 1205, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1300': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 1303, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 1305, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1400': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 1403, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 1405, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1496': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 1499, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 1501, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                }
-            },
-            
-            // XROLL-lite K - Тех карта XROLL-lite K.csv
-            'XROLL-lite K': {
-                '205': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 208, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '305': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 308, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '405': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 408, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '505': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 508, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '600': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 603, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '700': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 703, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '800': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 803, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '900': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 903, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1000': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 1003, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1100': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 1103, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1200': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 1203, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1300': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 1303, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1400': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 1403, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1496': {
-                    'Профиль поликарбонатный XROLL-lite': { value: 1499, unit: 'мм', material: 'Поликарбонат', thickness: '3мм' },
-                    'Профиль НПС 3007': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                }
-            },
-            
-            // XLUMO - Тех карта XLUMO.csv
-            'XLUMO': {
-                '125': { 'Профиль НПС 2967 (XLUMO)': { value: 125, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '250': { 'Профиль НПС 2967 (XLUMO)': { value: 250, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '375': { 'Профиль НПС 2967 (XLUMO)': { value: 375, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '625': { 'Профиль НПС 2967 (XLUMO)': { value: 625, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '750': { 'Профиль НПС 2967 (XLUMO)': { value: 750, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '875': { 'Профиль НПС 2967 (XLUMO)': { value: 875, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '1125': { 'Профиль НПС 2967 (XLUMO)': { value: 1125, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '1250': { 'Профиль НПС 2967 (XLUMO)': { value: 1250, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '1375': { 'Профиль НПС 2967 (XLUMO)': { value: 1375, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '1500': { 'Профиль НПС 2967 (XLUMO)': { value: 1500, unit: 'мм', material: 'Алюминий', thickness: '2мм' } }
-            },
-            
-            // XLUMO PROV - Тех карта XLUMO PROV.csv
-            'XLUMO PROV': {
-                '125': { 'Профиль НПС 2967 (XLUMO)': { value: 125, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '250': { 'Профиль НПС 2967 (XLUMO)': { value: 250, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '375': { 'Профиль НПС 2967 (XLUMO)': { value: 375, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '500': { 'Профиль НПС 2967 (XLUMO)': { value: 500, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '625': { 'Профиль НПС 2967 (XLUMO)': { value: 625, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '750': { 'Профиль НПС 2967 (XLUMO)': { value: 750, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '875': { 'Профиль НПС 2967 (XLUMO)': { value: 875, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '1000': { 'Профиль НПС 2967 (XLUMO)': { value: 1000, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '1125': { 'Профиль НПС 2967 (XLUMO)': { value: 1125, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '1250': { 'Профиль НПС 2967 (XLUMO)': { value: 1250, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '1375': { 'Профиль НПС 2967 (XLUMO)': { value: 1375, unit: 'мм', material: 'Алюминий', thickness: '2мм' } },
-                '1500': { 'Профиль НПС 2967 (XLUMO)': { value: 1500, unit: 'мм', material: 'Алюминий', thickness: '2мм' } }
-            },
-            
-            // XSTRONG - Тех карта XSTRONG.csv
-            'XSTRONG': {
-                'XSTRONG-10': { 'ТПК 004S': { value: 204, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                'XSTRONG-20': { 'ТПК 004S': { value: 344, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                'XSTRONG-30': { 'ТПК 004S': { value: 444, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                'XSTRONG-20PW': { 'ТПК 004S': { value: 394, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                'XSTRONG-30PW': { 'ТПК 004S': { value: 544, unit: 'мм', material: 'AISI 430', thickness: '2мм' } },
-                'XSTRONG-40PW': { 'ТПК 004S': { value: 744, unit: 'мм', material: 'AISI 430', thickness: '2мм' } }
-            },
-            
-            // XYELLOW - Тех карта XYELLOW.csv
-            'XYELLOW': {
-                '116': {
-                    'Профиль СЧ 4515 XYELLOW': { value: 117, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 113, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '216': {
-                    'Профиль СЧ 4515 XYELLOW': { value: 217, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 213, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '316': {
-                    'Профиль СЧ 4515 XYELLOW': { value: 317, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 313, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '416': {
-                    'Профиль СЧ 4515 XYELLOW': { value: 417, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 413, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '516': {
-                    'Профиль СЧ 4515 XYELLOW': { value: 517, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 513, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '612': {
-                    'Профиль СЧ 4515 XYELLOW': { value: 613, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 609, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '712': {
-                    'Профиль СЧ 4515 XYELLOW': { value: 713, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 709, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '812': {
-                    'Профиль СЧ 4515 XYELLOW': { value: 813, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 809, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '912': {
-                    'Профиль СЧ 4515 XYELLOW': { value: 913, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 909, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 90, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 012': {
-                    'Профиль СЧ 4515 XYELLOW': { value: 1013, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1009, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 108': {
-                    'Профиль СЧ 4515 XYELLOW': { value: 1109, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1105, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 208': {
-                    'Профиль СЧ 4515 XYELLOW': { value: 1209, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1205, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 308': {
-                    'Профиль СЧ 4515 XYELLOW': { value: 1309, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1305, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 408': {
-                    'Профиль СЧ 4515 XYELLOW': { value: 1409, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1405, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 508': {
-                    'Профиль СЧ 4515 XYELLOW': { value: 1509, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Модуль НПС 2999 (XGRAY/XYELLOW)': { value: 1505, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль СЧ 4446 Планка': { value: 135, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                }
-            },
-            
-            // XLINE - Тех карта XLINE.csv
-            'XLINE': {
-                '106': {
-                    'Профиль КП 453434': { value: 103, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Рассеиватель XLINE': { value: 104, unit: 'мм', material: 'Поликарбонат', thickness: '2мм' },
-                    'Профиль КП 453436': { value: 97, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '206': {
-                    'Профиль КП 453434': { value: 203, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Рассеиватель XLINE': { value: 204, unit: 'мм', material: 'Поликарбонат', thickness: '2мм' },
-                    'Профиль КП 453436': { value: 197, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '306': {
-                    'Профиль КП 453434': { value: 303, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Рассеиватель XLINE': { value: 304, unit: 'мм', material: 'Поликарбонат', thickness: '2мм' },
-                    'Профиль КП 453436': { value: 297, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '406': {
-                    'Профиль КП 453434': { value: 403, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Рассеиватель XLINE': { value: 404, unit: 'мм', material: 'Поликарбонат', thickness: '2мм' },
-                    'Профиль КП 453436': { value: 397, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '506': {
-                    'Профиль КП 453434': { value: 503, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Рассеиватель XLINE': { value: 504, unit: 'мм', material: 'Поликарбонат', thickness: '2мм' },
-                    'Профиль КП 453436': { value: 497, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '600': {
-                    'Профиль КП 453434': { value: 597, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Рассеиватель XLINE': { value: 598, unit: 'мм', material: 'Поликарбонат', thickness: '2мм' },
-                    'Профиль КП 453436': { value: 591, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '700': {
-                    'Профиль КП 453434': { value: 697, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Рассеиватель XLINE': { value: 698, unit: 'мм', material: 'Поликарбонат', thickness: '2мм' },
-                    'Профиль КП 453436': { value: 691, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '800': {
-                    'Профиль КП 453434': { value: 797, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Рассеиватель XLINE': { value: 798, unit: 'мм', material: 'Поликарбонат', thickness: '2мм' },
-                    'Профиль КП 453436': { value: 791, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '900': {
-                    'Профиль КП 453434': { value: 897, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Рассеиватель XLINE': { value: 898, unit: 'мм', material: 'Поликарбонат', thickness: '2мм' },
-                    'Профиль КП 453436': { value: 891, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 000': {
-                    'Профиль КП 453434': { value: 997, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Рассеиватель XLINE': { value: 998, unit: 'мм', material: 'Поликарбонат', thickness: '2мм' },
-                    'Профиль КП 453436': { value: 991, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 094': {
-                    'Профиль КП 453434': { value: 1091, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Рассеиватель XLINE': { value: 1092, unit: 'мм', material: 'Поликарбонат', thickness: '2мм' },
-                    'Профиль КП 453436': { value: 1085, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 194': {
-                    'Профиль КП 453434': { value: 1191, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Рассеиватель XLINE': { value: 1192, unit: 'мм', material: 'Поликарбонат', thickness: '2мм' },
-                    'Профиль КП 453436': { value: 1185, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 294': {
-                    'Профиль КП 453434': { value: 1291, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Рассеиватель XLINE': { value: 1292, unit: 'мм', material: 'Поликарбонат', thickness: '2мм' },
-                    'Профиль КП 453436': { value: 1285, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 394': {
-                    'Профиль КП 453434': { value: 1391, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Рассеиватель XLINE': { value: 1392, unit: 'мм', material: 'Поликарбонат', thickness: '2мм' },
-                    'Профиль КП 453436': { value: 1385, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 494': {
-                    'Профиль КП 453434': { value: 1491, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Рассеиватель XLINE': { value: 1492, unit: 'мм', material: 'Поликарбонат', thickness: '2мм' },
-                    'Профиль КП 453436': { value: 1485, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                }
-            },
-            
-            // XGLOW mini - Тех карта XGLOW mini.csv
-            'XGLOW mini': {
-                '125': {
-                    'Профиль НПС 2993': { value: 115, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль НПС 2994': { value: 40, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '250': {
-                    'Профиль НПС 2993': { value: 240, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль НПС 2994': { value: 40, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '375': {
-                    'Профиль НПС 2993': { value: 365, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль НПС 2994': { value: 40, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '500': {
-                    'Профиль НПС 2993': { value: 490, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль НПС 2994': { value: 40, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '510': {
-                    'Профиль НПС 2993': { value: 495, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль НПС 2994': { value: 40, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '625': {
-                    'Профиль НПС 2993': { value: 615, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль НПС 2994': { value: 40, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '750': {
-                    'Профиль НПС 2993': { value: 740, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль НПС 2994': { value: 40, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '875': {
-                    'Профиль НПС 2993': { value: 865, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль НПС 2994': { value: 40, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 000': {
-                    'Профиль НПС 2993': { value: 985, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль НПС 2994': { value: 40, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 125': {
-                    'Профиль НПС 2993': { value: 1115, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль НПС 2994': { value: 60, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 250': {
-                    'Профиль НПС 2993': { value: 1240, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль НПС 2994': { value: 60, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 375': {
-                    'Профиль НПС 2993': { value: 1365, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль НПС 2994': { value: 60, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 490': {
-                    'Профиль НПС 2993': { value: 1475, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль НПС 2994': { value: 60, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 500': {
-                    'Профиль НПС 2993': { value: 1490, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль НПС 2994': { value: 60, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                }
-            },
-            
-            // XGLOW - Тех карта XGLOW.csv
-            'XGLOW': {
-                '510': {
-                    'Профиль НПС 2997': { value: 500, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль НПС 2994': { value: 40, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 000': {
-                    'Профиль НПС 2997': { value: 990, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль НПС 2994': { value: 40, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                },
-                '1 490': {
-                    'Профиль НПС 2997': { value: 1480, unit: 'мм', material: 'AISI 430', thickness: '2мм' },
-                    'Профиль НПС 2994': { value: 60, unit: 'мм', material: 'AISI 430', thickness: '2мм' }
-                }
+                // Здесь будут все размеры для XGRAY v.1
             }
+            // Здесь будут все остальные изделия
         };
     }
     
-    // Расчет материалов для заказа
+    // ============== РАСЧЕТ МАТЕРИАЛОВ ==============
+    
     calculateMaterials(order) {
-        const materials = [];
+        const sheetMaterials = []; // листовые материалы (м²)
+        const profiles = []; // профили (мм)
         
         order.items.forEach(item => {
             const quantity = item.quantity || 1;
             const productName = item.product;
             const size = item.size;
             
-            console.log(`Расчет материалов для ${productName} размер ${size}, кол-во ${quantity}`);
+            // 1. Листовые материалы (алюминий, сталь, нержавейка, ПВХ, поликарбонат)
+            const allSheetMaterials = [
+                ...this.materialsDB.aluminum,
+                ...this.materialsDB.steel,
+                ...this.materialsDB.stainless,
+                ...this.materialsDB.pvc,
+                ...this.materialsDB.polycarbonate,
+                ...this.materialsDB.other
+            ];
             
-            // 1. Кронштейн
+            const sheetMatches = allSheetMaterials.filter(m => m.product === productName);
+            sheetMatches.forEach(m => {
+                sheetMaterials.push({
+                    name: m.material || this.getMaterialType(m),
+                    thickness: m.thickness,
+                    areaPerUnit: m.area,
+                    quantity: quantity,
+                    totalArea: m.area * quantity
+                });
+            });
+            
+            // 2. Кронштейн (если выбран)
             if (item.bracket && item.bracket !== 'отсутствует') {
                 const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket);
                 if (bracket) {
-                    materials.push({
+                    sheetMaterials.push({
                         name: `Кронштейн ${item.bracket}`,
-                        material: bracket.material || 'AISI 430',
                         thickness: bracket.thickness || '2мм',
-                        unitValue: bracket.weight || 0,
-                        unit: 'кг',
+                        areaPerUnit: bracket.area || bracket.weight, // предполагаем, что в loadBrackets() уже м²
                         quantity: quantity,
-                        totalValue: (bracket.weight || 0) * quantity
+                        totalArea: (bracket.area || bracket.weight) * quantity
                     });
                 }
             }
             
-            // 2. Лира
+            // 3. Лира (если выбрана)
             if (item.lyre && item.lyre !== 'отсутствует') {
                 const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre);
                 if (lyre) {
-                    materials.push({
+                    sheetMaterials.push({
                         name: `Лира ${item.lyre}`,
-                        material: lyre.material || 'AISI 430',
                         thickness: lyre.thickness || '1.5мм',
-                        unitValue: lyre.weight || 0,
-                        unit: 'кг',
+                        areaPerUnit: lyre.area || lyre.weight, // предполагаем, что в loadLyres() уже м²
                         quantity: quantity,
-                        totalValue: (lyre.weight || 0) * quantity
+                        totalArea: (lyre.area || lyre.weight) * quantity
                     });
                 }
             }
             
-            // 3. Материалы из техкарты изделия
+            // 4. Профили из техкарты изделия
             const productSpec = this.materialsDB.productSpecs[productName];
             if (productSpec && productSpec[size]) {
                 const spec = productSpec[size];
                 
                 Object.entries(spec).forEach(([key, data]) => {
-                    materials.push({
-                        name: `${key} (${productName})`,
-                        material: data.material || 'Комплектующие',
-                        thickness: data.thickness,
-                        unitValue: data.value,
+                    profiles.push({
+                        name: key,
+                        valuePerUnit: data.value,
                         unit: data.unit || 'мм',
                         quantity: quantity,
                         totalValue: data.value * quantity
@@ -752,14 +277,24 @@ class MaterialsReport {
             }
         });
         
-        return materials;
+        return { sheetMaterials, profiles };
     }
     
-    // Формирование HTML отчета
+    getMaterialType(material) {
+        if (material.area === this.materialsDB.aluminum.find(a => a.area === material.area)) return 'Алюминий';
+        if (material.area === this.materialsDB.steel.find(s => s.area === material.area)) return 'Сталь';
+        if (material.area === this.materialsDB.stainless.find(s => s.area === material.area)) return 'Нержавейка';
+        if (material.area === this.materialsDB.pvc.find(p => p.area === material.area)) return 'ПВХ';
+        if (material.area === this.materialsDB.polycarbonate.find(p => p.area === material.area)) return 'Поликарбонат';
+        return 'Листовой материал';
+    }
+    
+    // ============== ФОРМИРОВАНИЕ ОТЧЕТА ==============
+    
     async generateReportHTML(order) {
-        const materials = this.calculateMaterials(order);
+        const { sheetMaterials, profiles } = this.calculateMaterials(order);
         
-        if (materials.length === 0) {
+        if (sheetMaterials.length === 0 && profiles.length === 0) {
             return `
                 <div class="materials-report">
                     <h3>📊 Отчет по материалам для заказа №${order.number}</h3>
@@ -770,13 +305,6 @@ class MaterialsReport {
             `;
         }
         
-        // Группируем материалы по типу
-        const byType = {};
-        materials.forEach(m => {
-            if (!byType[m.material]) byType[m.material] = [];
-            byType[m.material].push(m);
-        });
-        
         let html = `
             <div class="materials-report">
                 <h3>📊 Отчет по материалам для заказа №${order.number}</h3>
@@ -785,63 +313,109 @@ class MaterialsReport {
                 </p>
                 
                 <h4>📦 Состав заказа:</h4>
-                <table class="items-table" style="margin-bottom: 20px;">
+                <table class="items-table" style="margin-bottom: 20px; width: 100%; border-collapse: collapse;">
                     <thead>
-                        <tr>
-                            <th>Изделие</th>
-                            <th>Размер</th>
-                            <th>Кол-во</th>
-                            <th>Кронштейн</th>
-                            <th>Лира</th>
+                        <tr style="background: #f0f0f0;">
+                            <th style="padding: 8px; text-align: left;">Изделие</th>
+                            <th style="padding: 8px; text-align: left;">Размер</th>
+                            <th style="padding: 8px; text-align: left;">Кол-во</th>
+                            <th style="padding: 8px; text-align: left;">Кронштейн</th>
+                            <th style="padding: 8px; text-align: left;">Лира</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${order.items.map(item => `
                             <tr>
-                                <td>${item.product}</td>
-                                <td>${item.size}</td>
-                                <td>${item.quantity}</td>
-                                <td>${item.bracket === 'отсутствует' ? '🚫' : item.bracket}</td>
-                                <td>${item.lyre === 'отсутствует' ? '🚫' : item.lyre}</td>
+                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.product}</td>
+                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.size}</td>
+                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.quantity}</td>
+                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.bracket === 'отсутствует' ? '🚫' : item.bracket}</td>
+                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.lyre === 'отсутствует' ? '🚫' : item.lyre}</td>
                             </tr>
                         `).join('')}
                     </tbody>
                 </table>
         `;
         
-        // Для каждого типа материала своя таблица
-        Object.entries(byType).forEach(([materialType, items]) => {
+        // Листовые материалы (м²)
+        if (sheetMaterials.length > 0) {
+            // Группируем по типу материала
+            const grouped = {};
+            sheetMaterials.forEach(m => {
+                const key = `${m.name} ${m.thickness}`;
+                if (!grouped[key]) {
+                    grouped[key] = {
+                        name: m.name,
+                        thickness: m.thickness,
+                        totalArea: 0,
+                        items: []
+                    };
+                }
+                grouped[key].totalArea += m.totalArea;
+                grouped[key].items.push(m);
+            });
+            
             html += `
-                <h4 style="margin-top: 20px;">${materialType}:</h4>
-                <table class="materials-table">
+                <h4 style="margin-top: 30px;">📋 Листовые материалы (расход в м²)</h4>
+                <table class="materials-table" style="width: 100%; border-collapse: collapse;">
                     <thead>
-                        <tr>
-                            <th>Наименование</th>
-                            <th>Толщина</th>
-                            <th>Расход на ед.</th>
-                            <th>Ед.</th>
-                            <th>Кол-во изд.</th>
-                            <th>Общий расход</th>
+                        <tr style="background: #f0f0f0;">
+                            <th style="padding: 8px; text-align: left;">Материал</th>
+                            <th style="padding: 8px; text-align: left;">Толщина</th>
+                            <th style="padding: 8px; text-align: right;">Расход на 1 шт (м²)</th>
+                            <th style="padding: 8px; text-align: right;">Кол-во</th>
+                            <th style="padding: 8px; text-align: right;">Общий расход (м²)</th>
                         </tr>
                     </thead>
                     <tbody>
             `;
             
-            items.forEach(item => {
+            Object.values(grouped).forEach(group => {
+                group.items.forEach(item => {
+                    html += `
+                        <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name}</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.thickness || '—'}</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.areaPerUnit.toFixed(4)}</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.quantity}</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.totalArea.toFixed(4)}</td>
+                        </tr>
+                    `;
+                });
+            });
+            
+            html += `</tbody></table>`;
+        }
+        
+        // Профили (мм)
+        if (profiles.length > 0) {
+            html += `
+                <h4 style="margin-top: 30px;">📏 Профили (расход в мм)</h4>
+                <table class="materials-table" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f0f0f0;">
+                            <th style="padding: 8px; text-align: left;">Профиль</th>
+                            <th style="padding: 8px; text-align: right;">Расход на 1 шт (мм)</th>
+                            <th style="padding: 8px; text-align: right;">Кол-во</th>
+                            <th style="padding: 8px; text-align: right;">Общий расход (мм)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            profiles.forEach(profile => {
                 html += `
                     <tr>
-                        <td><strong>${item.name}</strong></td>
-                        <td>${item.thickness || '-'}</td>
-                        <td>${item.unitValue.toFixed(3)}</td>
-                        <td>${item.unit}</td>
-                        <td>${item.quantity}</td>
-                        <td>${item.totalValue.toFixed(3)}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${profile.name}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${profile.valuePerUnit}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${profile.quantity}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${profile.totalValue}</td>
                     </tr>
                 `;
             });
             
             html += `</tbody></table>`;
-        });
+        }
         
         html += `</div>`;
         return html;
