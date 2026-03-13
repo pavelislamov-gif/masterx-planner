@@ -331,8 +331,12 @@ function showNotification(message, type = 'info') {
 
 // Загрузка и отображение заказов
 function loadOrders() {
+    console.log('loadOrders вызвана, заказов:', orders.length);
     const ordersList = document.getElementById('ordersList');
-    if (!ordersList) return;
+    if (!ordersList) {
+        console.error('ordersList не найден');
+        return;
+    }
     
     ordersList.innerHTML = '';
     
@@ -346,12 +350,15 @@ function loadOrders() {
         return;
     }
     
-    orders.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Сортируем по дате (сначала новые)
+    const sortedOrders = [...orders].sort((a, b) => new Date(b.date) - new Date(a.date));
     
-    orders.forEach(order => {
+    sortedOrders.forEach(order => {
         const orderCard = createOrderCard(order);
         ordersList.appendChild(orderCard);
     });
+    
+    console.log('Отображено заказов:', sortedOrders.length);
 }
 
 // Создание карточки заказа
@@ -657,13 +664,69 @@ function formatDate(dateString) {
     return new Date(dateString).toLocaleDateString('ru-RU', options);
 }
 
+// ============================================
+// УДАЛЕНИЕ ЗАКАЗА С ДВОЙНЫМ ПОДТВЕРЖДЕНИЕМ
+// ============================================
 function deleteOrder(orderId) {
-    if (confirm('Вы уверены, что хотите удалить заказ? Это действие нельзя отменить.')) {
-        orders = orders.filter(o => o.id !== orderId);
+    console.log('Попытка удалить заказ с ID:', orderId);
+    
+    // Первое подтверждение
+    const firstConfirm = confirm('Вы уверены, что хотите удалить этот заказ?');
+    
+    if (!firstConfirm) {
+        showNotification('Удаление отменено', 'info');
+        return;
+    }
+    
+    // Находим заказ для отображения информации
+    const orderToDelete = orders.find(o => o.id === orderId);
+    
+    if (!orderToDelete) {
+        showNotification('Заказ не найден', 'error');
+        return;
+    }
+    
+    // Второе подтверждение с деталями заказа
+    const itemInfo = orderToDelete.items.map(item => 
+        `${item.product} (${item.size}) - ${item.quantity} шт`
+    ).join('\n');
+    
+    const secondConfirm = confirm(
+        `⚠️ ВНИМАНИЕ! Это действие нельзя отменить.\n\n` +
+        `Заказ №${orderToDelete.number}\n` +
+        `Детали:\n${itemInfo}\n\n` +
+        `Вы точно хотите удалить этот заказ?`
+    );
+    
+    if (!secondConfirm) {
+        showNotification('Удаление отменено', 'info');
+        return;
+    }
+    
+    // Выполняем удаление
+    try {
+        // Фильтруем массив заказов
+        const newOrders = orders.filter(o => o.id !== orderId);
+        
+        console.log('Было заказов:', orders.length);
+        console.log('Стало заказов:', newOrders.length);
+        
+        // Обновляем глобальный массив
+        orders = newOrders;
+        
+        // Сохраняем в localStorage
         saveOrdersToStorage(orders);
+        
+        // Принудительно перезагружаем отображение
         loadOrders();
+        
+        // Обновляем статистику
         updateStatistics();
-        showNotification('Заказ удален', 'info');
+        
+        showNotification('✅ Заказ успешно удален', 'success');
+    } catch (error) {
+        console.error('Ошибка при удалении:', error);
+        showNotification('❌ Ошибка при удалении заказа', 'error');
     }
 }
 
