@@ -569,6 +569,7 @@ function closeMaterialsModal() {
 
 // Фильтрация заказов
 function filterOrders(searchText, statusFilter) {
+    console.log('Фильтр:', statusFilter, 'Поиск:', searchText);
     const cards = document.querySelectorAll('.order-card');
     searchText = searchText.toLowerCase();
     
@@ -579,17 +580,23 @@ function filterOrders(searchText, statusFilter) {
         
         let show = true;
         
+        // Поиск по тексту
         if (searchText) {
             const searchable = `${order.number} ${order.items.map(i => i.product).join(' ')}`.toLowerCase();
             show = searchable.includes(searchText);
         }
         
+        // Фильтр по статусу
         if (show && statusFilter !== 'all') {
-            show = order.status === statusFilter;
+            // Приводим статусы к одному виду
+            const orderStatus = order.status || 'active';
+            show = orderStatus === statusFilter;
+            console.log(`Заказ ${order.number}: статус="${orderStatus}", фильтр="${statusFilter}", показывать=${show}`);
         }
         
         card.style.display = show ? 'block' : 'none';
     });
+}
 }
 
 // Экспорт заказов в CSV
