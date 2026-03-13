@@ -59,16 +59,16 @@ async function loadAllData() {
             loadLyres()
         ]);
         
-        products = productsData;
-        brackets = bracketsData;
-        lyres = lyresData;
+        products = productsData || [];
+        brackets = bracketsData || [];
+        lyres = lyresData || [];
         
         console.log('✅ Продукты загружены:', products.length);
         console.log('✅ Кронштейны загружены:', brackets.length);
         console.log('✅ Лиры загружены:', lyres.length);
         
         // Загружаем заказы
-        orders = loadOrdersFromStorage();
+        orders = loadOrdersFromStorage() || [];
         console.log('✅ Заказы загружены:', orders.length);
         
         // Заполняем выпадающие списки
@@ -143,17 +143,7 @@ function populateSelects() {
                     bracketSelect.appendChild(option);
                 }
             });
-            console.log('✅ Кронштейнов добавлено:', brackets.length + 1); // +1 за "отсутствует"
-        } else {
-            // Если нет данных, добавляем тестовые
-            const testBrackets = ['PU-5', 'PU-6', 'LU-5', 'ACENTO'];
-            testBrackets.forEach(name => {
-                const option = document.createElement('option');
-                option.value = name;
-                option.textContent = name;
-                bracketSelect.appendChild(option);
-            });
-            console.log('✅ Добавлены тестовые кронштейны');
+            console.log('✅ Кронштейнов добавлено:', brackets.length + 1);
         }
     }
     
@@ -178,17 +168,7 @@ function populateSelects() {
                     lyreSelect.appendChild(option);
                 }
             });
-            console.log('✅ Лир добавлено:', lyres.length + 1); // +1 за "отсутствует"
-        } else {
-            // Если нет данных, добавляем тестовые
-            const testLyres = ['(L-серия) лира', '(P-серия) лира', 'Лира PZ-6'];
-            testLyres.forEach(name => {
-                const option = document.createElement('option');
-                option.value = name;
-                option.textContent = name;
-                lyreSelect.appendChild(option);
-            });
-            console.log('✅ Добавлены тестовые лиры');
+            console.log('✅ Лир добавлено:', lyres.length + 1);
         }
     }
     
@@ -297,10 +277,10 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
         items: [{
             product: document.getElementById('productSelect').value,
             size: document.getElementById('sizeSelect').value,
-            quantity: parseInt(document.getElementById('quantity').value),
+            quantity: parseInt(document.getElementById('quantity').value) || 1,
             bracket: bracket,
             lyre: lyre,
-            additional: document.getElementById('additionalDetails').value
+            additional: document.getElementById('additionalDetails').value || ''
         }],
         status: 'active',
         createdAt: new Date().toISOString(),
@@ -349,7 +329,7 @@ function loadOrders() {
     
     ordersList.innerHTML = '';
     
-    if (orders.length === 0) {
+    if (!orders || orders.length === 0) {
         ordersList.innerHTML = `
             <div style="text-align: center; padding: 50px; background: white; border-radius: 10px;">
                 <p style="font-size: 18px; color: #666;">📭 Нет заказов</p>
@@ -376,14 +356,16 @@ function createOrderCard(order) {
     const header = document.createElement('div');
     header.className = 'order-header';
     
-    const totalItems = order.items ? order.items.reduce((sum, item) => sum + (item.quantity || 0), 0) : 0;
+    // Проверяем, что order.items существует
+    const items = order.items || [];
+    const totalItems = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
     const completedTasks = countCompletedTasks(order);
     const totalTasks = countTotalTasks(order);
     const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
     
     header.innerHTML = `
         <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-            <h3>📦 Заказ №${order.number} от ${formatDate(order.date)}</h3>
+            <h3>📦 Заказ №${order.number || 'Без номера'} от ${formatDate(order.date)}</h3>
             <span style="background: ${getStatusColor(order.status)}; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px;">
                 ${order.status === 'active' ? 'В работе' : 'Завершен'}
             </span>
@@ -416,6 +398,37 @@ function createOrderCard(order) {
     progressBar.innerHTML = `<div style="width: ${progress}%; height: 100%; background: #28a745; transition: width 0.3s;"></div>`;
     content.appendChild(progressBar);
     
+    // Проверяем, есть ли элементы для отображения
+    let tableRows = '';
+    if (items.length > 0) {
+        tableRows = items.map(item => {
+            // Защита от undefined
+            const product = item.product || '-';
+            const size = item.size || '-';
+            const quantity = item.quantity || 0;
+            const bracket = item.bracket === 'отсутствует' ? '🚫 отсутствует' : (item.bracket || '-');
+            const lyre = item.lyre === 'отсутствует' ? '🚫 отсутствует' : (item.lyre || '-');
+            const additional = item.additional || '-';
+            
+            return `
+                <tr>
+                    <td><strong>${product}</strong></td>
+                    <td>${size}</td>
+                    <td>${quantity} шт</td>
+                    <td>${bracket}</td>
+                    <td>${lyre}</td>
+                    <td>${additional}</td>
+                </tr>
+            `;
+        }).join('');
+    } else {
+        tableRows = `
+            <tr>
+                <td colspan="6" style="text-align: center; color: #999;">Нет данных о деталях</td>
+            </tr>
+        `;
+    }
+    
     const itemsTable = document.createElement('table');
     itemsTable.className = 'items-table';
     itemsTable.innerHTML = `
@@ -430,16 +443,7 @@ function createOrderCard(order) {
             </tr>
         </thead>
         <tbody>
-            ${order.items.map(item => `
-                <tr>
-                    <td><strong>${item.product || '-'}</strong></td>
-                    <td>${item.size || '-'}</td>
-                    <td>${item.quantity || 0} шт</td>
-                    <td>${item.bracket === 'отсутствует' ? '🚫 отсутствует' : (item.bracket || '-')}</td>
-                    <td>${item.lyre === 'отсутствует' ? '🚫 отсутствует' : (item.lyre || '-')}</td>
-                    <td>${item.additional || '-'}</td>
-                </tr>
-            `).join('')}
+            ${tableRows}
         </tbody>
     `;
     content.appendChild(itemsTable);
@@ -476,7 +480,7 @@ function createSiteBlock(siteName, order, siteKey) {
         return `<div class="site-item"><div class="site-name">${siteName}</div><div class="squares"><div class="square"></div></div></div>`;
     }
     
-    const operations = getOperationsForProduct(order.items[0].product, siteKey);
+    const operations = getOperationsForProduct(order.items[0].product, siteKey) || [];
     const squares = [];
     
     for (let i = 0; i < operations.length; i++) {
@@ -512,7 +516,7 @@ function countCompletedTasks(order) {
 // Подсчет всех задач
 function countTotalTasks(order) {
     if (!order || !order.items || !order.items[0]) return 0;
-    const operations = getOperationsForProduct(order.items[0].product, 'all');
+    const operations = getOperationsForProduct(order.items[0].product, 'all') || [];
     const totalItems = order.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
     return operations.length * totalItems;
 }
@@ -635,6 +639,7 @@ function updateStatistics() {
 
 // Вспомогательные функции
 function formatDate(dateString) {
+    if (!dateString) return 'Дата не указана';
     const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
     return new Date(dateString).toLocaleDateString('ru-RU', options);
 }
