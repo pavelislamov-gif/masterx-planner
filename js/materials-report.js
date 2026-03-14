@@ -14,6 +14,9 @@ class MaterialsReport {
             brackets: [],
             lyres: [],
             
+            // Прутки (в мм)
+            rods: [],
+            
             // Профили из техкарт изделий (в мм)
             productSpecs: {}
         };
@@ -33,6 +36,9 @@ class MaterialsReport {
         // Загружаем кронштейны и лиры
         this.materialsDB.brackets = await loadBrackets();
         this.materialsDB.lyres = await loadLyres();
+        
+        // Загружаем прутки
+        this.materialsDB.rods = this.loadRodData();
         
         // Загружаем все спецификации продуктов (профили в мм)
         this.materialsDB.productSpecs = this.loadAllProductSpecs();
@@ -184,11 +190,63 @@ class MaterialsReport {
         ];
     }
     
+    // ============== ПРУТКИ (в мм) ==============
+    
+    loadRodData() {
+        return [
+            { product: 'XDISK', rodType: 'Пруток Шестигранник Ал 25мм', value: 27, unit: 'мм' },
+            { product: 'XDISK', rodType: 'Пруток 75мм Д16Т', value: 25, unit: 'мм' },
+            { product: 'XDISK', rodType: 'Пруток 100мм Д16Т', value: 70, unit: 'мм' },
+            { product: 'ACENTO 3T', rodType: 'Пруток 70мм Д16Т', value: 35, unit: 'мм' },
+            { product: 'ACENTO 3T', rodType: 'СЧ 4435 труба', value: 95, unit: 'мм' },
+            { product: 'ACENTO 4', rodType: 'Пруток 100мм Д16Т', value: 112, unit: 'мм' },
+            { product: 'XPIXEL BIN v.1', rodType: 'Пруток 100мм Д16Т', value: 34, unit: 'мм' },
+            { product: 'XPIXEL BIN v.1', rodType: 'Пруток 130мм Д16Т', value: 20, unit: 'мм' },
+            { product: 'XPIXEL BIN v.2', rodType: 'Пруток 100мм Д16Т', value: 34, unit: 'мм' },
+            { product: 'XPIXEL BIN v.2', rodType: 'Пруток 130мм Д16Т', value: 20, unit: 'мм' },
+            { product: 'XPIXEL BIN v.3', rodType: 'Пруток 110мм Д16Т', value: 40, unit: 'мм' },
+            { product: 'XPIXEL OVHD', rodType: 'Пруток 50мм Д16Т', value: 20, unit: 'мм' },
+            { product: 'XPOINT OVHD', rodType: 'Пруток 25мм Д16Т', value: 22, unit: 'мм' },
+            { product: 'XRAY 1', rodType: 'Пруток 50мм Д16Т', value: 80, unit: 'мм' },
+            { product: 'XRAY 12S', rodType: 'Пруток 150мм Д16Т', value: 70, unit: 'мм' },
+            { product: 'XRAY 18', rodType: 'Пруток 150мм Д16Т', value: 120, unit: 'мм' },
+            { product: 'XRAY 18S', rodType: 'Пруток 150мм Д16Т', value: 75, unit: 'мм' },
+            { product: 'XRAY 3', rodType: 'Пруток 58мм Д16Т', value: 110, unit: 'мм' },
+            { product: 'XRAY 3-GRP', rodType: 'Пруток 40мм Д16Т', value: 10, unit: 'мм' },
+            { product: 'XRAY 3-GRP', rodType: 'Пруток 48мм Д16Т', value: 72, unit: 'мм' },
+            { product: 'XRAY 6', rodType: 'Пруток 85мм Д16Т', value: 105, unit: 'мм' },
+            { product: 'XRAY 6 RGBW', rodType: 'Пруток 85мм Д16Т', value: 105, unit: 'мм' },
+            { product: 'XRAY 6-2 оконечный', rodType: 'Пруток 85мм Д16Т', value: 130, unit: 'мм' },
+            { product: 'XRAY 6-2 проходной', rodType: 'Пруток 85мм Д16Т', value: 130, unit: 'мм' },
+            { product: 'XRAY 6-T2 BT 180', rodType: 'СЧ 4435 труба', value: 183, unit: 'мм' },
+            { product: 'XRAY 6-T2 BT 200', rodType: 'СЧ 4435 труба', value: 203, unit: 'мм' },
+            { product: 'XRAY 6-T2 BT 220', rodType: 'СЧ 4435 труба', value: 223, unit: 'мм' },
+            { product: 'XRAY 6-T2 BT 220 Шторка х2', rodType: 'СЧ 4435 труба', value: 223, unit: 'мм' },
+            { product: 'XRAY 6-T2 BT 240 Шторка', rodType: 'СЧ 4435 труба', value: 243, unit: 'мм' },
+            { product: 'XRAY 6-T2 BZ 240 Шторка х2', rodType: 'СЧ 4435 труба', value: 243, unit: 'мм' },
+            { product: 'XRAY 6-T2 BZ 180', rodType: 'СЧ 4435 труба', value: 183, unit: 'мм' },
+            { product: 'XRAY 6-T2 BZ 200 Шторка', rodType: 'СЧ 4435 труба', value: 203, unit: 'мм' },
+            { product: 'XRAY 6-T2 BZ 220', rodType: 'СЧ 4435 труба', value: 223, unit: 'мм' },
+            { product: 'XRAY 6-T2 BZ 220 Шторка х2', rodType: 'СЧ 4435 труба', value: 223, unit: 'мм' },
+            { product: 'XRAY 6-T2 BZ 240 Шторка', rodType: 'СЧ 4435 труба', value: 243, unit: 'мм' },
+            { product: 'XRAY 6-T2 BZ 240 Шторка х2', rodType: 'СЧ 4435 труба', value: 243, unit: 'мм' },
+            { product: 'XRAY 6T Накладной', rodType: 'Пруток 90мм Д16Т', value: 34, unit: 'мм' },
+            { product: 'XRAY 6T BZ 120', rodType: 'СЧ 4435 труба', value: 123, unit: 'мм' },
+            { product: 'XRAY 6T BT 140 Шторка', rodType: 'СЧ 4435 труба', value: 143, unit: 'мм' },
+            { product: 'XRAY 6T RGBW BT 150', rodType: 'СЧ 4435 труба', value: 153, unit: 'мм' },
+            { product: 'XRAY 9', rodType: 'Пруток 120мм Д16Т', value: 100, unit: 'мм' },
+            { product: 'XRAY 9S', rodType: 'Пруток 120мм Д16Т', value: 65, unit: 'мм' },
+            { product: 'XSLOPE', rodType: 'Пруток 70мм Д16Т', value: 80, unit: 'мм' },
+            { product: 'XSPOT', rodType: 'Пруток 55мм Д16Т', value: 87, unit: 'мм' },
+            { product: 'XRAY 3-2', rodType: 'Пруток 58мм Д16Т', value: 152, unit: 'мм' }
+        ];
+    }
+    
     // ============== ПРОФИЛИ ИЗ ТЕХКАРТ (в мм) ==============
     
     loadAllProductSpecs() {
         return {
-            // XGRAY v.1 - Тех карта XGRAY v.1.csv
+            // XGRAY v.1
             'XGRAY v.1': {
                 '116': {
                     'Профиль МП 1928 XGRAY': { value: 117, unit: 'мм' },
@@ -267,7 +325,7 @@ class MaterialsReport {
                 }
             },
             
-            // XGRAY v.2 - Тех карта XGRAY v.2.csv
+            // XGRAY v.2
             'XGRAY v.2': {
                 '116': {
                     'Профиль МП 1928 XGRAY': { value: 117, unit: 'мм' },
@@ -331,7 +389,7 @@ class MaterialsReport {
                 }
             },
             
-            // XSMART mini - Тех карта XSMART mini.csv
+            // XSMART mini
             'XSMART mini': {
                 'XSMART mini 1': { 'Профиль НП 455015': { value: 71, unit: 'мм' } },
                 'XSMART mini 2': { 'Профиль НП 455015': { value: 91, unit: 'мм' } },
@@ -341,7 +399,7 @@ class MaterialsReport {
                 'XSMART mini 6': { 'Профиль НП 455015': { value: 246, unit: 'мм' } }
             },
             
-            // XLUMO Двунаправленный - Тех карта XLUMO Двунаправленный.csv
+            // XLUMO Двунаправленный
             'XLUMO Двунаправленный': {
                 'XLUMOx2-1': { 'Профиль НПС 3362': { value: 71, unit: 'мм' } },
                 'XLUMOx2-2': { 'Профиль НПС 3362': { value: 108, unit: 'мм' } },
@@ -351,7 +409,7 @@ class MaterialsReport {
                 'XLUMOx2-6': { 'Профиль НПС 3362': { value: 263, unit: 'мм' } }
             },
             
-            // XSMART - Тех карта XSMART.csv
+            // XSMART
             'XSMART': {
                 'XSMART-2': {
                     'КП 453785': { value: 91, unit: 'мм' },
@@ -387,7 +445,7 @@ class MaterialsReport {
                 }
             },
             
-            // XLUMO 1-6 - Тех карта XLUMO 1-6.csv
+            // XLUMO 1-6
             'XLUMO 1-6': {
                 'XLUMO-1': { 'Профиль НПС 2967 (XLUMO)': { value: 71, unit: 'мм' } },
                 'XLUMO-2': { 'Профиль НПС 2967 (XLUMO)': { value: 108, unit: 'мм' } },
@@ -397,7 +455,7 @@ class MaterialsReport {
                 'XLUMO-6': { 'Профиль НПС 2967 (XLUMO)': { value: 263, unit: 'мм' } }
             },
             
-            // XGIRO - Тех карта XGIRO.csv
+            // XGIRO
             'XGIRO': {
                 '130': { 'Профиль МП 0923-081': { value: 130, unit: 'мм' } },
                 '220': { 'Профиль МП 0923-081': { value: 220, unit: 'мм' } },
@@ -411,7 +469,7 @@ class MaterialsReport {
                 '1000': { 'Профиль МП 0923-081': { value: 1000, unit: 'мм' } }
             },
             
-            // XVISION - Тех карта XVISION.csv
+            // XVISION
             'XVISION': {
                 '110': { 'КП 453849': { value: 103, unit: 'мм' } },
                 '125': { 'КП 453849': { value: 118, unit: 'мм' } },
@@ -436,13 +494,13 @@ class MaterialsReport {
                 '1500': { 'КП 453849': { value: 1493, unit: 'мм' } }
             },
             
-            // XBAR-SW - Тех карта XBAR-SW.csv
+            // XBAR-SW
             'XBAR-SW': {
                 '1000': { 'КП 453054': { value: 998, unit: 'мм' } },
                 '1500': { 'КП 453054': { value: 1498, unit: 'мм' } }
             },
             
-            // XLITE - Тех карта XLITE.csv
+            // XLITE
             'XLITE': {
                 '125': { 'Профиль НПС 2966': { value: 125, unit: 'мм' } },
                 '250': { 'Профиль НПС 2966': { value: 250, unit: 'мм' } },
@@ -458,7 +516,7 @@ class MaterialsReport {
                 '1500': { 'Профиль НПС 2966': { value: 1500, unit: 'мм' } }
             },
             
-            // XROLL-lite P - Тех карта XROLL-lite P.csv
+            // XROLL-lite P
             'XROLL-lite P': {
                 '205': {
                     'Профиль поликарбонатный XROLL-lite': { value: 208, unit: 'мм' },
@@ -518,7 +576,7 @@ class MaterialsReport {
                 }
             },
             
-            // XROLL-lite K - Тех карта XROLL-lite K.csv
+            // XROLL-lite K
             'XROLL-lite K': {
                 '205': {
                     'Профиль поликарбонатный XROLL-lite': { value: 208, unit: 'мм' },
@@ -578,7 +636,7 @@ class MaterialsReport {
                 }
             },
             
-            // XLUMO - Тех карта XLUMO.csv
+            // XLUMO
             'XLUMO': {
                 '125': { 'Профиль НПС 2967 (XLUMO)': { value: 125, unit: 'мм' } },
                 '250': { 'Профиль НПС 2967 (XLUMO)': { value: 250, unit: 'мм' } },
@@ -592,7 +650,7 @@ class MaterialsReport {
                 '1500': { 'Профиль НПС 2967 (XLUMO)': { value: 1500, unit: 'мм' } }
             },
             
-            // XLUMO PROV - Тех карта XLUMO PROV.csv
+            // XLUMO PROV
             'XLUMO PROV': {
                 '125': { 'Профиль НПС 2967 (XLUMO)': { value: 125, unit: 'мм' } },
                 '250': { 'Профиль НПС 2967 (XLUMO)': { value: 250, unit: 'мм' } },
@@ -608,7 +666,7 @@ class MaterialsReport {
                 '1500': { 'Профиль НПС 2967 (XLUMO)': { value: 1500, unit: 'мм' } }
             },
             
-            // XSTRONG - Тех карта XSTRONG.csv
+            // XSTRONG
             'XSTRONG': {
                 'XSTRONG-10': { 'ТПК 004S': { value: 204, unit: 'мм' } },
                 'XSTRONG-20': { 'ТПК 004S': { value: 344, unit: 'мм' } },
@@ -618,7 +676,7 @@ class MaterialsReport {
                 'XSTRONG-40PW': { 'ТПК 004S': { value: 744, unit: 'мм' } }
             },
             
-            // XYELLOW - Тех карта XYELLOW.csv
+            // XYELLOW
             'XYELLOW': {
                 '116': {
                     'Профиль СЧ 4515 XYELLOW': { value: 117, unit: 'мм' },
@@ -697,7 +755,7 @@ class MaterialsReport {
                 }
             },
             
-            // XLINE - Тех карта XLINE.csv
+            // XLINE
             'XLINE': {
                 '106': {
                     'Профиль КП 453434': { value: 103, unit: 'мм' },
@@ -776,7 +834,7 @@ class MaterialsReport {
                 }
             },
             
-            // XGLOW mini - Тех карта XGLOW mini.csv
+            // XGLOW mini
             'XGLOW mini': {
                 '125': {
                     'Профиль НПС 2993': { value: 115, unit: 'мм' },
@@ -836,7 +894,7 @@ class MaterialsReport {
                 }
             },
             
-            // XGLOW - Тех карта XGLOW.csv
+            // XGLOW
             'XGLOW': {
                 '510': {
                     'Профиль НПС 2997': { value: 500, unit: 'мм' },
@@ -859,6 +917,7 @@ class MaterialsReport {
     calculateMaterials(order) {
         const sheetMaterials = []; // листовые материалы (м²)
         const profiles = []; // профили (мм)
+        const rods = []; // прутки (мм)
         
         order.items.forEach(item => {
             const quantity = item.quantity || 1;
@@ -916,7 +975,19 @@ class MaterialsReport {
                 }
             }
             
-            // 4. Профили из техкарты изделия
+            // 4. Прутки
+            const rodMatches = this.materialsDB.rods.filter(r => r.product === productName);
+            rodMatches.forEach(rod => {
+                rods.push({
+                    name: rod.rodType,
+                    valuePerUnit: rod.value,
+                    unit: rod.unit || 'мм',
+                    quantity: quantity,
+                    totalValue: rod.value * quantity
+                });
+            });
+            
+            // 5. Профили из техкарты изделия
             const productSpec = this.materialsDB.productSpecs[productName];
             if (productSpec && productSpec[size]) {
                 const spec = productSpec[size];
@@ -935,7 +1006,7 @@ class MaterialsReport {
             }
         });
         
-        return { sheetMaterials, profiles };
+        return { sheetMaterials, profiles, rods };
     }
     
     getMaterialType(material) {
@@ -950,9 +1021,9 @@ class MaterialsReport {
     // ============== ФОРМИРОВАНИЕ ОТЧЕТА ==============
     
     async generateReportHTML(order) {
-        const { sheetMaterials, profiles } = this.calculateMaterials(order);
+        const { sheetMaterials, profiles, rods } = this.calculateMaterials(order);
         
-        if (sheetMaterials.length === 0 && profiles.length === 0) {
+        if (sheetMaterials.length === 0 && profiles.length === 0 && rods.length === 0) {
             return `
                 <div class="materials-report">
                     <h3>📊 Отчет по материалам для заказа №${order.number}</h3>
@@ -1054,6 +1125,36 @@ class MaterialsReport {
                         <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${profile.valuePerUnit}</td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${profile.quantity}</td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${profile.totalValue}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `</tbody></table>`;
+        }
+        
+        // Прутки (мм)
+        if (rods.length > 0) {
+            html += `
+                <h4 style="margin-top: 30px;">🔩 Прутки (расход в мм)</h4>
+                <table class="materials-table" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f0f0f0;">
+                            <th style="padding: 8px; text-align: left;">Тип прутка</th>
+                            <th style="padding: 8px; text-align: right;">Расход на 1 шт (мм)</th>
+                            <th style="padding: 8px; text-align: right;">Кол-во</th>
+                            <th style="padding: 8px; text-align: right;">Общий расход (мм)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            rods.forEach(rod => {
+                html += `
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${rod.name}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${rod.valuePerUnit}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${rod.quantity}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${rod.totalValue}</td>
                     </tr>
                 `;
             });
