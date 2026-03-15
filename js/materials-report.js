@@ -920,11 +920,11 @@ class MaterialsReport {
         const rods = []; // прутки (мм)
         
         order.items.forEach(item => {
-            const quantity = item.quantity || 1;
+            const productQuantity = item.quantity || 1; // количество изделий
             const productName = item.product;
             const size = item.size;
             
-            console.log(`Расчет материалов для ${productName} размер ${size}, кол-во ${quantity}`);
+            console.log(`Расчет материалов для ${productName} размер ${size}, кол-во изделий: ${productQuantity}`);
             
             // 1. Листовые материалы (алюминий, сталь, нержавейка, ПВХ, поликарбонат)
             const allSheetMaterials = [
@@ -942,35 +942,39 @@ class MaterialsReport {
                     name: m.material || this.getMaterialType(m),
                     thickness: m.thickness,
                     areaPerUnit: m.area,
-                    quantity: quantity,
-                    totalArea: m.area * quantity
+                    quantity: productQuantity,
+                    totalArea: m.area * productQuantity
                 });
             });
             
-            // 2. Кронштейн (если выбран)
-            if (item.bracket && item.bracket !== 'отсутствует') {
-                const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket);
+            // 2. Кронштейн (с учетом количества на изделие)
+            if (item.bracket && item.bracket.type && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
+                const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
                 if (bracket) {
+                    const bracketTotalQuantity = item.bracket.quantity * productQuantity; // общее количество кронштейнов
                     sheetMaterials.push({
-                        name: `Кронштейн ${item.bracket}`,
+                        name: `Кронштейн ${item.bracket.type}`,
                         thickness: bracket.thickness || '2мм',
                         areaPerUnit: bracket.area || bracket.weight,
-                        quantity: quantity,
-                        totalArea: (bracket.area || bracket.weight) * quantity
+                        quantity: bracketTotalQuantity,
+                        totalArea: (bracket.area || bracket.weight) * bracketTotalQuantity,
+                        perProduct: item.bracket.quantity // количество на одно изделие
                     });
                 }
             }
             
-            // 3. Лира (если выбрана)
-            if (item.lyre && item.lyre !== 'отсутствует') {
-                const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre);
+            // 3. Лира (с учетом количества на изделие)
+            if (item.lyre && item.lyre.type && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
+                const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
                 if (lyre) {
+                    const lyreTotalQuantity = item.lyre.quantity * productQuantity; // общее количество лир
                     sheetMaterials.push({
-                        name: `Лира ${item.lyre}`,
+                        name: `Лира ${item.lyre.type}`,
                         thickness: lyre.thickness || '1.5мм',
                         areaPerUnit: lyre.area || lyre.weight,
-                        quantity: quantity,
-                        totalArea: (lyre.area || lyre.weight) * quantity
+                        quantity: lyreTotalQuantity,
+                        totalArea: (lyre.area || lyre.weight) * lyreTotalQuantity,
+                        perProduct: item.lyre.quantity // количество на одно изделие
                     });
                 }
             }
@@ -982,8 +986,8 @@ class MaterialsReport {
                     name: rod.rodType,
                     valuePerUnit: rod.value,
                     unit: rod.unit || 'мм',
-                    quantity: quantity,
-                    totalValue: rod.value * quantity
+                    quantity: productQuantity,
+                    totalValue: rod.value * productQuantity
                 });
             });
             
@@ -997,8 +1001,8 @@ class MaterialsReport {
                         name: key,
                         valuePerUnit: data.value,
                         unit: data.unit || 'мм',
-                        quantity: quantity,
-                        totalValue: data.value * quantity
+                        quantity: productQuantity,
+                        totalValue: data.value * productQuantity
                     });
                 });
             } else {
@@ -1055,17 +1059,27 @@ class MaterialsReport {
                         </tr>
                     </thead>
                     <tbody>
-                        ${order.items.map(item => `
-                            <tr>
-                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.product}</td>
-                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.size}</td>
-                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.quantity}</td>
-                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.bracket === 'отсутствует' ? '🚫' : item.bracket}</td>
-                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.lyre === 'отсутствует' ? '🚫' : item.lyre}</td>
-                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.ral || '-'}</td>
-                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.texture || '-'}</td>
-                            </tr>
-                        `).join('')}
+                        ${order.items.map(item => {
+                            const bracketInfo = item.bracket && item.bracket.type && item.bracket.type !== 'отсутствует' 
+                                ? `${item.bracket.type} (${item.bracket.quantity || 1} шт/изд)` 
+                                : '🚫 отсутствует';
+                            
+                            const lyreInfo = item.lyre && item.lyre.type && item.lyre.type !== 'отсутствует' 
+                                ? `${item.lyre.type} (${item.lyre.quantity || 1} шт/изд)` 
+                                : '🚫 отсутствует';
+                            
+                            return `
+                                <tr>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.product}</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.size}</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.quantity}</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${bracketInfo}</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${lyreInfo}</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.ral || '-'}</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.texture || '-'}</td>
+                                </tr>
+                            `;
+                        }).join('')}
                     </tbody>
                 </table>
         `;
