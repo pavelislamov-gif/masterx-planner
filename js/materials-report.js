@@ -19,6 +19,12 @@ class MaterialsReport {
     async loadMaterialsData() {
         console.log('Загрузка данных о материалах...');
         
+        // Сохраняем переданные данные, если они есть
+        const existingBrackets = this.materialsDB.brackets.length > 0 ? [...this.materialsDB.brackets] : null;
+        const existingLyres = this.materialsDB.lyres.length > 0 ? [...this.materialsDB.lyres] : null;
+        
+        console.log('📦 Существующие кронштейны:', existingBrackets?.length || 0);
+        
         try {
             const response = await fetch('data/norms.json');
             if (!response.ok) {
@@ -26,19 +32,32 @@ class MaterialsReport {
             }
             const norms = await response.json();
             
+            // Загружаем из JSON
             this.materialsDB.aluminum = norms.aluminum || [];
             this.materialsDB.steel = norms.steel || [];
             this.materialsDB.stainless = norms.stainless || [];
             this.materialsDB.pvc = norms.pvc || [];
             this.materialsDB.polycarbonate = norms.polycarbonate || [];
             this.materialsDB.other = norms.other || [];
-            this.materialsDB.brackets = norms.brackets || [];
-            this.materialsDB.lyres = norms.lyres || [];
             this.materialsDB.rods = norms.rods || [];
             this.materialsDB.productSpecs = norms.productSpecs || {};
             
+            // Для кронштейнов и лир: используем переданные, если есть, иначе из JSON
+            this.materialsDB.brackets = existingBrackets || norms.brackets || [];
+            this.materialsDB.lyres = existingLyres || norms.lyres || [];
+            
             this.normsLoaded = true;
             console.log('✅ Нормы загружены из JSON');
+            console.log('📦 Кронштейнов в БД:', this.materialsDB.brackets.length);
+            
+            // Проверяем наличие B(T)-15
+            const bt15 = this.materialsDB.brackets.find(b => b.name === 'B(T)-15');
+            if (bt15) {
+                console.log('✅ B(T)-15 найден:', bt15);
+            } else {
+                console.warn('❌ B(T)-15 НЕ найден в БД!');
+            }
+            
         } catch (error) {
             console.error('❌ Ошибка загрузки norms.json:', error);
             this.loadFallbackData();
@@ -49,6 +68,9 @@ class MaterialsReport {
         console.warn('⚠️ Используются резервные данные');
         this.materialsDB.aluminum = [
             { product: 'XGRAY v.1', thickness: '3мм', area: 0.0032 }
+        ];
+        this.materialsDB.brackets = [
+            { name: 'B(T)-15', thickness: '2мм', area: 0.0164 }
         ];
     }
     
@@ -99,12 +121,18 @@ class MaterialsReport {
             
             // 2. Кронштейн
             if (item.bracket?.type && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
+                console.log(`🔍 Поиск кронштейна: ${item.bracket.type}`);
+                
                 const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
+                
                 if (bracket) {
+                    console.log(`✅ Кронштейн найден:`, bracket);
                     const thickness = bracket.thickness || '2мм';
                     const area = bracket.area || 0;
                     const totalQty = item.bracket.quantity * productQty;
                     const totalArea = area * totalQty;
+                    
+                    console.log(`📊 area=${area}, totalQty=${totalQty}, totalArea=${totalArea}`);
                     
                     const keyName = `AISI 430 ${thickness}`;
                     
@@ -124,6 +152,9 @@ class MaterialsReport {
                         qty: totalQty,
                         total: totalArea
                     });
+                } else {
+                    console.warn(`❌ Кронштейн ${item.bracket.type} НЕ НАЙДЕН в БД!`);
+                    console.log('📋 Доступные кронштейны:', this.materialsDB.brackets.map(b => b.name));
                 }
             }
             
@@ -344,43 +375,6 @@ class MaterialsReport {
                 </table>
         `;
         
-        // AISI ИЗ ИЗДЕЛИЙ
-        if (data.aisi.products.length > 0) {
-            html += `<h4 style="margin-top: 30px;">🔩 AISI 430 из изделий (расход в м²)</h4>`;
-            
-            data.aisi.products.forEach(group => {
-                html += `
-                    <div style="margin-bottom: 20px;">
-                        <h5 style="margin-bottom: 10px;">${group.name}</h5>
-                        <table class="materials-table" style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="background: #f0f0f0;">
-                                    <th style="padding: 8px; text-align: left;">Деталь</th>
-                                    <th style="padding: 8px; text-align: right;">Расход на 1 шт (м²)</th>
-                                    <th style="padding: 8px; text-align: right;">Кол-во</th>
-                                    <th style="padding: 8px; text-align: right;">Общий расход (м²)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${group.items.map(item => `
-                                    <tr>
-                                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name}</td>
-                                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(item.unit)}</td>
-                                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.qty}</td>
-                                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(item.total)}</td>
-                                    </tr>
-                                `).join('')}
-                                <tr style="font-weight: bold; background: #e8f4f8;">
-                                    <td colspan="3" style="padding: 8px; text-align: right;">ИТОГО ${group.name}:</td>
-                                    <td style="padding: 8px; text-align: right;">${fmt(group.total)}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            });
-        }
-        
         // AISI ИЗ КРОНШТЕЙНОВ
         if (data.aisi.brackets.length > 0) {
             html += `<h4 style="margin-top: 30px;">🔩 AISI 430 из кронштейнов (расход в м²)</h4>`;
@@ -416,6 +410,8 @@ class MaterialsReport {
                     </div>
                 `;
             });
+        } else {
+            html += `<p style="color: #999;">Нет кронштейнов из AISI</p>`;
         }
         
         // AISI ИЗ ЛИР
@@ -430,6 +426,43 @@ class MaterialsReport {
                             <thead>
                                 <tr style="background: #f0f0f0;">
                                     <th style="padding: 8px; text-align: left;">Лира</th>
+                                    <th style="padding: 8px; text-align: right;">Расход на 1 шт (м²)</th>
+                                    <th style="padding: 8px; text-align: right;">Кол-во</th>
+                                    <th style="padding: 8px; text-align: right;">Общий расход (м²)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${group.items.map(item => `
+                                    <tr>
+                                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name}</td>
+                                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(item.unit)}</td>
+                                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.qty}</td>
+                                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(item.total)}</td>
+                                    </tr>
+                                `).join('')}
+                                <tr style="font-weight: bold; background: #e8f4f8;">
+                                    <td colspan="3" style="padding: 8px; text-align: right;">ИТОГО ${group.name}:</td>
+                                    <td style="padding: 8px; text-align: right;">${fmt(group.total)}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            });
+        }
+        
+        // AISI ИЗ ИЗДЕЛИЙ
+        if (data.aisi.products.length > 0) {
+            html += `<h4 style="margin-top: 30px;">🔩 AISI 430 из изделий (расход в м²)</h4>`;
+            
+            data.aisi.products.forEach(group => {
+                html += `
+                    <div style="margin-bottom: 20px;">
+                        <h5 style="margin-bottom: 10px;">${group.name}</h5>
+                        <table class="materials-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f0f0f0;">
+                                    <th style="padding: 8px; text-align: left;">Деталь</th>
                                     <th style="padding: 8px; text-align: right;">Расход на 1 шт (м²)</th>
                                     <th style="padding: 8px; text-align: right;">Кол-во</th>
                                     <th style="padding: 8px; text-align: right;">Общий расход (м²)</th>
