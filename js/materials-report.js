@@ -2,15 +2,22 @@
 class MaterialsReport {
     constructor() {
         this.materialsDB = {
+            // Листовые материалы (в м²)
             aluminum: [],
             steel: [],
             stainless: [],
             pvc: [],
             polycarbonate: [],
             other: [],
+            
+            // Кронштейны и лиры (в м²)
             brackets: [],
             lyres: [],
+            
+            // Прутки (в мм)
             rods: [],
+            
+            // Профили из техкарт изделий (в мм)
             productSpecs: {}
         };
         this.normsLoaded = false;
@@ -49,14 +56,121 @@ class MaterialsReport {
     
     loadFallbackData() {
         console.warn('⚠️ Используются резервные данные');
-        // Здесь можно добавить минимальные резервные данные
+        // Минимальные резервные данные
         this.materialsDB.aluminum = [
             { product: 'XGRAY v.1', thickness: '3мм', area: 0.0032 }
         ];
     }
     
-    // ... (все методы calculateMaterials, getMaterialType и т.д. остаются без изменений)
-    // ... (они уже были в предыдущей версии)
+    // ============== РАСЧЕТ МАТЕРИАЛОВ ==============
+    
+    calculateMaterials(order) {
+        const sheetMaterials = []; // листовые материалы (м²)
+        const profiles = []; // профили (мм)
+        const rods = []; // прутки (мм)
+        
+        order.items.forEach(item => {
+            const productQuantity = item.quantity || 1; // количество изделий
+            const productName = item.product;
+            const size = item.size;
+            
+            console.log(`Расчет материалов для ${productName} размер ${size}, кол-во изделий: ${productQuantity}`);
+            
+            // 1. Листовые материалы (алюминий, сталь, нержавейка, ПВХ, поликарбонат)
+            const allSheetMaterials = [
+                ...this.materialsDB.aluminum,
+                ...this.materialsDB.steel,
+                ...this.materialsDB.stainless,
+                ...this.materialsDB.pvc,
+                ...this.materialsDB.polycarbonate,
+                ...this.materialsDB.other
+            ];
+            
+            const sheetMatches = allSheetMaterials.filter(m => m.product === productName);
+            sheetMatches.forEach(m => {
+                sheetMaterials.push({
+                    name: m.material || this.getMaterialType(m),
+                    thickness: m.thickness,
+                    areaPerUnit: m.area,
+                    quantity: productQuantity,
+                    totalArea: m.area * productQuantity
+                });
+            });
+            
+            // 2. Кронштейн (с учетом количества на изделие)
+            if (item.bracket && item.bracket.type && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
+                const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
+                if (bracket) {
+                    const bracketTotalQuantity = item.bracket.quantity * productQuantity; // общее количество кронштейнов
+                    sheetMaterials.push({
+                        name: `Кронштейн ${item.bracket.type}`,
+                        thickness: bracket.thickness || '2мм',
+                        areaPerUnit: bracket.area,
+                        quantity: bracketTotalQuantity,
+                        totalArea: bracket.area * bracketTotalQuantity,
+                        perProduct: item.bracket.quantity // количество на одно изделие
+                    });
+                }
+            }
+            
+            // 3. Лира (с учетом количества на изделие)
+            if (item.lyre && item.lyre.type && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
+                const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
+                if (lyre) {
+                    const lyreTotalQuantity = item.lyre.quantity * productQuantity; // общее количество лир
+                    sheetMaterials.push({
+                        name: `Лира ${item.lyre.type}`,
+                        thickness: lyre.thickness || '1.5мм',
+                        areaPerUnit: lyre.area,
+                        quantity: lyreTotalQuantity,
+                        totalArea: lyre.area * lyreTotalQuantity,
+                        perProduct: item.lyre.quantity // количество на одно изделие
+                    });
+                }
+            }
+            
+            // 4. Прутки
+            const rodMatches = this.materialsDB.rods.filter(r => r.product === productName);
+            rodMatches.forEach(rod => {
+                rods.push({
+                    name: rod.rodType,
+                    valuePerUnit: rod.value,
+                    unit: rod.unit || 'мм',
+                    quantity: productQuantity,
+                    totalValue: rod.value * productQuantity
+                });
+            });
+            
+            // 5. Профили из техкарты изделия
+            const productSpec = this.materialsDB.productSpecs[productName];
+            if (productSpec && productSpec[size]) {
+                const spec = productSpec[size];
+                
+                Object.entries(spec).forEach(([key, data]) => {
+                    profiles.push({
+                        name: key,
+                        valuePerUnit: data.value,
+                        unit: data.unit || 'мм',
+                        quantity: productQuantity,
+                        totalValue: data.value * productQuantity
+                    });
+                });
+            } else {
+                console.warn(`Не найдены спецификации для ${productName} размер ${size}`);
+            }
+        });
+        
+        return { sheetMaterials, profiles, rods };
+    }
+    
+    getMaterialType(material) {
+        if (this.materialsDB.aluminum.find(a => a.area === material.area)) return 'Алюминий';
+        if (this.materialsDB.steel.find(s => s.area === material.area)) return 'Сталь';
+        if (this.materialsDB.stainless.find(s => s.area === material.area)) return 'Нержавейка';
+        if (this.materialsDB.pvc.find(p => p.area === material.area)) return 'ПВХ';
+        if (this.materialsDB.polycarbonate.find(p => p.area === material.area)) return 'Поликарбонат';
+        return 'Листовой материал';
+    }
     
     // ============== ФОРМИРОВАНИЕ ОТЧЕТА ==============
     
