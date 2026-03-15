@@ -20,53 +20,18 @@ calculateMaterials(order) {
         
         console.log(`→ ${productName} ${size} × ${productQty} шт`);
         
-        // 1. AISI из техкарты изделия
+        // 1. Профили/трубы из техкарты (НЕ ЛИСТЫ)
         const spec = this.materialsDB.productSpecs[productName]?.[size];
         if (spec) {
             Object.entries(spec).forEach(([key, data]) => {
-                const isAISI = key.includes('AISI') || 
-                               key.includes('Нержавейка') || 
-                               (data.material && data.material.includes('AISI'));
-                
-                if (isAISI) {
-                    // Определяем толщину
-                    let thickness = '2мм';
-                    if (key.includes('1мм')) thickness = '1мм';
-                    else if (key.includes('1.5мм')) thickness = '1.5мм';
-                    else if (key.includes('2мм')) thickness = '2мм';
-                    else if (key.includes('3мм')) thickness = '3мм';
-                    
-                    const value = data.value || 0;
-                    const total = value * productQty;
-                    
-                    const keyName = `AISI 430 ${thickness}`;
-                    
-                    if (!aisi.fromProducts[keyName]) {
-                        aisi.fromProducts[keyName] = {
-                            name: keyName,
-                            thickness: thickness,
-                            total: 0,
-                            items: []
-                        };
-                    }
-                    
-                    aisi.fromProducts[keyName].total += total;
-                    aisi.fromProducts[keyName].items.push({
-                        name: `${key} (${productName})`,
-                        unit: value,
-                        qty: productQty,
-                        total: total
-                    });
-                } else {
-                    // Не AISI — в профили
-                    profiles.push({
-                        name: key,
-                        unit: data.value || 0,
-                        unitType: data.unit || 'мм',
-                        qty: productQty,
-                        total: (data.value || 0) * productQty
-                    });
-                }
+                // Это профили, они идут в мм
+                profiles.push({
+                    name: key,
+                    unit: data.value || 0,
+                    unitType: 'мм',
+                    qty: productQty,
+                    total: (data.value || 0) * productQty
+                });
             });
         }
         
@@ -130,29 +95,93 @@ calculateMaterials(order) {
             }
         }
         
-        // 4. Остальные листовые материалы (не AISI)
-        const allSheets = [
-            ...this.materialsDB.aluminum,
-            ...this.materialsDB.steel,
-            ...this.materialsDB.stainless,
-            ...this.materialsDB.pvc,
-            ...this.materialsDB.polycarbonate,
-            ...this.materialsDB.other
-        ];
-        
-        const sheetMatches = allSheets.filter(m => m.product === productName);
-        sheetMatches.forEach(m => {
-            // Пропускаем AISI
-            if (m.material?.includes('AISI') || m.material?.includes('Нержавейка')) return;
-            
+        // 4. Листовые материалы (алюминий, сталь, нержавейка, ПВХ и т.д.)
+        // Алюминий
+        const aluMatch = this.materialsDB.aluminum.find(m => m.product === productName);
+        if (aluMatch) {
             otherSheetMaterials.push({
-                name: m.material || 'Лист',
-                thickness: m.thickness || '—',
-                unit: m.area || 0,
+                name: 'Алюминий',
+                thickness: aluMatch.thickness || '—',
+                unit: aluMatch.area || 0,
                 qty: productQty,
-                total: (m.area || 0) * productQty
+                total: (aluMatch.area || 0) * productQty
             });
-        });
+        }
+        
+        // Сталь
+        const steelMatch = this.materialsDB.steel.find(m => m.product === productName);
+        if (steelMatch) {
+            otherSheetMaterials.push({
+                name: 'Сталь',
+                thickness: steelMatch.thickness || '—',
+                unit: steelMatch.area || 0,
+                qty: productQty,
+                total: (steelMatch.area || 0) * productQty
+            });
+        }
+        
+        // Нержавейка (AISI из техкарты листов)
+        const stainlessMatch = this.materialsDB.stainless.find(m => m.product === productName);
+        if (stainlessMatch) {
+            const thickness = stainlessMatch.thickness || '1мм';
+            const area = stainlessMatch.area || 0;
+            const totalArea = area * productQty;
+            
+            const keyName = `AISI 430 ${thickness}`;
+            
+            if (!aisi.fromProducts[keyName]) {
+                aisi.fromProducts[keyName] = {
+                    name: keyName,
+                    thickness: thickness,
+                    total: 0,
+                    items: []
+                };
+            }
+            
+            aisi.fromProducts[keyName].total += totalArea;
+            aisi.fromProducts[keyName].items.push({
+                name: `Нержавейка (изделие)`,
+                unit: area,
+                qty: productQty,
+                total: totalArea
+            });
+        }
+        
+        // ПВХ
+        const pvcMatch = this.materialsDB.pvc.find(m => m.product === productName);
+        if (pvcMatch) {
+            otherSheetMaterials.push({
+                name: 'ПВХ',
+                thickness: pvcMatch.thickness || '—',
+                unit: pvcMatch.area || 0,
+                qty: productQty,
+                total: (pvcMatch.area || 0) * productQty
+            });
+        }
+        
+        // Поликарбонат
+        const polyMatch = this.materialsDB.polycarbonate.find(m => m.product === productName);
+        if (polyMatch) {
+            otherSheetMaterials.push({
+                name: polyMatch.material || 'Поликарбонат',
+                thickness: polyMatch.thickness || '—',
+                unit: polyMatch.area || 0,
+                qty: productQty,
+                total: (polyMatch.area || 0) * productQty
+            });
+        }
+        
+        // Другие материалы
+        const otherMatch = this.materialsDB.other.find(m => m.product === productName);
+        if (otherMatch) {
+            otherSheetMaterials.push({
+                name: otherMatch.material || 'Другой материал',
+                thickness: otherMatch.thickness || '—',
+                unit: otherMatch.area || 0,
+                qty: productQty,
+                total: (otherMatch.area || 0) * productQty
+            });
+        }
         
         // 5. Прутки
         const rodMatches = this.materialsDB.rods.filter(r => r.product === productName);
@@ -184,66 +213,291 @@ calculateMaterials(order) {
 async generateReportHTML(order) {
     const data = this.calculateMaterials(order);
     
+    console.log('=== ДАННЫЕ ДЛЯ ОТЧЕТА ===', data);
+    
     if (!data.otherSheets.length && !data.profiles.length && !data.rods.length &&
         !data.aisi.products.length && !data.aisi.brackets.length && !data.aisi.lyres.length) {
-        return `<p>Нет данных</p>`;
+        return `
+            <div class="materials-report">
+                <h3>📊 Отчет по материалам для заказа №${order.number || 'Без номера'}</h3>
+                <p style="color: #666; text-align: center; padding: 20px;">
+                    Нет данных о материалах для данного заказа
+                </p>
+            </div>
+        `;
     }
     
-    let html = `<h3>📊 Отчет №${order.number}</h3>`;
+    const fmt = (val, dec = 4) => {
+        if (val === undefined || val === null) return '0';
+        return Number(val).toFixed(dec);
+    };
     
-    // Функция для форматирования
-    const fmt = (val, dec = 4) => (val ?? 0).toFixed(dec);
+    let html = `
+        <div class="materials-report">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>📊 Отчет по материалам для заказа №${order.number || 'Без номера'}</h3>
+                <button onclick="window.print()" class="btn btn-primary" style="padding: 8px 15px;">
+                    🖨️ Печать
+                </button>
+            </div>
+            <p style="color: #666; margin-bottom: 20px;">
+                Дата: ${order.date ? new Date(order.date).toLocaleDateString('ru-RU') : 'Не указана'}
+            </p>
+            
+            <h4>📦 Состав заказа:</h4>
+            <table class="items-table" style="margin-bottom: 20px; width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f0f0f0;">
+                        <th style="padding: 8px; text-align: left;">Изделие</th>
+                        <th style="padding: 8px; text-align: left;">Размер</th>
+                        <th style="padding: 8px; text-align: left;">Кол-во</th>
+                        <th style="padding: 8px; text-align: left;">Кронштейн</th>
+                        <th style="padding: 8px; text-align: left;">Лира</th>
+                        <th style="padding: 8px; text-align: left;">RAL</th>
+                        <th style="padding: 8px; text-align: left;">Текстура</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${order.items.map(item => {
+                        const bracketInfo = item.bracket && item.bracket.type && item.bracket.type !== 'отсутствует' 
+                            ? `${item.bracket.type} (${item.bracket.quantity || 1} шт/изд)` 
+                            : '🚫 отсутствует';
+                        
+                        const lyreInfo = item.lyre && item.lyre.type && item.lyre.type !== 'отсутствует' 
+                            ? `${item.lyre.type} (${item.lyre.quantity || 1} шт/изд)` 
+                            : '🚫 отсутствует';
+                        
+                        return `
+                            <tr>
+                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.product || '-'}</td>
+                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.size || '-'}</td>
+                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.quantity || 0}</td>
+                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${bracketInfo}</td>
+                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${lyreInfo}</td>
+                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.ral || '-'}</td>
+                                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.texture || '-'}</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+    `;
     
-    // AISI из изделий
-    if (data.aisi.products.length) {
-        html += `<h4>🔩 AISI из изделий</h4>`;
-        data.aisi.products.forEach(g => {
-            html += `<h5>${g.name}</h5><table><tr><th>Деталь</th><th>м²/шт</th><th>Кол-во</th><th>Всего м²</th></tr>`;
-            g.items.forEach(i => html += `<tr><td>${i.name}</td><td>${fmt(i.unit)}</td><td>${i.qty}</td><td>${fmt(i.total)}</td></tr>`);
-            html += `<tr><td colspan="3"><strong>Итого</strong></td><td><strong>${fmt(g.total)}</strong></td></tr></table>`;
+    // ===========================================
+    // AISI ИЗ ИЗДЕЛИЙ (НЕРЖАВЕЙКА)
+    // ===========================================
+    if (data.aisi.products.length > 0) {
+        html += `<h4 style="margin-top: 30px;">🔩 AISI 430 из изделий (расход в м²)</h4>`;
+        
+        data.aisi.products.forEach(group => {
+            html += `
+                <div style="margin-bottom: 20px;">
+                    <h5 style="margin-bottom: 10px;">${group.name}</h5>
+                    <table class="materials-table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f0f0f0;">
+                                <th style="padding: 8px; text-align: left;">Деталь</th>
+                                <th style="padding: 8px; text-align: right;">Расход на 1 шт (м²)</th>
+                                <th style="padding: 8px; text-align: right;">Кол-во</th>
+                                <th style="padding: 8px; text-align: right;">Общий расход (м²)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${group.items.map(item => `
+                                <tr>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name}</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(item.unit)}</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.qty}</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(item.total)}</td>
+                                </tr>
+                            `).join('')}
+                            <tr style="font-weight: bold; background: #e8f4f8;">
+                                <td colspan="3" style="padding: 8px; text-align: right;">ИТОГО ${group.name}:</td>
+                                <td style="padding: 8px; text-align: right;">${fmt(group.total)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
         });
     }
     
-    // AISI из кронштейнов
-    if (data.aisi.brackets.length) {
-        html += `<h4>🔩 AISI из кронштейнов</h4>`;
-        data.aisi.brackets.forEach(g => {
-            html += `<h5>${g.name}</h5><table><tr><th>Кронштейн</th><th>м²/шт</th><th>Кол-во</th><th>Всего м²</th></tr>`;
-            g.items.forEach(i => html += `<tr><td>${i.name}</td><td>${fmt(i.unit)}</td><td>${i.qty}</td><td>${fmt(i.total)}</td></tr>`);
-            html += `<tr><td colspan="3"><strong>Итого</strong></td><td><strong>${fmt(g.total)}</strong></td></tr></table>`;
+    // ===========================================
+    // AISI ИЗ КРОНШТЕЙНОВ
+    // ===========================================
+    if (data.aisi.brackets.length > 0) {
+        html += `<h4 style="margin-top: 30px;">🔩 AISI 430 из кронштейнов (расход в м²)</h4>`;
+        
+        data.aisi.brackets.forEach(group => {
+            html += `
+                <div style="margin-bottom: 20px;">
+                    <h5 style="margin-bottom: 10px;">${group.name}</h5>
+                    <table class="materials-table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f0f0f0;">
+                                <th style="padding: 8px; text-align: left;">Кронштейн</th>
+                                <th style="padding: 8px; text-align: right;">Расход на 1 шт (м²)</th>
+                                <th style="padding: 8px; text-align: right;">Кол-во</th>
+                                <th style="padding: 8px; text-align: right;">Общий расход (м²)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${group.items.map(item => `
+                                <tr>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name}</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(item.unit)}</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.qty}</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(item.total)}</td>
+                                </tr>
+                            `).join('')}
+                            <tr style="font-weight: bold; background: #e8f4f8;">
+                                <td colspan="3" style="padding: 8px; text-align: right;">ИТОГО ${group.name}:</td>
+                                <td style="padding: 8px; text-align: right;">${fmt(group.total)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
         });
     }
     
-    // AISI из лир
-    if (data.aisi.lyres.length) {
-        html += `<h4>🔩 AISI из лир</h4>`;
-        data.aisi.lyres.forEach(g => {
-            html += `<h5>${g.name}</h5><table><tr><th>Лира</th><th>м²/шт</th><th>Кол-во</th><th>Всего м²</th></tr>`;
-            g.items.forEach(i => html += `<tr><td>${i.name}</td><td>${fmt(i.unit)}</td><td>${i.qty}</td><td>${fmt(i.total)}</td></tr>`);
-            html += `<tr><td colspan="3"><strong>Итого</strong></td><td><strong>${fmt(g.total)}</strong></td></tr></table>`;
+    // ===========================================
+    // AISI ИЗ ЛИР
+    // ===========================================
+    if (data.aisi.lyres.length > 0) {
+        html += `<h4 style="margin-top: 30px;">🔩 AISI 430 из лир (расход в м²)</h4>`;
+        
+        data.aisi.lyres.forEach(group => {
+            html += `
+                <div style="margin-bottom: 20px;">
+                    <h5 style="margin-bottom: 10px;">${group.name}</h5>
+                    <table class="materials-table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f0f0f0;">
+                                <th style="padding: 8px; text-align: left;">Лира</th>
+                                <th style="padding: 8px; text-align: right;">Расход на 1 шт (м²)</th>
+                                <th style="padding: 8px; text-align: right;">Кол-во</th>
+                                <th style="padding: 8px; text-align: right;">Общий расход (м²)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${group.items.map(item => `
+                                <tr>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name}</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(item.unit)}</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.qty}</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(item.total)}</td>
+                                </tr>
+                            `).join('')}
+                            <tr style="font-weight: bold; background: #e8f4f8;">
+                                <td colspan="3" style="padding: 8px; text-align: right;">ИТОГО ${group.name}:</td>
+                                <td style="padding: 8px; text-align: right;">${fmt(group.total)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
         });
     }
     
-    // Остальные листы
-    if (data.otherSheets.length) {
-        html += `<h4>📋 Прочие листы</h4><table><tr><th>Материал</th><th>Толщина</th><th>м²/шт</th><th>Кол-во</th><th>Всего м²</th></tr>`;
-        data.otherSheets.forEach(s => html += `<tr><td>${s.name}</td><td>${s.thickness}</td><td>${fmt(s.unit)}</td><td>${s.qty}</td><td>${fmt(s.total)}</td></tr>`);
-        html += `</table>`;
+    // ===========================================
+    // ПРОЧИЕ ЛИСТОВЫЕ МАТЕРИАЛЫ
+    // ===========================================
+    if (data.otherSheets.length > 0) {
+        html += `
+            <h4 style="margin-top: 30px;">📋 Прочие листовые материалы (расход в м²)</h4>
+            <table class="materials-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f0f0f0;">
+                        <th style="padding: 8px; text-align: left;">Материал</th>
+                        <th style="padding: 8px; text-align: left;">Толщина</th>
+                        <th style="padding: 8px; text-align: right;">Расход на 1 шт (м²)</th>
+                        <th style="padding: 8px; text-align: right;">Кол-во</th>
+                        <th style="padding: 8px; text-align: right;">Общий расход (м²)</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        data.otherSheets.forEach(item => {
+            html += `
+                <tr>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.thickness || '—'}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(item.unit)}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.qty}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(item.total)}</td>
+                </tr>
+            `;
+        });
+        
+        html += `</tbody></table>`;
     }
     
-    // Профили
-    if (data.profiles.length) {
-        html += `<h4>📏 Профили</h4><table><tr><th>Профиль</th><th>мм/шт</th><th>Кол-во</th><th>Всего мм</th></tr>`;
-        data.profiles.forEach(p => html += `<tr><td>${p.name}</td><td>${fmt(p.unit,0)}</td><td>${p.qty}</td><td>${fmt(p.total,0)}</td></tr>`);
-        html += `</table>`;
+    // ===========================================
+    // ПРОФИЛИ
+    // ===========================================
+    if (data.profiles.length > 0) {
+        html += `
+            <h4 style="margin-top: 30px;">📏 Профили (расход в мм)</h4>
+            <table class="materials-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f0f0f0;">
+                        <th style="padding: 8px; text-align: left;">Профиль</th>
+                        <th style="padding: 8px; text-align: right;">Расход на 1 шт (мм)</th>
+                        <th style="padding: 8px; text-align: right;">Кол-во</th>
+                        <th style="padding: 8px; text-align: right;">Общий расход (мм)</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        data.profiles.forEach(profile => {
+            html += `
+                <tr>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${profile.name}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(profile.unit, 0)}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${profile.qty}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(profile.total, 0)}</td>
+                </tr>
+            `;
+        });
+        
+        html += `</tbody></table>`;
     }
     
-    // Прутки
-    if (data.rods.length) {
-        html += `<h4>🔩 Прутки</h4><table><tr><th>Пруток</th><th>мм/шт</th><th>Кол-во</th><th>Всего мм</th></tr>`;
-        data.rods.forEach(r => html += `<tr><td>${r.name}</td><td>${fmt(r.unit,0)}</td><td>${r.qty}</td><td>${fmt(r.total,0)}</td></tr>`);
-        html += `</table>`;
+    // ===========================================
+    // ПРУТКИ
+    // ===========================================
+    if (data.rods.length > 0) {
+        html += `
+            <h4 style="margin-top: 30px;">🔩 Прутки (расход в мм)</h4>
+            <table class="materials-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f0f0f0;">
+                        <th style="padding: 8px; text-align: left;">Тип прутка</th>
+                        <th style="padding: 8px; text-align: right;">Расход на 1 шт (мм)</th>
+                        <th style="padding: 8px; text-align: right;">Кол-во</th>
+                        <th style="padding: 8px; text-align: right;">Общий расход (мм)</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        data.rods.forEach(rod => {
+            html += `
+                <tr>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${rod.name}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(rod.unit, 0)}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${rod.qty}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(rod.total, 0)}</td>
+                </tr>
+            `;
+        });
+        
+        html += `</tbody></table>`;
     }
     
+    html += `</div>`;
     return html;
 }
