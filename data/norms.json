@@ -1,0 +1,899 @@
+{
+  "aluminum": [
+    { "product": "XGRAY v.1", "thickness": "3мм", "area": 0.0032 },
+    { "product": "XGRAY v.2", "thickness": "3мм", "area": 0.0032 },
+    { "product": "ACENTO 3T", "thickness": "3мм", "area": 0.0033 },
+    { "product": "ACENTO 4", "thickness": "4мм", "area": 0.0064 },
+    { "product": "XBAR-SW", "thickness": "3мм", "area": 0.0001 },
+    { "product": "XEYES 130*120 1", "thickness": "2мм", "area": 0.044 },
+    { "product": "XEYES 130*120 2", "thickness": "2мм", "area": 0.044 },
+    { "product": "XEYES mini-1", "thickness": "3мм", "area": 0.0092 },
+    { "product": "XEYES mini-1", "thickness": "4мм", "area": 0.0044 },
+    { "product": "XFOCUS", "thickness": "3мм", "area": 0.0006 },
+    { "product": "XGIRO", "thickness": "3мм", "area": 0.002 },
+    { "product": "XGLOW", "thickness": "8мм", "area": 0.0007 },
+    { "product": "XLITE", "thickness": "3мм", "area": 0.006 },
+    { "product": "XLUMO", "thickness": "3мм", "area": 0.006 },
+    { "product": "XLUMO 1-6", "thickness": "3мм", "area": 0.006 },
+    { "product": "XLUMO Двунаправленный", "thickness": "3мм", "area": 0.008 },
+    { "product": "XLUMO PROV", "thickness": "3мм", "area": 0.006 },
+    { "product": "XMODULE-2x2", "thickness": "1.5мм", "area": 0.0086 },
+    { "product": "XMODULE-2x2", "thickness": "3мм", "area": 0.0048 },
+    { "product": "XMODULE-6x2", "thickness": "1.5мм", "area": 0.019 },
+    { "product": "XPIXEL OVHD", "thickness": "1мм", "area": 0.0011 },
+    { "product": "XRAY 12S", "thickness": "4мм", "area": 0.0094 },
+    { "product": "XRAY 18S", "thickness": "4мм", "area": 0.012 },
+    { "product": "XRAY 36S", "thickness": "8мм", "area": 0.023 },
+    { "product": "XRAY 6-T2 BT 180", "thickness": "3мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BT 200", "thickness": "3мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BT 220", "thickness": "3мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BT 220 Шторка х2", "thickness": "3мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BT 240 Шторка", "thickness": "3мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BZ 240 Шторка х2", "thickness": "3мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BZ 180", "thickness": "3мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BZ 200 Шторка", "thickness": "3мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BZ 220", "thickness": "3мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BZ 220 Шторка х2", "thickness": "3мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BZ 240 Шторка", "thickness": "3мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BZ 240 Шторка х2", "thickness": "3мм", "area": 0.0033 },
+    { "product": "XRAY 6T Накладной", "thickness": "3мм", "area": 0.0072 },
+    { "product": "XRAY 6T BZ 120", "thickness": "3мм", "area": 0.0072 },
+    { "product": "XRAY 6T BT 140 Шторка", "thickness": "3мм", "area": 0.0072 },
+    { "product": "XRAY 6T RGBW BT 150", "thickness": "3мм", "area": 0.0072 },
+    { "product": "XRAY 9S", "thickness": "3мм", "area": 0.0069 },
+    { "product": "XROLL-lite P", "thickness": "3мм", "area": 0.0036 },
+    { "product": "XROLL-lite K", "thickness": "3мм", "area": 0.0036 },
+    { "product": "XSLOPE", "thickness": "4мм", "area": 0.0001 },
+    { "product": "XSMART", "thickness": "3мм", "area": 0.01 },
+    { "product": "XSMART MINI", "thickness": "3мм", "area": 0.005 },
+    { "product": "XSTRONG", "thickness": "3мм", "area": 0.0012 },
+    { "product": "XYELLOW", "thickness": "3мм", "area": 0.004 },
+    { "product": "XEYES 130*90 1", "thickness": "2мм", "area": 0.044 },
+    { "product": "XEYES 130*90 2", "thickness": "2мм", "area": 0.044 },
+    { "product": "XEYES 130*90 3", "thickness": "2мм", "area": 0.044 },
+    { "product": "XEYES 130*90 4", "thickness": "2мм", "area": 0.044 },
+    { "product": "XEYES 130*120 3", "thickness": "2мм", "area": 0.044 },
+    { "product": "XEYES 130*120 4", "thickness": "2мм", "area": 0.044 },
+    { "product": "XGRAY v.2", "thickness": "3мм", "area": 0.0032 },
+    { "product": "XLINE", "thickness": "4мм", "area": 0.008 }
+  ],
+  "steel": [
+    { "product": "ACENTO 3T", "thickness": "0.5мм", "area": 0.0033 },
+    { "product": "ACENTO 4", "thickness": "0.5мм", "area": 0.0064 },
+    { "product": "XRAY 12S", "thickness": "0.5мм", "area": 0.01 },
+    { "product": "XRAY 18", "thickness": "0.5мм", "area": 0.01 },
+    { "product": "XRAY 18S", "thickness": "0.5мм", "area": 0.013 },
+    { "product": "XRAY 36", "thickness": "0.5мм", "area": 0.02 },
+    { "product": "XRAY 36S", "thickness": "0.5мм", "area": 0.02 },
+    { "product": "XRAY 6", "thickness": "0.5мм", "area": 0.0022 },
+    { "product": "XRAY 6 RGBW", "thickness": "0.5мм", "area": 0.0022 },
+    { "product": "XRAY 6-T2 BT 180", "thickness": "0.5мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BT 200", "thickness": "0.5мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BT 220", "thickness": "0.5мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BT 220 Шторка х2", "thickness": "0.5мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BT 240 Шторка", "thickness": "0.5мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BZ 240 Шторка х2", "thickness": "0.5мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BZ 180", "thickness": "0.5мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BZ 200 Шторка", "thickness": "0.5мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BZ 220", "thickness": "0.5мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BZ 220 Шторка х2", "thickness": "0.5мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BZ 240 Шторка", "thickness": "0.5мм", "area": 0.0033 },
+    { "product": "XRAY 6-T2 BZ 240 Шторка х2", "thickness": "0.5мм", "area": 0.0033 },
+    { "product": "XRAY 6T Накладной", "thickness": "0.5мм", "area": 0.0033 },
+    { "product": "XRAY 6T BZ 120", "thickness": "0.5мм", "area": 0.0033 },
+    { "product": "XRAY 6T BT 140 Шторка", "thickness": "0.5мм", "area": 0.0033 },
+    { "product": "XRAY 6T RGBW BT 150", "thickness": "0.5мм", "area": 0.0033 },
+    { "product": "XRAY 9S", "thickness": "0.5мм", "area": 0.0083 }
+  ],
+  "stainless": [
+    { "product": "XGRAY v.1", "thickness": "1мм", "area": 0.0002 },
+    { "product": "XGRAY v.2", "thickness": "1мм", "area": 0.0002 },
+    { "product": "XSLOPE", "thickness": "1мм", "area": 0.0002 },
+    { "product": "XYELLOW", "thickness": "1мм", "area": 0.0002 }
+  ],
+  "pvc": [
+    { "product": "XDISK", "thickness": "10мм", "area": 0.0003 },
+    { "product": "XBAR-SW", "thickness": "3мм", "area": 0.0005 },
+    { "product": "XFOCUS", "thickness": "3мм", "area": 0.003 },
+    { "product": "XGIRO", "thickness": "3мм", "area": 0.0004 },
+    { "product": "XLITE", "thickness": "3мм", "area": 0.0005 },
+    { "product": "XLUMO", "thickness": "3мм", "area": 0.003 },
+    { "product": "XLUMO 1-6", "thickness": "3мм", "area": 0.003 },
+    { "product": "XLUMO Двунаправленный", "thickness": "3мм", "area": 0.0044 },
+    { "product": "XLUMO PROV", "thickness": "3мм", "area": 0.003 },
+    { "product": "XSMART", "thickness": "3мм", "area": 0.003 },
+    { "product": "XSMART mini", "thickness": "3мм", "area": 0.0007 }
+  ],
+  "polycarbonate": [
+    { "product": "XEYES 130*120 1", "material": "Поликарбонат 3мм", "thickness": "3мм", "area": 0.001 },
+    { "product": "XEYES 130*120 2", "material": "Поликарбонат 3мм", "thickness": "3мм", "area": 0.002 },
+    { "product": "XEYES 130*120 3", "material": "Поликарбонат 3мм", "thickness": "3мм", "area": 0.003 },
+    { "product": "XEYES 130*120 4", "material": "Поликарбонат 3мм", "thickness": "3мм", "area": 0.004 },
+    { "product": "XEYES 130*90 1", "material": "Поликарбонат 3мм", "thickness": "3мм", "area": 0.001 },
+    { "product": "XEYES 130*90 2", "material": "Поликарбонат 3мм", "thickness": "3мм", "area": 0.002 },
+    { "product": "XEYES 130*90 3", "material": "Поликарбонат 3мм", "thickness": "3мм", "area": 0.003 },
+    { "product": "XEYES 130*90 4", "material": "Поликарбонат 3мм", "thickness": "3мм", "area": 0.004 },
+    { "product": "XRAY 3", "material": "Поликарбонат 6мм", "thickness": "6мм", "area": 0.0016 },
+    { "product": "XRAY 3-2", "material": "Поликарбонат 6мм", "thickness": "6мм", "area": 0.0032 },
+    { "product": "XRAY 9", "material": "Поликарбонат 6мм", "thickness": "6мм", "area": 0.0076 }
+  ],
+  "other": [
+    { "product": "XPIXEL BIN v.1", "material": "Оргстекло опал 30%", "thickness": "2мм", "area": 0.004 },
+    { "product": "XPIXEL BIN v.2", "material": "Оргстекло опал 30%", "thickness": "2мм", "area": 0.004 },
+    { "product": "XPIXEL BIN v.3", "material": "Оргстекло опал 30%", "thickness": "2мм", "area": 0.004 },
+    { "product": "XSPOT", "material": "Полистирол Черный", "thickness": "2мм", "area": 0.001 }
+  ],
+  "rods": [
+    { "product": "XDISK", "rodType": "Пруток Шестигранник Ал 25мм", "value": 27, "unit": "мм" },
+    { "product": "XDISK", "rodType": "Пруток 75мм Д16Т", "value": 25, "unit": "мм" },
+    { "product": "XDISK", "rodType": "Пруток 100мм Д16Т", "value": 70, "unit": "мм" },
+    { "product": "ACENTO 3T", "rodType": "Пруток 70мм Д16Т", "value": 35, "unit": "мм" },
+    { "product": "ACENTO 3T", "rodType": "СЧ 4435 труба", "value": 95, "unit": "мм" },
+    { "product": "ACENTO 4", "rodType": "Пруток 100мм Д16Т", "value": 112, "unit": "мм" },
+    { "product": "XPIXEL BIN v.1", "rodType": "Пруток 100мм Д16Т", "value": 34, "unit": "мм" },
+    { "product": "XPIXEL BIN v.1", "rodType": "Пруток 130мм Д16Т", "value": 20, "unit": "мм" },
+    { "product": "XPIXEL BIN v.2", "rodType": "Пруток 100мм Д16Т", "value": 34, "unit": "мм" },
+    { "product": "XPIXEL BIN v.2", "rodType": "Пруток 130мм Д16Т", "value": 20, "unit": "мм" },
+    { "product": "XPIXEL BIN v.3", "rodType": "Пруток 110мм Д16Т", "value": 40, "unit": "мм" },
+    { "product": "XPIXEL OVHD", "rodType": "Пруток 50мм Д16Т", "value": 20, "unit": "мм" },
+    { "product": "XPOINT OVHD", "rodType": "Пруток 25мм Д16Т", "value": 22, "unit": "мм" },
+    { "product": "XRAY 1", "rodType": "Пруток 50мм Д16Т", "value": 80, "unit": "мм" },
+    { "product": "XRAY 12S", "rodType": "Пруток 150мм Д16Т", "value": 70, "unit": "мм" },
+    { "product": "XRAY 18", "rodType": "Пруток 150мм Д16Т", "value": 120, "unit": "мм" },
+    { "product": "XRAY 18S", "rodType": "Пруток 150мм Д16Т", "value": 75, "unit": "мм" },
+    { "product": "XRAY 3", "rodType": "Пруток 58мм Д16Т", "value": 110, "unit": "мм" },
+    { "product": "XRAY 3-GRP", "rodType": "Пруток 40мм Д16Т", "value": 10, "unit": "мм" },
+    { "product": "XRAY 3-GRP", "rodType": "Пруток 48мм Д16Т", "value": 72, "unit": "мм" },
+    { "product": "XRAY 6", "rodType": "Пруток 85мм Д16Т", "value": 105, "unit": "мм" },
+    { "product": "XRAY 6 RGBW", "rodType": "Пруток 85мм Д16Т", "value": 105, "unit": "мм" },
+    { "product": "XRAY 6-2 оконечный", "rodType": "Пруток 85мм Д16Т", "value": 130, "unit": "мм" },
+    { "product": "XRAY 6-2 проходной", "rodType": "Пруток 85мм Д16Т", "value": 130, "unit": "мм" },
+    { "product": "XRAY 6-T2 BT 180", "rodType": "СЧ 4435 труба", "value": 183, "unit": "мм" },
+    { "product": "XRAY 6-T2 BT 200", "rodType": "СЧ 4435 труба", "value": 203, "unit": "мм" },
+    { "product": "XRAY 6-T2 BT 220", "rodType": "СЧ 4435 труба", "value": 223, "unit": "мм" },
+    { "product": "XRAY 6-T2 BT 220 Шторка х2", "rodType": "СЧ 4435 труба", "value": 223, "unit": "мм" },
+    { "product": "XRAY 6-T2 BT 240 Шторка", "rodType": "СЧ 4435 труба", "value": 243, "unit": "мм" },
+    { "product": "XRAY 6-T2 BZ 240 Шторка х2", "rodType": "СЧ 4435 труба", "value": 243, "unit": "мм" },
+    { "product": "XRAY 6-T2 BZ 180", "rodType": "СЧ 4435 труба", "value": 183, "unit": "мм" },
+    { "product": "XRAY 6-T2 BZ 200 Шторка", "rodType": "СЧ 4435 труба", "value": 203, "unit": "мм" },
+    { "product": "XRAY 6-T2 BZ 220", "rodType": "СЧ 4435 труба", "value": 223, "unit": "мм" },
+    { "product": "XRAY 6-T2 BZ 220 Шторка х2", "rodType": "СЧ 4435 труба", "value": 223, "unit": "мм" },
+    { "product": "XRAY 6-T2 BZ 240 Шторка", "rodType": "СЧ 4435 труба", "value": 243, "unit": "мм" },
+    { "product": "XRAY 6-T2 BZ 240 Шторка х2", "rodType": "СЧ 4435 труба", "value": 243, "unit": "мм" },
+    { "product": "XRAY 6T Накладной", "rodType": "Пруток 90мм Д16Т", "value": 34, "unit": "мм" },
+    { "product": "XRAY 6T BZ 120", "rodType": "СЧ 4435 труба", "value": 123, "unit": "мм" },
+    { "product": "XRAY 6T BT 140 Шторка", "rodType": "СЧ 4435 труба", "value": 143, "unit": "мм" },
+    { "product": "XRAY 6T RGBW BT 150", "rodType": "СЧ 4435 труба", "value": 153, "unit": "мм" },
+    { "product": "XRAY 9", "rodType": "Пруток 120мм Д16Т", "value": 100, "unit": "мм" },
+    { "product": "XRAY 9S", "rodType": "Пруток 120мм Д16Т", "value": 65, "unit": "мм" },
+    { "product": "XSLOPE", "rodType": "Пруток 70мм Д16Т", "value": 80, "unit": "мм" },
+    { "product": "XSPOT", "rodType": "Пруток 55мм Д16Т", "value": 87, "unit": "мм" },
+    { "product": "XRAY 3-2", "rodType": "Пруток 58мм Д16Т", "value": 152, "unit": "мм" }
+  ],
+  "brackets": [
+    { "name": "PU-5", "thickness": "2мм", "area": 0.01 },
+    { "name": "PU-6", "thickness": "2мм", "area": 0.0104 },
+    { "name": "PU-7", "thickness": "2мм", "area": 0.0108 },
+    { "name": "PU-8", "thickness": "2мм", "area": 0.0112 },
+    { "name": "PU-10", "thickness": "2мм", "area": 0.0122 },
+    { "name": "PU-12", "thickness": "2мм", "area": 0.0146 },
+    { "name": "PU-15", "thickness": "2мм", "area": 0.0164 },
+    { "name": "PU-20", "thickness": "2мм", "area": 0.0192 },
+    { "name": "PU-21", "thickness": "2мм", "area": 0.0202 },
+    { "name": "PU-25", "thickness": "2мм", "area": 0.0228 },
+    { "name": "PU-26", "thickness": "2мм", "area": 0.0236 },
+    { "name": "PU-38", "thickness": "3мм", "area": 0.0294 },
+    { "name": "PG-10", "thickness": "2мм", "area": 0.014 },
+    { "name": "PG-15", "thickness": "2мм", "area": 0.0168 },
+    { "name": "PG-20", "thickness": "2мм", "area": 0.0196 },
+    { "name": "LU-5", "thickness": "2мм", "area": 0.006 },
+    { "name": "LU-6", "thickness": "2мм", "area": 0.0064 },
+    { "name": "LU-7", "thickness": "2мм", "area": 0.007 },
+    { "name": "LU-10", "thickness": "2мм", "area": 0.0084 },
+    { "name": "LU-15", "thickness": "2мм", "area": 0.0108 },
+    { "name": "LU-20", "thickness": "2мм", "area": 0.0132 },
+    { "name": "LU-30", "thickness": "3мм", "area": 0.0178 },
+    { "name": "A-6", "thickness": "2мм", "area": 0.0075 },
+    { "name": "A-10", "thickness": "2мм", "area": 0.0101 },
+    { "name": "A-12", "thickness": "2мм", "area": 0.0115 },
+    { "name": "A-15", "thickness": "2мм", "area": 0.0133 },
+    { "name": "A-20", "thickness": "2мм", "area": 0.0165 },
+    { "name": "A-25", "thickness": "2мм", "area": 0.0197 },
+    { "name": "ACENTO", "thickness": "2мм", "area": 0.0073 },
+    { "name": "B-7", "thickness": "2мм", "area": 0.0105 },
+    { "name": "B-10", "thickness": "2мм", "area": 0.0127 },
+    { "name": "B-15", "thickness": "2мм", "area": 0.0163 },
+    { "name": "B-20", "thickness": "2мм", "area": 0.0199 },
+    { "name": "B-25", "thickness": "2мм", "area": 0.0235 },
+    { "name": "B(T)-7", "thickness": "2мм", "area": 0.0106 },
+    { "name": "B(T)-10", "thickness": "2мм", "area": 0.0128 },
+    { "name": "B(T)-15", "thickness": "2мм", "area": 0.0164 },
+    { "name": "B(T)-20", "thickness": "2мм", "area": 0.02 },
+    { "name": "B(T)-25", "thickness": "2мм", "area": 0.0236 },
+    { "name": "B(Z)-9", "thickness": "2мм", "area": 0.0033 },
+    { "name": "B(Z)-10", "thickness": "2мм", "area": 0.0033 },
+    { "name": "B(Z)-Спец", "thickness": "1.5мм", "area": 0.0083 },
+    { "name": "B(Z)-15", "thickness": "2мм", "area": 0.0033 },
+    { "name": "C-11", "thickness": "2мм", "area": 0.0151 },
+    { "name": "C-15", "thickness": "2мм", "area": 0.018 },
+    { "name": "C-20", "thickness": "2мм", "area": 0.0216 },
+    { "name": "C-25", "thickness": "2мм", "area": 0.0252 },
+    { "name": "C-28", "thickness": "3мм", "area": 0.0273 },
+    { "name": "D-15", "thickness": "2мм", "area": 0.0191 },
+    { "name": "D-20", "thickness": "2мм", "area": 0.0227 },
+    { "name": "D-25", "thickness": "3мм", "area": 0.0263 },
+    { "name": "D-30", "thickness": "3мм", "area": 0.0299 },
+    { "name": "F-15", "thickness": "2мм", "area": 0.0184 },
+    { "name": "F-20", "thickness": "2мм", "area": 0.022 },
+    { "name": "F-25", "thickness": "3мм", "area": 0.0255 },
+    { "name": "G-15", "thickness": "2мм", "area": 0.0269 },
+    { "name": "XOPTIC", "thickness": "2мм", "area": 0.0076 },
+    { "name": "M-10", "thickness": "2мм", "area": 0.0051 },
+    { "name": "M-15", "thickness": "2мм", "area": 0.0061 },
+    { "name": "M-20", "thickness": "2мм", "area": 0.0071 },
+    { "name": "NL-50", "thickness": "2мм", "area": 0.0031 },
+    { "name": "NL-150", "thickness": "2мм", "area": 0.0043 },
+    { "name": "NL-200", "thickness": "2мм", "area": 0.0067 },
+    { "name": "NL-200-2", "thickness": "2мм", "area": 0.0073 },
+    { "name": "NP-150-2", "thickness": "2мм", "area": 0.0104 },
+    { "name": "P-5", "thickness": "2мм", "area": 0.0055 },
+    { "name": "P-6", "thickness": "2мм", "area": 0.0059 },
+    { "name": "P-10", "thickness": "2мм", "area": 0.0072 },
+    { "name": "P-15", "thickness": "2мм", "area": 0.009 },
+    { "name": "P-20", "thickness": "2мм", "area": 0.0107 },
+    { "name": "P-100-2(v2)", "thickness": "2мм", "area": 0.0082 },
+    { "name": "PZ-6", "thickness": "2мм", "area": 0.0054 },
+    { "name": "PZ-9", "thickness": "2мм", "area": 0.0081 },
+    { "name": "PZ-15", "thickness": "2мм", "area": 0.0137 },
+    { "name": "XRAY1", "thickness": "2мм", "area": 0.002 },
+    { "name": "O-7", "thickness": "2мм", "area": 0.0042 },
+    { "name": "O-10", "thickness": "2мм", "area": 0.0057 },
+    { "name": "O-15", "thickness": "2мм", "area": 0.0137 },
+    { "name": "XSMART-1 П5.5", "thickness": "2мм", "area": 0.0044 },
+    { "name": "XSMART-2 П5.5", "thickness": "2мм", "area": 0.0049 },
+    { "name": "XEYES mini", "thickness": "2мм", "area": 0.037 },
+    { "name": "XPIXEL", "thickness": "2мм", "area": 0.0056 }
+  ],
+  "lyres": [
+    { "name": "(L-серия) лира", "thickness": "1.5мм", "area": 0.0024 },
+    { "name": "(P-серия) лира", "thickness": "2мм", "area": 0.005 },
+    { "name": "(P-серия) лира XGIRO", "thickness": "2мм", "area": 0.0028 },
+    { "name": "Лира XOPTIC-1 (К)", "thickness": "2мм", "area": 0.0037 },
+    { "name": "Лира PZ-6", "thickness": "2мм", "area": 0.0076 },
+    { "name": "Лира PZ-9", "thickness": "2мм", "area": 0.0088 },
+    { "name": "Лира PZ-15", "thickness": "2мм", "area": 0.0112 },
+    { "name": "Лира Q", "thickness": "1.2мм", "area": 0.0038 },
+    { "name": "Лира O", "thickness": "2мм", "area": 0.0037 },
+    { "name": "Лира XSTRONG", "thickness": "1.5мм", "area": 0.0034 },
+    { "name": "Лира П-5.5 спец. XSMART-1", "thickness": "2мм", "area": 0.0029 },
+    { "name": "Лира П-5.5 спец. XSMART-2", "thickness": "2мм", "area": 0.0033 }
+  ],
+  "productSpecs": {
+    "XGRAY v.1": {
+      "116": {
+        "Профиль МП 1928 XGRAY": { "value": 117, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 113, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "216": {
+        "Профиль МП 1928 XGRAY": { "value": 217, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 213, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "316": {
+        "Профиль МП 1928 XGRAY": { "value": 317, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 313, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "416": {
+        "Профиль МП 1928 XGRAY": { "value": 417, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 413, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "516": {
+        "Профиль МП 1928 XGRAY": { "value": 517, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 513, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "612": {
+        "Профиль МП 1928 XGRAY": { "value": 613, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 609, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "712": {
+        "Профиль МП 1928 XGRAY": { "value": 713, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 709, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "812": {
+        "Профиль МП 1928 XGRAY": { "value": 813, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 809, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "912": {
+        "Профиль МП 1928 XGRAY": { "value": 913, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 909, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "1 012": {
+        "Профиль МП 1928 XGRAY": { "value": 1013, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1009, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 135, "unit": "мм" }
+      },
+      "1 108": {
+        "Профиль МП 1928 XGRAY": { "value": 1109, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1105, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 135, "unit": "мм" }
+      },
+      "1 208": {
+        "Профиль МП 1928 XGRAY": { "value": 1209, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1205, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 135, "unit": "мм" }
+      },
+      "1 308": {
+        "Профиль МП 1928 XGRAY": { "value": 1309, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1305, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 135, "unit": "мм" }
+      },
+      "1 408": {
+        "Профиль МП 1928 XGRAY": { "value": 1409, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1405, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 135, "unit": "мм" }
+      },
+      "1 508": {
+        "Профиль МП 1928 XGRAY": { "value": 1509, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1505, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 135, "unit": "мм" }
+      }
+    },
+    "XGRAY v.2": {
+      "116": {
+        "Профиль МП 1928 XGRAY": { "value": 117, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 113, "unit": "мм" }
+      },
+      "216": {
+        "Профиль МП 1928 XGRAY": { "value": 217, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 213, "unit": "мм" }
+      },
+      "316": {
+        "Профиль МП 1928 XGRAY": { "value": 317, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 313, "unit": "мм" }
+      },
+      "416": {
+        "Профиль МП 1928 XGRAY": { "value": 417, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 413, "unit": "мм" }
+      },
+      "516": {
+        "Профиль МП 1928 XGRAY": { "value": 517, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 513, "unit": "мм" }
+      },
+      "612": {
+        "Профиль МП 1928 XGRAY": { "value": 613, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 609, "unit": "мм" }
+      },
+      "712": {
+        "Профиль МП 1928 XGRAY": { "value": 713, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 709, "unit": "мм" }
+      },
+      "812": {
+        "Профиль МП 1928 XGRAY": { "value": 813, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 809, "unit": "мм" }
+      },
+      "912": {
+        "Профиль МП 1928 XGRAY": { "value": 913, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 909, "unit": "мм" }
+      },
+      "1 012": {
+        "Профиль МП 1928 XGRAY": { "value": 1013, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1009, "unit": "мм" }
+      },
+      "1 108": {
+        "Профиль МП 1928 XGRAY": { "value": 1109, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1105, "unit": "мм" }
+      },
+      "1 208": {
+        "Профиль МП 1928 XGRAY": { "value": 1209, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1205, "unit": "мм" }
+      },
+      "1 308": {
+        "Профиль МП 1928 XGRAY": { "value": 1309, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1305, "unit": "мм" }
+      },
+      "1 408": {
+        "Профиль МП 1928 XGRAY": { "value": 1409, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1405, "unit": "мм" }
+      },
+      "1 508": {
+        "Профиль МП 1928 XGRAY": { "value": 1509, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1505, "unit": "мм" }
+      }
+    },
+    "XSMART mini": {
+      "XSMART mini 1": { "Профиль НП 455015": { "value": 71, "unit": "мм" } },
+      "XSMART mini 2": { "Профиль НП 455015": { "value": 91, "unit": "мм" } },
+      "XSMART mini 3": { "Профиль НП 455015": { "value": 131, "unit": "мм" } },
+      "XSMART mini 4": { "Профиль НП 455015": { "value": 171, "unit": "мм" } },
+      "XSMART mini 5": { "Профиль НП 455015": { "value": 206, "unit": "мм" } },
+      "XSMART mini 6": { "Профиль НП 455015": { "value": 246, "unit": "мм" } }
+    },
+    "XLUMO Двунаправленный": {
+      "XLUMOx2-1": { "Профиль НПС 3362": { "value": 71, "unit": "мм" } },
+      "XLUMOx2-2": { "Профиль НПС 3362": { "value": 108, "unit": "мм" } },
+      "XLUMOx2-3": { "Профиль НПС 3362": { "value": 148, "unit": "мм" } },
+      "XLUMOx2-4": { "Профиль НПС 3362": { "value": 188, "unit": "мм" } },
+      "XLUMOx2-5": { "Профиль НПС 3362": { "value": 223, "unit": "мм" } },
+      "XLUMOx2-6": { "Профиль НПС 3362": { "value": 263, "unit": "мм" } }
+    },
+    "XSMART": {
+      "XSMART-2": {
+        "КП 453785": { "value": 91, "unit": "мм" },
+        "КП 453784": { "value": 82, "unit": "мм" }
+      },
+      "XSMART-3": {
+        "КП 453785": { "value": 131, "unit": "мм" },
+        "КП 453784": { "value": 122, "unit": "мм" }
+      },
+      "XSMART-4": {
+        "КП 453785": { "value": 171, "unit": "мм" },
+        "КП 453784": { "value": 162, "unit": "мм" }
+      },
+      "XSMART-5": {
+        "КП 453785": { "value": 206, "unit": "мм" },
+        "КП 453784": { "value": 197, "unit": "мм" }
+      },
+      "XSMART-6": {
+        "КП 453785": { "value": 246, "unit": "мм" },
+        "КП 453784": { "value": 237, "unit": "мм" }
+      },
+      "500": {
+        "КП 453785": { "value": 500, "unit": "мм" },
+        "КП 453784": { "value": 500, "unit": "мм" }
+      },
+      "1000": {
+        "КП 453785": { "value": 1000, "unit": "мм" },
+        "КП 453784": { "value": 1000, "unit": "мм" }
+      },
+      "1500": {
+        "КП 453785": { "value": 1500, "unit": "мм" },
+        "КП 453784": { "value": 1500, "unit": "мм" }
+      }
+    },
+    "XLUMO 1-6": {
+      "XLUMO-1": { "Профиль НПС 2967 (XLUMO)": { "value": 71, "unit": "мм" } },
+      "XLUMO-2": { "Профиль НПС 2967 (XLUMO)": { "value": 108, "unit": "мм" } },
+      "XLUMO-3": { "Профиль НПС 2967 (XLUMO)": { "value": 148, "unit": "мм" } },
+      "XLUMO-4": { "Профиль НПС 2967 (XLUMO)": { "value": 188, "unit": "мм" } },
+      "XLUMO-5": { "Профиль НПС 2967 (XLUMO)": { "value": 223, "unit": "мм" } },
+      "XLUMO-6": { "Профиль НПС 2967 (XLUMO)": { "value": 263, "unit": "мм" } }
+    },
+    "XGIRO": {
+      "130": { "Профиль МП 0923-081": { "value": 130, "unit": "мм" } },
+      "220": { "Профиль МП 0923-081": { "value": 220, "unit": "мм" } },
+      "310": { "Профиль МП 0923-081": { "value": 310, "unit": "мм" } },
+      "410": { "Профиль МП 0923-081": { "value": 410, "unit": "мм" } },
+      "510": { "Профиль МП 0923-081": { "value": 510, "unit": "мм" } },
+      "600": { "Профиль МП 0923-081": { "value": 600, "unit": "мм" } },
+      "700": { "Профиль МП 0923-081": { "value": 700, "unit": "мм" } },
+      "800": { "Профиль МП 0923-081": { "value": 800, "unit": "мм" } },
+      "900": { "Профиль МП 0923-081": { "value": 900, "unit": "мм" } },
+      "1000": { "Профиль МП 0923-081": { "value": 1000, "unit": "мм" } }
+    },
+    "XVISION": {
+      "110": { "КП 453849": { "value": 103, "unit": "мм" } },
+      "125": { "КП 453849": { "value": 118, "unit": "мм" } },
+      "210": { "КП 453849": { "value": 203, "unit": "мм" } },
+      "250": { "КП 453849": { "value": 243, "unit": "мм" } },
+      "310": { "КП 453849": { "value": 303, "unit": "мм" } },
+      "375": { "КП 453849": { "value": 368, "unit": "мм" } },
+      "410": { "КП 453849": { "value": 403, "unit": "мм" } },
+      "500": { "КП 453849": { "value": 493, "unit": "мм" } },
+      "510": { "КП 453849": { "value": 503, "unit": "мм" } },
+      "600": { "КП 453849": { "value": 593, "unit": "мм" } },
+      "625": { "КП 453849": { "value": 618, "unit": "мм" } },
+      "700": { "КП 453849": { "value": 693, "unit": "мм" } },
+      "750": { "КП 453849": { "value": 743, "unit": "мм" } },
+      "800": { "КП 453849": { "value": 793, "unit": "мм" } },
+      "875": { "КП 453849": { "value": 868, "unit": "мм" } },
+      "900": { "КП 453849": { "value": 893, "unit": "мм" } },
+      "1000": { "КП 453849": { "value": 993, "unit": "мм" } },
+      "1125": { "КП 453849": { "value": 1138, "unit": "мм" } },
+      "1250": { "КП 453849": { "value": 1243, "unit": "мм" } },
+      "1375": { "КП 453849": { "value": 1368, "unit": "мм" } },
+      "1500": { "КП 453849": { "value": 1493, "unit": "мм" } }
+    },
+    "XBAR-SW": {
+      "1000": { "КП 453054": { "value": 998, "unit": "мм" } },
+      "1500": { "КП 453054": { "value": 1498, "unit": "мм" } }
+    },
+    "XLITE": {
+      "125": { "Профиль НПС 2966": { "value": 125, "unit": "мм" } },
+      "250": { "Профиль НПС 2966": { "value": 250, "unit": "мм" } },
+      "375": { "Профиль НПС 2966": { "value": 375, "unit": "мм" } },
+      "500": { "Профиль НПС 2966": { "value": 500, "unit": "мм" } },
+      "625": { "Профиль НПС 2966": { "value": 625, "unit": "мм" } },
+      "750": { "Профиль НПС 2966": { "value": 750, "unit": "мм" } },
+      "875": { "Профиль НПС 2966": { "value": 875, "unit": "мм" } },
+      "1000": { "Профиль НПС 2966": { "value": 1000, "unit": "мм" } },
+      "1125": { "Профиль НПС 2966": { "value": 1125, "unit": "мм" } },
+      "1250": { "Профиль НПС 2966": { "value": 1250, "unit": "мм" } },
+      "1375": { "Профиль НПС 2966": { "value": 1375, "unit": "мм" } },
+      "1500": { "Профиль НПС 2966": { "value": 1500, "unit": "мм" } }
+    },
+    "XROLL-lite P": {
+      "205": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 208, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 210, "unit": "мм" }
+      },
+      "305": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 308, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 310, "unit": "мм" }
+      },
+      "405": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 408, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 410, "unit": "мм" }
+      },
+      "505": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 508, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 510, "unit": "мм" }
+      },
+      "600": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 603, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 605, "unit": "мм" }
+      },
+      "700": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 703, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 705, "unit": "мм" }
+      },
+      "800": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 803, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 805, "unit": "мм" }
+      },
+      "900": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 903, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 905, "unit": "мм" }
+      },
+      "1000": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 1003, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 1005, "unit": "мм" }
+      },
+      "1100": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 1103, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 1105, "unit": "мм" }
+      },
+      "1200": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 1203, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 1205, "unit": "мм" }
+      },
+      "1300": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 1303, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 1305, "unit": "мм" }
+      },
+      "1400": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 1403, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 1405, "unit": "мм" }
+      },
+      "1496": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 1499, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 1501, "unit": "мм" }
+      }
+    },
+    "XROLL-lite K": {
+      "205": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 208, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 90, "unit": "мм" }
+      },
+      "305": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 308, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 90, "unit": "мм" }
+      },
+      "405": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 408, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 90, "unit": "мм" }
+      },
+      "505": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 508, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 90, "unit": "мм" }
+      },
+      "600": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 603, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 90, "unit": "мм" }
+      },
+      "700": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 703, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 90, "unit": "мм" }
+      },
+      "800": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 803, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 90, "unit": "мм" }
+      },
+      "900": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 903, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 90, "unit": "мм" }
+      },
+      "1000": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 1003, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 90, "unit": "мм" }
+      },
+      "1100": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 1103, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 90, "unit": "мм" }
+      },
+      "1200": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 1203, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 90, "unit": "мм" }
+      },
+      "1300": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 1303, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 90, "unit": "мм" }
+      },
+      "1400": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 1403, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 90, "unit": "мм" }
+      },
+      "1496": {
+        "Профиль поликарбонатный XROLL-lite": { "value": 1499, "unit": "мм" },
+        "Профиль НПС 3007": { "value": 90, "unit": "мм" }
+      }
+    },
+    "XLUMO": {
+      "125": { "Профиль НПС 2967 (XLUMO)": { "value": 125, "unit": "мм" } },
+      "250": { "Профиль НПС 2967 (XLUMO)": { "value": 250, "unit": "мм" } },
+      "375": { "Профиль НПС 2967 (XLUMO)": { "value": 375, "unit": "мм" } },
+      "625": { "Профиль НПС 2967 (XLUMO)": { "value": 625, "unit": "мм" } },
+      "750": { "Профиль НПС 2967 (XLUMO)": { "value": 750, "unit": "мм" } },
+      "875": { "Профиль НПС 2967 (XLUMO)": { "value": 875, "unit": "мм" } },
+      "1125": { "Профиль НПС 2967 (XLUMO)": { "value": 1125, "unit": "мм" } },
+      "1250": { "Профиль НПС 2967 (XLUMO)": { "value": 1250, "unit": "мм" } },
+      "1375": { "Профиль НПС 2967 (XLUMO)": { "value": 1375, "unit": "мм" } },
+      "1500": { "Профиль НПС 2967 (XLUMO)": { "value": 1500, "unit": "мм" } }
+    },
+    "XLUMO PROV": {
+      "125": { "Профиль НПС 2967 (XLUMO)": { "value": 125, "unit": "мм" } },
+      "250": { "Профиль НПС 2967 (XLUMO)": { "value": 250, "unit": "мм" } },
+      "375": { "Профиль НПС 2967 (XLUMO)": { "value": 375, "unit": "мм" } },
+      "500": { "Профиль НПС 2967 (XLUMO)": { "value": 500, "unit": "мм" } },
+      "625": { "Профиль НПС 2967 (XLUMO)": { "value": 625, "unit": "мм" } },
+      "750": { "Профиль НПС 2967 (XLUMO)": { "value": 750, "unit": "мм" } },
+      "875": { "Профиль НПС 2967 (XLUMO)": { "value": 875, "unit": "мм" } },
+      "1000": { "Профиль НПС 2967 (XLUMO)": { "value": 1000, "unit": "мм" } },
+      "1125": { "Профиль НПС 2967 (XLUMO)": { "value": 1125, "unit": "мм" } },
+      "1250": { "Профиль НПС 2967 (XLUMO)": { "value": 1250, "unit": "мм" } },
+      "1375": { "Профиль НПС 2967 (XLUMO)": { "value": 1375, "unit": "мм" } },
+      "1500": { "Профиль НПС 2967 (XLUMO)": { "value": 1500, "unit": "мм" } }
+    },
+    "XSTRONG": {
+      "XSTRONG-10": { "ТПК 004S": { "value": 204, "unit": "мм" } },
+      "XSTRONG-20": { "ТПК 004S": { "value": 344, "unit": "мм" } },
+      "XSTRONG-30": { "ТПК 004S": { "value": 444, "unit": "мм" } },
+      "XSTRONG-20PW": { "ТПК 004S": { "value": 394, "unit": "мм" } },
+      "XSTRONG-30PW": { "ТПК 004S": { "value": 544, "unit": "мм" } },
+      "XSTRONG-40PW": { "ТПК 004S": { "value": 744, "unit": "мм" } }
+    },
+    "XYELLOW": {
+      "116": {
+        "Профиль СЧ 4515 XYELLOW": { "value": 117, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 113, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "216": {
+        "Профиль СЧ 4515 XYELLOW": { "value": 217, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 213, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "316": {
+        "Профиль СЧ 4515 XYELLOW": { "value": 317, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 313, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "416": {
+        "Профиль СЧ 4515 XYELLOW": { "value": 417, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 413, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "516": {
+        "Профиль СЧ 4515 XYELLOW": { "value": 517, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 513, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "612": {
+        "Профиль СЧ 4515 XYELLOW": { "value": 613, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 609, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "712": {
+        "Профиль СЧ 4515 XYELLOW": { "value": 713, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 709, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "812": {
+        "Профиль СЧ 4515 XYELLOW": { "value": 813, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 809, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "912": {
+        "Профиль СЧ 4515 XYELLOW": { "value": 913, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 909, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 90, "unit": "мм" }
+      },
+      "1 012": {
+        "Профиль СЧ 4515 XYELLOW": { "value": 1013, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1009, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 135, "unit": "мм" }
+      },
+      "1 108": {
+        "Профиль СЧ 4515 XYELLOW": { "value": 1109, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1105, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 135, "unit": "мм" }
+      },
+      "1 208": {
+        "Профиль СЧ 4515 XYELLOW": { "value": 1209, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1205, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 135, "unit": "мм" }
+      },
+      "1 308": {
+        "Профиль СЧ 4515 XYELLOW": { "value": 1309, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1305, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 135, "unit": "мм" }
+      },
+      "1 408": {
+        "Профиль СЧ 4515 XYELLOW": { "value": 1409, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1405, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 135, "unit": "мм" }
+      },
+      "1 508": {
+        "Профиль СЧ 4515 XYELLOW": { "value": 1509, "unit": "мм" },
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": { "value": 1505, "unit": "мм" },
+        "Профиль СЧ 4446 Планка": { "value": 135, "unit": "мм" }
+      }
+    },
+    "XLINE": {
+      "106": {
+        "Профиль КП 453434": { "value": 103, "unit": "мм" },
+        "Рассеиватель XLINE": { "value": 104, "unit": "мм" },
+        "Профиль КП 453436": { "value": 97, "unit": "мм" }
+      },
+      "206": {
+        "Профиль КП 453434": { "value": 203, "unit": "мм" },
+        "Рассеиватель XLINE": { "value": 204, "unit": "мм" },
+        "Профиль КП 453436": { "value": 197, "unit": "мм" }
+      },
+      "306": {
+        "Профиль КП 453434": { "value": 303, "unit": "мм" },
+        "Рассеиватель XLINE": { "value": 304, "unit": "мм" },
+        "Профиль КП 453436": { "value": 297, "unit": "мм" }
+      },
+      "406": {
+        "Профиль КП 453434": { "value": 403, "unit": "мм" },
+        "Рассеиватель XLINE": { "value": 404, "unit": "мм" },
+        "Профиль КП 453436": { "value": 397, "unit": "мм" }
+      },
+      "506": {
+        "Профиль КП 453434": { "value": 503, "unit": "мм" },
+        "Рассеиватель XLINE": { "value": 504, "unit": "мм" },
+        "Профиль КП 453436": { "value": 497, "unit": "мм" }
+      },
+      "600": {
+        "Профиль КП 453434": { "value": 597, "unit": "мм" },
+        "Рассеиватель XLINE": { "value": 598, "unit": "мм" },
+        "Профиль КП 453436": { "value": 591, "unit": "мм" }
+      },
+      "700": {
+        "Профиль КП 453434": { "value": 697, "unit": "мм" },
+        "Рассеиватель XLINE": { "value": 698, "unit": "мм" },
+        "Профиль КП 453436": { "value": 691, "unit": "мм" }
+      },
+      "800": {
+        "Профиль КП 453434": { "value": 797, "unit": "мм" },
+        "Рассеиватель XLINE": { "value": 798, "unit": "мм" },
+        "Профиль КП 453436": { "value": 791, "unit": "мм" }
+      },
+      "900": {
+        "Профиль КП 453434": { "value": 897, "unit": "мм" },
+        "Рассеиватель XLINE": { "value": 898, "unit": "мм" },
+        "Профиль КП 453436": { "value": 891, "unit": "мм" }
+      },
+      "1 000": {
+        "Профиль КП 453434": { "value": 997, "unit": "мм" },
+        "Рассеиватель XLINE": { "value": 998, "unit": "мм" },
+        "Профиль КП 453436": { "value": 991, "unit": "мм" }
+      },
+      "1 094": {
+        "Профиль КП 453434": { "value": 1091, "unit": "мм" },
+        "Рассеиватель XLINE": { "value": 1092, "unit": "мм" },
+        "Профиль КП 453436": { "value": 1085, "unit": "мм" }
+      },
+      "1 194": {
+        "Профиль КП 453434": { "value": 1191, "unit": "мм" },
+        "Рассеиватель XLINE": { "value": 1192, "unit": "мм" },
+        "Профиль КП 453436": { "value": 1185, "unit": "мм" }
+      },
+      "1 294": {
+        "Профиль КП 453434": { "value": 1291, "unit": "мм" },
+        "Рассеиватель XLINE": { "value": 1292, "unit": "мм" },
+        "Профиль КП 453436": { "value": 1285, "unit": "мм" }
+      },
+      "1 394": {
+        "Профиль КП 453434": { "value": 1391, "unit": "мм" },
+        "Рассеиватель XLINE": { "value": 1392, "unit": "мм" },
+        "Профиль КП 453436": { "value": 1385, "unit": "мм" }
+      },
+      "1 494": {
+        "Профиль КП 453434": { "value": 1491, "unit": "мм" },
+        "Рассеиватель XLINE": { "value": 1492, "unit": "мм" },
+        "Профиль КП 453436": { "value": 1485, "unit": "мм" }
+      }
+    },
+    "XGLOW mini": {
+      "125": {
+        "Профиль НПС 2993": { "value": 115, "unit": "мм" },
+        "Профиль НПС 2994": { "value": 40, "unit": "мм" }
+      },
+      "250": {
+        "Профиль НПС 2993": { "value": 240, "unit": "мм" },
+        "Профиль НПС 2994": { "value": 40, "unit": "мм" }
+      },
+      "375": {
+        "Профиль НПС 2993": { "value": 365, "unit": "мм" },
+        "Профиль НПС 2994": { "value": 40, "unit": "мм" }
+      },
+      "500": {
+        "Профиль НПС 2993": { "value": 490, "unit": "мм" },
+        "Профиль НПС 2994": { "value": 40, "unit": "мм" }
+      },
+      "510": {
+        "Профиль НПС 2993": { "value": 495, "unit": "мм" },
+        "Профиль НПС 2994": { "value": 40, "unit": "мм" }
+      },
+      "625": {
+        "Профиль НПС 2993": { "value": 615, "unit": "мм" },
+        "Профиль НПС 2994": { "value": 40, "unit": "мм" }
+      },
+      "750": {
+        "Профиль НПС 2993": { "value": 740, "unit": "мм" },
+        "Профиль НПС 2994": { "value": 40, "unit": "мм" }
+      },
+      "875": {
+        "Профиль НПС 2993": { "value": 865, "unit": "мм" },
+        "Профиль НПС 2994": { "value": 40, "unit": "мм" }
+      },
+      "1 000": {
+        "Профиль НПС 2993": { "value": 985, "unit": "мм" },
+        "Профиль НПС 2994": { "value": 40, "unit": "мм" }
+      },
+      "1 125": {
+        "Профиль НПС 2993": { "value": 1115, "unit": "мм" },
+        "Профиль НПС 2994": { "value": 60, "unit": "мм" }
+      },
+      "1 250": {
+        "Профиль НПС 2993": { "value": 1240, "unit": "мм" },
+        "Профиль НПС 2994": { "value": 60, "unit": "мм" }
+      },
+      "1 375": {
+        "Профиль НПС 2993": { "value": 1365, "unit": "мм" },
+        "Профиль НПС 2994": { "value": 60, "unit": "мм" }
+      },
+      "1 490": {
+        "Профиль НПС 2993": { "value": 1475, "unit": "мм" },
+        "Профиль НПС 2994": { "value": 60, "unit": "мм" }
+      },
+      "1 500": {
+        "Профиль НПС 2993": { "value": 1490, "unit": "мм" },
+        "Профиль НПС 2994": { "value": 60, "unit": "мм" }
+      }
+    },
+    "XGLOW": {
+      "510": {
+        "Профиль НПС 2997": { "value": 500, "unit": "мм" },
+        "Профиль НПС 2994": { "value": 40, "unit": "мм" }
+      },
+      "1 000": {
+        "Профиль НПС 2997": { "value": 990, "unit": "мм" },
+        "Профиль НПС 2994": { "value": 40, "unit": "мм" }
+      },
+      "1 490": {
+        "Профиль НПС 2997": { "value": 1480, "unit": "мм" },
+        "Профиль НПС 2994": { "value": 60, "unit": "мм" }
+      }
+    }
+  }
+}
