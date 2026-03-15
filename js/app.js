@@ -250,6 +250,10 @@ function openOrderModal() {
     const orderNumber = generateOrderNumber();
     document.getElementById('orderNumber').value = orderNumber;
     
+    // Устанавливаем значения по умолчанию для количества
+    document.getElementById('bracketQuantity').value = 1;
+    document.getElementById('lyreQuantity').value = 1;
+    
     // Устанавливаем обработчик на создание
     const form = document.getElementById('orderForm');
     form.onsubmit = createOrderHandler;
@@ -266,11 +270,13 @@ async function createOrderHandler(e) {
     e.preventDefault();
     
     const bracket = document.getElementById('bracketSelect').value;
+    const bracketQuantity = parseInt(document.getElementById('bracketQuantity').value) || 0;
     const lyre = document.getElementById('lyreSelect').value;
+    const lyreQuantity = parseInt(document.getElementById('lyreQuantity').value) || 0;
     const ral = document.getElementById('ralInput').value.trim();
     const texture = document.getElementById('textureSelect').value;
     
-    console.log('Создание заказа с:', { bracket, lyre, ral, texture });
+    console.log('Создание заказа с:', { bracket, bracketQuantity, lyre, lyreQuantity, ral, texture });
     
     const order = {
         id: Date.now(),
@@ -280,8 +286,14 @@ async function createOrderHandler(e) {
             product: document.getElementById('productSelect').value,
             size: document.getElementById('sizeSelect').value,
             quantity: parseInt(document.getElementById('quantity').value) || 1,
-            bracket: bracket,
-            lyre: lyre,
+            bracket: {
+                type: bracket,
+                quantity: bracketQuantity
+            },
+            lyre: {
+                type: lyre,
+                quantity: lyreQuantity
+            },
             ral: ral || null,
             texture: texture || null,
             additional: document.getElementById('additionalDetails').value || ''
@@ -321,8 +333,25 @@ function editOrder(orderId) {
     }, 200);
 
     document.getElementById('quantity').value = order.items[0].quantity;
-    document.getElementById('bracketSelect').value = order.items[0].bracket;
-    document.getElementById('lyreSelect').value = order.items[0].lyre;
+    
+    // Заполняем кронштейн и его количество
+    if (order.items[0].bracket) {
+        document.getElementById('bracketSelect').value = order.items[0].bracket.type || '';
+        document.getElementById('bracketQuantity').value = order.items[0].bracket.quantity || 0;
+    } else {
+        document.getElementById('bracketSelect').value = '';
+        document.getElementById('bracketQuantity').value = 0;
+    }
+    
+    // Заполняем лиру и её количество
+    if (order.items[0].lyre) {
+        document.getElementById('lyreSelect').value = order.items[0].lyre.type || '';
+        document.getElementById('lyreQuantity').value = order.items[0].lyre.quantity || 0;
+    } else {
+        document.getElementById('lyreSelect').value = '';
+        document.getElementById('lyreQuantity').value = 0;
+    }
+    
     document.getElementById('ralInput').value = order.items[0].ral || '';
     document.getElementById('textureSelect').value = order.items[0].texture || '';
     document.getElementById('additionalDetails').value = order.items[0].additional || '';
@@ -345,7 +374,9 @@ function saveEditedOrder(orderId) {
     if (orderIndex === -1) return;
 
     const bracket = document.getElementById('bracketSelect').value;
+    const bracketQuantity = parseInt(document.getElementById('bracketQuantity').value) || 0;
     const lyre = document.getElementById('lyreSelect').value;
+    const lyreQuantity = parseInt(document.getElementById('lyreQuantity').value) || 0;
     const ral = document.getElementById('ralInput').value.trim();
     const texture = document.getElementById('textureSelect').value;
 
@@ -357,8 +388,14 @@ function saveEditedOrder(orderId) {
             product: document.getElementById('productSelect').value,
             size: document.getElementById('sizeSelect').value,
             quantity: parseInt(document.getElementById('quantity').value) || 1,
-            bracket: bracket,
-            lyre: lyre,
+            bracket: {
+                type: bracket,
+                quantity: bracketQuantity
+            },
+            lyre: {
+                type: lyre,
+                quantity: lyreQuantity
+            },
             ral: ral || null,
             texture: texture || null,
             additional: document.getElementById('additionalDetails').value || ''
@@ -512,8 +549,27 @@ function createOrderCard(order) {
             const product = item.product || '-';
             const size = item.size || '-';
             const quantity = item.quantity || 0;
-            const bracket = item.bracket === 'отсутствует' ? '🚫 отсутствует' : (item.bracket || '-');
-            const lyre = item.lyre === 'отсутствует' ? '🚫 отсутствует' : (item.lyre || '-');
+            
+            // Формируем информацию о кронштейне
+            let bracketInfo = '-';
+            if (item.bracket) {
+                if (item.bracket.type === 'отсутствует' || !item.bracket.type) {
+                    bracketInfo = '🚫 отсутствует';
+                } else {
+                    bracketInfo = `${item.bracket.type} (${item.bracket.quantity || 1} шт)`;
+                }
+            }
+            
+            // Формируем информацию о лире
+            let lyreInfo = '-';
+            if (item.lyre) {
+                if (item.lyre.type === 'отсутствует' || !item.lyre.type) {
+                    lyreInfo = '🚫 отсутствует';
+                } else {
+                    lyreInfo = `${item.lyre.type} (${item.lyre.quantity || 1} шт)`;
+                }
+            }
+            
             const ralInfo = item.ral || '-';
             const textureInfo = item.texture || '-';
             const additional = item.additional || '-';
@@ -523,8 +579,8 @@ function createOrderCard(order) {
                     <td><strong>${product}</strong></td>
                     <td>${size}</td>
                     <td>${quantity} шт</td>
-                    <td>${bracket}</td>
-                    <td>${lyre}</td>
+                    <td>${bracketInfo}</td>
+                    <td>${lyreInfo}</td>
                     <td>${ralInfo}</td>
                     <td>${textureInfo}</td>
                     <td>${additional}</td>
@@ -705,13 +761,18 @@ function filterOrders(searchText, statusFilter) {
 
 // Экспорт заказов в CSV
 function exportOrders() {
-    let csv = 'Номер заказа,Дата,Изделие,Размер,Количество,Кронштейн,Лира,RAL,Текстура,Доп.детали,Статус\n';
+    let csv = 'Номер заказа,Дата,Изделие,Размер,Количество,Кронштейн,Кол-во кронштейнов,Лира,Кол-во лир,RAL,Текстура,Доп.детали,Статус\n';
     
     orders.forEach(order => {
         order.items.forEach(item => {
+            const bracketType = item.bracket && item.bracket.type !== 'отсутствует' ? item.bracket.type : '';
+            const bracketQty = item.bracket && item.bracket.type !== 'отсутствует' ? (item.bracket.quantity || 1) : 0;
+            const lyreType = item.lyre && item.lyre.type !== 'отсутствует' ? item.lyre.type : '';
+            const lyreQty = item.lyre && item.lyre.type !== 'отсутствует' ? (item.lyre.quantity || 1) : 0;
             const ralCode = item.ral || '';
             const texture = item.texture || '';
-            csv += `"${order.number}","${order.date}","${item.product}","${item.size}",${item.quantity},"${item.bracket}","${item.lyre}","${ralCode}","${texture}","${item.additional || ''}","${order.status}"\n`;
+            
+            csv += `"${order.number}","${order.date}","${item.product}","${item.size}",${item.quantity},"${bracketType}",${bracketQty},"${lyreType}",${lyreQty},"${ralCode}","${texture}","${item.additional || ''}","${order.status}"\n`;
         });
     });
     
@@ -785,11 +846,27 @@ function deleteOrder(orderId) {
     }
     
     // Второе подтверждение с деталями заказа
-    const itemInfo = orderToDelete.items.map(item => 
-        `${item.product} (${item.size}) - ${item.quantity} шт` +
-        (item.ral ? `, RAL: ${item.ral}` : '') +
-        (item.texture ? `, ${item.texture}` : '')
-    ).join('\n');
+    const itemInfo = orderToDelete.items.map(item => {
+        let info = `${item.product} (${item.size}) - ${item.quantity} шт`;
+        
+        if (item.bracket && item.bracket.type && item.bracket.type !== 'отсутствует') {
+            info += `, кронштейн: ${item.bracket.type} (${item.bracket.quantity || 1} шт)`;
+        }
+        
+        if (item.lyre && item.lyre.type && item.lyre.type !== 'отсутствует') {
+            info += `, лира: ${item.lyre.type} (${item.lyre.quantity || 1} шт)`;
+        }
+        
+        if (item.ral) {
+            info += `, RAL: ${item.ral}`;
+        }
+        
+        if (item.texture) {
+            info += `, ${item.texture}`;
+        }
+        
+        return info;
+    }).join('\n');
     
     const secondConfirm = confirm(
         `⚠️ ВНИМАНИЕ! Это действие нельзя отменить.\n\n` +
