@@ -166,15 +166,16 @@ class MaterialsReport {
         return 'Листовой материал';
     }
     
-    safeNumber(value, defaultValue = 0) {
-        if (value === undefined || value === null) return defaultValue;
-        return value;
-    }
-    
     // ============== ФОРМИРОВАНИЕ ОТЧЕТА ==============
     
     async generateReportHTML(order) {
         const { sheetMaterials, profiles, rods } = this.calculateMaterials(order);
+        
+        // Отладка в консоли
+        console.log('=== ОТЛАДКА ОТЧЕТА ===');
+        console.log('sheetMaterials:', sheetMaterials);
+        console.log('profiles:', profiles);
+        console.log('rods:', rods);
         
         if (sheetMaterials.length === 0 && profiles.length === 0 && rods.length === 0) {
             return `
@@ -256,16 +257,19 @@ class MaterialsReport {
             `;
             
             sheetMaterials.forEach(item => {
-                const areaPerUnit = this.safeNumber(item.areaPerUnit);
-                const totalArea = this.safeNumber(item.totalArea);
+                const areaPerUnit = (item && item.areaPerUnit !== undefined && item.areaPerUnit !== null) ? item.areaPerUnit : 0;
+                const totalArea = (item && item.totalArea !== undefined && item.totalArea !== null) ? item.totalArea : 0;
+                const quantity = (item && item.quantity !== undefined && item.quantity !== null) ? item.quantity : 0;
+                const name = (item && item.name) ? item.name : 'Неизвестный материал';
+                const thickness = (item && item.thickness) ? item.thickness : '—';
                 
                 html += `
                     <tr>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name || 'Неизвестный'}</td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.thickness || '—'}</td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${areaPerUnit.toFixed(4)}</td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.quantity || 0}</td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${totalArea.toFixed(4)}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${name}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${thickness}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${Number(areaPerUnit).toFixed(4)}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${quantity}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${Number(totalArea).toFixed(4)}</td>
                     </tr>
                 `;
             });
@@ -290,15 +294,27 @@ class MaterialsReport {
             `;
             
             profiles.forEach(profile => {
-                const valuePerUnit = this.safeNumber(profile.valuePerUnit);
-                const totalValue = this.safeNumber(profile.totalValue);
+                // Проверка на undefined/null для каждого поля
+                const valuePerUnit = (profile && profile.valuePerUnit !== undefined && profile.valuePerUnit !== null) 
+                    ? profile.valuePerUnit 
+                    : 0;
+                
+                const totalValue = (profile && profile.totalValue !== undefined && profile.totalValue !== null) 
+                    ? profile.totalValue 
+                    : 0;
+                
+                const quantity = (profile && profile.quantity !== undefined && profile.quantity !== null) 
+                    ? profile.quantity 
+                    : 0;
+                
+                const name = (profile && profile.name) ? profile.name : 'Неизвестный профиль';
                 
                 html += `
                     <tr>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${profile.name || 'Неизвестный'}</td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${valuePerUnit.toFixed(0)}</td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${profile.quantity || 0}</td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${totalValue.toFixed(0)}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${name}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${Number(valuePerUnit).toFixed(0)}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${quantity}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${Number(totalValue).toFixed(0)}</td>
                     </tr>
                 `;
             });
@@ -323,15 +339,26 @@ class MaterialsReport {
             `;
             
             rods.forEach(rod => {
-                const valuePerUnit = this.safeNumber(rod.valuePerUnit);
-                const totalValue = this.safeNumber(rod.totalValue);
+                const valuePerUnit = (rod && rod.valuePerUnit !== undefined && rod.valuePerUnit !== null) 
+                    ? rod.valuePerUnit 
+                    : 0;
+                
+                const totalValue = (rod && rod.totalValue !== undefined && rod.totalValue !== null) 
+                    ? rod.totalValue 
+                    : 0;
+                
+                const quantity = (rod && rod.quantity !== undefined && rod.quantity !== null) 
+                    ? rod.quantity 
+                    : 0;
+                
+                const name = (rod && rod.name) ? rod.name : 'Неизвестный пруток';
                 
                 html += `
                     <tr>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${rod.name || 'Неизвестный'}</td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${valuePerUnit.toFixed(0)}</td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${rod.quantity || 0}</td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${totalValue.toFixed(0)}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${name}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${Number(valuePerUnit).toFixed(0)}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${quantity}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${Number(totalValue).toFixed(0)}</td>
                     </tr>
                 `;
             });
