@@ -119,7 +119,7 @@ class MaterialsReport {
                 });
             }
             
-            // 2. Кронштейн
+            // 2. Кронштейн - ИСПРАВЛЕНО: теперь ищем и в area, и в weight
             if (item.bracket?.type && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
                 console.log(`🔍 Поиск кронштейна: ${item.bracket.type}`);
                 
@@ -128,7 +128,8 @@ class MaterialsReport {
                 if (bracket) {
                     console.log(`✅ Кронштейн найден:`, bracket);
                     const thickness = bracket.thickness || '2мм';
-                    const area = bracket.area || 0;
+                    // Ищем значение в area или weight (для совместимости)
+                    const area = bracket.area || bracket.weight || 0;
                     const totalQty = item.bracket.quantity * productQty;
                     const totalArea = area * totalQty;
                     
@@ -158,12 +159,12 @@ class MaterialsReport {
                 }
             }
             
-            // 3. Лира
+            // 3. Лира - тоже исправлено
             if (item.lyre?.type && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
                 const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
                 if (lyre) {
                     const thickness = lyre.thickness || '1.5мм';
-                    const area = lyre.area || 0;
+                    const area = lyre.area || lyre.weight || 0;
                     const totalQty = item.lyre.quantity * productQty;
                     const totalArea = area * totalQty;
                     
