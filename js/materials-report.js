@@ -55,26 +55,35 @@ class MaterialsReport {
     // ============== РАСЧЕТ МАТЕРИАЛОВ ==============
     
     calculateMaterials(order) {
-        // Результаты
         const otherSheetMaterials = [];
         const profiles = [];
         const rods = [];
         
-        // Группировка AISI по источникам
         const aisi = {
             fromProducts: {},
             fromBrackets: {},
             fromLyres: {}
         };
         
+        if (!order || !order.items) {
+            return {
+                otherSheets: [],
+                profiles: [],
+                rods: [],
+                aisi: {
+                    products: [],
+                    brackets: [],
+                    lyres: []
+                }
+            };
+        }
+        
         order.items.forEach(item => {
             const productQty = item.quantity || 1;
             const productName = item.product;
             const size = item.size;
             
-            console.log(`→ ${productName} ${size} × ${productQty} шт`);
-            
-            // 1. Профили/трубы из техкарты
+            // 1. Профили из техкарты
             const spec = this.materialsDB.productSpecs[productName]?.[size];
             if (spec) {
                 Object.entries(spec).forEach(([key, data]) => {
@@ -148,8 +157,7 @@ class MaterialsReport {
                 }
             }
             
-            // 4. Листовые материалы
-            // Алюминий
+            // 4. Алюминий
             const aluMatch = this.materialsDB.aluminum.find(m => m.product === productName);
             if (aluMatch) {
                 otherSheetMaterials.push({
@@ -161,7 +169,7 @@ class MaterialsReport {
                 });
             }
             
-            // Сталь
+            // 5. Сталь
             const steelMatch = this.materialsDB.steel.find(m => m.product === productName);
             if (steelMatch) {
                 otherSheetMaterials.push({
@@ -173,7 +181,7 @@ class MaterialsReport {
                 });
             }
             
-            // Нержавейка (AISI из техкарты листов)
+            // 6. Нержавейка из изделий
             const stainlessMatch = this.materialsDB.stainless.find(m => m.product === productName);
             if (stainlessMatch) {
                 const thickness = stainlessMatch.thickness || '1мм';
@@ -200,7 +208,7 @@ class MaterialsReport {
                 });
             }
             
-            // ПВХ
+            // 7. ПВХ
             const pvcMatch = this.materialsDB.pvc.find(m => m.product === productName);
             if (pvcMatch) {
                 otherSheetMaterials.push({
@@ -212,7 +220,7 @@ class MaterialsReport {
                 });
             }
             
-            // Поликарбонат
+            // 8. Поликарбонат
             const polyMatch = this.materialsDB.polycarbonate.find(m => m.product === productName);
             if (polyMatch) {
                 otherSheetMaterials.push({
@@ -224,7 +232,7 @@ class MaterialsReport {
                 });
             }
             
-            // Другие материалы
+            // 9. Другие материалы
             const otherMatch = this.materialsDB.other.find(m => m.product === productName);
             if (otherMatch) {
                 otherSheetMaterials.push({
@@ -236,7 +244,7 @@ class MaterialsReport {
                 });
             }
             
-            // 5. Прутки
+            // 10. Прутки
             const rodMatches = this.materialsDB.rods.filter(r => r.product === productName);
             rodMatches.forEach(rod => {
                 rods.push({
