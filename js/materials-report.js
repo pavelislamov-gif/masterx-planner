@@ -166,12 +166,12 @@ class MaterialsReport {
         return 'Листовой материал';
     }
     
-    // ============== ФОРМИРОВАНИЕ ОТЧЕТА ==============
-    
-    formatNumber(value, decimals = 4) {
-        if (value === undefined || value === null) return '0';
-        return Number(value).toFixed(decimals);
+    safeNumber(value, defaultValue = 0) {
+        if (value === undefined || value === null) return defaultValue;
+        return value;
     }
+    
+    // ============== ФОРМИРОВАНИЕ ОТЧЕТА ==============
     
     async generateReportHTML(order) {
         const { sheetMaterials, profiles, rods } = this.calculateMaterials(order);
@@ -256,13 +256,16 @@ class MaterialsReport {
             `;
             
             sheetMaterials.forEach(item => {
+                const areaPerUnit = this.safeNumber(item.areaPerUnit);
+                const totalArea = this.safeNumber(item.totalArea);
+                
                 html += `
                     <tr>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name || 'Неизвестный'}</td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.thickness || '—'}</td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${this.formatNumber(item.areaPerUnit)}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${areaPerUnit.toFixed(4)}</td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.quantity || 0}</td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${this.formatNumber(item.totalArea)}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${totalArea.toFixed(4)}</td>
                     </tr>
                 `;
             });
@@ -287,12 +290,15 @@ class MaterialsReport {
             `;
             
             profiles.forEach(profile => {
+                const valuePerUnit = this.safeNumber(profile.valuePerUnit);
+                const totalValue = this.safeNumber(profile.totalValue);
+                
                 html += `
                     <tr>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;">${profile.name || 'Неизвестный'}</td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${this.formatNumber(profile.valuePerUnit, 0)}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${valuePerUnit.toFixed(0)}</td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${profile.quantity || 0}</td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${this.formatNumber(profile.totalValue, 0)}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${totalValue.toFixed(0)}</td>
                     </tr>
                 `;
             });
@@ -317,12 +323,15 @@ class MaterialsReport {
             `;
             
             rods.forEach(rod => {
+                const valuePerUnit = this.safeNumber(rod.valuePerUnit);
+                const totalValue = this.safeNumber(rod.totalValue);
+                
                 html += `
                     <tr>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;">${rod.name || 'Неизвестный'}</td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${this.formatNumber(rod.valuePerUnit, 0)}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${valuePerUnit.toFixed(0)}</td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${rod.quantity || 0}</td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${this.formatNumber(rod.totalValue, 0)}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${totalValue.toFixed(0)}</td>
                     </tr>
                 `;
             });
