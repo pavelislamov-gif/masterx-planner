@@ -56,13 +56,13 @@ class MaterialsReport {
     
     loadFallbackData() {
         console.warn('⚠️ Используются резервные данные');
-        // Минимальные резервные данные
         this.materialsDB.aluminum = [
             { product: 'XGRAY v.1', thickness: '3мм', area: 0.0032 }
         ];
     }
     
     // ============== РАСЧЕТ МАТЕРИАЛОВ ==============
+    // ЭТОТ МЕТОД ДОЛЖЕН БЫТЬ В ФАЙЛЕ!
     
     calculateMaterials(order) {
         const sheetMaterials = []; // листовые материалы (м²)
@@ -70,13 +70,13 @@ class MaterialsReport {
         const rods = []; // прутки (мм)
         
         order.items.forEach(item => {
-            const productQuantity = item.quantity || 1; // количество изделий
+            const productQuantity = item.quantity || 1;
             const productName = item.product;
             const size = item.size;
             
             console.log(`Расчет материалов для ${productName} размер ${size}, кол-во изделий: ${productQuantity}`);
             
-            // 1. Листовые материалы (алюминий, сталь, нержавейка, ПВХ, поликарбонат)
+            // 1. Листовые материалы
             const allSheetMaterials = [
                 ...this.materialsDB.aluminum,
                 ...this.materialsDB.steel,
@@ -97,34 +97,34 @@ class MaterialsReport {
                 });
             });
             
-            // 2. Кронштейн (с учетом количества на изделие)
+            // 2. Кронштейн
             if (item.bracket && item.bracket.type && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
                 const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
                 if (bracket) {
-                    const bracketTotalQuantity = item.bracket.quantity * productQuantity; // общее количество кронштейнов
+                    const bracketTotalQuantity = item.bracket.quantity * productQuantity;
                     sheetMaterials.push({
                         name: `Кронштейн ${item.bracket.type}`,
                         thickness: bracket.thickness || '2мм',
                         areaPerUnit: bracket.area,
                         quantity: bracketTotalQuantity,
                         totalArea: bracket.area * bracketTotalQuantity,
-                        perProduct: item.bracket.quantity // количество на одно изделие
+                        perProduct: item.bracket.quantity
                     });
                 }
             }
             
-            // 3. Лира (с учетом количества на изделие)
+            // 3. Лира
             if (item.lyre && item.lyre.type && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
                 const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
                 if (lyre) {
-                    const lyreTotalQuantity = item.lyre.quantity * productQuantity; // общее количество лир
+                    const lyreTotalQuantity = item.lyre.quantity * productQuantity;
                     sheetMaterials.push({
                         name: `Лира ${item.lyre.type}`,
                         thickness: lyre.thickness || '1.5мм',
                         areaPerUnit: lyre.area,
                         quantity: lyreTotalQuantity,
                         totalArea: lyre.area * lyreTotalQuantity,
-                        perProduct: item.lyre.quantity // количество на одно изделие
+                        perProduct: item.lyre.quantity
                     });
                 }
             }
@@ -141,7 +141,7 @@ class MaterialsReport {
                 });
             });
             
-            // 5. Профили из техкарты изделия
+            // 5. Профили из техкарты
             const productSpec = this.materialsDB.productSpecs[productName];
             if (productSpec && productSpec[size]) {
                 const spec = productSpec[size];
@@ -155,8 +155,6 @@ class MaterialsReport {
                         totalValue: data.value * productQuantity
                     });
                 });
-            } else {
-                console.warn(`Не найдены спецификации для ${productName} размер ${size}`);
             }
         });
         
@@ -239,7 +237,7 @@ class MaterialsReport {
                 </table>
         `;
         
-        // Листовые материалы (м²)
+        // Листовые материалы
         if (sheetMaterials.length > 0) {
             html += `
                 <h4 style="margin-top: 30px;">📋 Листовые материалы (расход в м²)</h4>
@@ -271,7 +269,7 @@ class MaterialsReport {
             html += `</tbody></table>`;
         }
         
-        // Профили (мм)
+        // Профили
         if (profiles.length > 0) {
             html += `
                 <h4 style="margin-top: 30px;">📏 Профили (расход в мм)</h4>
@@ -301,7 +299,7 @@ class MaterialsReport {
             html += `</tbody></table>`;
         }
         
-        // Прутки (мм)
+        // Прутки
         if (rods.length > 0) {
             html += `
                 <h4 style="margin-top: 30px;">🔩 Прутки (расход в мм)</h4>
