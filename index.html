@@ -131,6 +131,20 @@
             border: 1px solid #ddd;
             vertical-align: middle;
         }
+        
+        .quantity-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .quantity-row select {
+            flex: 2;
+        }
+        
+        .quantity-row input {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
@@ -215,27 +229,37 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>🔢 Кол-во штук:</label>
+                        <label>🔢 Кол-во изделий:</label>
                         <input type="number" id="quantity" min="1" value="1" required>
                     </div>
+                    
+                    <!-- Кронштейн с количеством -->
                     <div class="form-group">
                         <label>🔧 Тип кронштейна:</label>
-                        <select id="bracketSelect" required>
-                            <option value="">Выберите кронштейн</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>🎸 Тип лиры:</label>
-                        <select id="lyreSelect" required>
-                            <option value="">Выберите лиру</option>
-                        </select>
+                        <div class="quantity-row">
+                            <select id="bracketSelect">
+                                <option value="">Выберите кронштейн</option>
+                            </select>
+                            <input type="number" id="bracketQuantity" min="0" value="1" placeholder="Кол-во">
+                        </div>
                     </div>
                     
-                    <!-- НОВЫЕ ПОЛЯ: ЦВЕТ RAL И ТЕКСТУРА -->
+                    <!-- Лира с количеством -->
                     <div class="form-group">
-    <label>🎨 Цвет RAL (вручную):</label>
-    <input type="text" id="ralInput" placeholder="Например: RAL 9003">
-</div>
+                        <label>🎸 Тип лиры:</label>
+                        <div class="quantity-row">
+                            <select id="lyreSelect">
+                                <option value="">Выберите лиру</option>
+                            </select>
+                            <input type="number" id="lyreQuantity" min="0" value="1" placeholder="Кол-во">
+                        </div>
+                    </div>
+                    
+                    <!-- Цвет RAL и текстура -->
+                    <div class="form-group">
+                        <label>🎨 Цвет RAL (вручную):</label>
+                        <input type="text" id="ralInput" placeholder="Например: RAL 9003">
+                    </div>
                     <div class="form-group">
                         <label>🧵 Текстура:</label>
                         <select id="textureSelect">
