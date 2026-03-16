@@ -23,25 +23,65 @@
             gap: 10px;
         }
         
+        .order-card {
+            background: linear-gradient(135deg, #1a1e24, #15191f);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            overflow: hidden;
+            border: 1px solid #2a2f38;
+        }
+        
+        .order-header {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #232830, #1a1e24);
+            border-bottom: 1px solid #2a2f38;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .order-header h3 {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .product-info {
+            padding: 12px 20px;
+            background: #15191f;
+            border-bottom: 1px solid #2a2f38;
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+        
+        .product-info strong {
+            color: #ff3b3b;
+        }
+        
         .task-card {
             background: #1a1e24;
             border-radius: 8px;
             padding: 15px 20px;
-            margin-bottom: 15px;
+            margin: 10px 20px;
             border: 1px solid #2a2f38;
             transition: all 0.3s;
         }
         
+        .task-card.extra-task {
+            border-left: 3px solid #ff3b3b;
+            background: #1e232b;
+        }
+        
         .task-card:hover {
             border-color: #ff3b3b;
-            box-shadow: 0 0 20px rgba(255,59,59,0.2);
         }
         
         .task-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
         
         .task-title {
@@ -64,27 +104,37 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 10px 15px;
+            padding: 12px 15px;
             background: #15191f;
             border-radius: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             border: 1px solid #2a2f38;
         }
         
-        .executor-name {
+        .executor-name-input {
             flex: 2;
-            font-weight: 500;
+            padding: 8px 12px;
+            background: #1e232b;
+            border: 1px solid #2a2f38;
+            border-radius: 6px;
             color: #fff;
+            font-size: 14px;
+        }
+        
+        .executor-name-input:focus {
+            outline: none;
+            border-color: #ff3b3b;
         }
         
         .executor-quantity {
-            width: 70px;
-            padding: 6px;
+            width: 80px;
+            padding: 8px;
             background: #1e232b;
             border: 1px solid #2a2f38;
             border-radius: 6px;
             color: #fff;
             text-align: center;
+            font-size: 14px;
         }
         
         .executor-quantity:focus {
@@ -95,31 +145,34 @@
         .btn-work {
             background: #2a2f38;
             color: #fff;
-            padding: 6px 15px;
+            padding: 8px 16px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
             transition: all 0.3s;
             border: 1px solid #3a404b;
+            min-width: 100px;
         }
         
         .btn-work.active {
             background: #ff9f1c;
             border-color: #ffb347;
             color: #000;
+            font-weight: 600;
         }
         
         .btn-add-executor {
             background: transparent;
             color: #ff3b3b;
-            padding: 6px 15px;
+            padding: 8px 16px;
             border: 1px dashed #ff3b3b;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
             margin: 10px 0;
             transition: all 0.3s;
+            width: 100%;
         }
         
         .btn-add-executor:hover {
@@ -130,13 +183,14 @@
         .btn-ready {
             background: #2ecc71;
             color: white;
-            padding: 8px 20px;
+            padding: 10px 20px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
-            margin-top: 10px;
+            margin-top: 15px;
+            width: 100%;
             transition: all 0.3s;
         }
         
@@ -163,7 +217,7 @@
         
         .new-executor-form input {
             flex: 1;
-            padding: 8px 12px;
+            padding: 10px;
             background: #1e232b;
             border: 1px solid #2a2f38;
             border-radius: 6px;
@@ -187,7 +241,7 @@
         .task-description {
             color: #a0a0a0;
             font-size: 12px;
-            margin: 10px 0;
+            margin: 10px 0 15px 0;
             padding: 10px;
             background: #15191f;
             border-radius: 6px;
@@ -209,28 +263,46 @@
             margin-left: 10px;
         }
         
-        .product-info {
-            padding: 12px 20px;
-            background: #15191f;
-            border-bottom: 1px solid #2a2f38;
-            color: #a0a0a0;
-            font-size: 14px;
+        .executor-list {
+            margin-top: 10px;
         }
         
-        .product-info strong {
+        .executor-header {
+            display: flex;
+            gap: 12px;
+            padding: 0 15px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #a0a0a0;
+        }
+        
+        .executor-header span:nth-child(1) { flex: 2; }
+        .executor-header span:nth-child(2) { width: 80px; text-align: center; }
+        .executor-header span:nth-child(3) { width: 100px; text-align: center; }
+        
+        .extra-tasks-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dashed #ff3b3b;
+        }
+        
+        .extra-tasks-title {
             color: #ff3b3b;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-left: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- ШАПКА С PNG ЛОГОТИПОМ -->
+        <!-- ШАПКА -->
         <header>
             <div class="logo-container">
-                <!-- PNG ЛОГОТИП ИЗ ПАПКИ IMAGES (спуститься на уровень выше) -->
                 <img src="../images/logo.png" alt="MasterX Logo" class="logo-img">
-                
-                <!-- ТЕКСТ MasterX С КРАСНОЙ X -->
                 <div class="logo-text">
                     Master<span class="x-red">X</span>
                 </div>
@@ -306,6 +378,7 @@
                 return;
             }
 
+            // Группируем задачи по заказам
             const tasksByOrder = {};
             tasks.forEach(task => {
                 if (!tasksByOrder[task.orderId]) {
@@ -318,6 +391,7 @@
                 tasksByOrder[task.orderId].items.push(task);
             });
 
+            // Отображаем каждый заказ как карточку
             Object.values(tasksByOrder).forEach(order => {
                 tasksList.appendChild(createOrderCard(order));
             });
@@ -332,8 +406,13 @@
             header.innerHTML = `<h3>📦 Заказ №${order.orderNumber}</h3>`;
             card.appendChild(header);
 
+            // Разделяем основные и дополнительные задачи
+            const mainTasks = order.items.filter(task => !task.isExtra);
+            const extraTasks = order.items.filter(task => task.isExtra);
+
+            // Группируем основные задачи по изделиям
             const tasksByProduct = {};
-            order.items.forEach(task => {
+            mainTasks.forEach(task => {
                 const key = task.product;
                 if (!tasksByProduct[key]) {
                     tasksByProduct[key] = {
@@ -346,14 +425,32 @@
                 tasksByProduct[key].tasks.push(task);
             });
 
+            // Отображаем основные задачи
             Object.values(tasksByProduct).forEach(product => {
-                card.appendChild(createProductSection(product));
+                card.appendChild(createProductSection(product, false));
             });
+
+            // Отображаем дополнительные задачи (если есть)
+            if (extraTasks.length > 0) {
+                const extraSection = document.createElement('div');
+                extraSection.className = 'extra-tasks-section';
+                
+                const extraTitle = document.createElement('div');
+                extraTitle.className = 'extra-tasks-title';
+                extraTitle.textContent = '📋 Дополнительные задачи';
+                extraSection.appendChild(extraTitle);
+                
+                extraTasks.forEach(task => {
+                    extraSection.appendChild(createTaskCard(task, true));
+                });
+                
+                card.appendChild(extraSection);
+            }
 
             return card;
         }
 
-        function createProductSection(product) {
+        function createProductSection(product, isExtra = false) {
             const section = document.createElement('div');
 
             const info = document.createElement('div');
@@ -365,22 +462,18 @@
             `;
             section.appendChild(info);
 
-            const sortedTasks = [...product.tasks].sort((a, b) => {
-                if (a.isExtra && !b.isExtra) return 1;
-                if (!a.isExtra && b.isExtra) return -1;
-                return (a.operationIndex || 0) - (b.operationIndex || 0);
-            });
+            const sortedTasks = [...product.tasks].sort((a, b) => (a.operationIndex || 0) - (b.operationIndex || 0));
 
             sortedTasks.forEach(task => {
-                section.appendChild(createTaskCard(task));
+                section.appendChild(createTaskCard(task, false));
             });
 
             return section;
         }
 
-        function createTaskCard(task) {
+        function createTaskCard(task, isExtra = false) {
             const card = document.createElement('div');
-            card.className = 'task-card';
+            card.className = `task-card ${isExtra ? 'extra-task' : ''}`;
             card.dataset.taskId = task.id;
 
             const header = document.createElement('div');
@@ -388,12 +481,12 @@
             header.innerHTML = `
                 <span class="task-title">
                     ${task.operation}
-                    ${task.isExtra ? '<span class="extra-task-badge">Доп.</span>' : ''}
+                    ${isExtra ? '<span class="extra-task-badge">Доп.</span>' : ''}
                 </span>
             `;
             card.appendChild(header);
 
-            if (task.isExtra && task.description) {
+            if (isExtra && task.description) {
                 const desc = document.createElement('div');
                 desc.className = 'task-description';
                 desc.textContent = task.description;
@@ -405,6 +498,16 @@
             progress.textContent = `Выполнено: ${task.completedQuantity || 0}/${task.totalQuantity || 0} шт`;
             card.appendChild(progress);
 
+            // Заголовки колонок
+            const headers = document.createElement('div');
+            headers.className = 'executor-header';
+            headers.innerHTML = `
+                <span>ФИО</span>
+                <span>Кол-во</span>
+                <span>Статус</span>
+            `;
+            card.appendChild(headers);
+
             const executorList = document.createElement('div');
             executorList.className = 'executor-list';
             executorList.id = `executors-${task.id}`;
@@ -415,7 +518,7 @@
                 });
             } else {
                 const noExecutors = document.createElement('p');
-                noExecutors.style.cssText = 'color: #a0a0a0; padding: 10px; font-size: 13px;';
+                noExecutors.style.cssText = 'color: #a0a0a0; padding: 15px; text-align: center;';
                 noExecutors.textContent = 'Нет исполнителей';
                 executorList.appendChild(noExecutors);
             }
@@ -443,10 +546,17 @@
             const div = document.createElement('div');
             div.className = 'executor-item';
 
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'executor-name';
-            nameSpan.textContent = executor.name;
-            div.appendChild(nameSpan);
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.className = 'executor-name-input';
+            nameInput.value = executor.name;
+            nameInput.placeholder = 'ФИО исполнителя';
+            nameInput.disabled = task.status === 'completed';
+            nameInput.onchange = (e) => {
+                executor.name = e.target.value;
+                taskManager.saveHistoryForDate(taskManager.currentDate);
+            };
+            div.appendChild(nameInput);
 
             const quantityInput = document.createElement('input');
             quantityInput.type = 'number';
@@ -488,8 +598,6 @@
 
             const addBtn = document.createElement('button');
             addBtn.className = 'btn btn-success';
-            addBtn.style.padding = '6px 15px';
-            addBtn.style.fontSize = '12px';
             addBtn.textContent = 'Добавить';
             addBtn.onclick = () => {
                 if (input.value.trim()) {
@@ -500,8 +608,6 @@
 
             const cancelBtn = document.createElement('button');
             cancelBtn.className = 'btn btn-danger';
-            cancelBtn.style.padding = '6px 15px';
-            cancelBtn.style.fontSize = '12px';
             cancelBtn.textContent = 'Отмена';
             cancelBtn.onclick = () => formDiv.remove();
 
