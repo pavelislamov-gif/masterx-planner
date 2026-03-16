@@ -1,4 +1,4 @@
-// js/task-manager.js - УНИВЕРСАЛЬНЫЙ МЕНЕДЖЕР ЗАДАЧ (С ЗАЩИТОЙ ОТ РЕКУРСИИ)
+// js/task-manager.js - УНИВЕРСАЛЬНЫЙ МЕНЕДЖЕР ЗАДАЧ (ИСПРАВЛЕННАЯ ВЕРСИЯ)
 
 class TaskManager {
     constructor(siteType, customOperations = {}) {
@@ -73,7 +73,7 @@ class TaskManager {
             this.orders = [];
             this.tasks = [];
         } finally {
-            // Сбрасываем флаг через setTimeout, чтобы избежать рекурсии
+            // Сбрасываем флаг через setTimeout
             setTimeout(() => {
                 this._isLoading = false;
             }, 100);
@@ -245,13 +245,13 @@ class TaskManager {
         }
     }
     
-    // Публичный метод с уведомлением (с защитой от спама)
+    // Публичный метод с уведомлением
     saveTasksToHistory(dateStr) {
         this._saveTasksToHistoryInternal(dateStr);
         
         // Защита от слишком частых уведомлений
         const now = Date.now();
-        if (now - this._lastNotificationTime < 500) { // Не чаще чем раз в 500ms
+        if (now - this._lastNotificationTime < 500) {
             console.log('saveTasksToHistory: слишком часто, пропускаем уведомление');
             return;
         }
@@ -295,24 +295,49 @@ class TaskManager {
     // ============== УПРАВЛЕНИЕ ИСПОЛНИТЕЛЯМИ ==============
     
     addExecutor(taskId, executorName) {
-        if (!executorName || !executorName.trim()) return false;
+        console.log('addExecutor called:', taskId, executorName);
+        
+        if (!executorName || !executorName.trim()) {
+            console.warn('Имя исполнителя пустое');
+            return false;
+        }
         
         const task = this.tasks.find(t => t.id === taskId);
-        if (!task) return false;
+        if (!task) {
+            console.warn('Задача не найдена:', taskId);
+            return false;
+        }
         
-        if (!task.executors) task.executors = [];
+        if (!task.executors) {
+            task.executors = [];
+        }
         
+        // Проверяем, нет ли уже такого исполнителя
+        const existing = task.executors.find(e => e.name.toLowerCase() === executorName.trim().toLowerCase());
+        if (existing) {
+            console.warn('Исполнитель уже существует:', executorName);
+            return false;
+        }
+        
+        // Создаем уникальный ID
         const executorId = `${executorName.trim()}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
         
-        task.executors.push({
+        const newExecutor = {
             id: executorId,
             name: executorName.trim(),
             displayName: executorName.trim(),
             quantity: 0,
             status: 'pending'
-        });
+        };
         
+        task.executors.push(newExecutor);
+        
+        console.log('✅ Исполнитель добавлен, теперь исполнителей:', task.executors.length);
+        console.log('Текущие исполнители:', task.executors);
+        
+        // Сохраняем в историю
         this.saveTasksToHistory(this.formatDate(this.currentDate));
+        
         return true;
     }
     
@@ -433,7 +458,6 @@ class TaskManager {
     }
     
     notifyOtherTabs(taskId, status) {
-        // Используем setTimeout и защиту от дублирования
         setTimeout(() => {
             const event = new CustomEvent('taskStatusChanged', {
                 detail: { 
@@ -510,4 +534,4 @@ if (typeof window !== 'undefined') {
     window.TaskManager = TaskManager;
 }
 
-console.log('✅ task-manager.js загружен (версия с защитой от рекурсии)');
+console.log('✅ task-manager.js загружен (исправленная версия)');
