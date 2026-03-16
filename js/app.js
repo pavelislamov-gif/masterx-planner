@@ -524,13 +524,19 @@ function updateStatistics() {
     document.getElementById('completedTasks').textContent = completedTasks;
 }
 
-// Инициализация отчета по материалам
 if (typeof MaterialsReport !== 'undefined') {
-    materialsReport = new MaterialsReport();
-    materialsReport.materialsDB.brackets = brackets;
-    materialsReport.materialsDB.lyres = lyres;
-    await materialsReport.loadMaterialsData();
-    console.log('✅ Отчет по материалам инициализирован');
+    window.materialsReport = new MaterialsReport();
+    window.materialsReport.materialsDB.brackets = brackets;
+    window.materialsReport.materialsDB.lyres = lyres;
+    
+    // Убираем await, используем then()
+    window.materialsReport.loadMaterialsData()
+        .then(() => {
+            console.log('✅ Отчет по материалам инициализирован');
+        })
+        .catch(err => {
+            console.error('❌ Ошибка инициализации отчета:', err);
+        });
 }
 
 function deleteOrder(orderId) {
