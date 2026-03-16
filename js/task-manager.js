@@ -12,15 +12,28 @@ class TaskManager {
     // Загрузить базу операций из техкарт
     loadOperationsDatabase() {
         return {
+            // ТОКАРНЫЙ УЧАСТОК
             'tokarniy': {
                 'XRAY 6-T2 BT 220 Шторка x2': [
                     'Заготовка',
-                    'Точение Корпуса', 
+                    'Точение Корпуса',
                     'Заготовка деталей Крышка',
                     'Точение деталей Кольцо',
                     'Фрезеровка Корпуса'
+                ],
+                'XGRAY v.1': [
+                    'Заготовка',
+                    'Точение Корпуса',
+                    'Фрезеровка Корпуса'
+                ],
+                'XGRAY v.2': [
+                    'Заготовка',
+                    'Точение Корпуса',
+                    'Фрезеровка Корпуса'
                 ]
             },
+            
+            // СЛЕСАРНЫЙ УЧАСТОК
             'slesarniy': {
                 'XRAY 6-T2 BT 220 Шторка x2': [
                     'Нарезка резьбы Корпус+V',
@@ -30,25 +43,49 @@ class TaskManager {
                     'Обработка Основания платы',
                     'Голтовка Кронштейна',
                     'УВ корпуса'
+                ],
+                'XGRAY v.1': [
+                    'Нарезка резьбы',
+                    'Голтовка',
+                    'УВ корпуса'
                 ]
             },
+            
+            // ФРЕЗЕРНЫЙ УЧАСТОК
             'frezerniy': {
                 'XRAY 6-T2 BT 220 Шторка x2': [
                     'Поликарбонат Прозрачный 3мм х 2'
+                ],
+                'XGRAY v.1': [
+                    'Заглушка AL 3мм Левая',
+                    'Заглушка AL 3мм Правая'
                 ]
             },
+            
+            // ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК
             'lazerno': {
                 'XRAY 6-T2 BT 220 Шторка x2': [
                     'Раскрой Основания платы',
                     'Раскрой Фоновая заглушка',
                     'Раскрой Кронштейн BT',
                     'Гибка Кронштейн BT'
+                ],
+                'XGRAY v.1': [
+                    'Раскрой Заглушка модуля'
                 ]
             },
+            
+            // ПОЛИМЕРНЫЙ УЧАСТОК
             'polimerniy': {
                 'XRAY 6-T2 BT 220 Шторка x2': [
                     'Корпус',
                     'Фоновая заглушка'
+                ],
+                'XGRAY v.1': [
+                    'Профиль',
+                    'Заглушка Левая',
+                    'Заглушка Правая',
+                    'Кронштейн AL'
                 ]
             }
         };
@@ -280,6 +317,11 @@ class TaskManager {
         if (totalCompleted >= this.tasks[taskIndex].totalQuantity) {
             this.tasks[taskIndex].status = 'completed';
             this.tasks[taskIndex].completedQuantity = this.tasks[taskIndex].totalQuantity;
+            
+            // Отмечаем всех исполнителей как completed
+            this.tasks[taskIndex].executors.forEach(e => {
+                e.status = 'completed';
+            });
             
             this.updateOrderTaskStatus(taskId, 'completed');
         } else if (totalCompleted > 0) {
