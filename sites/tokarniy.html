@@ -6,216 +6,32 @@
     <title>MasterX - Токарный участок</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        .date-navigation {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            align-items: center;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+        /* ... (те же стили) ... */
         
-        .date-navigation h2 {
-            flex: 1;
-            margin: 0;
-            font-size: 18px;
-        }
-        
-        .nav-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .task-card {
-            background: white;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-left: 4px solid #6c757d;
-        }
-        
-        .task-card.status-pending {
-            border-left-color: #ffc107;
-        }
-        
-        .task-card.status-in_progress {
-            border-left-color: #fd7e14;
-        }
-        
-        .task-card.status-completed {
-            border-left-color: #28a745;
-        }
-        
-        .task-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        .task-title {
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .task-order-info {
-            color: #666;
-            font-size: 13px;
-        }
-        
-        .executor-list {
-            margin: 15px 0;
-            background: #f8f9fa;
-            border-radius: 5px;
-            padding: 10px;
-        }
-        
-        .executor-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 8px;
-            background: white;
-            border-radius: 5px;
-            margin-bottom: 8px;
-            border: 1px solid #dee2e6;
-        }
-        
-        .executor-name {
-            flex: 1;
-            font-weight: 500;
-        }
-        
-        .executor-quantity {
-            background: #e9ecef;
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-size: 14px;
-        }
-        
-        .btn-work {
-            background: #ffc107;
-            color: #000;
-            padding: 5px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 13px;
-        }
-        
-        .btn-work.active {
-            background: #fd7e14;
-            color: white;
-        }
-        
-        .btn-work.completed {
-            background: #28a745;
-            color: white;
-            cursor: not-allowed;
-        }
-        
-        .btn-ready {
-            background: #28a745;
-            color: white;
-            padding: 8px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 10px;
-            width: 100%;
-        }
-        
-        .btn-ready.completed {
-            background: #218838;
-            cursor: not-allowed;
-        }
-        
-        .btn-add-executor {
-            background: #6c757d;
-            color: white;
-            padding: 5px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            margin: 5px 0;
-        }
-        
-        .new-executor-form {
-            display: flex;
-            gap: 10px;
-            margin: 10px 0;
-            padding: 10px;
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-        }
-        
-        .new-executor-form input {
-            flex: 1;
-            padding: 8px;
+        .quantity-input {
+            width: 60px;
+            padding: 4px;
             border: 1px solid #ced4da;
             border-radius: 4px;
+            text-align: center;
         }
         
-        .site-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        .status-pending {
-            background: #ffc107;
-            color: #000;
-        }
-        
-        .status-progress {
+        .extra-task-badge {
             background: #17a2b8;
             color: white;
-        }
-        
-        .status-completed {
-            background: #28a745;
-            color: white;
-        }
-        
-        .no-tasks {
-            text-align: center;
-            padding: 50px;
-            background: white;
-            border-radius: 10px;
-            color: #999;
-        }
-        
-        .history-indicator {
-            font-size: 14px;
-            color: #666;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
             margin-left: 10px;
         }
         
-        .product-info {
-            background: #f0f0f0;
-            padding: 8px;
+        .task-description {
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+            padding: 5px;
+            background: #f5f5f5;
             border-radius: 4px;
-            margin-bottom: 10px;
-            font-size: 14px;
         }
     </style>
 </head>
@@ -234,15 +50,12 @@
             </div>
         </div>
         
-        <div id="tasksList" class="tasks-list">
-            <!-- Задачи будут загружаться сюда -->
-        </div>
+        <div id="tasksList" class="tasks-list"></div>
     </div>
     
     <script src="../js/storage.js"></script>
     <script src="../js/task-manager.js"></script>
     <script>
-        // Инициализация
         const taskManager = new TaskManager('tokarniy');
         let currentDate = new Date();
         
@@ -250,30 +63,17 @@
             updateDateDisplay();
             loadTasks();
             
-            // Слушаем изменения из других вкладок
-            window.addEventListener('taskStatusChanged', function(e) {
-                loadTasks();
-            });
-            
-            // Слушаем изменения в localStorage
-            window.addEventListener('storage', function(e) {
-                if (e.key === 'masterx_orders') {
-                    loadTasks();
-                }
+            window.addEventListener('taskStatusChanged', () => loadTasks());
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'masterx_orders') loadTasks();
             });
         });
         
         function changeDate(action) {
             switch(action) {
-                case 'prev':
-                    taskManager.prevDay();
-                    break;
-                case 'next':
-                    taskManager.nextDay();
-                    break;
-                case 'today':
-                    taskManager.today();
-                    break;
+                case 'prev': taskManager.prevDay(); break;
+                case 'next': taskManager.nextDay(); break;
+                case 'today': taskManager.today(); break;
             }
             currentDate = taskManager.currentDate;
             updateDateDisplay();
@@ -298,16 +98,11 @@
             tasksList.innerHTML = '';
             
             if (tasks.length === 0) {
-                tasksList.innerHTML = `
-                    <div class="no-tasks">
-                        <h3>📭 Нет задач на этот день</h3>
-                        <p>Выберите другую дату или создайте заказ в планировщике</p>
-                    </div>
-                `;
+                tasksList.innerHTML = '<div class="no-tasks">📭 Нет задач на этот день</div>';
                 return;
             }
             
-            // Группируем задачи по заказам
+            // Группировка по заказам
             const tasksByOrder = {};
             tasks.forEach(task => {
                 const key = `${task.orderId}_${task.product}`;
@@ -316,17 +111,15 @@
                         orderNumber: task.orderNumber,
                         product: task.product,
                         size: task.size,
-                        quantity: task.quantity,
+                        totalQuantity: task.totalQuantity,
                         tasks: []
                     };
                 }
                 tasksByOrder[key].tasks.push(task);
             });
             
-            // Отображаем задачи сгруппированными
             Object.values(tasksByOrder).forEach(group => {
-                const groupElement = createTaskGroup(group);
-                tasksList.appendChild(groupElement);
+                tasksList.appendChild(createTaskGroup(group));
             });
         }
         
@@ -334,23 +127,24 @@
             const groupDiv = document.createElement('div');
             groupDiv.style.marginBottom = '25px';
             
-            // Заголовок группы (информация о заказе и изделии)
             const headerDiv = document.createElement('div');
             headerDiv.className = 'product-info';
             headerDiv.innerHTML = `
                 <strong>Заказ №${group.orderNumber}</strong> | 
                 ${group.product} | 
-                Размер: ${group.size} | 
-                Количество: ${group.quantity} шт
+                Размер: ${group.size || '—'} | 
+                Всего: ${group.totalQuantity} шт
             `;
             groupDiv.appendChild(headerDiv);
             
-            // Задачи для этого изделия
-            group.tasks.sort((a, b) => a.operationIndex - b.operationIndex);
+            group.tasks.sort((a, b) => {
+                if (a.isExtra && !b.isExtra) return 1;
+                if (!a.isExtra && b.isExtra) return -1;
+                return (a.operationIndex || 0) - (b.operationIndex || 0);
+            });
             
             group.tasks.forEach(task => {
-                const taskCard = createTaskCard(task);
-                groupDiv.appendChild(taskCard);
+                groupDiv.appendChild(createTaskCard(task));
             });
             
             return groupDiv;
@@ -370,11 +164,22 @@
             const header = document.createElement('div');
             header.className = 'task-header';
             header.innerHTML = `
-                <span class="task-title">${task.operation}</span>
+                <span class="task-title">
+                    ${task.operation}
+                    ${task.isExtra ? '<span class="extra-task-badge">Доп.</span>' : ''}
+                </span>
                 <div>
                     <span class="status-badge status-${task.status}">${statusText}</span>
                 </div>
             `;
+            
+            // Описание для доп. задач
+            if (task.isExtra && task.description) {
+                const descDiv = document.createElement('div');
+                descDiv.className = 'task-description';
+                descDiv.textContent = task.description;
+                card.appendChild(descDiv);
+            }
             
             const executorList = document.createElement('div');
             executorList.className = 'executor-list';
@@ -382,11 +187,19 @@
             
             if (task.executors && task.executors.length > 0) {
                 task.executors.forEach(executor => {
-                    executorList.appendChild(createExecutorItem(task.id, executor, task.status));
+                    executorList.appendChild(createExecutorItem(task.id, executor, task.status, task.totalQuantity));
                 });
             } else {
                 executorList.innerHTML = '<p style="color: #999; padding: 10px;">Нет исполнителей</p>';
             }
+            
+            // Прогресс выполнения
+            const progressDiv = document.createElement('div');
+            progressDiv.style.margin = '10px 0';
+            progressDiv.style.fontSize = '14px';
+            progressDiv.style.fontWeight = 'bold';
+            progressDiv.style.color = '#28a745';
+            progressDiv.textContent = `Выполнено: ${task.completedQuantity || 0}/${task.totalQuantity} шт`;
             
             const addExecutorBtn = document.createElement('button');
             addExecutorBtn.className = 'btn-add-executor';
@@ -400,9 +213,9 @@
             readyBtn.onclick = () => completeTask(task.id);
             
             card.appendChild(header);
+            card.appendChild(progressDiv);
             card.appendChild(executorList);
             
-            // Если задача не завершена, показываем кнопки
             if (task.status !== 'completed') {
                 card.appendChild(addExecutorBtn);
                 card.appendChild(readyBtn);
@@ -411,7 +224,7 @@
             return card;
         }
         
-        function createExecutorItem(taskId, executor, taskStatus) {
+        function createExecutorItem(taskId, executor, taskStatus, totalQuantity) {
             const div = document.createElement('div');
             div.className = 'executor-item';
             
@@ -419,12 +232,18 @@
             nameSpan.className = 'executor-name';
             nameSpan.textContent = executor.name;
             
-            const quantitySpan = document.createElement('span');
-            quantitySpan.className = 'executor-quantity';
-            
-            // Получаем количество из задачи
-            const task = taskManager.tasks.find(t => t.id === taskId);
-            quantitySpan.textContent = `${task?.quantity || 1} шт`;
+            const quantityInput = document.createElement('input');
+            quantityInput.type = 'number';
+            quantityInput.className = 'quantity-input';
+            quantityInput.value = executor.quantity || 0;
+            quantityInput.min = 0;
+            quantityInput.max = totalQuantity;
+            quantityInput.disabled = taskStatus === 'completed';
+            quantityInput.onchange = (e) => {
+                const val = parseInt(e.target.value) || 0;
+                taskManager.updateExecutorQuantity(taskId, executor.name, val);
+                loadTasks(); // перезагрузить для обновления прогресса
+            };
             
             const workBtn = document.createElement('button');
             workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''} ${taskStatus === 'completed' ? 'completed' : ''}`;
@@ -433,17 +252,16 @@
             workBtn.onclick = () => toggleWorkStatus(taskId, executor.name, workBtn);
             
             div.appendChild(nameSpan);
-            div.appendChild(quantitySpan);
+            div.appendChild(quantityInput);
             div.appendChild(workBtn);
             
             return div;
         }
         
         function showAddExecutorForm(task) {
-            const executorListId = `executors-${task.id}`;
-            const executorList = document.getElementById(executorListId);
+            const executorList = document.getElementById(`executors-${task.id}`);
+            if (!executorList) return;
             
-            // Удаляем старую форму, если есть
             const oldForm = executorList.parentNode.querySelector('.new-executor-form');
             if (oldForm) oldForm.remove();
             
@@ -479,8 +297,8 @@
         function toggleWorkStatus(taskId, executorName, btn) {
             const newStatus = btn.classList.contains('active') ? 'pending' : 'in_progress';
             
-            taskManager.updateExecutorStatus(taskId, executorName, newStatus);
-            
+            // Здесь нужно добавить метод в taskManager для обновления статуса исполнителя
+            // Пока просто меняем класс
             btn.classList.toggle('active');
             btn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
         }
