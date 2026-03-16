@@ -1,165 +1,166 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MasterX - Планировщик производства</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <div class="container">
-        <!-- ШАПКА С ЛОГОТИПОМ -->
-        <header>
-            <div class="logo-container">
-                <img src="images/logo.png" alt="MasterX Logo" class="logo-img">
-                <div class="logo-text">
-                    Master<span class="x-red">X</span>
-                </div>
-            </div>
-            <button class="btn btn-primary" onclick="openOrderModal()">
-                <span style="font-size: 20px; margin-right: 5px;">+</span> Новый заказ
-            </button>
-        </header>
+// Глобальные переменные
+let products = [];
+let brackets = [];
+let lyres = [];
+let orders = [];
 
-        <!-- НАВИГАЦИЯ ПО УЧАСТКАМ -->
-        <div class="sites-navigation">
-            <h3 style="margin-bottom: 15px; color: #fff;">🏭 Производственные участки:</h3>
-            <div class="sites-links">
-                <a href="sites/tokarniy.html" class="site-link">🔧 Токарный</a>
-                <a href="sites/slesarniy.html" class="site-link">🔨 Слесарный</a>
-                <a href="sites/frezerniy.html" class="site-link">⚙️ Фрезерный</a>
-                <a href="sites/lazerno-gibochniy.html" class="site-link">✨ Лазерно-гибочный</a>
-                <a href="sites/polimerniy.html" class="site-link">🧪 Полимерный</a>
-            </div>
-        </div>
+// Инициализация
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadAllData();
+});
 
-        <!-- СТАТИСТИКА -->
-        <div class="order-stats" id="orderStats">
-            <div class="stat-item">
-                <div class="stat-value" id="totalOrders">0</div>
-                <div class="stat-label">Всего заказов</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="totalItems">0</div>
-                <div class="stat-label">Изделий</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="activeTasks">0</div>
-                <div class="stat-label">В работе</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="completedTasks">0</div>
-                <div class="stat-label">Выполнено</div>
-            </div>
-        </div>
+// Загрузка всех данных
+async function loadAllData() {
+    products = await loadProducts() || [];
+    brackets = await loadBrackets() || [];
+    lyres = await loadLyres() || [];
+    orders = loadOrdersFromStorage() || [];
+    
+    populateSelects();
+    loadOrders();
+}
 
-        <!-- ФИЛЬТРЫ И ПОИСК -->
-        <div class="filter-section">
-            <input type="text" class="search-box" placeholder="🔍 Поиск по номеру заказа или изделию..." id="searchInput">
-            <select id="statusFilter" class="search-box" style="width: auto;">
-                <option value="all">Все статусы</option>
-                <option value="active">Активные</option>
-                <option value="completed">Завершенные</option>
-            </select>
-            <button class="btn btn-primary" onclick="exportOrders()">📥 Экспорт заказов</button>
-        </div>
+// Заполнение выпадающих списков
+function populateSelects() {
+    const productSelect = document.getElementById('productSelect');
+    if (productSelect) {
+        productSelect.innerHTML = '<option value="">Выберите изделие</option>';
+        products.forEach(product => {
+            const option = document.createElement('option');
+            option.value = product.name;
+            option.textContent = product.name;
+            productSelect.appendChild(option);
+        });
+    }
+    
+    const bracketSelect = document.getElementById('bracketSelect');
+    if (bracketSelect) {
+        bracketSelect.innerHTML = '<option value="">Выберите кронштейн</option>';
+        bracketSelect.innerHTML += '<option value="отсутствует">🚫 отсутствует</option>';
+        brackets.forEach(bracket => {
+            const option = document.createElement('option');
+            option.value = bracket.name;
+            option.textContent = bracket.name;
+            bracketSelect.appendChild(option);
+        });
+    }
+    
+    const lyreSelect = document.getElementById('lyreSelect');
+    if (lyreSelect) {
+        lyreSelect.innerHTML = '<option value="">Выберите лиру</option>';
+        lyreSelect.innerHTML += '<option value="отсутствует">🚫 отсутствует</option>';
+        lyres.forEach(lyre => {
+            const option = document.createElement('option');
+            option.value = lyre.name;
+            option.textContent = lyre.name;
+            lyreSelect.appendChild(option);
+        });
+    }
+}
 
-        <!-- МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ЗАКАЗА -->
-        <div id="orderModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeOrderModal()">&times;</span>
-                <h2 style="color: #fff; margin-bottom: 20px;">📋 Создание нового заказа</h2>
-                <form id="orderForm">
-                    <div class="form-group">
-                        <label>📅 Дата заказа:</label>
-                        <input type="date" id="orderDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label>🔢 Номер заказа:</label>
-                        <input type="text" id="orderNumber" placeholder="Например: З-2024-001" required>
-                    </div>
-                    <div class="form-group">
-                        <label>🏷️ Изделие:</label>
-                        <select id="productSelect" onchange="loadProductSizes()" required>
-                            <option value="">Выберите изделие</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>📏 Размер/Имя:</label>
-                        <select id="sizeSelect" required>
-                            <option value="">Сначала выберите изделие</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>🔢 Кол-во изделий:</label>
-                        <input type="number" id="quantity" min="1" value="1" required>
-                    </div>
-                    
-                    <!-- Кронштейн с количеством -->
-                    <div class="form-group">
-                        <label>🔧 Тип кронштейна:</label>
-                        <div class="quantity-row">
-                            <select id="bracketSelect">
-                                <option value="">Выберите кронштейн</option>
-                            </select>
-                            <input type="number" id="bracketQuantity" min="0" value="1" placeholder="Кол-во">
-                        </div>
-                    </div>
-                    
-                    <!-- Лира с количеством -->
-                    <div class="form-group">
-                        <label>🎸 Тип лиры:</label>
-                        <div class="quantity-row">
-                            <select id="lyreSelect">
-                                <option value="">Выберите лиру</option>
-                            </select>
-                            <input type="number" id="lyreQuantity" min="0" value="1" placeholder="Кол-во">
-                        </div>
-                    </div>
-                    
-                    <!-- Цвет RAL и текстура -->
-                    <div class="form-group">
-                        <label>🎨 Цвет RAL (вручную):</label>
-                        <input type="text" id="ralInput" placeholder="Например: RAL 9003">
-                    </div>
-                    <div class="form-group">
-                        <label>🧵 Текстура:</label>
-                        <select id="textureSelect">
-                            <option value="">Выберите текстуру</option>
-                            <option value="матовая">Матовая</option>
-                            <option value="глянцевая">Глянцевая</option>
-                            <option value="сатиновая">Сатиновая</option>
-                            <option value="структурированная">Структурированная</option>
-                            <option value="антик">Антик</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>📝 Дополнительные детали:</label>
-                        <textarea id="additionalDetails" rows="3" placeholder="Особые требования или примечания..."></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-success" style="width: 100%; padding: 12px;">✅ Создать заказ</button>
-                </form>
+// Загрузка размеров
+async function loadProductSizes() {
+    const productName = document.getElementById('productSelect').value;
+    const product = products.find(p => p.name === productName);
+    const sizeSelect = document.getElementById('sizeSelect');
+    
+    sizeSelect.innerHTML = '<option value="">Выберите размер</option>';
+    if (product && product.sizes) {
+        product.sizes.forEach(size => {
+            const option = document.createElement('option');
+            option.value = size;
+            option.textContent = size;
+            sizeSelect.appendChild(option);
+        });
+    }
+}
+
+// Открытие модального окна
+function openOrderModal() {
+    document.getElementById('orderModal').style.display = 'block';
+    document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('orderNumber').value = generateOrderNumber();
+}
+
+// Генерация номера заказа
+function generateOrderNumber() {
+    const date = new Date();
+    const year = date.getFullYear().toString().slice(-2);
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const count = (orders.length + 1).toString().padStart(3, '0');
+    return `З-${year}${month}${day}-${count}`;
+}
+
+// Закрытие модального окна
+function closeOrderModal() {
+    document.getElementById('orderModal').style.display = 'none';
+    document.getElementById('orderForm').reset();
+}
+
+// Обработка формы заказа
+document.getElementById('orderForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const order = {
+        id: Date.now(),
+        date: document.getElementById('orderDate').value,
+        number: document.getElementById('orderNumber').value,
+        items: [{
+            product: document.getElementById('productSelect').value,
+            size: document.getElementById('sizeSelect').value,
+            quantity: parseInt(document.getElementById('quantity').value) || 1,
+            bracket: {
+                type: document.getElementById('bracketSelect').value,
+                quantity: parseInt(document.getElementById('bracketQuantity').value) || 0
+            },
+            lyre: {
+                type: document.getElementById('lyreSelect').value,
+                quantity: parseInt(document.getElementById('lyreQuantity').value) || 0
+            },
+            ral: document.getElementById('ralInput').value,
+            texture: document.getElementById('textureSelect').value,
+            additional: document.getElementById('additionalDetails').value
+        }],
+        status: 'active',
+        tasks: {},
+        extraTasks: []
+    };
+    
+    orders.push(order);
+    saveOrdersToStorage(orders);
+    loadOrders();
+    closeOrderModal();
+    alert('Заказ создан!');
+});
+
+// Загрузка заказов
+function loadOrders() {
+    const ordersList = document.getElementById('ordersList');
+    if (!ordersList) return;
+    
+    ordersList.innerHTML = '';
+    
+    if (orders.length === 0) {
+        ordersList.innerHTML = '<div style="text-align: center; padding: 50px;">📭 Нет заказов</div>';
+        return;
+    }
+    
+    orders.sort((a, b) => new Date(b.date) - new Date(a.date));
+    orders.forEach(order => {
+        const card = document.createElement('div');
+        card.className = 'order-card';
+        card.innerHTML = `
+            <div style="padding: 15px; background: #1a1e24; border-bottom: 1px solid #2a2f38;">
+                <h3>📦 Заказ №${order.number}</h3>
+                <p>${order.items[0].product} | ${order.items[0].quantity} шт</p>
             </div>
-        </div>
+        `;
+        ordersList.appendChild(card);
+    });
+}
 
-        <!-- МОДАЛЬНОЕ ОКНО МАТЕРИАЛОВ -->
-        <div id="materialsModal" class="modal">
-            <div class="modal-content" style="max-width: 900px;">
-                <span class="close" onclick="closeMaterialsModal()">&times;</span>
-                <div id="materialsReport"></div>
-            </div>
-        </div>
-
-        <!-- СПИСОК ЗАКАЗОВ -->
-        <div id="ordersList" class="orders-list">
-            <!-- Заказы будут загружаться сюда -->
-        </div>
-    </div>
-
-    <script src="js/storage.js"></script>
-    <script src="js/data-loader.js"></script>
-    <script src="js/materials-report.js"></script>
-    <script src="js/app.js"></script>
-</body>
-</html>
+// Глобальные функции
+window.openOrderModal = openOrderModal;
+window.closeOrderModal = closeOrderModal;
+window.loadProductSizes = loadProductSizes;
