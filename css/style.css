@@ -18,7 +18,7 @@ body {
     padding: 20px;
 }
 
-/* ============== ШАПКА С ЛОГОТИПОМ ============== */
+/* ============== ШАПКА С PNG ЛОГОТИПОМ ============== */
 header {
     display: flex;
     justify-content: space-between;
@@ -37,20 +37,21 @@ header {
     gap: 15px;
 }
 
-.logo {
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, #00d4ff, #0077ff);
+/* Стили для PNG логотипа */
+.logo-img {
+    height: 45px;
+    width: auto;
     border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 20px;
-    color: white;
-    box-shadow: 0 0 20px rgba(0,212,255,0.3);
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 0 10px rgba(255,59,59,0.2));
 }
 
+.logo-img:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 20px rgba(255,59,59,0.4));
+}
+
+/* Текст логотипа */
 .logo-text {
     font-size: 24px;
     font-weight: 600;
@@ -62,6 +63,7 @@ header {
     font-weight: 700;
     text-shadow: 0 0 15px rgba(255,59,59,0.5);
     margin-left: 2px;
+    animation: pulse 2s infinite;
 }
 
 /* ============== КНОПКИ ============== */
@@ -575,13 +577,13 @@ header {
 
 @keyframes pulse {
     0% {
-        transform: scale(1);
+        text-shadow: 0 0 10px rgba(255,59,59,0.5);
     }
     50% {
-        transform: scale(1.05);
+        text-shadow: 0 0 20px rgba(255,59,59,0.8);
     }
     100% {
-        transform: scale(1);
+        text-shadow: 0 0 10px rgba(255,59,59,0.5);
     }
 }
 
