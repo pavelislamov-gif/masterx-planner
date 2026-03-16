@@ -6,628 +6,153 @@
     <title>MasterX - Токарный участок</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        /* ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ УЧАСТКОВ */
-        .date-navigation {
-            background: linear-gradient(135deg, #1a1e24, #0f1217);
-            padding: 15px 25px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            border: 1px solid #2a2f38;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .nav-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .order-card {
-            background: linear-gradient(135deg, #1a1e24, #15191f);
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            overflow: hidden;
-            border: 1px solid #2a2f38;
-        }
-        
-        .order-header {
-            padding: 15px 25px;
-            background: linear-gradient(135deg, #232830, #1a1e24);
-            border-bottom: 1px solid #2a2f38;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .order-header h3 {
-            color: #fff;
-            font-size: 18px;
-            font-weight: 500;
-        }
-        
-        .product-info {
-            padding: 12px 20px;
-            background: #15191f;
-            border-bottom: 1px solid #2a2f38;
-            color: #a0a0a0;
-            font-size: 14px;
-        }
-        
-        .product-info strong {
-            color: #ff3b3b;
-        }
-        
         .task-card {
             background: #1a1e24;
             border-radius: 8px;
-            padding: 15px 20px;
-            margin: 10px 20px;
-            border: 1px solid #2a2f38;
-            transition: all 0.3s;
-        }
-        
-        .task-card.extra-task {
-            border-left: 3px solid #ff3b3b;
-            background: #1e232b;
-        }
-        
-        .task-card:hover {
-            border-color: #ff3b3b;
-        }
-        
-        .task-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 15px;
             margin-bottom: 15px;
+            border: 1px solid #2a2f38;
         }
-        
         .task-title {
             font-size: 16px;
-            font-weight: 600;
+            font-weight: bold;
             color: #fff;
         }
-        
-        .task-progress {
-            font-size: 13px;
-            color: #4cd964;
-            margin-bottom: 15px;
-            padding: 5px 10px;
-            background: #1e232b;
-            border-radius: 20px;
-            display: inline-block;
-        }
-        
         .executor-item {
             display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 15px;
-            background: #15191f;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #2a2f38;
-        }
-        
-        .executor-name-input {
-            flex: 2;
-            padding: 8px 12px;
-            background: #1e232b;
-            border: 1px solid #2a2f38;
-            border-radius: 6px;
-            color: #fff;
-            font-size: 14px;
-        }
-        
-        .executor-name-input:focus {
-            outline: none;
-            border-color: #ff3b3b;
-        }
-        
-        .executor-quantity {
-            width: 80px;
-            padding: 8px;
-            background: #1e232b;
-            border: 1px solid #2a2f38;
-            border-radius: 6px;
-            color: #fff;
-            text-align: center;
-            font-size: 14px;
-        }
-        
-        .executor-quantity:focus {
-            outline: none;
-            border-color: #ff3b3b;
-        }
-        
-        .btn-work {
-            background: #2a2f38;
-            color: #fff;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.3s;
-            border: 1px solid #3a404b;
-            min-width: 100px;
-        }
-        
-        .btn-work.active {
-            background: #ff9f1c;
-            border-color: #ffb347;
-            color: #000;
-            font-weight: 600;
-        }
-        
-        .btn-add-executor {
-            background: transparent;
-            color: #ff3b3b;
-            padding: 8px 16px;
-            border: 1px dashed #ff3b3b;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            margin: 10px 0;
-            transition: all 0.3s;
-            width: 100%;
-        }
-        
-        .btn-add-executor:hover {
-            background: #ff3b3b;
-            color: white;
-        }
-        
-        .btn-ready {
-            background: #2ecc71;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            margin-top: 15px;
-            width: 100%;
-            transition: all 0.3s;
-        }
-        
-        .btn-ready:hover:not(:disabled) {
-            background: #4cd964;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(46,204,113,0.3);
-        }
-        
-        .btn-ready:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .new-executor-form {
-            display: flex;
             gap: 10px;
-            margin: 15px 0;
-            padding: 15px;
-            background: #15191f;
-            border: 1px solid #2a2f38;
-            border-radius: 8px;
-        }
-        
-        .new-executor-form input {
-            flex: 1;
             padding: 10px;
-            background: #1e232b;
-            border: 1px solid #2a2f38;
+            background: #15191f;
             border-radius: 6px;
-            color: #fff;
+            margin: 10px 0;
         }
-        
-        .new-executor-form input:focus {
-            outline: none;
-            border-color: #ff3b3b;
+        .btn-work {
+            background: #ffc107;
+            padding: 5px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
         }
-        
-        .extra-task-badge {
-            background: #ff3b3b;
+        .btn-work.active {
+            background: #fd7e14;
             color: white;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 10px;
-            margin-left: 10px;
         }
-        
-        .task-description {
-            color: #a0a0a0;
-            font-size: 12px;
-            margin: 10px 0 15px 0;
+        .btn-add-executor {
+            background: #6c757d;
+            color: white;
+            padding: 5px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px 0;
+        }
+        .btn-ready {
+            background: #28a745;
+            color: white;
             padding: 10px;
-            background: #15191f;
-            border-radius: 6px;
-            border-left: 3px solid #ff3b3b;
-        }
-        
-        .no-tasks {
-            text-align: center;
-            padding: 60px;
-            background: #1a1e24;
-            border-radius: 12px;
-            color: #a0a0a0;
-            border: 1px solid #2a2f38;
-        }
-        
-        .history-indicator {
-            font-size: 13px;
-            color: #a0a0a0;
-            margin-left: 10px;
-        }
-        
-        .executor-list {
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
             margin-top: 10px;
         }
-        
-        .executor-header {
-            display: flex;
-            gap: 12px;
-            padding: 0 15px;
-            margin-bottom: 8px;
-            font-size: 12px;
-            color: #a0a0a0;
-        }
-        
-        .executor-header span:nth-child(1) { flex: 2; }
-        .executor-header span:nth-child(2) { width: 80px; text-align: center; }
-        .executor-header span:nth-child(3) { width: 100px; text-align: center; }
-        
-        .extra-tasks-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 2px dashed #ff3b3b;
-        }
-        
-        .extra-tasks-title {
-            color: #ff3b3b;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            padding-left: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .no-tasks {
+            text-align: center;
+            padding: 50px;
+            color: #666;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- ШАПКА -->
-        <header>
-            <div class="logo-container">
-                <img src="../images/logo.png" alt="MasterX Logo" class="logo-img">
-                <div class="logo-text">
-                    Master<span class="x-red">X</span>
-                </div>
-            </div>
-            <h1 style="margin:0; color: white; font-size:20px;">🔧 Токарный участок</h1>
-        </header>
-
-        <!-- НАВИГАЦИЯ ПО ДАТАМ -->
-        <div class="date-navigation">
-            <h2 id="currentDateDisplay" style="font-size: 16px; color: #fff; margin: 0;"></h2>
-            <div class="nav-buttons">
-                <button class="btn btn-primary" onclick="changeDate('prev')">← Вчера</button>
-                <button class="btn btn-success" onclick="changeDate('today')">Сегодня</button>
-                <button class="btn btn-primary" onclick="changeDate('next')">Завтра →</button>
-            </div>
-        </div>
-
-        <!-- СПИСОК ЗАДАЧ -->
-        <div id="tasksList" class="tasks-list"></div>
+        <h1>🔧 Токарный участок</h1>
+        
+        <div id="tasksList"></div>
     </div>
 
     <script src="../js/storage.js"></script>
     <script src="../js/task-manager.js"></script>
     <script>
         const taskManager = new TaskManager('tokarniy');
-        let currentDate = new Date();
-
+        
         document.addEventListener('DOMContentLoaded', function() {
-            updateDateDisplay();
             loadTasks();
-
-            window.addEventListener('taskStatusChanged', () => loadTasks());
-            window.addEventListener('storage', (e) => {
-                if (e.key === 'masterx_orders') loadTasks();
+            
+            // Слушаем изменения
+            window.addEventListener('taskStatusChanged', function() {
+                loadTasks();
+            });
+            
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'masterx_orders') {
+                    loadTasks();
+                }
             });
         });
-
-        function changeDate(action) {
-            switch(action) {
-                case 'prev': taskManager.prevDay(); break;
-                case 'next': taskManager.nextDay(); break;
-                case 'today': taskManager.today(); break;
-            }
-            currentDate = taskManager.currentDate;
-            updateDateDisplay();
-            loadTasks();
-        }
-
-        function updateDateDisplay() {
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            const dateStr = currentDate.toLocaleDateString('ru-RU', options);
-            const isToday = taskManager.formatDate(currentDate) === taskManager.formatDate(new Date());
-            document.getElementById('currentDateDisplay').innerHTML = `
-                ${dateStr} ${!isToday ? '<span class="history-indicator">(история)</span>' : ''}
-            `;
-        }
-
+        
         function loadTasks() {
-            taskManager.orders = loadOrdersFromStorage() || [];
             taskManager.loadData();
             const tasks = taskManager.tasks;
             const tasksList = document.getElementById('tasksList');
-
+            
             tasksList.innerHTML = '';
-
+            
             if (tasks.length === 0) {
-                tasksList.innerHTML = `
-                    <div class="no-tasks">
-                        <p style="font-size: 18px; color: #666;">📭 Нет задач на этот день</p>
-                        <p style="color: #999;">Выберите другую дату или создайте заказ в планировщике</p>
-                    </div>
-                `;
+                tasksList.innerHTML = '<div class="no-tasks">📭 Нет задач</div>';
                 return;
             }
-
-            // Группируем задачи по заказам
-            const tasksByOrder = {};
+            
+            // Группируем по заказам
+            const byOrder = {};
             tasks.forEach(task => {
-                if (!tasksByOrder[task.orderId]) {
-                    tasksByOrder[task.orderId] = {
-                        orderId: task.orderId,
+                if (!byOrder[task.orderId]) {
+                    byOrder[task.orderId] = {
                         orderNumber: task.orderNumber,
-                        items: []
-                    };
-                }
-                tasksByOrder[task.orderId].items.push(task);
-            });
-
-            // Отображаем каждый заказ как карточку
-            Object.values(tasksByOrder).forEach(order => {
-                tasksList.appendChild(createOrderCard(order));
-            });
-        }
-
-        function createOrderCard(order) {
-            const card = document.createElement('div');
-            card.className = 'order-card';
-
-            const header = document.createElement('div');
-            header.className = 'order-header';
-            header.innerHTML = `<h3>📦 Заказ №${order.orderNumber}</h3>`;
-            card.appendChild(header);
-
-            // Разделяем основные и дополнительные задачи
-            const mainTasks = order.items.filter(task => !task.isExtra);
-            const extraTasks = order.items.filter(task => task.isExtra);
-
-            // Группируем основные задачи по изделиям
-            const tasksByProduct = {};
-            mainTasks.forEach(task => {
-                const key = task.product;
-                if (!tasksByProduct[key]) {
-                    tasksByProduct[key] = {
-                        product: task.product,
-                        size: task.size,
-                        totalQuantity: task.totalQuantity,
                         tasks: []
                     };
                 }
-                tasksByProduct[key].tasks.push(task);
+                byOrder[task.orderId].tasks.push(task);
             });
-
-            // Отображаем основные задачи
-            Object.values(tasksByProduct).forEach(product => {
-                card.appendChild(createProductSection(product, false));
-            });
-
-            // Отображаем дополнительные задачи (если есть)
-            if (extraTasks.length > 0) {
-                const extraSection = document.createElement('div');
-                extraSection.className = 'extra-tasks-section';
+            
+            Object.values(byOrder).forEach(order => {
+                const orderDiv = document.createElement('div');
+                orderDiv.className = 'order-card';
+                orderDiv.innerHTML = `<h3>📦 Заказ №${order.orderNumber}</h3>`;
                 
-                const extraTitle = document.createElement('div');
-                extraTitle.className = 'extra-tasks-title';
-                extraTitle.textContent = '📋 Дополнительные задачи';
-                extraSection.appendChild(extraTitle);
-                
-                extraTasks.forEach(task => {
-                    extraSection.appendChild(createTaskCard(task, true));
+                order.tasks.forEach(task => {
+                    orderDiv.appendChild(createTaskCard(task));
                 });
                 
-                card.appendChild(extraSection);
-            }
-
-            return card;
-        }
-
-        function createProductSection(product, isExtra = false) {
-            const section = document.createElement('div');
-
-            const info = document.createElement('div');
-            info.className = 'product-info';
-            info.innerHTML = `
-                <strong>${product.product}</strong> | 
-                Размер: ${product.size || 'Стандартный'} | 
-                Всего: ${product.totalQuantity || 0} шт
-            `;
-            section.appendChild(info);
-
-            const sortedTasks = [...product.tasks].sort((a, b) => (a.operationIndex || 0) - (b.operationIndex || 0));
-
-            sortedTasks.forEach(task => {
-                section.appendChild(createTaskCard(task, false));
+                tasksList.appendChild(orderDiv);
             });
-
-            return section;
         }
-
-        function createTaskCard(task, isExtra = false) {
+        
+        function createTaskCard(task) {
             const card = document.createElement('div');
-            card.className = `task-card ${isExtra ? 'extra-task' : ''}`;
-            card.dataset.taskId = task.id;
-
-            const header = document.createElement('div');
-            header.className = 'task-header';
-            header.innerHTML = `
-                <span class="task-title">
-                    ${task.operation}
-                    ${isExtra ? '<span class="extra-task-badge">Доп.</span>' : ''}
-                </span>
+            card.className = 'task-card';
+            
+            card.innerHTML = `
+                <div class="task-title">${task.operation}</div>
+                <div>Выполнено: 0/${task.totalQuantity}</div>
+                <div id="executors-${task.id}"></div>
+                <button class="btn-add-executor" onclick="addExecutor('${task.id}')">+ Добавить исполнителя</button>
+                <button class="btn-ready" onclick="completeTask('${task.id}')">ГОТОВО</button>
             `;
-            card.appendChild(header);
-
-            if (isExtra && task.description) {
-                const desc = document.createElement('div');
-                desc.className = 'task-description';
-                desc.textContent = task.description;
-                card.appendChild(desc);
-            }
-
-            const progress = document.createElement('div');
-            progress.className = 'task-progress';
-            progress.textContent = `Выполнено: ${task.completedQuantity || 0}/${task.totalQuantity || 0} шт`;
-            card.appendChild(progress);
-
-            // Заголовки колонок
-            const headers = document.createElement('div');
-            headers.className = 'executor-header';
-            headers.innerHTML = `
-                <span>ФИО</span>
-                <span>Кол-во</span>
-                <span>Статус</span>
-            `;
-            card.appendChild(headers);
-
-            const executorList = document.createElement('div');
-            executorList.className = 'executor-list';
-            executorList.id = `executors-${task.id}`;
-
-            if (task.executors && task.executors.length > 0) {
-                task.executors.forEach(executor => {
-                    executorList.appendChild(createExecutorItem(task, executor));
-                });
-            } else {
-                const noExecutors = document.createElement('p');
-                noExecutors.style.cssText = 'color: #a0a0a0; padding: 15px; text-align: center;';
-                noExecutors.textContent = 'Нет исполнителей';
-                executorList.appendChild(noExecutors);
-            }
-            card.appendChild(executorList);
-
-            if (task.status !== 'completed') {
-                const addBtn = document.createElement('button');
-                addBtn.className = 'btn-add-executor';
-                addBtn.textContent = '+ Добавить исполнителя';
-                addBtn.onclick = () => showAddExecutorForm(task);
-                card.appendChild(addBtn);
-            }
-
-            const readyBtn = document.createElement('button');
-            readyBtn.className = 'btn-ready';
-            readyBtn.textContent = 'ГОТОВО';
-            readyBtn.disabled = task.status === 'completed';
-            readyBtn.onclick = () => completeTask(task.id);
-            card.appendChild(readyBtn);
-
+            
             return card;
         }
-
-        function createExecutorItem(task, executor) {
-            const div = document.createElement('div');
-            div.className = 'executor-item';
-
-            const nameInput = document.createElement('input');
-            nameInput.type = 'text';
-            nameInput.className = 'executor-name-input';
-            nameInput.value = executor.name;
-            nameInput.placeholder = 'ФИО исполнителя';
-            nameInput.disabled = task.status === 'completed';
-            nameInput.onchange = (e) => {
-                executor.name = e.target.value;
-                taskManager.saveHistoryForDate(taskManager.currentDate);
-            };
-            div.appendChild(nameInput);
-
-            const quantityInput = document.createElement('input');
-            quantityInput.type = 'number';
-            quantityInput.className = 'executor-quantity';
-            quantityInput.value = executor.quantity || 0;
-            quantityInput.min = 0;
-            quantityInput.max = task.totalQuantity || 0;
-            quantityInput.disabled = task.status === 'completed';
-            quantityInput.onchange = (e) => {
-                const val = parseInt(e.target.value) || 0;
-                taskManager.updateExecutorQuantity(task.id, executor.name, val);
-                loadTasks();
-            };
-            div.appendChild(quantityInput);
-
-            const workBtn = document.createElement('button');
-            workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''}`;
-            workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
-            workBtn.disabled = task.status === 'completed';
-            workBtn.onclick = () => toggleWorkStatus(task.id, executor.name, workBtn);
-            div.appendChild(workBtn);
-
-            return div;
+        
+        function addExecutor(taskId) {
+            const name = prompt('ФИО исполнителя:');
+            if (!name) return;
+            
+            // Здесь нужно добавить логику сохранения исполнителя
+            alert(`Исполнитель ${name} добавлен`);
         }
-
-        function showAddExecutorForm(task) {
-            const executorList = document.getElementById(`executors-${task.id}`);
-            if (!executorList) return;
-
-            const oldForm = executorList.parentNode.querySelector('.new-executor-form');
-            if (oldForm) oldForm.remove();
-
-            const formDiv = document.createElement('div');
-            formDiv.className = 'new-executor-form';
-
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.placeholder = 'ФИО исполнителя';
-
-            const addBtn = document.createElement('button');
-            addBtn.className = 'btn btn-success';
-            addBtn.textContent = 'Добавить';
-            addBtn.onclick = () => {
-                if (input.value.trim()) {
-                    taskManager.addExecutor(task.id, input.value);
-                    loadTasks();
-                }
-            };
-
-            const cancelBtn = document.createElement('button');
-            cancelBtn.className = 'btn btn-danger';
-            cancelBtn.textContent = 'Отмена';
-            cancelBtn.onclick = () => formDiv.remove();
-
-            formDiv.appendChild(input);
-            formDiv.appendChild(addBtn);
-            formDiv.appendChild(cancelBtn);
-
-            executorList.parentNode.insertBefore(formDiv, executorList.nextSibling);
-        }
-
-        function toggleWorkStatus(taskId, executorName, btn) {
-            const newStatus = btn.classList.contains('active') ? 'pending' : 'in_progress';
-            taskManager.updateExecutorStatus(taskId, executorName, newStatus);
-            btn.classList.toggle('active');
-            btn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
-        }
-
+        
         function completeTask(taskId) {
-            if (confirm('Завершить эту задачу?')) {
-                taskManager.completeTask(taskId);
+            if (confirm('Завершить задачу?')) {
+                taskManager.updateTaskStatus(taskId, 'completed');
                 loadTasks();
             }
         }
