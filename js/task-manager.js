@@ -5,186 +5,34 @@ class TaskManager {
         this.currentDate = new Date();
         this.tasks = [];
         this.orders = [];
-        this.taskHistory = {};
-        this.operationsDB = this.loadOperationsDatabase();
-    }
-    
-    // Загрузить базу операций из техкарт
-    loadOperationsDatabase() {
-        return {
-            // ТОКАРНЫЙ УЧАСТОК
-            'tokarniy': {
-                'XRAY 6-T2 BT 220 Шторка x2': [
-                    'Заготовка',
-                    'Точение Корпуса',
-                    'Заготовка деталей Крышка',
-                    'Точение деталей Кольцо',
-                    'Фрезеровка Корпуса'
-                ],
-                'XGRAY v.1': [
-                    'Заготовка',
-                    'Точение Корпуса',
-                    'Фрезеровка Корпуса'
-                ],
-                'XGRAY v.2': [
-                    'Заготовка',
-                    'Точение Корпуса',
-                    'Фрезеровка Корпуса'
-                ]
-            },
-            
-            // СЛЕСАРНЫЙ УЧАСТОК
-            'slesarniy': {
-                'XRAY 6-T2 BT 220 Шторка x2': [
-                    'Нарезка резьбы Корпус+V',
-                    'Установка Резьбовых заклепок 4*16',
-                    'Нарезка резьбы Основание платы+V',
-                    'Обработка Корпуса',
-                    'Обработка Основания платы',
-                    'Голтовка Кронштейна',
-                    'УВ корпуса'
-                ],
-                'XGRAY v.1': [
-                    'Нарезка резьбы',
-                    'Голтовка',
-                    'УВ корпуса'
-                ]
-            },
-            
-            // ФРЕЗЕРНЫЙ УЧАСТОК
-            'frezerniy': {
-                'XRAY 6-T2 BT 220 Шторка x2': [
-                    'Поликарбонат Прозрачный 3мм х 2'
-                ],
-                'XGRAY v.1': [
-                    'Заглушка AL 3мм Левая',
-                    'Заглушка AL 3мм Правая'
-                ]
-            },
-            
-            // ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК
-            'lazerno': {
-                'XRAY 6-T2 BT 220 Шторка x2': [
-                    'Раскрой Основания платы',
-                    'Раскрой Фоновая заглушка',
-                    'Раскрой Кронштейн BT',
-                    'Гибка Кронштейн BT'
-                ],
-                'XGRAY v.1': [
-                    'Раскрой Заглушка модуля'
-                ]
-            },
-            
-            // ПОЛИМЕРНЫЙ УЧАСТОК
-            'polimerniy': {
-                'XRAY 6-T2 BT 220 Шторка x2': [
-                    'Корпус',
-                    'Фоновая заглушка'
-                ],
-                'XGRAY v.1': [
-                    'Профиль',
-                    'Заглушка Левая',
-                    'Заглушка Правая',
-                    'Кронштейн AL'
-                ]
-            }
-        };
-    }
-    
-    // Получить операции для изделия на текущем участке
-    getOperationsForProduct(productName) {
-        const siteOps = this.operationsDB[this.siteType];
-        if (!siteOps) return [];
-        
-        // Прямое совпадение
-        if (siteOps[productName]) {
-            return siteOps[productName];
-        }
-        
-        // Поиск по частичному совпадению
-        for (let key in siteOps) {
-            if (productName.includes(key) || key.includes(productName)) {
-                return siteOps[key];
-            }
-        }
-        
-        return [];
     }
     
     // Загрузить заказы и задачи
     loadData() {
         this.orders = loadOrdersFromStorage() || [];
-        this.loadHistoryForDate(this.currentDate);
+        this.generateTasks();
         return this.tasks;
-    }
-    
-    // Загрузить историю задач для конкретной даты
-    loadHistoryForDate(date) {
-        const dateStr = this.formatDate(date);
-        const savedHistory = localStorage.getItem(`tasks_${this.siteType}_${dateStr}`);
-        
-        if (savedHistory) {
-            try {
-                let historyTasks = JSON.parse(savedHistory);
-                
-                // Фильтруем задачи: оставляем только те, чьи заказы существуют
-                historyTasks = historyTasks.filter(task => {
-                    return this.orders.some(o => o.id === task.orderId);
-                });
-                
-                this.taskHistory[dateStr] = historyTasks;
-                this.tasks = historyTasks;
-                
-                // Если задачи отфильтровались, сохраняем обновлённую историю
-                if (historyTasks.length !== JSON.parse(savedHistory).length) {
-                    this.saveHistoryForDate(date);
-                }
-            } catch (e) {
-                console.error('Ошибка парсинга истории:', e);
-                this.tasks = this.generateTasks();
-                this.saveHistoryForDate(date);
-            }
-        } else {
-            this.tasks = this.generateTasks();
-            this.saveHistoryForDate(date);
-        }
-        
-        return this.tasks;
-    }
-    
-    // Сохранить историю задач для даты
-    saveHistoryForDate(date) {
-        const dateStr = this.formatDate(date);
-        this.taskHistory[dateStr] = this.tasks;
-        localStorage.setItem(`tasks_${this.siteType}_${dateStr}`, JSON.stringify(this.tasks));
     }
     
     // Сгенерировать задачи для участка из заказов
     generateTasks() {
-        const tasks = [];
-        const dateStr = this.formatDate(this.currentDate);
+        this.tasks = [];
         
-        const activeOrders = this.orders.filter(o => o.status === 'active');
-        
-        activeOrders.forEach(order => {
-            if (!order.items || !order.items[0]) return;
+        this.orders.forEach(order => {
+            if (order.status !== 'active') return;
             
-            const item = order.items[0];
-            const productName = item.product;
-            const operations = this.getOperationsForProduct(productName);
-            const totalQuantity = item.quantity || 1;
-            
-            // Создаём задачи для каждой операции
-            operations.forEach((op, index) => {
-                const taskId = `${order.id}_${productName}_${this.siteType}_${index}`;
+            order.items.forEach(item => {
+                const productName = item.product;
+                const operations = this.getOperationsForProduct(productName);
+                const totalQuantity = item.quantity || 1;
                 
-                // Проверяем, есть ли уже задача в истории для этой даты
-                const existingTask = this.tasks.find(t => t.id === taskId);
-                
-                if (existingTask) {
-                    tasks.push(existingTask);
-                } else {
-                    tasks.push({
+                operations.forEach((op, index) => {
+                    const taskId = `${order.id}_${productName}_${this.siteType}_${index}`;
+                    
+                    // Получаем статус из заказа
+                    const taskStatus = order.tasks && order.tasks[taskId] ? order.tasks[taskId] : 'pending';
+                    
+                    this.tasks.push({
                         id: taskId,
                         orderId: order.id,
                         orderNumber: order.number,
@@ -194,68 +42,92 @@ class TaskManager {
                         completedQuantity: 0,
                         operation: op,
                         operationIndex: index,
-                        status: 'pending',
+                        status: taskStatus,
                         executors: [],
-                        date: dateStr,
                         isExtra: false
                     });
-                }
+                });
             });
             
             // Дополнительные задачи
-            if (order.extraTasks && order.extraTasks.length > 0) {
+            if (order.extraTasks) {
                 order.extraTasks.forEach((extraTask, index) => {
                     if (extraTask.site !== this.siteType) return;
                     
                     const taskId = `${order.id}_extra_${index}`;
+                    const taskStatus = order.tasks && order.tasks[taskId] ? order.tasks[taskId] : 'pending';
                     
-                    // Проверяем, есть ли уже задача в истории
-                    const existingTask = this.tasks.find(t => t.id === taskId);
-                    
-                    if (existingTask) {
-                        tasks.push(existingTask);
-                    } else {
-                        tasks.push({
-                            id: taskId,
-                            orderId: order.id,
-                            orderNumber: order.number,
-                            product: extraTask.title,
-                            description: extraTask.description,
-                            totalQuantity: 1,
-                            completedQuantity: 0,
-                            operation: extraTask.title,
-                            status: 'pending',
-                            executors: [],
-                            date: dateStr,
-                            isExtra: true
-                        });
-                    }
+                    this.tasks.push({
+                        id: taskId,
+                        orderId: order.id,
+                        orderNumber: order.number,
+                        product: extraTask.title,
+                        description: extraTask.description,
+                        totalQuantity: 1,
+                        completedQuantity: 0,
+                        operation: extraTask.title,
+                        status: taskStatus,
+                        executors: [],
+                        isExtra: true
+                    });
                 });
             }
         });
+    }
+    
+    // Получить операции для изделия
+    getOperationsForProduct(productName) {
+        const operationsDB = {
+            'tokarniy': {
+                'XRAY 6-T2 BT 220 Шторка x2': [
+                    'Заготовка',
+                    'Точение Корпуса',
+                    'Заготовка деталей Крышка',
+                    'Точение деталей Кольцо',
+                    'Фрезеровка Корпуса'
+                ]
+            },
+            'slesarniy': {
+                'XRAY 6-T2 BT 220 Шторка x2': [
+                    'Нарезка резьбы Корпус+V',
+                    'Установка Резьбовых заклепок 4*16',
+                    'Нарезка резьбы Основание платы+V',
+                    'Обработка Корпуса',
+                    'Обработка Основания платы',
+                    'Голтовка Кронштейна',
+                    'УВ корпуса'
+                ]
+            },
+            'frezerniy': {
+                'XRAY 6-T2 BT 220 Шторка x2': [
+                    'Поликарбонат Прозрачный 3мм х 2'
+                ]
+            },
+            'lazerno': {
+                'XRAY 6-T2 BT 220 Шторка x2': [
+                    'Раскрой Основания платы',
+                    'Раскрой Фоновая заглушка',
+                    'Раскрой Кронштейн BT',
+                    'Гибка Кронштейн BT'
+                ]
+            },
+            'polimerniy': {
+                'XRAY 6-T2 BT 220 Шторка x2': [
+                    'Корпус',
+                    'Фоновая заглушка'
+                ]
+            }
+        };
         
-        return tasks;
+        return operationsDB[this.siteType]?.[productName] || [];
     }
     
     // Обновить статус задачи
     updateTaskStatus(taskId, status) {
-        const taskIndex = this.tasks.findIndex(t => t.id === taskId);
-        if (taskIndex === -1) return false;
-        
-        this.tasks[taskIndex].status = status;
-        this.saveHistoryForDate(this.currentDate);
-        this.updateOrderTaskStatus(taskId, status);
-        this.notifyOtherTabs(taskId, status);
-        
-        return true;
-    }
-    
-    // Обновить статус в заказе (для квадратиков в планировщике)
-    updateOrderTaskStatus(taskId, status) {
         const [orderId] = taskId.split('_');
         const orderIndex = this.orders.findIndex(o => o.id == orderId);
         
-        if (orderIndex === -1) return;
+        if (orderIndex === -1) return false;
         
         if (!this.orders[orderIndex].tasks) {
             this.orders[orderIndex].tasks = {};
@@ -267,142 +139,17 @@ class TaskManager {
         
         this.orders[orderIndex].tasks[taskId] = squareStatus;
         saveOrdersToStorage(this.orders);
-    }
-    
-    // Добавить исполнителя
-    addExecutor(taskId, executorName) {
+        
+        // Обновляем локальные задачи
         const taskIndex = this.tasks.findIndex(t => t.id === taskId);
-        if (taskIndex === -1) return false;
-        
-        if (!this.tasks[taskIndex].executors) {
-            this.tasks[taskIndex].executors = [];
+        if (taskIndex !== -1) {
+            this.tasks[taskIndex].status = status;
         }
         
-        // Проверяем, нет ли уже такого исполнителя
-        const existing = this.tasks[taskIndex].executors.find(e => e.name === executorName);
-        if (existing) return false;
-        
-        this.tasks[taskIndex].executors.push({
-            name: executorName,
-            quantity: 0,
-            status: 'pending',
-            addedAt: new Date().toISOString()
-        });
-        
-        this.saveHistoryForDate(this.currentDate);
-        return true;
-    }
-    
-    // Обновить количество исполнителя
-    updateExecutorQuantity(taskId, executorName, quantity) {
-        const taskIndex = this.tasks.findIndex(t => t.id === taskId);
-        if (taskIndex === -1) return false;
-        
-        const executor = this.tasks[taskIndex].executors?.find(e => e.name === executorName);
-        if (!executor) return false;
-        
-        // Обновляем количество
-        executor.quantity = quantity;
-        
-        // Пересчитываем общее выполнение
-        const totalCompleted = this.tasks[taskIndex].executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
-        this.tasks[taskIndex].completedQuantity = totalCompleted;
-        
-        // Если исполнитель выполнил работу, отмечаем как in_progress
-        if (quantity > 0 && executor.status !== 'completed') {
-            executor.status = 'in_progress';
-        }
-        
-        // Проверяем, выполнена ли задача полностью
-        if (totalCompleted >= this.tasks[taskIndex].totalQuantity) {
-            this.tasks[taskIndex].status = 'completed';
-            this.tasks[taskIndex].completedQuantity = this.tasks[taskIndex].totalQuantity;
-            
-            // Отмечаем всех исполнителей как completed
-            this.tasks[taskIndex].executors.forEach(e => {
-                e.status = 'completed';
-            });
-            
-            this.updateOrderTaskStatus(taskId, 'completed');
-        } else if (totalCompleted > 0) {
-            this.tasks[taskIndex].status = 'in_progress';
-            this.updateOrderTaskStatus(taskId, 'in_progress');
-        }
-        
-        this.saveHistoryForDate(this.currentDate);
-        return true;
-    }
-    
-    // Обновить статус исполнителя
-    updateExecutorStatus(taskId, executorName, status) {
-        const taskIndex = this.tasks.findIndex(t => t.id === taskId);
-        if (taskIndex === -1) return false;
-        
-        const executor = this.tasks[taskIndex].executors?.find(e => e.name === executorName);
-        if (!executor) return false;
-        
-        executor.status = status;
-        
-        if (status === 'in_progress' && this.tasks[taskIndex].status !== 'completed') {
-            this.updateTaskStatus(taskId, 'in_progress');
-        }
-        
-        this.saveHistoryForDate(this.currentDate);
-        return true;
-    }
-    
-    // Завершить задачу
-    completeTask(taskId) {
-        const taskIndex = this.tasks.findIndex(t => t.id === taskId);
-        if (taskIndex === -1) return false;
-        
-        this.tasks[taskIndex].status = 'completed';
-        this.tasks[taskIndex].completedQuantity = this.tasks[taskIndex].totalQuantity;
-        
-        if (this.tasks[taskIndex].executors) {
-            this.tasks[taskIndex].executors.forEach(e => {
-                e.status = 'completed';
-                e.quantity = this.tasks[taskIndex].totalQuantity;
-            });
-        }
-        
-        this.saveHistoryForDate(this.currentDate);
-        this.updateOrderTaskStatus(taskId, 'completed');
+        // Оповещаем другие вкладки
+        this.notifyOtherTabs(taskId, status);
         
         return true;
-    }
-    
-    // Установить дату
-    setDate(date) {
-        this.currentDate = new Date(date);
-        this.loadHistoryForDate(this.currentDate);
-        return this.tasks;
-    }
-    
-    // Предыдущий день
-    prevDay() {
-        this.currentDate.setDate(this.currentDate.getDate() - 1);
-        this.loadHistoryForDate(this.currentDate);
-        return this.tasks;
-    }
-    
-    // Следующий день
-    nextDay() {
-        this.currentDate.setDate(this.currentDate.getDate() + 1);
-        this.loadHistoryForDate(this.currentDate);
-        return this.tasks;
-    }
-    
-    // Сегодня
-    today() {
-        this.currentDate = new Date();
-        this.loadHistoryForDate(this.currentDate);
-        return this.tasks;
-    }
-    
-    // Форматировать дату
-    formatDate(date) {
-        return date.toISOString().split('T')[0];
     }
     
     // Оповестить другие вкладки
