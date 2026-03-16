@@ -159,30 +159,38 @@ header {
     backdrop-filter: blur(5px);
 }
 
+/* МОДАЛЬНОЕ ОКНО С ПРОКРУТКОЙ */
 .modal-content {
     background: linear-gradient(135deg, #1a1e24, #0f1217);
-    margin: 5% auto;
+    margin: 2% auto;  /* уменьшил отступ сверху */
     padding: 30px;
     width: 90%;
     max-width: 500px;
+    max-height: 90vh;  /* ограничиваем высоту 90% экрана */
+    overflow-y: auto;  /* включаем вертикальную прокрутку */
     border-radius: 12px;
     position: relative;
     border: 1px solid #2a2f38;
     box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
-.close {
-    position: absolute;
-    right: 20px;
-    top: 10px;
-    font-size: 28px;
-    cursor: pointer;
-    color: #a0a0a0;
-    transition: all 0.3s;
+/* Стилизация скроллбара для модального окна */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
 }
 
-.close:hover {
-    color: #ff3b3b;
+.modal-content::-webkit-scrollbar-track {
+    background: #1e232b;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #ff3b3b;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #ff6b6b;
 }
 
 /* ============== ФОРМЫ ============== */
