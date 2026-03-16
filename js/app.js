@@ -10,24 +10,139 @@ document.addEventListener('DOMContentLoaded', async function() {
     await loadAllData();
 });
 
-// Загрузка всех данных
-async function loadAllData() {
-    try {
-        products = await loadProducts() || [];
-        brackets = await loadBrackets() || [];
-        lyres = await loadLyres() || [];
-        orders = loadOrdersFromStorage() || [];
-        
-        console.log('Продукты:', products.length);
-        console.log('Кронштейны:', brackets.length);
-        console.log('Лир:', lyres.length);
-        console.log('Заказы:', orders.length);
-        
-        populateSelects();
-        loadOrders();
-    } catch (error) {
-        console.error('Ошибка загрузки:', error);
+// Загрузка заказов с квадратиками
+function loadOrders() {
+    const ordersList = document.getElementById('ordersList');
+    if (!ordersList) return;
+    
+    ordersList.innerHTML = '';
+    
+    if (orders.length === 0) {
+        ordersList.innerHTML = '<div style="text-align: center; padding: 50px; background: #1a1e24; border-radius: 8px; color: #666;">📭 Нет заказов</div>';
+        return;
     }
+    
+    orders.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    orders.forEach(order => {
+        const card = document.createElement('div');
+        card.className = 'order-card';
+        card.dataset.orderId = order.id;
+        
+        // Шапка заказа
+        const header = document.createElement('div');
+        header.className = 'order-header';
+        header.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                <h3>📦 Заказ №${order.number} от ${formatDate(order.date)}</h3>
+                <span style="background: #ff3b3b; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px;">В работе</span>
+                <span style="background: #2a2f38; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #fff;">
+                    Деталей: ${order.items[0].quantity} шт
+                </span>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-info" onclick="event.stopPropagation(); showMaterialsReport(${order.id})">📊 Материалы</button>
+                <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
+            </div>
+        `;
+        
+        // Контент (скрыт по умолчанию)
+        const content = document.createElement('div');
+        content.className = 'order-content';
+        content.style.display = 'none';
+        
+        // Информация о заказе
+        const item = order.items[0];
+        content.innerHTML = `
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Изделие</th>
+                        <th>Размер</th>
+                        <th>Кол-во</th>
+                        <th>Кронштейн</th>
+                        <th>Лира</th>
+                        <th>RAL</th>
+                        <th>Текстура</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>${item.product}</strong></td>
+                        <td>${item.size || '-'}</td>
+                        <td>${item.quantity} шт</td>
+                        <td>${item.bracket.type} (${item.bracket.quantity} шт)</td>
+                        <td>${item.lyre.type} (${item.lyre.quantity} шт)</td>
+                        <td>${item.ral || '-'}</td>
+                        <td>${item.texture || '-'}</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="sites-section">
+                <h4 style="margin-bottom: 15px;">🏭 Производственные участки</h4>
+                <div class="sites-grid">
+                    ${createSiteRow('🔧 Токарный', order, 'tokarniy')}
+                    ${createSiteRow('🔨 Слесарный', order, 'slesarniy')}
+                    ${createSiteRow('⚙️ Фрезерный', order, 'frezerniy')}
+                    ${createSiteRow('✨ Лазерно-гибочный', order, 'lazerno')}
+                    ${createSiteRow('🧪 Полимерный', order, 'polimerniy')}
+                </div>
+            </div>
+        `;
+        
+        // Клик по заголовку для раскрытия
+        header.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('btn')) {
+                content.style.display = content.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+        
+        card.appendChild(header);
+        card.appendChild(content);
+        ordersList.appendChild(card);
+    });
+}
+
+// Форматирование даты
+function formatDate(dateString) {
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    return new Date(dateString).toLocaleDateString('ru-RU', options);
+}
+
+// Вспомогательная функция для создания строки участка
+function createSiteRow(name, order, siteKey) {
+    // Пока просто заглушка
+    return `
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #1a1e24; border-radius: 5px; margin-bottom: 5px;">
+            <span style="color: #fff;">${name}</span>
+            <div style="display: flex; gap: 5px;">
+                <div class="square"></div>
+                <div class="square"></div>
+                <div class="square"></div>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
+        </div>
+    `;
+}
+
+// Заглушка для отчета по материалам
+function showMaterialsReport(orderId) {
+    alert('Отчет по материалам будет позже');
+}
+
+// Удаление заказа
+function deleteOrder(orderId) {
+    if (confirm('Удалить заказ?')) {
+        orders = orders.filter(o => o.id !== orderId);
+        saveOrdersToStorage(orders);
+        loadOrders();
+    }
+}
+
+// Добавление доп. задачи
+function addExtraTask(orderId, siteKey) {
+    alert(`Добавить задачу на участок ${siteKey}`);
 }
 
 // Заполнение выпадающих списков
