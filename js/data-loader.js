@@ -276,6 +276,11 @@ async function loadProducts() {
             name: 'XRAY 6-T2 BZ 240 Шторка', 
             sizes: ['Стандартный']
         },
+        // XRAY 6-T2 BZ 240 Шторка х2
+        { 
+            name: 'XRAY 6-T2 BZ 240 Шторка х2', 
+            sizes: ['Стандартный']
+        },
         // XRAY 6T Накладной
         { 
             name: 'XRAY 6T Накладной', 
@@ -378,7 +383,6 @@ async function loadProductSizes(productName) {
 async function loadBrackets() {
     console.log('Загрузка кронштейнов...');
     
-    // Полный список кронштейнов из файла ClusterX - Тех карта Кронштейны.csv
     return [
         { name: 'PU-5', thickness: '2мм', area: 0.01 },
         { name: 'PU-6', thickness: '2мм', area: 0.0104 },
@@ -469,7 +473,6 @@ async function loadBrackets() {
 async function loadLyres() {
     console.log('Загрузка лир...');
     
-    // Полный список лир из файла ClusterX - Тех карта Лиры.csv
     return [
         { name: '(L-серия) лира', thickness: '1.5мм', area: 0.0024 },
         { name: '(P-серия) лира', thickness: '2мм', area: 0.005 },
