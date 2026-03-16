@@ -16,11 +16,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
         .nav-buttons {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
         
         .order-card {
@@ -124,6 +127,7 @@
             border: 1px solid #2a2f38;
             border-radius: 4px;
             color: #fff;
+            font-size: 14px;
         }
         
         .executor-quantity {
@@ -134,6 +138,7 @@
             border-radius: 4px;
             color: #fff;
             text-align: center;
+            font-size: 14px;
         }
         
         .btn-work {
@@ -146,6 +151,7 @@
             font-size: 13px;
             transition: all 0.3s;
             min-width: 90px;
+            font-weight: 600;
         }
         
         .btn-work.active {
@@ -156,6 +162,11 @@
         .btn-work.completed {
             background: #28a745;
             color: white;
+            cursor: not-allowed;
+        }
+        
+        .btn-work:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
         }
         
@@ -215,6 +226,7 @@
             border: 1px solid #2a2f38;
             border-radius: 4px;
             color: #fff;
+            font-size: 14px;
         }
         
         .extra-task-badge {
@@ -331,6 +343,51 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            border: none;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+            border: none;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #000;
+            border: none;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+            border: none;
+        }
+        
+        .btn-info:hover {
+            background: #138496;
+        }
     </style>
 </head>
 <body>
@@ -395,21 +452,14 @@
         </div>
     </div>
 
-    <!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ (ВАЖНО: В ПРАВИЛЬНОМ ПОРЯДКЕ) -->
+    <!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ -->
     <script src="../js/storage.js"></script>
     <script src="../js/data-loader.js"></script>
-    <script src="../js/task-manager.js"></script>  <!-- ЭТОТ ФАЙЛ БЫЛ ПРОПУЩЕН -->
+    <script src="../js/task-manager.js"></script>
     
     <script>
         // ============== ОПЕРАЦИИ ДЛЯ ТОКАРНОГО УЧАСТКА ==============
         const tokarniyOperations = {
-            'XRAY 6-T2 BT 220 Шторка х2': [
-                'Заготовка',
-                'Точение Корпуса',
-                'Заготовка деталей Крышка',
-                'Точение деталей Кольцо',
-                'Фрезеровка Корпуса'
-            ],
             'XRAY 6-T2 BT 180': [
                 'Заготовка',
                 'Точение Корпуса',
@@ -431,6 +481,41 @@
                 'Точение Кольца',
                 'Фрезеровка'
             ],
+            'XRAY 6-T2 BT 220 Шторка х2': [
+                'Заготовка',
+                'Точение Корпуса',
+                'Заготовка деталей Крышка',
+                'Точение деталей Кольцо',
+                'Фрезеровка Корпуса'
+            ],
+            'XRAY 6-T2 BZ 180': [
+                'Заготовка',
+                'Точение Корпуса',
+                'Точение Крышки',
+                'Точение Кольца',
+                'Фрезеровка'
+            ],
+            'XRAY 6-T2 BZ 200 Шторка': [
+                'Заготовка',
+                'Точение Корпуса',
+                'Точение Крышки',
+                'Точение Кольца',
+                'Фрезеровка'
+            ],
+            'XRAY 6-T2 BZ 220': [
+                'Заготовка',
+                'Точение Корпуса',
+                'Точение Крышки',
+                'Точение Кольца',
+                'Фрезеровка'
+            ],
+            'XRAY 6-T2 BZ 220 Шторка х2': [
+                'Заготовка',
+                'Точение Корпуса',
+                'Заготовка деталей Крышка',
+                'Точение деталей Кольцо',
+                'Фрезеровка Корпуса'
+            ],
             'XGRAY v.1': [
                 'Заготовка профиля',
                 'Точение профиля',
@@ -440,6 +525,24 @@
                 'Заготовка профиля',
                 'Точение профиля',
                 'Точение планки'
+            ],
+            'XSMART': [
+                'Заготовка',
+                'Точение корпуса'
+            ],
+            'XSMART mini': [
+                'Заготовка',
+                'Точение корпуса'
+            ],
+            'ACENTO 3T': [
+                'Заготовка',
+                'Точение корпуса',
+                'Точение фланца'
+            ],
+            'ACENTO 4': [
+                'Заготовка',
+                'Точение корпуса',
+                'Точение фланца'
             ]
         };
         
@@ -458,6 +561,10 @@
             const taskManager = new TaskManager('tokarniy', tokarniyOperations);
             let currentFilter = 'all';
             
+            // Таймеры для защиты от рекурсии
+            let _historyTimer = null;
+            let _loadTimer = null;
+            
             // Глобальные функции для доступа из HTML
             window.taskManager = taskManager;
             
@@ -469,21 +576,32 @@
                 // Слушаем изменения из других вкладок
                 window.addEventListener('taskStatusChanged', function() {
                     console.log('🔄 Получено событие taskStatusChanged');
-                    loadTasks();
+                    if (_loadTimer) clearTimeout(_loadTimer);
+                    _loadTimer = setTimeout(() => {
+                        loadTasks();
+                    }, 100);
                 });
                 
+                // Слушаем изменения истории (с защитой от рекурсии)
                 window.addEventListener('taskHistoryChanged', function(e) {
                     if (e.detail.siteType === 'tokarniy') {
                         console.log('🔄 Изменение истории для токарного участка');
-                        loadTasks();
+                        if (_historyTimer) clearTimeout(_historyTimer);
+                        _historyTimer = setTimeout(() => {
+                            loadTasks();
+                        }, 200);
                     }
                 });
                 
+                // Слушаем изменения в localStorage
                 window.addEventListener('storage', function(e) {
-                    if (e.key === 'masterx_orders' || e.key.startsWith('tasks_tokarniy_')) {
+                    if (e.key === 'masterx_orders' || (e.key && e.key.startsWith('tasks_tokarniy_'))) {
                         console.log('🔄 Изменение в localStorage');
-                        taskManager.loadData();
-                        loadTasks();
+                        if (_loadTimer) clearTimeout(_loadTimer);
+                        _loadTimer = setTimeout(() => {
+                            taskManager.loadData();
+                            loadTasks();
+                        }, 100);
                     }
                 });
             });
@@ -525,7 +643,10 @@
             function loadTasks() {
                 const tasksList = document.getElementById('tasksList');
                 
+                // Загружаем данные
                 taskManager.loadData();
+                
+                // Получаем отфильтрованные задачи
                 let tasks = taskManager.getTasksByStatus(currentFilter);
                 
                 // Обновляем статистику
@@ -708,7 +829,8 @@
                 quantityInput.onchange = (e) => {
                     const val = parseInt(e.target.value) || 0;
                     taskManager.updateExecutorQuantity(task.id, executor.id, val);
-                    loadTasks();
+                    // Не вызываем loadTasks здесь, так как updateExecutorQuantity вызовет saveTasksToHistory,
+                    // который через событие обновит страницу
                 };
                 div.appendChild(quantityInput);
                 
@@ -751,7 +873,9 @@
                 addBtn.onclick = () => {
                     if (input.value.trim()) {
                         taskManager.addExecutor(task.id, input.value);
-                        loadTasks();
+                        // Не вызываем loadTasks здесь, так как addExecutor вызовет saveTasksToHistory,
+                        // который через событие обновит страницу
+                        formDiv.remove();
                     }
                 };
                 
@@ -778,7 +902,7 @@
             window.removeExecutor = function(taskId, executorId) {
                 if (confirm('Удалить этого исполнителя?')) {
                     taskManager.removeExecutor(taskId, executorId);
-                    loadTasks();
+                    // Не вызываем loadTasks здесь, так как removeExecutor вызовет saveTasksToHistory
                 }
             };
             
@@ -797,7 +921,7 @@
                 
                 if (confirm(message)) {
                     taskManager.completeTask(taskId);
-                    loadTasks();
+                    // Не вызываем loadTasks здесь, так как completeTask вызовет saveTasksToHistory
                 }
             };
             
