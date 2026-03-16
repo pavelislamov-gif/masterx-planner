@@ -34,12 +34,13 @@ function showLoading() {
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(255,255,255,0.8);
+        background: rgba(0,0,0,0.8);
         display: flex;
         justify-content: center;
         align-items: center;
         z-index: 2000;
         font-size: 18px;
+        color: white;
     `;
     loader.innerHTML = 'Загрузка данных... ⏳';
     document.body.appendChild(loader);
@@ -310,25 +311,12 @@ function closeOrderModal() {
 // Показать уведомление
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 25px;
-        background: ${type === 'success' ? '#28a745' : '#17a2b8'};
-        color: white;
-        border-radius: 5px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 3000;
-        animation: slideIn 0.3s ease;
-    `;
+    notification.className = 'notification';
     notification.textContent = message;
-    
     document.body.appendChild(notification);
     
     setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
+        notification.remove();
     }, 3000);
 }
 
@@ -338,7 +326,7 @@ function showNotification(message, type = 'info') {
 function getSiteOperationsCount(productName, siteKey) {
     const operationsDB = {
         'tokarniy': {
-            'XRAY 6-T2 BT 220 Шторка x2': 3,
+            'XRAY 6-T2 BT 220 Шторка x2': 5,
             'XGRAY v.1': 3,
             'XGRAY v.2': 3,
             'XSMART mini': 2
@@ -399,10 +387,12 @@ function getTotalCompletedForTask(taskId, siteKey) {
     return totalCompleted;
 }
 
-// Создание строки участка с квадратиками и количеством
+// ============== ФУНКЦИИ ДЛЯ КВАДРАТИКОВ ==============
+
+// Создание строки участка с квадратиками по числу операций
 function createSiteRow(siteDisplayName, order, siteKey) {
     if (!order.items || !order.items[0]) {
-        return `<div class="site-item"><div class="site-name">${siteDisplayName}</div><div class="squares"><div class="square"></div></div></div>`;
+        return `<div class="site-item"><div class="site-name">${siteDisplayName}</div><div class="squares"></div></div>`;
     }
     
     const operationsCount = getSiteOperationsCount(order.items[0].product, siteKey);
@@ -412,7 +402,7 @@ function createSiteRow(siteDisplayName, order, siteKey) {
     let completedTasks = 0;
     let totalCompletedOverall = 0;
     
-    // Основные операции
+    // Создаём квадратики по числу операций
     for (let i = 0; i < operationsCount; i++) {
         const taskId = `${order.id}_${order.items[0].product}_${siteKey}_${i}`;
         const taskStatus = order.tasks && order.tasks[taskId] ? order.tasks[taskId] : '';
@@ -420,23 +410,22 @@ function createSiteRow(siteDisplayName, order, siteKey) {
         // Получаем общее количество выполненных деталей по этой задаче от ВСЕХ исполнителей
         const completedQuantity = getTotalCompletedForTask(taskId, siteKey);
         
-        // Определяем цвет квадратика на основе общего выполнения
+        // Определяем цвет квадратика
         let squareColor = '';
-        if (taskStatus === 'green' || completedQuantity >= totalProductQuantity) {
+        let displayText = '';
+        
+        if (completedQuantity >= totalProductQuantity) {
             squareColor = 'green';
             completedTasks++;
-        } else if (taskStatus === 'orange' || completedQuantity > 0) {
+            displayText = `${totalProductQuantity}`;
+        } else if (completedQuantity > 0) {
             squareColor = 'orange';
+            displayText = `${completedQuantity}`;
         }
         
         totalCompletedOverall += completedQuantity;
         
-        // Формируем текст для отображения внутри квадратика
-        const displayText = completedQuantity > 0 ? `${completedQuantity}` : '';
-        
-        // Добавляем всплывающую подсказку с деталями
-        const tooltip = `Выполнено: ${completedQuantity}/${totalProductQuantity} шт`;
-        
+        const tooltip = `Операция ${i+1}: ${completedQuantity}/${totalProductQuantity} шт`;
         squaresHtml += `<div class="square ${squareColor}" data-task="${taskId}" title="${tooltip}">${displayText}</div>`;
     }
     
@@ -445,21 +434,21 @@ function createSiteRow(siteDisplayName, order, siteKey) {
         order.extraTasks.forEach((task, index) => {
             if (task.site === siteKey) {
                 const taskId = `${order.id}_extra_${index}`;
-                const taskStatus = order.tasks && order.tasks[taskId] ? order.tasks[taskId] : '';
-                
                 const completedQuantity = getTotalCompletedForTask(taskId, siteKey);
                 
                 let squareColor = '';
-                if (taskStatus === 'green' || completedQuantity >= 1) {
+                let displayText = '';
+                
+                if (completedQuantity >= 1) {
                     squareColor = 'green';
                     completedTasks++;
-                } else if (taskStatus === 'orange' || completedQuantity > 0) {
+                    displayText = '1';
+                } else if (completedQuantity > 0) {
                     squareColor = 'orange';
+                    displayText = '1';
                 }
                 
-                const displayText = completedQuantity > 0 ? `1` : '';
-                const tooltip = `Доп. задача: ${completedQuantity > 0 ? 'выполнена' : 'ожидает'}`;
-                
+                const tooltip = `Доп. задача: ${task.title}`;
                 squaresHtml += `<div class="square ${squareColor} extra-square" data-task="${taskId}" title="${tooltip}">${displayText}</div>`;
             }
         });
@@ -473,7 +462,7 @@ function createSiteRow(siteDisplayName, order, siteKey) {
             <div class="squares">
                 ${squaresHtml || '<div class="square"></div>'}
             </div>
-            <div style="font-size: 12px; color: #666; margin: 0 15px;">
+            <div style="font-size: 12px; color: #a0a0a0; margin: 0 15px;">
                 ${totalCompletedOverall}/${totalProductQuantity * operationsCount}
             </div>
             <button class="btn btn-sm btn-primary" onclick="addExtraTaskToSite(${order.id}, '${siteKey}')">➕</button>
@@ -502,8 +491,8 @@ function addExtraTaskToSite(orderId, siteKey) {
     modal.innerHTML = `
         <div class="modal-content" style="max-width: 500px;">
             <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
-            <h3>➕ Новая дополнительная задача</h3>
-            <p>Заказ №${order.number} | Участок: ${siteNames[siteKey]}</p>
+            <h3 style="color: #fff; margin-bottom: 20px;">➕ Новая дополнительная задача</h3>
+            <p style="color: #a0a0a0; margin-bottom: 20px;">Заказ №${order.number} | Участок: ${siteNames[siteKey]}</p>
             <form id="extraTaskForm">
                 <input type="hidden" id="extraTaskSite" value="${siteKey}">
                 <div class="form-group">
@@ -568,7 +557,8 @@ function deleteExtraTask(orderId, taskIndex) {
     }
 }
 
-// Создание карточки заказа
+// ============== СОЗДАНИЕ КАРТОЧКИ ЗАКАЗА ==============
+
 function createOrderCard(order) {
     const card = document.createElement('div');
     card.className = 'order-card';
@@ -615,10 +605,10 @@ function createOrderCard(order) {
             <span style="background: ${getStatusColor(order.status)}; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px;">
                 ${order.status === 'active' ? 'В работе' : 'Завершен'}
             </span>
-            <span style="background: #e9ecef; padding: 3px 10px; border-radius: 15px; font-size: 12px;">
+            <span style="background: #2a2f38; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #fff;">
                 Деталей: ${totalItems} шт
             </span>
-            <span style="background: #e9ecef; padding: 3px 10px; border-radius: 15px; font-size: 12px;">
+            <span style="background: #2a2f38; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #fff;">
                 Прогресс: ${progress}%
             </span>
         </div>
@@ -637,12 +627,12 @@ function createOrderCard(order) {
     progressBar.style.cssText = `
         width: 100%;
         height: 6px;
-        background: #e9ecef;
+        background: #2a2f38;
         border-radius: 3px;
         margin: 10px 0;
         overflow: hidden;
     `;
-    progressBar.innerHTML = `<div style="width: ${progress}%; height: 100%; background: #28a745; transition: width 0.3s;"></div>`;
+    progressBar.innerHTML = `<div style="width: ${progress}%; height: 100%; background: #ff3b3b; transition: width 0.3s;"></div>`;
     content.appendChild(progressBar);
     
     // Таблица с основными позициями
@@ -699,7 +689,7 @@ function createOrderCard(order) {
     if (order.extraTasks && order.extraTasks.length > 0) {
         const extraTasksSection = document.createElement('div');
         extraTasksSection.className = 'extra-tasks-section';
-        extraTasksSection.innerHTML = '<h4 style="margin-top: 20px;">📋 Дополнительные задачи</h4>';
+        extraTasksSection.innerHTML = '<h4 style="margin-top: 20px; color: #ff3b3b;">📋 Дополнительные задачи</h4>';
         
         const extraTasksTable = document.createElement('table');
         extraTasksTable.className = 'items-table';
@@ -714,7 +704,7 @@ function createOrderCard(order) {
             
             extraRows += `
                 <tr>
-                    <td><strong>${task.title}</strong><br><small style="color: #666;">${task.description || ''}</small></td>
+                    <td><strong>${task.title}</strong><br><small style="color: #a0a0a0;">${task.description || ''}</small></td>
                     <td>${getSiteName(task.site)}</td>
                     <td style="text-align: center;">${statusText}</td>
                     <td style="text-align: center;">
@@ -742,11 +732,11 @@ function createOrderCard(order) {
         content.appendChild(extraTasksSection);
     }
     
-    // Участки
+    // Участки с квадратиками
     const sitesSection = document.createElement('div');
     sitesSection.className = 'sites-section';
     sitesSection.innerHTML = `
-        <h4 style="margin-bottom: 15px;">🏭 Производственные участки</h4>
+        <h4 style="margin-bottom: 15px; color: #fff;">🏭 Производственные участки</h4>
         <div class="sites-grid">
             ${createSiteRow('🔧 Токарный', order, 'tokarniy')}
             ${createSiteRow('🔨 Слесарный', order, 'slesarniy')}
@@ -794,9 +784,9 @@ function loadOrders() {
     
     if (!orders || orders.length === 0) {
         ordersList.innerHTML = `
-            <div style="text-align: center; padding: 50px; background: white; border-radius: 10px;">
-                <p style="font-size: 18px; color: #666;">📭 Нет заказов</p>
-                <p style="color: #999;">Нажмите "+ Новый заказ" чтобы создать первый заказ</p>
+            <div style="text-align: center; padding: 50px; background: #1a1e24; border-radius: 10px; border: 1px solid #2a2f38;">
+                <p style="font-size: 18px; color: #a0a0a0;">📭 Нет заказов</p>
+                <p style="color: #666;">Нажмите "+ Новый заказ" чтобы создать первый заказ</p>
             </div>
         `;
         return;
@@ -912,7 +902,7 @@ async function showMaterialsReport(orderId) {
     
     if (!modal || !reportDiv) return;
     
-    reportDiv.innerHTML = '<div style="text-align: center; padding: 20px;">⏳ Загрузка отчета...</div>';
+    reportDiv.innerHTML = '<div style="text-align: center; padding: 20px; color: #fff;">⏳ Загрузка отчета...</div>';
     modal.style.display = 'block';
     
     try {
@@ -1089,7 +1079,7 @@ function deleteOrder(orderId) {
 
 // Получение цвета статуса
 function getStatusColor(status) {
-    return status === 'active' ? '#007bff' : '#28a745';
+    return status === 'active' ? '#ff3b3b' : '#2ecc71';
 }
 
 // Закрытие модальных окон при клике вне их
