@@ -324,3 +324,8 @@ window.closeOrderModal = closeOrderModal;
 window.loadProductSizes = loadProductSizes;
 window.exportOrders = function() { alert('Экспорт заказов'); };
 window.closeMaterialsModal = function() { document.getElementById('materialsModal').style.display = 'none'; };
+
+// Глобальные функции
+window.showMaterialsReport = showMaterialsReport;
+window.deleteOrder = deleteOrder;
+window.addExtraTask = addExtraTask;
