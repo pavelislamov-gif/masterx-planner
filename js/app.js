@@ -72,7 +72,7 @@ function generateOrderNumber() {
 
 // ============== ФУНКЦИИ ДЛЯ РАБОТЫ С ЗАКАЗАМИ ==============
 
-// Загрузка и отображение заказов (ОПРЕДЕЛЕНА ПЕРВОЙ!)
+// Загрузка и отображение заказов
 function loadOrders() {
     console.log('loadOrders вызвана');
     const ordersList = document.getElementById('ordersList');
@@ -189,23 +189,98 @@ function updateStatistics() {
     document.getElementById('completedTasks').textContent = completedTasks;
 }
 
-// Обновление статуса задачи
+// Обновление статуса задачи (ИСПРАВЛЕНО)
 function updateTaskStatus(taskId, status) {
     console.log('updateTaskStatus вызвана', taskId, status);
-    const [orderId] = taskId.split('_');
-    const order = orders.find(o => o.id == orderId);
     
-    if (!order) return;
+    // Разбираем ID задачи (формат: orderId_siteType_index)
+    const parts = taskId.split('_');
+    const orderId = parts[0];
+    
+    const order = orders.find(o => o.id == orderId);
+    if (!order) {
+        console.warn('Заказ не найден:', orderId);
+        return;
+    }
     
     if (!order.tasks) order.tasks = {};
     
+    // Конвертируем статус из task-manager в статус квадратика
     let squareStatus = '';
     if (status === 'in_progress') squareStatus = 'orange';
     if (status === 'completed') squareStatus = 'green';
     
+    // Сохраняем статус
     order.tasks[taskId] = squareStatus;
+    
+    console.log(`✅ Обновлен статус задачи ${taskId}: ${squareStatus}`);
+    
+    // Сохраняем в localStorage
     saveOrdersToStorage(orders);
+    
+    // Обновляем отображение
     loadOrders();
+    updateStatistics();
+}
+
+// ============== СИНХРОНИЗАЦИЯ С УЧАСТКАМИ (НОВАЯ ФУНКЦИЯ) ==============
+function syncTasksFromHistory() {
+    console.log('🔄 Синхронизация задач из истории...');
+    
+    // Получаем сегодняшнюю дату
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Для каждого участка
+    const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+    let updatedCount = 0;
+    
+    sites.forEach(siteType => {
+        try {
+            const historyKey = `tasks_${siteType}_${today}`;
+            const history = localStorage.getItem(historyKey);
+            
+            if (history) {
+                const tasks = JSON.parse(history);
+                console.log(`📊 Загружено ${tasks.length} задач для ${siteType}`);
+                
+                // Обновляем статусы в заказах
+                tasks.forEach(task => {
+                    if (task.status === 'completed' || task.status === 'in_progress') {
+                        // Находим заказ
+                        const orderId = task.orderId;
+                        const order = orders.find(o => o.id == orderId);
+                        
+                        if (order) {
+                            if (!order.tasks) order.tasks = {};
+                            
+                            // Конвертируем статус
+                            let squareStatus = '';
+                            if (task.status === 'in_progress') squareStatus = 'orange';
+                            if (task.status === 'completed') squareStatus = 'green';
+                            
+                            // Обновляем статус задачи в заказе
+                            if (order.tasks[task.id] !== squareStatus) {
+                                order.tasks[task.id] = squareStatus;
+                                updatedCount++;
+                                console.log(`  📌 Задача ${task.id}: ${squareStatus}`);
+                            }
+                        }
+                    }
+                });
+            }
+        } catch (error) {
+            console.error(`❌ Ошибка синхронизации для ${siteType}:`, error);
+        }
+    });
+    
+    if (updatedCount > 0) {
+        console.log(`✅ Обновлено ${updatedCount} статусов задач`);
+        saveOrdersToStorage(orders);
+        loadOrders();
+        updateStatistics();
+    } else {
+        console.log('📭 Нет новых обновлений');
+    }
 }
 
 // ============== ФУНКЦИИ ДЛЯ МОДАЛЬНОГО ОКНА ==============
@@ -319,7 +394,125 @@ async function loadProductSizes() {
 // ============== ФУНКЦИЯ getOperationCount ==============
 function getOperationCount(productName, siteKey) {
     const operations = {
-        // ... (ваш большой объект operations)
+        // XRAY 6-T2 серия
+        'XRAY 6-T2 BT 180': { 'tokarniy': 3, 'slesarniy': 7, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
+        'XRAY 6-T2 BT 200': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
+        'XRAY 6-T2 BT 220': { 'tokarniy': 3, 'slesarniy': 7, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
+        'XRAY 6-T2 BT 220 Шторка х2': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
+        'XRAY 6-T2 BT 240 Шторка': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
+        'XRAY 6-T2 BZ 180': { 'tokarniy': 3, 'slesarniy': 7, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
+        'XRAY 6-T2 BZ 200 Шторка': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
+        'XRAY 6-T2 BZ 220': { 'tokarniy': 4, 'slesarniy': 7, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
+        'XRAY 6-T2 BZ 220 Шторка х2': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
+        'XRAY 6-T2 BZ 240 Шторка': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
+        'XRAY 6-T2 BZ 240 Шторка х2': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
+        
+        // XGRAY
+        'XGRAY v.1': { 'tokarniy': 3, 'slesarniy': 3, 'frezerniy': 2, 'lazerno': 1, 'polimerniy': 4 },
+        'XGRAY v.2': { 'tokarniy': 3, 'slesarniy': 3, 'frezerniy': 2, 'lazerno': 5, 'polimerniy': 5 },
+        
+        // XSMART
+        'XSMART mini': { 'tokarniy': 2, 'slesarniy': 1, 'frezerniy': 2, 'lazerno': 5, 'polimerniy': 4 },
+        'XSMART': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 2, 'lazerno': 4, 'polimerniy': 5 },
+        
+        // XLUMO
+        'XLUMO': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 5, 'lazerno': 5, 'polimerniy': 4 },
+        'XLUMO 1-6': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 4, 'lazerno': 4, 'polimerniy': 4 },
+        'XLUMO Двунаправленный': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 3, 'lazerno': 4, 'polimerniy': 4 },
+        'XLUMO PROV': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 3, 'lazerno': 5, 'polimerniy': 4 },
+        
+        // XGIRO
+        'XGIRO': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 2, 'lazerno': 4, 'polimerniy': 4 },
+        
+        // XVISION
+        'XVISION': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 1 },
+        
+        // XBAR-SW
+        'XBAR-SW': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 5, 'polimerniy': 4 },
+        
+        // XLITE
+        'XLITE': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 2, 'lazerno': 4, 'polimerniy': 4 },
+        
+        // XROLL
+        'XROLL-lite P': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 2 },
+        'XROLL-lite K': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
+        
+        // XSTRONG
+        'XSTRONG': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 5, 'polimerniy': 3 },
+        
+        // XYELLOW
+        'XYELLOW': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 1, 'polimerniy': 3 },
+        
+        // XLINE
+        'XLINE': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 2 },
+        
+        // XGLOW
+        'XGLOW mini': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 2, 'polimerniy': 3 },
+        'XGLOW': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 2, 'polimerniy': 5 },
+        
+        // XRAY другие
+        'XRAY 1': { 'tokarniy': 5, 'slesarniy': 4, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
+        'XRAY 3': { 'tokarniy': 5, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
+        'XRAY 3-2': { 'tokarniy': 7, 'slesarniy': 4, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
+        'XRAY 3-GRP': { 'tokarniy': 5, 'slesarniy': 3, 'frezerniy': 0, 'lazerno': 2, 'polimerniy': 2 },
+        'XRAY 6': { 'tokarniy': 5, 'slesarniy': 5, 'frezerniy': 0, 'lazerno': 3, 'polimerniy': 3 },
+        'XRAY 6 RGBW': { 'tokarniy': 6, 'slesarniy': 5, 'frezerniy': 0, 'lazerno': 3, 'polimerniy': 3 },
+        'XRAY 6-2 проходной': { 'tokarniy': 6, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
+        'XRAY 6-2 оконечный': { 'tokarniy': 6, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
+        'XRAY 6T Накладной': { 'tokarniy': 5, 'slesarniy': 6, 'frezerniy': 0, 'lazerno': 3, 'polimerniy': 4 },
+        'XRAY 6T BZ 120': { 'tokarniy': 4, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 5, 'polimerniy': 4 },
+        'XRAY 6T BT 140 Шторка': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 5, 'polimerniy': 4 },
+        'XRAY 6T RGBW BT 150': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 5, 'polimerniy': 4 },
+        'XRAY 9': { 'tokarniy': 7, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 4 },
+        'XRAY 9S': { 'tokarniy': 3, 'slesarniy': 5, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
+        'XRAY 12S': { 'tokarniy': 3, 'slesarniy': 5, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
+        'XRAY 18': { 'tokarniy': 7, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 5 },
+        'XRAY 18S': { 'tokarniy': 3, 'slesarniy': 5, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
+        'XRAY 36': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 5 },
+        'XRAY 36S': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
+        
+        // XSLOPE
+        'XSLOPE': { 'tokarniy': 5, 'slesarniy': 6, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
+        
+        // XPIXEL
+        'XPIXEL BIN v.1': { 'tokarniy': 3, 'slesarniy': 3, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 2 },
+        'XPIXEL BIN v.2': { 'tokarniy': 4, 'slesarniy': 2, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 2 },
+        'XPIXEL BIN v.3': { 'tokarniy': 4, 'slesarniy': 4, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 3 },
+        'XPIXEL OVHD': { 'tokarniy': 3, 'slesarniy': 1, 'frezerniy': 0, 'lazerno': 1, 'polimerniy': 2 },
+        
+        // XPOINT
+        'XPOINT OVHD': { 'tokarniy': 2, 'slesarniy': 1, 'frezerniy': 0, 'lazerno': 0, 'polimerniy': 1 },
+        
+        // XSPOT
+        'XSPOT': { 'tokarniy': 5, 'slesarniy': 3, 'frezerniy': 0, 'lazerno': 2, 'polimerniy': 2 },
+        
+        // XWHITE
+        'XWHITE': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 3 },
+        
+        // XDISK
+        'XDISK': { 'tokarniy': 8, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 3 },
+        
+        // ACENTO
+        'ACENTO 3T': { 'tokarniy': 4, 'slesarniy': 6, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
+        'ACENTO 4': { 'tokarniy': 3, 'slesarniy': 6, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
+        
+        // XEYES
+        'XEYES 130*90 1': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
+        'XEYES 130*90 2': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
+        'XEYES 130*90 3': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
+        'XEYES 130*90 4': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
+        'XEYES 130*120 1': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
+        'XEYES 130*120 2': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
+        'XEYES 130*120 3': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
+        'XEYES 130*120 4': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
+        'XEYES mini-1': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 5, 'polimerniy': 4 },
+        
+        // XFOCUS
+        'XFOCUS': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 5, 'polimerniy': 3 },
+        
+        // XMODULE
+        'XMODULE-2x2': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 2, 'polimerniy': 1 },
+        'XMODULE-6x2': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 1, 'polimerniy': 0 }
     };
     
     // Пробуем найти точное совпадение
@@ -339,7 +532,7 @@ function getOperationCount(productName, siteKey) {
     return 1; // По умолчанию
 }
 
-// ============== ФУНКЦИЯ createSiteRow ==============
+// ============== ФУНКЦИЯ createSiteRow (ИСПРАВЛЕНА) ==============
 function createSiteRow(name, order, siteKey) {
     if (!order.items || order.items.length === 0) {
         return '<div>Нет изделий</div>';
@@ -352,10 +545,12 @@ function createSiteRow(name, order, siteKey) {
     let completedCount = 0;
     
     for (let i = 0; i < operationCount; i++) {
-        const taskId = `${order.id}_${item.product}_${siteKey}_${i}`;
+        // ВАЖНО: Используем ТОТ ЖЕ формат ID, что и в task-manager.js
+        const taskId = `${order.id}_${siteKey}_${i}`;
         const status = order.tasks && order.tasks[taskId] ? order.tasks[taskId] : '';
         
         if (status === 'green') completedCount++;
+        if (status === 'orange') console.log(`Задача ${taskId} в работе`);
         
         squares += `<div class="square ${status}" data-task="${taskId}" title="Операция ${i+1}"></div>`;
     }
@@ -457,7 +652,7 @@ function addExtraTask(orderId, siteKey) {
     loadOrders();
 }
 
-// Экспорт заказов (ТЕПЕРЬ ОПРЕДЕЛЕНА!)
+// Экспорт заказов
 function exportOrders() {
     console.log('exportOrders вызвана');
     
@@ -519,8 +714,11 @@ async function loadAllData() {
         console.log('✅ Лиры загружены:', lyres.length);
         console.log('✅ Заказы загружены:', orders.length);
         
+        // Синхронизируем с историей задач
+        syncTasksFromHistory();
+        
         populateSelects();
-        loadOrders(); // ТЕПЕРЬ loadOrders ОПРЕДЕЛЕНА!
+        loadOrders();
         updateStatistics();
         
         // Инициализация отчета по материалам
@@ -541,15 +739,20 @@ async function loadAllData() {
         // Слушаем изменения из других вкладок
         window.addEventListener('storage', function(e) {
             if (e.key === 'masterx_orders') {
+                console.log('🔄 Изменение в localStorage (orders)');
                 orders = JSON.parse(e.newValue || '[]');
                 loadOrders();
                 updateStatistics();
+            }
+            if (e.key && e.key.startsWith('tasks_')) {
+                console.log('🔄 Изменение в localStorage (tasks)');
+                syncTasksFromHistory();
             }
         });
         
         // Слушаем события от участков
         window.addEventListener('taskStatusChanged', function(e) {
-            console.log('Статус задачи изменён:', e.detail);
+            console.log('🔄 Статус задачи изменён:', e.detail);
             updateTaskStatus(e.detail.taskId, e.detail.status);
         });
         
@@ -562,7 +765,7 @@ async function loadAllData() {
 
 // ============== ИНИЦИАЛИЗАЦИЯ ==============
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('Страница загружена, начинаем инициализацию...');
+    console.log('📅 DOM загружен, начинаем инициализацию...');
     await loadAllData();
 });
 
@@ -608,7 +811,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             orders.push(order);
             saveOrdersToStorage(orders);
-            loadOrders(); // ТЕПЕРЬ loadOrders ОПРЕДЕЛЕНА!
+            loadOrders();
             updateStatistics();
             closeOrderModal();
             alert('✅ Заказ успешно создан!');
@@ -617,7 +820,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============== ЭКСПОРТ ФУНКЦИЙ В ГЛОБАЛЬНУЮ ОБЛАСТЬ ==============
-// ВАЖНО: ЭТОТ КОД ДОЛЖЕН БЫТЬ В САМОМ КОНЦЕ!
 window.openOrderModal = openOrderModal;
 window.closeOrderModal = closeOrderModal;
 window.loadProductSizes = loadProductSizes;
@@ -626,7 +828,7 @@ window.showMaterialsReport = showMaterialsReport;
 window.deleteOrder = deleteOrder;
 window.addExtraTask = addExtraTask;
 window.closeMaterialsModal = closeMaterialsModal;
+window.syncTasksFromHistory = syncTasksFromHistory; // Добавляем функцию синхронизации
 
 console.log('📤 Экспорт функций в глобальную область...');
-console.log('✅ exportOrders определена:', typeof exportOrders === 'function');
 console.log('✅ app.js полностью загружен');
