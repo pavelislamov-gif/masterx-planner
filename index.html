@@ -6,22 +6,33 @@ let orders = [];
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', async function() {
+    console.log('Страница загружена');
     await loadAllData();
 });
 
 // Загрузка всех данных
 async function loadAllData() {
-    products = await loadProducts() || [];
-    brackets = await loadBrackets() || [];
-    lyres = await loadLyres() || [];
-    orders = loadOrdersFromStorage() || [];
-    
-    populateSelects();
-    loadOrders();
+    try {
+        products = await loadProducts() || [];
+        brackets = await loadBrackets() || [];
+        lyres = await loadLyres() || [];
+        orders = loadOrdersFromStorage() || [];
+        
+        console.log('Продукты:', products.length);
+        console.log('Кронштейны:', brackets.length);
+        console.log('Лир:', lyres.length);
+        console.log('Заказы:', orders.length);
+        
+        populateSelects();
+        loadOrders();
+    } catch (error) {
+        console.error('Ошибка загрузки:', error);
+    }
 }
 
 // Заполнение выпадающих списков
 function populateSelects() {
+    // Изделия
     const productSelect = document.getElementById('productSelect');
     if (productSelect) {
         productSelect.innerHTML = '<option value="">Выберите изделие</option>';
@@ -33,10 +44,16 @@ function populateSelects() {
         });
     }
     
+    // Кронштейны
     const bracketSelect = document.getElementById('bracketSelect');
     if (bracketSelect) {
         bracketSelect.innerHTML = '<option value="">Выберите кронштейн</option>';
-        bracketSelect.innerHTML += '<option value="отсутствует">🚫 отсутствует</option>';
+        
+        const absentOption = document.createElement('option');
+        absentOption.value = "отсутствует";
+        absentOption.textContent = "🚫 отсутствует";
+        bracketSelect.appendChild(absentOption);
+        
         brackets.forEach(bracket => {
             const option = document.createElement('option');
             option.value = bracket.name;
@@ -45,10 +62,16 @@ function populateSelects() {
         });
     }
     
+    // Лиры
     const lyreSelect = document.getElementById('lyreSelect');
     if (lyreSelect) {
         lyreSelect.innerHTML = '<option value="">Выберите лиру</option>';
-        lyreSelect.innerHTML += '<option value="отсутствует">🚫 отсутствует</option>';
+        
+        const absentOption = document.createElement('option');
+        absentOption.value = "отсутствует";
+        absentOption.textContent = "🚫 отсутствует";
+        lyreSelect.appendChild(absentOption);
+        
         lyres.forEach(lyre => {
             const option = document.createElement('option');
             option.value = lyre.name;
@@ -77,9 +100,12 @@ async function loadProductSizes() {
 
 // Открытие модального окна
 function openOrderModal() {
-    document.getElementById('orderModal').style.display = 'block';
-    document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('orderNumber').value = generateOrderNumber();
+    const modal = document.getElementById('orderModal');
+    if (modal) {
+        modal.style.display = 'block';
+        document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('orderNumber').value = generateOrderNumber();
+    }
 }
 
 // Генерация номера заказа
@@ -131,7 +157,7 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
     saveOrdersToStorage(orders);
     loadOrders();
     closeOrderModal();
-    alert('Заказ создан!');
+    alert('✅ Заказ создан!');
 });
 
 // Загрузка заказов
@@ -142,20 +168,37 @@ function loadOrders() {
     ordersList.innerHTML = '';
     
     if (orders.length === 0) {
-        ordersList.innerHTML = '<div style="text-align: center; padding: 50px;">📭 Нет заказов</div>';
+        ordersList.innerHTML = '<div style="text-align: center; padding: 50px; background: #1a1e24; border-radius: 8px; color: #666;">📭 Нет заказов</div>';
         return;
     }
     
     orders.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
     orders.forEach(order => {
         const card = document.createElement('div');
         card.className = 'order-card';
-        card.innerHTML = `
-            <div style="padding: 15px; background: #1a1e24; border-bottom: 1px solid #2a2f38;">
-                <h3>📦 Заказ №${order.number}</h3>
-                <p>${order.items[0].product} | ${order.items[0].quantity} шт</p>
+        card.style.cssText = 'background: #1a1e24; border-radius: 8px; margin-bottom: 15px; overflow: hidden;';
+        
+        const header = document.createElement('div');
+        header.style.cssText = 'padding: 15px; background: #232830; border-bottom: 1px solid #2a2f38;';
+        header.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: #fff; margin: 0;">📦 Заказ №${order.number}</h3>
+                <span style="background: #ff3b3b; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px;">В работе</span>
             </div>
         `;
+        
+        const content = document.createElement('div');
+        content.style.cssText = 'padding: 15px;';
+        
+        const item = order.items[0];
+        content.innerHTML = `
+            <p><strong style="color: #fff;">${item.product}</strong> <span style="color: #a0a0a0;">| ${item.size} | ${item.quantity} шт</span></p>
+            <p style="color: #a0a0a0; font-size: 13px;">Кронштейн: ${item.bracket.type} (${item.bracket.quantity} шт) | Лира: ${item.lyre.type} (${item.lyre.quantity} шт)</p>
+        `;
+        
+        card.appendChild(header);
+        card.appendChild(content);
         ordersList.appendChild(card);
     });
 }
@@ -164,3 +207,5 @@ function loadOrders() {
 window.openOrderModal = openOrderModal;
 window.closeOrderModal = closeOrderModal;
 window.loadProductSizes = loadProductSizes;
+window.exportOrders = function() { alert('Экспорт заказов'); };
+window.closeMaterialsModal = function() { document.getElementById('materialsModal').style.display = 'none'; };
