@@ -11,13 +11,17 @@
             gap: 10px;
             margin-bottom: 20px;
             align-items: center;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .task-card {
             background: white;
             border-radius: 8px;
-            padding: 15px;
             margin-bottom: 15px;
+            padding: 15px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
@@ -143,6 +147,37 @@
             display: flex;
             gap: 10px;
         }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .status-progress {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .status-completed {
+            background: #28a745;
+            color: white;
+        }
+        
+        .no-tasks {
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: 10px;
+            color: #999;
+        }
     </style>
 </head>
 <body>
@@ -166,7 +201,203 @@
     </div>
     
     <script src="../js/storage.js"></script>
-    <script src="../js/data-loader.js"></script>
-    <script src="../js/tokarniy.js"></script>
+    <script src="../js/task-manager.js"></script>
+    <script>
+        // Инициализация
+        const taskManager = new TaskManager('tokarniy');
+        let currentDate = new Date();
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDateDisplay();
+            loadTasks();
+            
+            // Слушаем изменения из других вкладок
+            window.addEventListener('taskStatusChanged', function(e) {
+                loadTasks(); // перезагрузить задачи
+            });
+            
+            // Слушаем изменения в localStorage
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'masterx_orders') {
+                    loadTasks();
+                }
+            });
+        });
+        
+        function changeDate(delta) {
+            if (delta === 0) {
+                currentDate = new Date();
+            } else {
+                currentDate.setDate(currentDate.getDate() + delta);
+            }
+            updateDateDisplay();
+            loadTasks();
+        }
+        
+        function updateDateDisplay() {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDateDisplay').textContent = 
+                `Задачи на ${currentDate.toLocaleDateString('ru-RU', options)}`;
+        }
+        
+        function loadTasks() {
+            taskManager.loadData();
+            const tasks = taskManager.tasks;
+            const tasksList = document.getElementById('tasksList');
+            
+            tasksList.innerHTML = '';
+            
+            if (tasks.length === 0) {
+                tasksList.innerHTML = `
+                    <div class="no-tasks">
+                        <h3>📭 Нет задач на сегодня</h3>
+                        <p>Создайте заказ в планировщике</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            tasks.forEach(task => {
+                const taskCard = createTaskCard(task);
+                tasksList.appendChild(taskCard);
+            });
+        }
+        
+        function createTaskCard(task) {
+            const card = document.createElement('div');
+            card.className = 'task-card';
+            card.dataset.taskId = task.id;
+            
+            const statusClass = task.status === 'completed' ? 'status-completed' : 
+                               task.status === 'in_progress' ? 'status-progress' : 'status-pending';
+            
+            const header = document.createElement('div');
+            header.className = 'task-header';
+            header.innerHTML = `
+                <span class="task-title">${task.operation}</span>
+                <div>
+                    <span class="status-badge ${statusClass}">${getStatusText(task.status)}</span>
+                    <span class="task-order-info">Заказ №${task.orderNumber} | ${task.product} | ${task.size} | ${task.quantity} шт</span>
+                </div>
+            `;
+            
+            const executorList = document.createElement('div');
+            executorList.className = 'executor-list';
+            executorList.id = `executors-${task.id}`;
+            
+            task.executors.forEach(executor => {
+                executorList.appendChild(createExecutorItem(task.id, executor, task.status));
+            });
+            
+            const addExecutorBtn = document.createElement('button');
+            addExecutorBtn.className = 'btn-add-executor';
+            addExecutorBtn.textContent = '+ Добавить исполнителя';
+            addExecutorBtn.onclick = () => showAddExecutorForm(task);
+            
+            const readyBtn = document.createElement('button');
+            readyBtn.className = `btn-ready ${task.status === 'completed' ? 'completed' : ''}`;
+            readyBtn.textContent = 'ГОТОВО';
+            readyBtn.disabled = task.status === 'completed';
+            readyBtn.onclick = () => completeTask(task);
+            
+            card.appendChild(header);
+            card.appendChild(executorList);
+            card.appendChild(addExecutorBtn);
+            card.appendChild(readyBtn);
+            
+            return card;
+        }
+        
+        function createExecutorItem(taskId, executor, taskStatus) {
+            const div = document.createElement('div');
+            div.className = 'executor-item';
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'executor-name';
+            nameSpan.textContent = executor.name;
+            
+            const quantitySpan = document.createElement('span');
+            quantitySpan.className = 'executor-quantity';
+            quantitySpan.textContent = `${executor.quantity || 1} шт`;
+            
+            const workBtn = document.createElement('button');
+            workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''} ${taskStatus === 'completed' ? 'completed' : ''}`;
+            workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
+            workBtn.disabled = taskStatus === 'completed';
+            workBtn.onclick = () => toggleWorkStatus(taskId, executor.name, workBtn);
+            
+            div.appendChild(nameSpan);
+            div.appendChild(quantitySpan);
+            div.appendChild(workBtn);
+            
+            return div;
+        }
+        
+        function showAddExecutorForm(task) {
+            const executorListId = `executors-${task.id}`;
+            const executorList = document.getElementById(executorListId);
+            
+            const formDiv = document.createElement('div');
+            formDiv.className = 'new-executor-form';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = 'ФИО исполнителя';
+            
+            const addBtn = document.createElement('button');
+            addBtn.className = 'btn btn-success';
+            addBtn.textContent = 'Добавить';
+            addBtn.onclick = () => {
+                if (input.value.trim()) {
+                    taskManager.addExecutor(task.id, input.value);
+                    loadTasks();
+                    formDiv.remove();
+                }
+            };
+            
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'btn btn-danger';
+            cancelBtn.textContent = 'Отмена';
+            cancelBtn.onclick = () => formDiv.remove();
+            
+            formDiv.appendChild(input);
+            formDiv.appendChild(addBtn);
+            formDiv.appendChild(cancelBtn);
+            
+            const oldForm = executorList.parentNode.querySelector('.new-executor-form');
+            if (oldForm) oldForm.remove();
+            
+            executorList.parentNode.insertBefore(formDiv, executorList.nextSibling);
+        }
+        
+        function toggleWorkStatus(taskId, executorName, btn) {
+            const task = taskManager.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            const newStatus = btn.classList.contains('active') ? 'pending' : 'in_progress';
+            
+            taskManager.updateExecutorStatus(taskId, executorName, newStatus);
+            
+            btn.classList.toggle('active');
+            btn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
+            
+            // Обновить статус задачи
+            taskManager.updateTaskStatus(taskId, newStatus === 'in_progress' ? 'in_progress' : 'pending');
+        }
+        
+        function completeTask(task) {
+            taskManager.updateTaskStatus(task.id, 'completed');
+            loadTasks();
+        }
+        
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': 'Ожидает',
+                'in_progress': 'В работе',
+                'completed': 'Завершено'
+            };
+            return statusMap[status] || status;
+        }
+    </script>
 </body>
 </html>
