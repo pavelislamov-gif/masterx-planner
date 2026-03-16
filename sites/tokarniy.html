@@ -582,7 +582,7 @@
                     }, 100);
                 });
                 
-                // Слушаем изменения истории (с защитой от рекурсии)
+                // Слушаем изменения истории
                 window.addEventListener('taskHistoryChanged', function(e) {
                     if (e.detail.siteType === 'tokarniy') {
                         console.log('🔄 Изменение истории для токарного участка');
@@ -641,6 +641,7 @@
             
             // ============== ЗАГРУЗКА ЗАДАЧ ==============
             function loadTasks() {
+                console.log('loadTasks вызвана');
                 const tasksList = document.getElementById('tasksList');
                 
                 // Загружаем данные
@@ -829,8 +830,7 @@
                 quantityInput.onchange = (e) => {
                     const val = parseInt(e.target.value) || 0;
                     taskManager.updateExecutorQuantity(task.id, executor.id, val);
-                    // Не вызываем loadTasks здесь, так как updateExecutorQuantity вызовет saveTasksToHistory,
-                    // который через событие обновит страницу
+                    setTimeout(() => loadTasks(), 100);
                 };
                 div.appendChild(quantityInput);
                 
@@ -852,64 +852,71 @@
                 return div;
             }
             
-// ============== ФОРМА ДОБАВЛЕНИЯ ИСПОЛНИТЕЛЯ ==============
-function showAddExecutorForm(task) {
-    const executorList = document.getElementById(`executors-${task.id}`);
-    if (!executorList) return;
-    
-    // Удаляем старую форму, если есть
-    const oldForm = executorList.parentNode.querySelector('.new-executor-form');
-    if (oldForm) oldForm.remove();
-    
-    const formDiv = document.createElement('div');
-    formDiv.className = 'new-executor-form';
-    
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.placeholder = 'ФИО исполнителя';
-    input.style.flex = '1';
-    
-    const addBtn = document.createElement('button');
-    addBtn.className = 'btn btn-success';
-    addBtn.textContent = 'Добавить';
-    addBtn.onclick = function() {
-        const name = input.value.trim();
-        if (name) {
-            console.log('Добавление исполнителя:', name);
-            
-            // Добавляем исполнителя
-            const result = taskManager.addExecutor(task.id, name);
-            
-            if (result) {
-                console.log('✅ Исполнитель добавлен');
-                formDiv.remove();
+            // ============== ФОРМА ДОБАВЛЕНИЯ ИСПОЛНИТЕЛЯ ==============
+            function showAddExecutorForm(task) {
+                console.log('showAddExecutorForm вызвана для задачи:', task.id);
                 
-                // ПРИНУДИТЕЛЬНО ОБНОВЛЯЕМ ЗАДАЧИ
-                setTimeout(() => {
-                    loadTasks(); // Прямой вызов для обновления
-                }, 100);
-            } else {
-                alert('Ошибка при добавлении исполнителя');
+                const executorList = document.getElementById(`executors-${task.id}`);
+                if (!executorList) {
+                    console.error('executorList не найден');
+                    return;
+                }
+                
+                // Удаляем старую форму, если есть
+                const oldForm = executorList.parentNode.querySelector('.new-executor-form');
+                if (oldForm) oldForm.remove();
+                
+                const formDiv = document.createElement('div');
+                formDiv.className = 'new-executor-form';
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = 'ФИО исполнителя';
+                input.style.flex = '1';
+                
+                const addBtn = document.createElement('button');
+                addBtn.className = 'btn btn-success';
+                addBtn.textContent = 'Добавить';
+                addBtn.onclick = function() {
+                    const name = input.value.trim();
+                    console.log('Попытка добавить исполнителя:', name);
+                    
+                    if (!name) {
+                        alert('Введите ФИО исполнителя');
+                        return;
+                    }
+                    
+                    // Добавляем исполнителя через taskManager
+                    const result = taskManager.addExecutor(task.id, name);
+                    console.log('Результат добавления:', result);
+                    
+                    if (result) {
+                        console.log('✅ Исполнитель добавлен успешно');
+                        formDiv.remove();
+                        
+                        // Принудительно обновляем список задач
+                        setTimeout(() => {
+                            loadTasks();
+                        }, 200);
+                    } else {
+                        alert('Не удалось добавить исполнителя. Возможно, он уже существует.');
+                    }
+                };
+                
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'btn btn-danger';
+                cancelBtn.textContent = 'Отмена';
+                cancelBtn.onclick = function() {
+                    formDiv.remove();
+                };
+                
+                formDiv.appendChild(input);
+                formDiv.appendChild(addBtn);
+                formDiv.appendChild(cancelBtn);
+                
+                executorList.parentNode.insertBefore(formDiv, executorList.nextSibling);
+                input.focus();
             }
-        } else {
-            alert('Введите ФИО');
-        }
-    };
-    
-    const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'btn btn-danger';
-    cancelBtn.textContent = 'Отмена';
-    cancelBtn.onclick = function() {
-        formDiv.remove();
-    };
-    
-    formDiv.appendChild(input);
-    formDiv.appendChild(addBtn);
-    formDiv.appendChild(cancelBtn);
-    
-    executorList.parentNode.insertBefore(formDiv, executorList.nextSibling);
-    input.focus(); // Автоматически ставим фокус на поле ввода
-}
             
             // ============== ДЕЙСТВИЯ С ЗАДАЧАМИ ==============
             window.toggleWorkStatus = function(taskId, executorId, btn) {
@@ -917,12 +924,14 @@ function showAddExecutorForm(task) {
                 taskManager.updateExecutorStatus(taskId, executorId, newStatus);
                 btn.classList.toggle('active');
                 btn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
+                
+                setTimeout(() => loadTasks(), 100);
             };
             
             window.removeExecutor = function(taskId, executorId) {
                 if (confirm('Удалить этого исполнителя?')) {
                     taskManager.removeExecutor(taskId, executorId);
-                    // Не вызываем loadTasks здесь, так как removeExecutor вызовет saveTasksToHistory
+                    setTimeout(() => loadTasks(), 100);
                 }
             };
             
@@ -941,7 +950,7 @@ function showAddExecutorForm(task) {
                 
                 if (confirm(message)) {
                     taskManager.completeTask(taskId);
-                    // Не вызываем loadTasks здесь, так как completeTask вызовет saveTasksToHistory
+                    setTimeout(() => loadTasks(), 100);
                 }
             };
             
