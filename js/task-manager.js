@@ -212,4 +212,295 @@ class TaskManager {
                 'XRAY 18S': ['Корпус', 'Фоновая заглушка', 'Кронштейн'],
                 'XRAY 36': ['Корпус', 'Фоновая заглушка', 'Кольцо', 'Задняя крышка', 'Кронштейн'],
                 'XRAY 36S': ['Корпус', 'Фоновая заглушка', 'Кронштейн'],
-                'XSLOPE': ['Корпус', 'Модуль', 'Кронште
+                'XSLOPE': ['Корпус', 'Модуль', 'Кронштейн'],
+                'XPIXEL BIN v.1': ['Корпус', 'Кольцо'],
+                'XPIXEL BIN v.2': ['Корпус', 'Кольцо Фланец'],
+                'XPIXEL BIN v.3': ['Корпус', 'Кольцо', 'Кронштейн'],
+                'XPIXEL OVHD': ['Корпус', 'Чаша'],
+                'XDISK': ['Корпус', 'Крышка', 'Кронштейн'],
+                'XPOINT OVHD': ['Корпус'],
+                'XSPOT': ['Корпус', 'Кронштейн'],
+                'ACENTO 3T': ['Корпус', 'Фоновая заглушка', 'Кронштейн'],
+                'ACENTO 4': ['Корпус', 'Фоновая заглушка', 'Кронштейн'],
+                'XROLL-lite P': ['Заглушка', 'Профиль Кронштейн'],
+                'XROLL-lite K': ['Заглушка', 'Кронштейн'],
+                'XWHITE': ['Профиль', 'Заглушка', 'Крепление'],
+                'XEYES 130*90 1': ['Корпус', 'Кронштейн'],
+                'XEYES 130*90 2': ['Корпус', 'Кронштейн'],
+                'XEYES 130*90 3': ['Корпус', 'Кронштейн'],
+                'XEYES 130*90 4': ['Корпус', 'Кронштейн'],
+                'XEYES 130*120 1': ['Корпус', 'Кронштейн'],
+                'XEYES 130*120 2': ['Корпус', 'Кронштейн'],
+                'XEYES 130*120 3': ['Корпус', 'Кронштейн'],
+                'XEYES 130*120 4': ['Корпус', 'Кронштейн'],
+                'XEYES mini-1': ['Корпус', 'Заглушка', 'Лира', 'Кронштейн'],
+                'XGIRO': ['Профиль', 'Заглушка', 'Лира', 'Кронштейн'],
+                'XGLOW': ['Профиль', 'Заглушка Левая', 'Заглушка Правая', 'Кронштейн', 'Кронштейн AL'],
+                'XGLOW mini': ['Профиль', 'Кронштейн', 'Кронштейн AL'],
+                'XGRAY v.1': ['Профиль', 'Заглушка Левая', 'Заглушка Правая', 'Кронштейн AL'],
+                'XLITE': ['Профиль', 'Заглушка', 'Лира', 'Кронштейн'],
+                'XSMART': ['Профиль', 'Планка', 'Заглушка', 'Лира', 'Кронштейн'],
+                'XSMART MINI': ['Профиль', 'Заглушка', 'Лира', 'Кронштейн'],
+                'XSTRONG': ['Профиль', 'Лира', 'Кронштейн'],
+                'XLUMO': ['Профиль', 'Заглушка', 'Лира', 'Кронштейн'],
+                'XLUMO 1-6': ['Профиль', 'Заглушка', 'Лира', 'Кронштейн'],
+                'XLUMO Двунаправленный': ['Профиль', 'Заглушка', 'Лира', 'Кронштейн'],
+                'XLUMO PROV': ['Профиль', 'Заглушка', 'Лира', 'Кронштейн'],
+                'XVISION': ['Профиль'],
+                'XBAR-SW': ['Профиль', 'Заглушка', 'Лира', 'Кронштейн'],
+                'XMODULE-2x2': ['Основание платы'],
+                'XFOCUS': ['Профиль', 'Лира', 'Кронштейн'],
+                'XYELLOW': ['Профиль', 'Заглушка', 'Кронштейн AL'],
+                'XLINE': ['Профиль', 'Заглушка'],
+                'XGRAY v.2': ['Профиль', 'Заглушка Левая', 'Заглушка Правая', 'Лира', 'Кронштейн']
+            }
+        };
+    }
+    
+    // Получить операции для изделия на текущем участке
+    getOperationsForProduct(productName) {
+        const siteOps = this.operationsDB[this.siteType];
+        if (!siteOps) return [];
+        
+        // Прямое совпадение
+        if (siteOps[productName]) {
+            return siteOps[productName];
+        }
+        
+        // Поиск по частичному совпадению (для XRAY 6-T2 BT 220 и т.д.)
+        for (let key in siteOps) {
+            if (productName.includes(key) || key.includes(productName)) {
+                return siteOps[key];
+            }
+        }
+        
+        return [];
+    }
+    
+    // Загрузить заказы и задачи
+    loadData() {
+        this.orders = loadOrdersFromStorage() || [];
+        this.loadHistoryForDate(this.currentDate);
+        return this.tasks;
+    }
+    
+    // Загрузить историю задач для конкретной даты
+    loadHistoryForDate(date) {
+        const dateStr = this.formatDate(date);
+        const savedHistory = localStorage.getItem(`tasks_${this.siteType}_${dateStr}`);
+        
+        if (savedHistory) {
+            this.taskHistory[dateStr] = JSON.parse(savedHistory);
+            this.tasks = this.taskHistory[dateStr] || [];
+        } else {
+            // Если истории нет, генерируем задачи из заказов
+            this.tasks = this.generateTasks();
+            this.saveHistoryForDate(date);
+        }
+        
+        return this.tasks;
+    }
+    
+    // Сохранить историю задач для даты
+    saveHistoryForDate(date) {
+        const dateStr = this.formatDate(date);
+        this.taskHistory[dateStr] = this.tasks;
+        localStorage.setItem(`tasks_${this.siteType}_${dateStr}`, JSON.stringify(this.tasks));
+    }
+    
+    // Сгенерировать задачи для участка из заказов
+    generateTasks() {
+        const tasks = [];
+        const dateStr = this.formatDate(this.currentDate);
+        
+        this.orders.forEach(order => {
+            if (order.status !== 'active') return; // только активные заказы
+            
+            order.items.forEach(item => {
+                const productName = item.product;
+                const operations = this.getOperationsForProduct(productName);
+                
+                operations.forEach((op, index) => {
+                    const taskId = `${order.id}_${productName}_${this.siteType}_${index}`;
+                    
+                    // Проверяем, есть ли уже задача в истории
+                    const existingTask = this.taskHistory[dateStr]?.find(t => t.id === taskId);
+                    
+                    if (existingTask) {
+                        tasks.push(existingTask);
+                    } else {
+                        // Создаём новую задачу
+                        tasks.push({
+                            id: taskId,
+                            orderId: order.id,
+                            orderNumber: order.number,
+                            product: productName,
+                            size: item.size,
+                            quantity: item.quantity,
+                            operation: op,
+                            operationIndex: index,
+                            status: 'pending', // pending, in_progress, completed
+                            executors: [],
+                            date: dateStr
+                        });
+                    }
+                });
+            });
+        });
+        
+        return tasks;
+    }
+    
+    // Обновить статус задачи
+    updateTaskStatus(taskId, status) {
+        const dateStr = this.formatDate(this.currentDate);
+        const taskIndex = this.tasks.findIndex(t => t.id === taskId);
+        
+        if (taskIndex === -1) return false;
+        
+        // Обновить статус
+        this.tasks[taskIndex].status = status;
+        
+        // Сохранить историю
+        this.saveHistoryForDate(this.currentDate);
+        
+        // Обновить статус в заказе для планировщика
+        this.updateOrderTaskStatus(taskId, status);
+        
+        // Оповестить другие вкладки
+        this.notifyOtherTabs(taskId, status);
+        
+        return true;
+    }
+    
+    // Обновить статус в заказе (для квадратиков в планировщике)
+    updateOrderTaskStatus(taskId, status) {
+        const [orderId] = taskId.split('_');
+        const orderIndex = this.orders.findIndex(o => o.id == orderId);
+        
+        if (orderIndex === -1) return;
+        
+        if (!this.orders[orderIndex].tasks) {
+            this.orders[orderIndex].tasks = {};
+        }
+        
+        // Преобразуем статус для квадратика
+        let squareStatus = '';
+        if (status === 'in_progress') squareStatus = 'orange';
+        if (status === 'completed') squareStatus = 'green';
+        
+        this.orders[orderIndex].tasks[taskId] = squareStatus;
+        saveOrdersToStorage(this.orders);
+    }
+    
+    // Добавить исполнителя
+    addExecutor(taskId, executorName) {
+        const dateStr = this.formatDate(this.currentDate);
+        const taskIndex = this.tasks.findIndex(t => t.id === taskId);
+        
+        if (taskIndex === -1) return false;
+        
+        // Инициализировать массив исполнителей
+        if (!this.tasks[taskIndex].executors) {
+            this.tasks[taskIndex].executors = [];
+        }
+        
+        // Добавить нового исполнителя
+        this.tasks[taskIndex].executors.push({
+            name: executorName,
+            status: 'pending', // pending, in_progress, completed
+            addedAt: new Date().toISOString()
+        });
+        
+        // Сохранить историю
+        this.saveHistoryForDate(this.currentDate);
+        
+        return true;
+    }
+    
+    // Обновить статус исполнителя
+    updateExecutorStatus(taskId, executorName, status) {
+        const taskIndex = this.tasks.findIndex(t => t.id === taskId);
+        
+        if (taskIndex === -1) return false;
+        
+        const executor = this.tasks[taskIndex].executors?.find(e => e.name === executorName);
+        if (!executor) return false;
+        
+        executor.status = status;
+        
+        // Сохранить историю
+        this.saveHistoryForDate(this.currentDate);
+        
+        // Если статус in_progress, обновить статус задачи
+        if (status === 'in_progress' && this.tasks[taskIndex].status !== 'completed') {
+            this.updateTaskStatus(taskId, 'in_progress');
+        }
+        
+        return true;
+    }
+    
+    // Завершить задачу (кнопка "ГОТОВО")
+    completeTask(taskId) {
+        const taskIndex = this.tasks.findIndex(t => t.id === taskId);
+        if (taskIndex === -1) return false;
+        
+        this.tasks[taskIndex].status = 'completed';
+        
+        // Отметить всех исполнителей как завершённых
+        if (this.tasks[taskIndex].executors) {
+            this.tasks[taskIndex].executors.forEach(e => {
+                e.status = 'completed';
+            });
+        }
+        
+        // Сохранить историю
+        this.saveHistoryForDate(this.currentDate);
+        
+        // Обновить статус в заказе (зелёный квадратик)
+        this.updateOrderTaskStatus(taskId, 'completed');
+        
+        return true;
+    }
+    
+    // Установить дату
+    setDate(date) {
+        this.currentDate = new Date(date);
+        this.loadHistoryForDate(this.currentDate);
+        return this.tasks;
+    }
+    
+    // Перейти на предыдущий день
+    prevDay() {
+        this.currentDate.setDate(this.currentDate.getDate() - 1);
+        this.loadHistoryForDate(this.currentDate);
+        return this.tasks;
+    }
+    
+    // Перейти на следующий день
+    nextDay() {
+        this.currentDate.setDate(this.currentDate.getDate() + 1);
+        this.loadHistoryForDate(this.currentDate);
+        return this.tasks;
+    }
+    
+    // Перейти на сегодня
+    today() {
+        this.currentDate = new Date();
+        this.loadHistoryForDate(this.currentDate);
+        return this.tasks;
+    }
+    
+    // Форматировать дату
+    formatDate(date) {
+        return date.toISOString().split('T')[0];
+    }
+    
+    // Оповестить другие вкладки
+    notifyOtherTabs(taskId, status) {
+        const event = new CustomEvent('taskStatusChanged', {
+            detail: { taskId, status }
+        });
+        window.dispatchEvent(event);
+    }
+}
