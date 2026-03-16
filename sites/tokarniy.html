@@ -59,39 +59,14 @@
         }
         
         .task-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #333;
         }
         
         .task-order-info {
             color: #666;
-            font-size: 14px;
-        }
-        
-        .squares-container {
-            display: flex;
-            gap: 5px;
-            margin: 10px 0;
-        }
-        
-        .square {
-            width: 30px;
-            height: 30px;
-            border: 2px solid #dee2e6;
-            border-radius: 4px;
-            background: white;
-            transition: all 0.3s;
-        }
-        
-        .square.orange {
-            background: #ffc107;
-            border-color: #ffc107;
-        }
-        
-        .square.green {
-            background: #28a745;
-            border-color: #28a745;
+            font-size: 13px;
         }
         
         .executor-list {
@@ -132,6 +107,7 @@
             border-radius: 4px;
             cursor: pointer;
             transition: all 0.3s;
+            font-size: 13px;
         }
         
         .btn-work.active {
@@ -233,6 +209,14 @@
             color: #666;
             margin-left: 10px;
         }
+        
+        .product-info {
+            background: #f0f0f0;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -268,7 +252,7 @@
             
             // Слушаем изменения из других вкладок
             window.addEventListener('taskStatusChanged', function(e) {
-                loadTasks(); // перезагрузить задачи
+                loadTasks();
             });
             
             // Слушаем изменения в localStorage
@@ -302,7 +286,7 @@
             const isToday = taskManager.formatDate(currentDate) === taskManager.formatDate(new Date());
             
             document.getElementById('currentDateDisplay').innerHTML = `
-                ${dateStr} ${!isToday ? '<span class="history-indicator'>(история)</span>' : ''}
+                ${dateStr} ${!isToday ? '<span class="history-indicator">(история)</span>' : ''}
             `;
         }
         
@@ -323,10 +307,53 @@
                 return;
             }
             
+            // Группируем задачи по заказам
+            const tasksByOrder = {};
             tasks.forEach(task => {
-                const taskCard = createTaskCard(task);
-                tasksList.appendChild(taskCard);
+                const key = `${task.orderId}_${task.product}`;
+                if (!tasksByOrder[key]) {
+                    tasksByOrder[key] = {
+                        orderNumber: task.orderNumber,
+                        product: task.product,
+                        size: task.size,
+                        quantity: task.quantity,
+                        tasks: []
+                    };
+                }
+                tasksByOrder[key].tasks.push(task);
             });
+            
+            // Отображаем задачи сгруппированными
+            Object.values(tasksByOrder).forEach(group => {
+                const groupElement = createTaskGroup(group);
+                tasksList.appendChild(groupElement);
+            });
+        }
+        
+        function createTaskGroup(group) {
+            const groupDiv = document.createElement('div');
+            groupDiv.style.marginBottom = '25px';
+            
+            // Заголовок группы (информация о заказе и изделии)
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'product-info';
+            headerDiv.innerHTML = `
+                <strong>Заказ №${group.orderNumber}</strong> | 
+                ${group.product} | 
+                Размер: ${group.size} | 
+                Количество: ${group.quantity} шт
+            `;
+            groupDiv.appendChild(headerDiv);
+            
+            // Задачи для этого изделия
+            group.tasks.sort((a, b) => a.operationIndex - b.operationIndex);
+            
+            group.tasks.forEach(task => {
+                const taskCard = createTaskCard(task);
+                groupDiv.appendChild(taskCard);
+            });
+            
+            return groupDiv;
         }
         
         function createTaskCard(task) {
@@ -348,26 +375,6 @@
                     <span class="status-badge status-${task.status}">${statusText}</span>
                 </div>
             `;
-            
-            const orderInfo = document.createElement('div');
-            orderInfo.style.marginBottom = '10px';
-            orderInfo.style.color = '#666';
-            orderInfo.innerHTML = `
-                Заказ №${task.orderNumber} | ${task.product} | ${task.size} | ${task.quantity} шт
-            `;
-            
-            // Квадратики (только если задача не завершена)
-            const squaresContainer = document.createElement('div');
-            squaresContainer.className = 'squares-container';
-            
-            // Получаем статус квадратика из заказа
-            const squareStatus = getSquareStatusFromOrder(task);
-            
-            for (let i = 0; i < (task.squares || 1); i++) {
-                const square = document.createElement('div');
-                square.className = `square ${squareStatus}`;
-                squaresContainer.appendChild(square);
-            }
             
             const executorList = document.createElement('div');
             executorList.className = 'executor-list';
@@ -393,8 +400,6 @@
             readyBtn.onclick = () => completeTask(task.id);
             
             card.appendChild(header);
-            card.appendChild(orderInfo);
-            card.appendChild(squaresContainer);
             card.appendChild(executorList);
             
             // Если задача не завершена, показываем кнопки
@@ -404,16 +409,6 @@
             }
             
             return card;
-        }
-        
-        function getSquareStatusFromOrder(task) {
-            const [orderId] = task.id.split('_');
-            const order = taskManager.orders.find(o => o.id == orderId);
-            
-            if (order && order.tasks && order.tasks[task.id]) {
-                return order.tasks[task.id];
-            }
-            return '';
         }
         
         function createExecutorItem(taskId, executor, taskStatus) {
@@ -488,9 +483,6 @@
             
             btn.classList.toggle('active');
             btn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
-            
-            // Обновляем отображение квадратиков
-            loadTasks();
         }
         
         function completeTask(taskId) {
