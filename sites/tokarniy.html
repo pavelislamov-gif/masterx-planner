@@ -6,110 +6,24 @@
     <title>MasterX - Токарный участок</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        /* ОСНОВНЫЕ СТИЛИ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #f5f5f5;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* ШАПКА */
-        .site-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .site-header h1 {
-            color: #333;
-            font-size: 24px;
-        }
-
-        /* НАВИГАЦИЯ ПО ДАТАМ */
+        /* ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ УЧАСТКА */
         .date-navigation {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding: 15px 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-
-        .date-navigation h2 {
-            font-size: 18px;
-            color: #333;
-            margin: 0;
-        }
-
+        
         .nav-buttons {
             display: flex;
             gap: 10px;
         }
-
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: #007bff;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0056b3;
-        }
-
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #218838;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        .btn-warning {
-            background: #ffc107;
-            color: #000;
-        }
-
-        .btn-warning:hover {
-            background: #e0a800;
-        }
-
-        /* КАРТОЧКА ЗАКАЗА */
+        
+        /* КАРТОЧКА ЗАКАЗА - КАК В ПЛАНИРОВЩИКЕ */
         .order-card {
             background: white;
             border-radius: 10px;
@@ -117,7 +31,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             overflow: hidden;
         }
-
+        
         .order-header {
             padding: 15px 20px;
             background: #f8f9fa;
@@ -126,198 +40,150 @@
             justify-content: space-between;
             align-items: center;
         }
-
+        
         .order-header h3 {
             color: #333;
             font-size: 18px;
         }
-
+        
         /* ИНФОРМАЦИЯ О ПРОДУКТЕ */
         .product-info {
             padding: 15px 20px;
-            background: #e9ecef;
+            background: #f8f9fa;
             border-bottom: 1px solid #dee2e6;
             font-size: 14px;
         }
-
+        
         .product-info strong {
             color: #007bff;
         }
-
-        /* КАРТОЧКА ЗАДАЧИ */
+        
+        /* КАРТОЧКА ЗАДАЧИ - МИНИМАЛИСТИЧНАЯ */
         .task-card {
             padding: 15px 20px;
             border-bottom: 1px solid #dee2e6;
-            transition: all 0.3s;
         }
-
-        .task-card.status-pending {
-            border-left: 4px solid #ffc107;
-        }
-
-        .task-card.status-in_progress {
-            border-left: 4px solid #fd7e14;
-        }
-
-        .task-card.status-completed {
-            border-left: 4px solid #28a745;
-        }
-
+        
         .task-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
-
+        
         .task-title {
-            font-size: 16px;
-            font-weight: bold;
+            font-size: 15px;
+            font-weight: 600;
             color: #333;
         }
-
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .status-pending {
-            background: #ffc107;
-            color: #000;
-        }
-
-        .status-in_progress {
-            background: #17a2b8;
-            color: white;
-        }
-
-        .status-completed {
-            background: #28a745;
-            color: white;
-        }
-
-        /* ПРОГРЕСС ЗАДАЧИ */
+        
         .task-progress {
-            margin-bottom: 15px;
-            font-size: 14px;
+            font-size: 13px;
             color: #28a745;
-            font-weight: bold;
+            margin-bottom: 10px;
         }
-
+        
         /* ИСПОЛНИТЕЛИ */
-        .executor-list {
-            margin: 15px 0;
-        }
-
         .executor-item {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 10px;
+            gap: 10px;
+            padding: 8px 12px;
             background: #f8f9fa;
-            border-radius: 5px;
+            border-radius: 6px;
             margin-bottom: 8px;
             border: 1px solid #dee2e6;
+            font-size: 13px;
         }
-
+        
         .executor-name {
             flex: 2;
             font-weight: 500;
         }
-
-        .executor-quantity-input {
-            width: 80px;
-            padding: 5px;
+        
+        .executor-quantity {
+            width: 60px;
+            padding: 4px;
             border: 1px solid #ced4da;
             border-radius: 4px;
             text-align: center;
+            font-size: 13px;
         }
-
+        
         .btn-work {
-            padding: 5px 15px;
+            background: #ffc107;
+            color: #000;
+            padding: 4px 12px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
             transition: all 0.3s;
-            background: #ffc107;
-            color: #000;
         }
-
+        
         .btn-work.active {
             background: #fd7e14;
             color: white;
         }
-
+        
         .btn-work.completed {
             background: #28a745;
             color: white;
             cursor: not-allowed;
         }
-
-        /* КНОПКА ДОБАВЛЕНИЯ ИСПОЛНИТЕЛЯ */
+        
         .btn-add-executor {
             background: #6c757d;
             color: white;
-            padding: 5px 15px;
+            padding: 4px 12px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
             margin: 5px 0;
         }
-
-        .btn-add-executor:hover {
-            background: #5a6268;
-        }
-
-        /* ФОРМА ДОБАВЛЕНИЯ ИСПОЛНИТЕЛЯ */
-        .new-executor-form {
-            display: flex;
-            gap: 10px;
-            margin: 10px 0;
-            padding: 10px;
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-        }
-
-        .new-executor-form input {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-        }
-
-        /* КНОПКА ГОТОВО */
+        
         .btn-ready {
             background: #28a745;
             color: white;
-            padding: 10px 20px;
+            padding: 6px 12px;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
-            font-weight: bold;
-            margin-top: 10px;
-            width: 100%;
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 8px;
+            width: auto;
+            display: inline-block;
         }
-
+        
         .btn-ready:hover:not(:disabled) {
             background: #218838;
         }
-
+        
         .btn-ready:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-
-        .btn-ready.completed {
-            background: #218838;
+        
+        .new-executor-form {
+            display: flex;
+            gap: 8px;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
         }
-
-        /* НЕТ ЗАДАЧ */
+        
+        .new-executor-form input {
+            flex: 1;
+            padding: 6px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
         .no-tasks {
             text-align: center;
             padding: 50px;
@@ -325,34 +191,32 @@
             border-radius: 10px;
             color: #999;
         }
-
+        
         .history-indicator {
-            font-size: 14px;
+            font-size: 13px;
             color: #666;
             margin-left: 10px;
         }
-
-        /* ДОПОЛНИТЕЛЬНАЯ ЗАДАЧА */
+        
         .extra-task-badge {
             background: #17a2b8;
             color: white;
-            padding: 2px 8px;
+            padding: 2px 6px;
             border-radius: 12px;
-            font-size: 11px;
-            margin-left: 10px;
+            font-size: 10px;
+            margin-left: 8px;
         }
-
+        
         .task-description {
             color: #666;
             font-size: 12px;
-            margin: 5px 0;
-            padding: 8px;
+            margin: 5px 0 10px 0;
+            padding: 6px 10px;
             background: #f8f9fa;
             border-radius: 4px;
             border-left: 3px solid #17a2b8;
         }
         
-        /* ИНДИКАТОР УДАЛЁННОГО ЗАКАЗА */
         .deleted-order {
             opacity: 0.5;
             background: #f8d7da;
@@ -368,24 +232,31 @@
             transform: translate(-50%, -50%);
             background: #dc3545;
             color: white;
-            padding: 5px 10px;
+            padding: 4px 8px;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             opacity: 0.8;
+        }
+        
+        .btn-sm {
+            padding: 2px 6px;
+            font-size: 11px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- ШАПКА -->
-        <div class="site-header">
-            <h1>🔧 Токарный участок</h1>
-        </div>
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <div>
+                <h1 style="color: #333; font-size: 24px;">🔧 Токарный участок</h1>
+            </div>
+        </header>
 
         <!-- НАВИГАЦИЯ ПО ДАТАМ -->
         <div class="date-navigation">
-            <h2 id="currentDateDisplay"></h2>
+            <h2 id="currentDateDisplay" style="font-size: 16px; color: #333; margin: 0;"></h2>
             <div class="nav-buttons">
                 <button class="btn btn-primary" onclick="changeDate('prev')">← Вчера</button>
                 <button class="btn btn-success" onclick="changeDate('today')">Сегодня</button>
@@ -408,34 +279,24 @@
             updateDateDisplay();
             loadTasks();
 
-            // Слушаем изменения из других вкладок
             window.addEventListener('taskStatusChanged', function(e) {
                 loadTasks();
             });
 
-            // Слушаем изменения в localStorage
             window.addEventListener('storage', function(e) {
                 if (e.key === 'masterx_orders') {
-                    loadTasks(); // Перезагружаем задачи при изменении заказов
+                    loadTasks();
                 }
             });
             
-            // Периодическая проверка наличия заказов (каждые 5 секунд)
             setInterval(checkOrdersExistence, 5000);
         });
 
-        // ===== НАВИГАЦИЯ ПО ДАТАМ =====
         function changeDate(action) {
             switch(action) {
-                case 'prev':
-                    taskManager.prevDay();
-                    break;
-                case 'next':
-                    taskManager.nextDay();
-                    break;
-                case 'today':
-                    taskManager.today();
-                    break;
+                case 'prev': taskManager.prevDay(); break;
+                case 'next': taskManager.nextDay(); break;
+                case 'today': taskManager.today(); break;
             }
             currentDate = taskManager.currentDate;
             updateDateDisplay();
@@ -446,38 +307,32 @@
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             const dateStr = currentDate.toLocaleDateString('ru-RU', options);
             const isToday = taskManager.formatDate(currentDate) === taskManager.formatDate(new Date());
-
             document.getElementById('currentDateDisplay').innerHTML = `
                 ${dateStr} ${!isToday ? '<span class="history-indicator">(история)</span>' : ''}
             `;
         }
         
-        // ===== ПРОВЕРКА СУЩЕСТВОВАНИЯ ЗАКАЗОВ =====
         function checkOrdersExistence() {
             const currentOrders = loadOrdersFromStorage() || [];
             const tasks = taskManager.tasks;
             let needsUpdate = false;
             
             tasks.forEach(task => {
-                const orderExists = currentOrders.some(o => o.id === task.orderId);
-                if (!orderExists) {
-                    console.log(`Заказ ${task.orderId} удалён, удаляем задачу ${task.id}`);
+                if (!currentOrders.some(o => o.id === task.orderId)) {
                     needsUpdate = true;
                 }
             });
             
             if (needsUpdate) {
-                // Очищаем историю для текущей даты
                 const dateStr = taskManager.formatDate(currentDate);
                 localStorage.removeItem(`tasks_${taskManager.siteType}_${dateStr}`);
-                taskManager.loadData(); // Перезагружаем данные
+                taskManager.loadData();
                 loadTasks();
             }
         }
 
-        // ===== ЗАГРУЗКА ЗАДАЧ =====
         function loadTasks() {
-            taskManager.orders = loadOrdersFromStorage() || []; // Обновляем заказы
+            taskManager.orders = loadOrdersFromStorage() || [];
             taskManager.loadData();
             const tasks = taskManager.tasks;
             const tasksList = document.getElementById('tasksList');
@@ -487,14 +342,13 @@
             if (tasks.length === 0) {
                 tasksList.innerHTML = `
                     <div class="no-tasks">
-                        <h3>📭 Нет задач на этот день</h3>
-                        <p>Выберите другую дату или создайте заказ в планировщике</p>
+                        <p style="font-size: 18px; color: #666;">📭 Нет задач на этот день</p>
+                        <p style="color: #999;">Выберите другую дату или создайте заказ в планировщике</p>
                     </div>
                 `;
                 return;
             }
 
-            // Группируем задачи по заказам
             const tasksByOrder = {};
             tasks.forEach(task => {
                 if (!tasksByOrder[task.orderId]) {
@@ -507,33 +361,25 @@
                 tasksByOrder[task.orderId].items.push(task);
             });
 
-            // Отображаем каждый заказ как карточку
             Object.values(tasksByOrder).forEach(order => {
                 tasksList.appendChild(createOrderCard(order));
             });
         }
 
-        // ===== СОЗДАНИЕ КАРТОЧКИ ЗАКАЗА =====
         function createOrderCard(order) {
             const card = document.createElement('div');
             card.className = 'order-card';
             
-            // Проверяем, существует ли заказ в текущих заказах
             const orderExists = taskManager.orders.some(o => o.id === order.orderId);
             if (!orderExists) {
                 card.classList.add('deleted-order');
             }
 
-            // Шапка заказа
             const header = document.createElement('div');
             header.className = 'order-header';
-            header.innerHTML = `
-                <h3>📦 Заказ №${order.orderNumber}</h3>
-                <span class="status-badge status-pending">В работе</span>
-            `;
+            header.innerHTML = `<h3>📦 Заказ №${order.orderNumber}</h3>`;
             card.appendChild(header);
 
-            // Группируем задачи по изделиям внутри заказа
             const tasksByProduct = {};
             order.items.forEach(task => {
                 const key = task.product;
@@ -548,7 +394,6 @@
                 tasksByProduct[key].tasks.push(task);
             });
 
-            // Отображаем каждое изделие
             Object.values(tasksByProduct).forEach(product => {
                 card.appendChild(createProductSection(product));
             });
@@ -556,11 +401,9 @@
             return card;
         }
 
-        // ===== СОЗДАНИЕ СЕКЦИИ ИЗДЕЛИЯ =====
         function createProductSection(product) {
             const section = document.createElement('div');
 
-            // Информация об изделии
             const info = document.createElement('div');
             info.className = 'product-info';
             info.innerHTML = `
@@ -570,14 +413,12 @@
             `;
             section.appendChild(info);
 
-            // Сортируем задачи: сначала основные, потом дополнительные
             const sortedTasks = [...product.tasks].sort((a, b) => {
                 if (a.isExtra && !b.isExtra) return 1;
                 if (!a.isExtra && b.isExtra) return -1;
                 return (a.operationIndex || 0) - (b.operationIndex || 0);
             });
 
-            // Отображаем каждую задачу
             sortedTasks.forEach(task => {
                 section.appendChild(createTaskCard(task));
             });
@@ -585,20 +426,11 @@
             return section;
         }
 
-        // ===== СОЗДАНИЕ КАРТОЧКИ ЗАДАЧИ =====
         function createTaskCard(task) {
             const card = document.createElement('div');
-            card.className = `task-card status-${task.status}`;
+            card.className = 'task-card';
             card.dataset.taskId = task.id;
 
-            // Статус задачи
-            const statusText = {
-                'pending': 'Ожидает',
-                'in_progress': 'В работе',
-                'completed': 'Завершено'
-            }[task.status] || task.status;
-
-            // Заголовок задачи
             const header = document.createElement('div');
             header.className = 'task-header';
             header.innerHTML = `
@@ -606,11 +438,9 @@
                     ${task.operation}
                     ${task.isExtra ? '<span class="extra-task-badge">Доп.</span>' : ''}
                 </span>
-                <span class="status-badge status-${task.status}">${statusText}</span>
             `;
             card.appendChild(header);
 
-            // Описание для дополнительной задачи
             if (task.isExtra && task.description) {
                 const desc = document.createElement('div');
                 desc.className = 'task-description';
@@ -618,13 +448,11 @@
                 card.appendChild(desc);
             }
 
-            // Прогресс выполнения
             const progress = document.createElement('div');
             progress.className = 'task-progress';
             progress.textContent = `Выполнено: ${task.completedQuantity || 0}/${task.totalQuantity || 0} шт`;
             card.appendChild(progress);
 
-            // Список исполнителей
             const executorList = document.createElement('div');
             executorList.className = 'executor-list';
             executorList.id = `executors-${task.id}`;
@@ -634,11 +462,13 @@
                     executorList.appendChild(createExecutorItem(task, executor));
                 });
             } else {
-                executorList.innerHTML = '<p style="color: #999; padding: 10px;">Нет исполнителей</p>';
+                const noExecutors = document.createElement('p');
+                noExecutors.style.cssText = 'color: #999; padding: 8px 0; font-size: 13px;';
+                noExecutors.textContent = 'Нет исполнителей';
+                executorList.appendChild(noExecutors);
             }
             card.appendChild(executorList);
 
-            // Кнопка добавления исполнителя (если задача не завершена)
             if (task.status !== 'completed') {
                 const addBtn = document.createElement('button');
                 addBtn.className = 'btn-add-executor';
@@ -647,9 +477,8 @@
                 card.appendChild(addBtn);
             }
 
-            // Кнопка ГОТОВО (для всей задачи)
             const readyBtn = document.createElement('button');
-            readyBtn.className = `btn-ready ${task.status === 'completed' ? 'completed' : ''}`;
+            readyBtn.className = 'btn-ready';
             readyBtn.textContent = 'ГОТОВО';
             readyBtn.disabled = task.status === 'completed';
             readyBtn.onclick = () => completeTask(task.id);
@@ -658,21 +487,18 @@
             return card;
         }
 
-        // ===== СОЗДАНИЕ ЭЛЕМЕНТА ИСПОЛНИТЕЛЯ =====
         function createExecutorItem(task, executor) {
             const div = document.createElement('div');
             div.className = 'executor-item';
 
-            // Имя исполнителя
             const nameSpan = document.createElement('span');
             nameSpan.className = 'executor-name';
             nameSpan.textContent = executor.name;
             div.appendChild(nameSpan);
 
-            // Поле для ввода количества
             const quantityInput = document.createElement('input');
             quantityInput.type = 'number';
-            quantityInput.className = 'executor-quantity-input';
+            quantityInput.className = 'executor-quantity';
             quantityInput.value = executor.quantity || 0;
             quantityInput.min = 0;
             quantityInput.max = task.totalQuantity || 0;
@@ -680,13 +506,12 @@
             quantityInput.onchange = (e) => {
                 const val = parseInt(e.target.value) || 0;
                 taskManager.updateExecutorQuantity(task.id, executor.name, val);
-                loadTasks(); // перезагружаем для обновления прогресса
+                loadTasks();
             };
             div.appendChild(quantityInput);
 
-            // Кнопка статуса исполнителя
             const workBtn = document.createElement('button');
-            workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''} ${task.status === 'completed' ? 'completed' : ''}`;
+            workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''}`;
             workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
             workBtn.disabled = task.status === 'completed';
             workBtn.onclick = () => toggleWorkStatus(task.id, executor.name, workBtn);
@@ -695,12 +520,10 @@
             return div;
         }
 
-        // ===== ФОРМА ДОБАВЛЕНИЯ ИСПОЛНИТЕЛЯ =====
         function showAddExecutorForm(task) {
             const executorList = document.getElementById(`executors-${task.id}`);
             if (!executorList) return;
 
-            // Удаляем старую форму, если есть
             const oldForm = executorList.parentNode.querySelector('.new-executor-form');
             if (oldForm) oldForm.remove();
 
@@ -713,6 +536,8 @@
 
             const addBtn = document.createElement('button');
             addBtn.className = 'btn btn-success';
+            addBtn.style.padding = '4px 12px';
+            addBtn.style.fontSize = '12px';
             addBtn.textContent = 'Добавить';
             addBtn.onclick = () => {
                 if (input.value.trim()) {
@@ -723,6 +548,8 @@
 
             const cancelBtn = document.createElement('button');
             cancelBtn.className = 'btn btn-danger';
+            cancelBtn.style.padding = '4px 12px';
+            cancelBtn.style.fontSize = '12px';
             cancelBtn.textContent = 'Отмена';
             cancelBtn.onclick = () => formDiv.remove();
 
@@ -733,17 +560,13 @@
             executorList.parentNode.insertBefore(formDiv, executorList.nextSibling);
         }
 
-        // ===== ПЕРЕКЛЮЧЕНИЕ СТАТУСА ИСПОЛНИТЕЛЯ =====
         function toggleWorkStatus(taskId, executorName, btn) {
             const newStatus = btn.classList.contains('active') ? 'pending' : 'in_progress';
-            
             taskManager.updateExecutorStatus(taskId, executorName, newStatus);
-            
             btn.classList.toggle('active');
             btn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
         }
 
-        // ===== ЗАВЕРШЕНИЕ ЗАДАЧИ =====
         function completeTask(taskId) {
             if (confirm('Завершить эту задачу?')) {
                 taskManager.completeTask(taskId);
