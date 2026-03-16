@@ -47,13 +47,6 @@ class MaterialsReport {
             console.log('✅ Нормы загружены из JSON');
             console.log('📦 Кронштейнов в БД:', this.materialsDB.brackets.length);
             
-            const bt15 = this.materialsDB.brackets.find(b => b.name === 'B(T)-15');
-            if (bt15) {
-                console.log('✅ B(T)-15 найден:', bt15);
-            } else {
-                console.warn('❌ B(T)-15 НЕ найден в БД!');
-            }
-            
         } catch (error) {
             console.error('❌ Ошибка загрузки norms.json:', error);
             this.loadFallbackData();
@@ -113,18 +106,12 @@ class MaterialsReport {
             }
             
             if (item.bracket?.type && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
-                console.log(`🔍 Поиск кронштейна: ${item.bracket.type}`);
-                
                 const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
-                
                 if (bracket) {
-                    console.log(`✅ Кронштейн найден:`, bracket);
                     const thickness = bracket.thickness || '2мм';
                     const area = bracket.area || bracket.weight || 0;
                     const totalQty = item.bracket.quantity * productQty;
                     const totalArea = area * totalQty;
-                    
-                    console.log(`📊 area=${area}, totalQty=${totalQty}, totalArea=${totalArea}`);
                     
                     const keyName = `AISI 430 ${thickness}`;
                     
@@ -144,8 +131,6 @@ class MaterialsReport {
                         qty: totalQty,
                         total: totalArea
                     });
-                } else {
-                    console.warn(`❌ Кронштейн ${item.bracket.type} НЕ НАЙДЕН в БД!`);
                 }
             }
             
@@ -286,8 +271,6 @@ class MaterialsReport {
     async generateReportHTML(order) {
         const data = this.calculateMaterials(order);
         
-        console.log('=== ДАННЫЕ ДЛЯ ОТЧЕТА ===', data);
-        
         if (data.otherSheets.length === 0 && data.profiles.length === 0 && data.rods.length === 0 &&
             data.aisi.products.length === 0 && data.aisi.brackets.length === 0 && data.aisi.lyres.length === 0) {
             return `
@@ -376,72 +359,6 @@ class MaterialsReport {
                             ${group.items.map(item => `
                                 <tr>
                                     <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name.replace('Кронштейн ', '')}</td>
-                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">AISI 430</td>
-                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${group.thickness}</td>
-                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(item.unit)}</td>
-                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.qty}</td>
-                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(item.total)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
-            });
-        }
-        
-        if (data.aisi.lyres.length > 0) {
-            html += `<h4 style="margin-top: 30px;">🔩 Лиры из AISI 430</h4>`;
-            
-            data.aisi.lyres.forEach(group => {
-                html += `
-                    <table class="materials-table" style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
-                        <thead>
-                            <tr style="background: #f0f0f0;">
-                                <th style="padding: 8px; text-align: left;">Лира</th>
-                                <th style="padding: 8px; text-align: center;">Материал</th>
-                                <th style="padding: 8px; text-align: center;">Толщина</th>
-                                <th style="padding: 8px; text-align: right;">Расход на 1 шт (м²)</th>
-                                <th style="padding: 8px; text-align: right;">Кол-во</th>
-                                <th style="padding: 8px; text-align: right;">Общий расход (м²)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${group.items.map(item => `
-                                <tr>
-                                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name.replace('Лира ', '')}</td>
-                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">AISI 430</td>
-                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${group.thickness}</td>
-                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(item.unit)}</td>
-                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.qty}</td>
-                                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(item.total)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
-            });
-        }
-        
-        if (data.aisi.products.length > 0) {
-            html += `<h4 style="margin-top: 30px;">🔩 Детали из AISI 430 (в составе изделий)</h4>`;
-            
-            data.aisi.products.forEach(group => {
-                html += `
-                    <table class="materials-table" style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
-                        <thead>
-                            <tr style="background: #f0f0f0;">
-                                <th style="padding: 8px; text-align: left;">Деталь</th>
-                                <th style="padding: 8px; text-align: center;">Материал</th>
-                                <th style="padding: 8px; text-align: center;">Толщина</th>
-                                <th style="padding: 8px; text-align: right;">Расход на 1 шт (м²)</th>
-                                <th style="padding: 8px; text-align: right;">Кол-во</th>
-                                <th style="padding: 8px; text-align: right;">Общий расход (м²)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${group.items.map(item => `
-                                <tr>
-                                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name}</td>
                                     <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">AISI 430</td>
                                     <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${group.thickness}</td>
                                     <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${fmt(item.unit)}</td>
