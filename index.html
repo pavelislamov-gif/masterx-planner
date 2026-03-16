@@ -5,173 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MasterX - Планировщик производства</title>
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        /* Дополнительные стили для навигации и отчетов */
-        .sites-navigation {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .sites-links {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-top: 10px;
-        }
-
-        .site-link {
-            padding: 10px 20px;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            text-decoration: none;
-            color: #333;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-
-        .site-link:hover {
-            background: #007bff;
-            color: white;
-            border-color: #007bff;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,123,255,0.2);
-        }
-
-        .btn-info {
-            background: #17a2b8;
-            color: white;
-            margin: 10px 0;
-        }
-
-        .btn-info:hover {
-            background: #138496;
-        }
-
-        .materials-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
-        }
-
-        .materials-table th,
-        .materials-table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .materials-table th {
-            background: #007bff;
-            color: white;
-        }
-
-        .materials-table tfoot {
-            font-weight: bold;
-            background: #f8f9fa;
-        }
-
-        .order-stats {
-            display: flex;
-            gap: 20px;
-            margin-top: 20px;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 10px;
-            color: white;
-        }
-
-        .stat-item {
-            flex: 1;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .search-box {
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
-            width: 300px;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .search-box:focus {
-            border-color: #007bff;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
-        }
-
-        .filter-section {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .color-preview {
-            width: 20px;
-            height: 20px;
-            display: inline-block;
-            margin-left: 5px;
-            border-radius: 3px;
-            border: 1px solid #ddd;
-            vertical-align: middle;
-        }
-        
-        .quantity-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        
-        .quantity-row select {
-            flex: 2;
-        }
-        
-        .quantity-row input {
-            flex: 1;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
+        <!-- ШАПКА С ЛОГОТИПОМ -->
         <header>
-            <div>
-                <h1>🏭 MasterX Планировщик производства</h1>
-                <p style="color: #666; margin-top: 5px;">Управление заказами и производственными участками</p>
+            <div class="logo-container">
+                <!-- Геометрический логотип (можно заменить на PNG) -->
+                <div class="logo">M</div>
+                <div class="logo-text">
+                    Master<span class="x-red">X</span>
+                </div>
             </div>
             <button class="btn btn-primary" onclick="openOrderModal()">
                 <span style="font-size: 20px; margin-right: 5px;">+</span> Новый заказ
             </button>
         </header>
 
-        <!-- Навигация по участкам -->
+        <!-- НАВИГАЦИЯ ПО УЧАСТКАМ -->
         <div class="sites-navigation">
-            <h3 style="margin-bottom: 15px; color: #333;">Производственные участки:</h3>
+            <h3 style="margin-bottom: 15px; color: #fff;">🏭 Производственные участки:</h3>
             <div class="sites-links">
-                <a href="sites/tokarniy.html" class="site-link" target="_blank">🔧 Токарный</a>
-                <a href="sites/slesarniy.html" class="site-link" target="_blank">🔨 Слесарный</a>
-                <a href="sites/frezerniy.html" class="site-link" target="_blank">⚙️ Фрезерный</a>
-                <a href="sites/lazerno-gibochniy.html" class="site-link" target="_blank">✨ Лазерно-гибочный</a>
-                <a href="sites/polimerniy.html" class="site-link" target="_blank">🧪 Полимерный</a>
+                <a href="sites/tokarniy.html" class="site-link">🔧 Токарный</a>
+                <a href="sites/slesarniy.html" class="site-link">🔨 Слесарный</a>
+                <a href="sites/frezerniy.html" class="site-link">⚙️ Фрезерный</a>
+                <a href="sites/lazerno-gibochniy.html" class="site-link">✨ Лазерно-гибочный</a>
+                <a href="sites/polimerniy.html" class="site-link">🧪 Полимерный</a>
             </div>
         </div>
 
-        <!-- Статистика -->
+        <!-- СТАТИСТИКА -->
         <div class="order-stats" id="orderStats">
             <div class="stat-item">
                 <div class="stat-value" id="totalOrders">0</div>
@@ -191,7 +54,7 @@
             </div>
         </div>
 
-        <!-- Фильтры и поиск -->
+        <!-- ФИЛЬТРЫ И ПОИСК -->
         <div class="filter-section">
             <input type="text" class="search-box" placeholder="🔍 Поиск по номеру заказа или изделию..." id="searchInput">
             <select id="statusFilter" class="search-box" style="width: auto;">
@@ -202,11 +65,11 @@
             <button class="btn btn-primary" onclick="exportOrders()">📥 Экспорт заказов</button>
         </div>
 
-        <!-- Модальное окно создания заказа -->
+        <!-- МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ЗАКАЗА -->
         <div id="orderModal" class="modal">
             <div class="modal-content">
                 <span class="close" onclick="closeOrderModal()">&times;</span>
-                <h2>📋 Создание нового заказа</h2>
+                <h2 style="color: #fff; margin-bottom: 20px;">📋 Создание нового заказа</h2>
                 <form id="orderForm">
                     <div class="form-group">
                         <label>📅 Дата заказа:</label>
@@ -281,7 +144,7 @@
             </div>
         </div>
 
-        <!-- Модальное окно материалов -->
+        <!-- МОДАЛЬНОЕ ОКНО МАТЕРИАЛОВ -->
         <div id="materialsModal" class="modal">
             <div class="modal-content" style="max-width: 900px;">
                 <span class="close" onclick="closeMaterialsModal()">&times;</span>
@@ -289,7 +152,7 @@
             </div>
         </div>
 
-        <!-- Список заказов -->
+        <!-- СПИСОК ЗАКАЗОВ -->
         <div id="ordersList" class="orders-list">
             <!-- Заказы будут загружаться сюда -->
         </div>
