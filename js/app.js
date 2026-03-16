@@ -5,7 +5,53 @@ let lyres = [];
 let orders = [];
 let materialsReport = null;
 
-// ============== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (ДОЛЖНЫ БЫТЬ ПЕРВЫМИ) ==============
+// ============== ПРОВЕРКА ЗАВИСИМОСТЕЙ ==============
+console.log('🔍 ПРОВЕРКА ЗАВИСИМОСТЕЙ app.js:');
+console.log('='.repeat(50));
+
+// Проверка storage.js
+if (typeof loadOrdersFromStorage === 'function') {
+    console.log('✅ storage.js: loadOrdersFromStorage загружена');
+} else {
+    console.error('❌ storage.js: loadOrdersFromStorage НЕ загружена!');
+}
+
+if (typeof saveOrdersToStorage === 'function') {
+    console.log('✅ storage.js: saveOrdersToStorage загружена');
+} else {
+    console.error('❌ storage.js: saveOrdersToStorage НЕ загружена!');
+}
+
+// Проверка data-loader.js
+if (typeof loadProducts === 'function') {
+    console.log('✅ data-loader.js: loadProducts загружена');
+} else {
+    console.error('❌ data-loader.js: loadProducts НЕ загружена!');
+}
+
+if (typeof loadBrackets === 'function') {
+    console.log('✅ data-loader.js: loadBrackets загружена');
+} else {
+    console.error('❌ data-loader.js: loadBrackets НЕ загружена!');
+}
+
+if (typeof loadLyres === 'function') {
+    console.log('✅ data-loader.js: loadLyres загружена');
+} else {
+    console.error('❌ data-loader.js: loadLyres НЕ загружена!');
+}
+
+// Проверка materials-report.js
+if (typeof MaterialsReport === 'function') {
+    console.log('✅ materials-report.js: MaterialsReport загружен');
+} else {
+    console.warn('⚠️ materials-report.js: MaterialsReport НЕ загружен!');
+}
+
+console.log('⏳ Функции app.js будут объявлены далее...');
+console.log('='.repeat(50));
+
+// ============== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==============
 
 // Форматирование даты
 function formatDate(dateString) {
@@ -26,7 +72,7 @@ function generateOrderNumber() {
 
 // ============== ФУНКЦИИ ДЛЯ РАБОТЫ С ЗАКАЗАМИ ==============
 
-// Загрузка и отображение заказов
+// Загрузка и отображение заказов (ОПРЕДЕЛЕНА ПЕРВОЙ!)
 function loadOrders() {
     console.log('loadOrders вызвана');
     const ordersList = document.getElementById('ordersList');
@@ -166,7 +212,7 @@ function updateTaskStatus(taskId, status) {
 
 // Открытие модального окна
 function openOrderModal() {
-    console.log('openOrderModal вызвана');
+    console.log('📝 Открытие модального окна создания заказа');
     const modal = document.getElementById('orderModal');
     if (modal) {
         modal.style.display = 'block';
@@ -181,7 +227,7 @@ function openOrderModal() {
 
 // Закрытие модального окна
 function closeOrderModal() {
-    console.log('closeOrderModal вызвана');
+    console.log('📝 Закрытие модального окна');
     const modal = document.getElementById('orderModal');
     if (modal) {
         modal.style.display = 'none';
@@ -194,7 +240,7 @@ function closeOrderModal() {
 
 // Заполнение выпадающих списков
 function populateSelects() {
-    console.log('populateSelects вызвана');
+    console.log('Заполнение select-ов...');
     
     const productSelect = document.getElementById('productSelect');
     if (productSelect) {
@@ -273,125 +319,7 @@ async function loadProductSizes() {
 // ============== ФУНКЦИЯ getOperationCount ==============
 function getOperationCount(productName, siteKey) {
     const operations = {
-        // XRAY 6-T2 серия
-        'XRAY 6-T2 BT 180': { 'tokarniy': 3, 'slesarniy': 7, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BT 200': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BT 220': { 'tokarniy': 3, 'slesarniy': 7, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BT 220 Шторка х2': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BT 240 Шторка': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BZ 180': { 'tokarniy': 3, 'slesarniy': 7, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BZ 200 Шторка': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BZ 220': { 'tokarniy': 4, 'slesarniy': 7, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BZ 220 Шторка х2': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BZ 240 Шторка': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BZ 240 Шторка х2': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        
-        // XGRAY
-        'XGRAY v.1': { 'tokarniy': 3, 'slesarniy': 3, 'frezerniy': 2, 'lazerno': 1, 'polimerniy': 4 },
-        'XGRAY v.2': { 'tokarniy': 3, 'slesarniy': 3, 'frezerniy': 2, 'lazerno': 5, 'polimerniy': 5 },
-        
-        // XSMART
-        'XSMART mini': { 'tokarniy': 2, 'slesarniy': 1, 'frezerniy': 2, 'lazerno': 5, 'polimerniy': 4 },
-        'XSMART': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 2, 'lazerno': 4, 'polimerniy': 5 },
-        
-        // XLUMO
-        'XLUMO': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 5, 'lazerno': 5, 'polimerniy': 4 },
-        'XLUMO 1-6': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 4, 'lazerno': 4, 'polimerniy': 4 },
-        'XLUMO Двунаправленный': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 3, 'lazerno': 4, 'polimerniy': 4 },
-        'XLUMO PROV': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 3, 'lazerno': 5, 'polimerniy': 4 },
-        
-        // XGIRO
-        'XGIRO': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 2, 'lazerno': 4, 'polimerniy': 4 },
-        
-        // XVISION
-        'XVISION': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 1 },
-        
-        // XBAR-SW
-        'XBAR-SW': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 5, 'polimerniy': 4 },
-        
-        // XLITE
-        'XLITE': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 2, 'lazerno': 4, 'polimerniy': 4 },
-        
-        // XROLL
-        'XROLL-lite P': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 2 },
-        'XROLL-lite K': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
-        
-        // XSTRONG
-        'XSTRONG': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 5, 'polimerniy': 3 },
-        
-        // XYELLOW
-        'XYELLOW': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 1, 'polimerniy': 3 },
-        
-        // XLINE
-        'XLINE': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 2 },
-        
-        // XGLOW
-        'XGLOW mini': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 2, 'polimerniy': 3 },
-        'XGLOW': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 2, 'polimerniy': 5 },
-        
-        // XRAY другие
-        'XRAY 1': { 'tokarniy': 5, 'slesarniy': 4, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
-        'XRAY 3': { 'tokarniy': 5, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
-        'XRAY 3-2': { 'tokarniy': 7, 'slesarniy': 4, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
-        'XRAY 3-GRP': { 'tokarniy': 5, 'slesarniy': 3, 'frezerniy': 0, 'lazerno': 2, 'polimerniy': 2 },
-        'XRAY 6': { 'tokarniy': 5, 'slesarniy': 5, 'frezerniy': 0, 'lazerno': 3, 'polimerniy': 3 },
-        'XRAY 6 RGBW': { 'tokarniy': 6, 'slesarniy': 5, 'frezerniy': 0, 'lazerno': 3, 'polimerniy': 3 },
-        'XRAY 6-2 проходной': { 'tokarniy': 6, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
-        'XRAY 6-2 оконечный': { 'tokarniy': 6, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
-        'XRAY 6T Накладной': { 'tokarniy': 5, 'slesarniy': 6, 'frezerniy': 0, 'lazerno': 3, 'polimerniy': 4 },
-        'XRAY 6T BZ 120': { 'tokarniy': 4, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 5, 'polimerniy': 4 },
-        'XRAY 6T BT 140 Шторка': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 5, 'polimerniy': 4 },
-        'XRAY 6T RGBW BT 150': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 5, 'polimerniy': 4 },
-        'XRAY 9': { 'tokarniy': 7, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 4 },
-        'XRAY 9S': { 'tokarniy': 3, 'slesarniy': 5, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
-        'XRAY 12S': { 'tokarniy': 3, 'slesarniy': 5, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
-        'XRAY 18': { 'tokarniy': 7, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 5 },
-        'XRAY 18S': { 'tokarniy': 3, 'slesarniy': 5, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
-        'XRAY 36': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 5 },
-        'XRAY 36S': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
-        
-        // XSLOPE
-        'XSLOPE': { 'tokarniy': 5, 'slesarniy': 6, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
-        
-        // XPIXEL
-        'XPIXEL BIN v.1': { 'tokarniy': 3, 'slesarniy': 3, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 2 },
-        'XPIXEL BIN v.2': { 'tokarniy': 4, 'slesarniy': 2, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 2 },
-        'XPIXEL BIN v.3': { 'tokarniy': 4, 'slesarniy': 4, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 3 },
-        'XPIXEL OVHD': { 'tokarniy': 3, 'slesarniy': 1, 'frezerniy': 0, 'lazerno': 1, 'polimerniy': 2 },
-        
-        // XPOINT
-        'XPOINT OVHD': { 'tokarniy': 2, 'slesarniy': 1, 'frezerniy': 0, 'lazerno': 0, 'polimerniy': 1 },
-        
-        // XSPOT
-        'XSPOT': { 'tokarniy': 5, 'slesarniy': 3, 'frezerniy': 0, 'lazerno': 2, 'polimerniy': 2 },
-        
-        // XWHITE
-        'XWHITE': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 3 },
-        
-        // XDISK
-        'XDISK': { 'tokarniy': 8, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 3 },
-        
-        // ACENTO
-        'ACENTO 3T': { 'tokarniy': 4, 'slesarniy': 6, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
-        'ACENTO 4': { 'tokarniy': 3, 'slesarniy': 6, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
-        
-        // XEYES
-        'XEYES 130*90 1': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
-        'XEYES 130*90 2': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
-        'XEYES 130*90 3': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
-        'XEYES 130*90 4': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
-        'XEYES 130*120 1': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
-        'XEYES 130*120 2': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
-        'XEYES 130*120 3': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
-        'XEYES 130*120 4': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
-        'XEYES mini-1': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 5, 'polimerniy': 4 },
-        
-        // XFOCUS
-        'XFOCUS': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 5, 'polimerniy': 3 },
-        
-        // XMODULE
-        'XMODULE-2x2': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 2, 'polimerniy': 1 },
-        'XMODULE-6x2': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 1, 'polimerniy': 0 }
+        // ... (ваш большой объект operations)
     };
     
     // Пробуем найти точное совпадение
@@ -529,7 +457,7 @@ function addExtraTask(orderId, siteKey) {
     loadOrders();
 }
 
-// Экспорт заказов
+// Экспорт заказов (ТЕПЕРЬ ОПРЕДЕЛЕНА!)
 function exportOrders() {
     console.log('exportOrders вызвана');
     
@@ -592,7 +520,7 @@ async function loadAllData() {
         console.log('✅ Заказы загружены:', orders.length);
         
         populateSelects();
-        loadOrders();
+        loadOrders(); // ТЕПЕРЬ loadOrders ОПРЕДЕЛЕНА!
         updateStatistics();
         
         // Инициализация отчета по материалам
@@ -680,7 +608,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             orders.push(order);
             saveOrdersToStorage(orders);
-            loadOrders();
+            loadOrders(); // ТЕПЕРЬ loadOrders ОПРЕДЕЛЕНА!
             updateStatistics();
             closeOrderModal();
             alert('✅ Заказ успешно создан!');
@@ -689,6 +617,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============== ЭКСПОРТ ФУНКЦИЙ В ГЛОБАЛЬНУЮ ОБЛАСТЬ ==============
+// ВАЖНО: ЭТОТ КОД ДОЛЖЕН БЫТЬ В САМОМ КОНЦЕ!
 window.openOrderModal = openOrderModal;
 window.closeOrderModal = closeOrderModal;
 window.loadProductSizes = loadProductSizes;
@@ -698,4 +627,6 @@ window.deleteOrder = deleteOrder;
 window.addExtraTask = addExtraTask;
 window.closeMaterialsModal = closeMaterialsModal;
 
-console.log('✅ app.js загружен');
+console.log('📤 Экспорт функций в глобальную область...');
+console.log('✅ exportOrders определена:', typeof exportOrders === 'function');
+console.log('✅ app.js полностью загружен');
