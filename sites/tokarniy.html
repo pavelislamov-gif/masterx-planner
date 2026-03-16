@@ -17,12 +17,36 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
+        .date-navigation h2 {
+            flex: 1;
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
         .task-card {
             background: white;
             border-radius: 8px;
             margin-bottom: 15px;
             padding: 15px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #6c757d;
+        }
+        
+        .task-card.status-pending {
+            border-left-color: #ffc107;
+        }
+        
+        .task-card.status-in_progress {
+            border-left-color: #fd7e14;
+        }
+        
+        .task-card.status-completed {
+            border-left-color: #28a745;
         }
         
         .task-header {
@@ -31,7 +55,7 @@
             align-items: center;
             margin-bottom: 10px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #007bff;
+            border-bottom: 1px solid #dee2e6;
         }
         
         .task-title {
@@ -45,18 +69,47 @@
             font-size: 14px;
         }
         
+        .squares-container {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .square {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #dee2e6;
+            border-radius: 4px;
+            background: white;
+            transition: all 0.3s;
+        }
+        
+        .square.orange {
+            background: #ffc107;
+            border-color: #ffc107;
+        }
+        
+        .square.green {
+            background: #28a745;
+            border-color: #28a745;
+        }
+        
         .executor-list {
             margin: 15px 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
         }
         
         .executor-item {
             display: flex;
             align-items: center;
             gap: 15px;
-            padding: 10px;
-            background: #f8f9fa;
+            padding: 8px;
+            background: white;
             border-radius: 5px;
             margin-bottom: 8px;
+            border: 1px solid #dee2e6;
         }
         
         .executor-name {
@@ -117,15 +170,16 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
-            margin-top: 5px;
+            margin: 5px 0;
         }
         
         .new-executor-form {
             display: flex;
             gap: 10px;
-            margin-top: 10px;
+            margin: 10px 0;
             padding: 10px;
-            background: #e9ecef;
+            background: white;
+            border: 1px solid #dee2e6;
             border-radius: 5px;
         }
         
@@ -141,11 +195,6 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-        }
-        
-        .nav-buttons {
-            display: flex;
-            gap: 10px;
         }
         
         .status-badge {
@@ -178,21 +227,27 @@
             border-radius: 10px;
             color: #999;
         }
+        
+        .history-indicator {
+            font-size: 14px;
+            color: #666;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="site-header">
             <h1>🔧 Токарный участок</h1>
-            <div class="nav-buttons">
-                <button class="btn btn-primary" onclick="changeDate(-1)">← Вчера</button>
-                <button class="btn btn-success" onclick="changeDate(0)">Сегодня</button>
-                <button class="btn btn-primary" onclick="changeDate(1)">Завтра →</button>
-            </div>
         </div>
         
         <div class="date-navigation">
             <h2 id="currentDateDisplay"></h2>
+            <div class="nav-buttons">
+                <button class="btn btn-primary" onclick="changeDate('prev')">← Вчера</button>
+                <button class="btn btn-success" onclick="changeDate('today')">Сегодня</button>
+                <button class="btn btn-primary" onclick="changeDate('next')">Завтра →</button>
+            </div>
         </div>
         
         <div id="tasksList" class="tasks-list">
@@ -224,20 +279,31 @@
             });
         });
         
-        function changeDate(delta) {
-            if (delta === 0) {
-                currentDate = new Date();
-            } else {
-                currentDate.setDate(currentDate.getDate() + delta);
+        function changeDate(action) {
+            switch(action) {
+                case 'prev':
+                    taskManager.prevDay();
+                    break;
+                case 'next':
+                    taskManager.nextDay();
+                    break;
+                case 'today':
+                    taskManager.today();
+                    break;
             }
+            currentDate = taskManager.currentDate;
             updateDateDisplay();
             loadTasks();
         }
         
         function updateDateDisplay() {
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('currentDateDisplay').textContent = 
-                `Задачи на ${currentDate.toLocaleDateString('ru-RU', options)}`;
+            const dateStr = currentDate.toLocaleDateString('ru-RU', options);
+            const isToday = taskManager.formatDate(currentDate) === taskManager.formatDate(new Date());
+            
+            document.getElementById('currentDateDisplay').innerHTML = `
+                ${dateStr} ${!isToday ? '<span class="history-indicator'>(история)</span>' : ''}
+            `;
         }
         
         function loadTasks() {
@@ -250,8 +316,8 @@
             if (tasks.length === 0) {
                 tasksList.innerHTML = `
                     <div class="no-tasks">
-                        <h3>📭 Нет задач на сегодня</h3>
-                        <p>Создайте заказ в планировщике</p>
+                        <h3>📭 Нет задач на этот день</h3>
+                        <p>Выберите другую дату или создайте заказ в планировщике</p>
                     </div>
                 `;
                 return;
@@ -265,29 +331,55 @@
         
         function createTaskCard(task) {
             const card = document.createElement('div');
-            card.className = 'task-card';
+            card.className = `task-card status-${task.status}`;
             card.dataset.taskId = task.id;
             
-            const statusClass = task.status === 'completed' ? 'status-completed' : 
-                               task.status === 'in_progress' ? 'status-progress' : 'status-pending';
+            const statusText = {
+                'pending': 'Ожидает',
+                'in_progress': 'В работе',
+                'completed': 'Завершено'
+            }[task.status] || task.status;
             
             const header = document.createElement('div');
             header.className = 'task-header';
             header.innerHTML = `
                 <span class="task-title">${task.operation}</span>
                 <div>
-                    <span class="status-badge ${statusClass}">${getStatusText(task.status)}</span>
-                    <span class="task-order-info">Заказ №${task.orderNumber} | ${task.product} | ${task.size} | ${task.quantity} шт</span>
+                    <span class="status-badge status-${task.status}">${statusText}</span>
                 </div>
             `;
+            
+            const orderInfo = document.createElement('div');
+            orderInfo.style.marginBottom = '10px';
+            orderInfo.style.color = '#666';
+            orderInfo.innerHTML = `
+                Заказ №${task.orderNumber} | ${task.product} | ${task.size} | ${task.quantity} шт
+            `;
+            
+            // Квадратики (только если задача не завершена)
+            const squaresContainer = document.createElement('div');
+            squaresContainer.className = 'squares-container';
+            
+            // Получаем статус квадратика из заказа
+            const squareStatus = getSquareStatusFromOrder(task);
+            
+            for (let i = 0; i < (task.squares || 1); i++) {
+                const square = document.createElement('div');
+                square.className = `square ${squareStatus}`;
+                squaresContainer.appendChild(square);
+            }
             
             const executorList = document.createElement('div');
             executorList.className = 'executor-list';
             executorList.id = `executors-${task.id}`;
             
-            task.executors.forEach(executor => {
-                executorList.appendChild(createExecutorItem(task.id, executor, task.status));
-            });
+            if (task.executors && task.executors.length > 0) {
+                task.executors.forEach(executor => {
+                    executorList.appendChild(createExecutorItem(task.id, executor, task.status));
+                });
+            } else {
+                executorList.innerHTML = '<p style="color: #999; padding: 10px;">Нет исполнителей</p>';
+            }
             
             const addExecutorBtn = document.createElement('button');
             addExecutorBtn.className = 'btn-add-executor';
@@ -298,14 +390,30 @@
             readyBtn.className = `btn-ready ${task.status === 'completed' ? 'completed' : ''}`;
             readyBtn.textContent = 'ГОТОВО';
             readyBtn.disabled = task.status === 'completed';
-            readyBtn.onclick = () => completeTask(task);
+            readyBtn.onclick = () => completeTask(task.id);
             
             card.appendChild(header);
+            card.appendChild(orderInfo);
+            card.appendChild(squaresContainer);
             card.appendChild(executorList);
-            card.appendChild(addExecutorBtn);
-            card.appendChild(readyBtn);
+            
+            // Если задача не завершена, показываем кнопки
+            if (task.status !== 'completed') {
+                card.appendChild(addExecutorBtn);
+                card.appendChild(readyBtn);
+            }
             
             return card;
+        }
+        
+        function getSquareStatusFromOrder(task) {
+            const [orderId] = task.id.split('_');
+            const order = taskManager.orders.find(o => o.id == orderId);
+            
+            if (order && order.tasks && order.tasks[task.id]) {
+                return order.tasks[task.id];
+            }
+            return '';
         }
         
         function createExecutorItem(taskId, executor, taskStatus) {
@@ -318,7 +426,10 @@
             
             const quantitySpan = document.createElement('span');
             quantitySpan.className = 'executor-quantity';
-            quantitySpan.textContent = `${executor.quantity || 1} шт`;
+            
+            // Получаем количество из задачи
+            const task = taskManager.tasks.find(t => t.id === taskId);
+            quantitySpan.textContent = `${task?.quantity || 1} шт`;
             
             const workBtn = document.createElement('button');
             workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''} ${taskStatus === 'completed' ? 'completed' : ''}`;
@@ -337,6 +448,10 @@
             const executorListId = `executors-${task.id}`;
             const executorList = document.getElementById(executorListId);
             
+            // Удаляем старую форму, если есть
+            const oldForm = executorList.parentNode.querySelector('.new-executor-form');
+            if (oldForm) oldForm.remove();
+            
             const formDiv = document.createElement('div');
             formDiv.className = 'new-executor-form';
             
@@ -351,7 +466,6 @@
                 if (input.value.trim()) {
                     taskManager.addExecutor(task.id, input.value);
                     loadTasks();
-                    formDiv.remove();
                 }
             };
             
@@ -364,16 +478,10 @@
             formDiv.appendChild(addBtn);
             formDiv.appendChild(cancelBtn);
             
-            const oldForm = executorList.parentNode.querySelector('.new-executor-form');
-            if (oldForm) oldForm.remove();
-            
             executorList.parentNode.insertBefore(formDiv, executorList.nextSibling);
         }
         
         function toggleWorkStatus(taskId, executorName, btn) {
-            const task = taskManager.tasks.find(t => t.id === taskId);
-            if (!task) return;
-            
             const newStatus = btn.classList.contains('active') ? 'pending' : 'in_progress';
             
             taskManager.updateExecutorStatus(taskId, executorName, newStatus);
@@ -381,22 +489,13 @@
             btn.classList.toggle('active');
             btn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
             
-            // Обновить статус задачи
-            taskManager.updateTaskStatus(taskId, newStatus === 'in_progress' ? 'in_progress' : 'pending');
-        }
-        
-        function completeTask(task) {
-            taskManager.updateTaskStatus(task.id, 'completed');
+            // Обновляем отображение квадратиков
             loadTasks();
         }
         
-        function getStatusText(status) {
-            const statusMap = {
-                'pending': 'Ожидает',
-                'in_progress': 'В работе',
-                'completed': 'Завершено'
-            };
-            return statusMap[status] || status;
+        function completeTask(taskId) {
+            taskManager.completeTask(taskId);
+            loadTasks();
         }
     </script>
 </body>
