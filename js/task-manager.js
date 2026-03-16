@@ -83,8 +83,22 @@ class TaskManager {
     }
     
     generateTasks() {
+        console.log('generateTasks начата');
         this.tasks = [];
         const dateStr = this.formatDate(this.currentDate);
+        
+        // Загружаем историю для этой даты
+        let historyTasks = [];
+        try {
+            const historyKey = `tasks_${this.siteType}_${dateStr}`;
+            const history = localStorage.getItem(historyKey);
+            if (history) {
+                historyTasks = JSON.parse(history);
+                console.log(`Загружено ${historyTasks.length} задач из истории`);
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки истории:', error);
+        }
         
         this.orders.forEach(order => {
             if (order.status !== 'active') return;
@@ -94,29 +108,30 @@ class TaskManager {
                 const operations = this.getOperationsForProduct(productName);
                 
                 operations.forEach((op, index) => {
-                    const taskId = `${order.id}_${this.siteType}_${index}_${Date.now()}`;
+                    const taskId = `${order.id}_${this.siteType}_${index}`;
                     const taskStatus = order.tasks?.[taskId];
                     
-                    const savedTask = this.loadTaskFromHistory(taskId, dateStr);
+                    // Ищем задачу в истории
+                    const historyTask = historyTasks.find(t => t.id === taskId);
                     
-                    this.tasks.push({
+                    const task = {
                         id: taskId,
                         orderId: order.id,
                         orderNumber: order.number,
                         product: productName,
                         size: item.size || 'Стандартный',
                         totalQuantity: parseInt(item.quantity) || 1,
-                        completedQuantity: this.safeParseInt(savedTask?.completedQuantity) || 0,
+                        completedQuantity: historyTask?.completedQuantity || 0,
                         operation: op,
                         index: index,
-                        status: this.convertSquareStatus(taskStatus),
-                        executors: savedTask?.executors?.map(e => ({
-                            ...e,
-                            quantity: this.safeParseInt(e.quantity) || 0
-                        })) || [],
+                        status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
+                        executors: historyTask?.executors || [],
                         date: dateStr,
                         isExtra: false
-                    });
+                    };
+                    
+                    console.log(`Создана задача ${taskId} с ${task.executors.length} исполнителями:`, task.executors);
+                    this.tasks.push(task);
                 });
             });
             
@@ -128,30 +143,32 @@ class TaskManager {
                     const taskId = `${order.id}_extra_${index}`;
                     const taskStatus = order.tasks?.[taskId];
                     
-                    const savedTask = this.loadTaskFromHistory(taskId, dateStr);
+                    const historyTask = historyTasks.find(t => t.id === taskId);
                     
-                    this.tasks.push({
+                    const task = {
                         id: taskId,
                         orderId: order.id,
                         orderNumber: order.number,
                         product: extra.title,
                         description: extra.description || '',
                         totalQuantity: 1,
-                        completedQuantity: this.safeParseInt(savedTask?.completedQuantity) || 0,
+                        completedQuantity: historyTask?.completedQuantity || 0,
                         operation: extra.title,
                         isExtra: true,
-                        status: this.convertSquareStatus(taskStatus),
-                        executors: savedTask?.executors?.map(e => ({
-                            ...e,
-                            quantity: this.safeParseInt(e.quantity) || 0
-                        })) || [],
+                        status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
+                        executors: historyTask?.executors || [],
                         date: dateStr
-                    });
+                    };
+                    
+                    console.log(`Создана доп. задача ${taskId} с ${task.executors.length} исполнителями:`, task.executors);
+                    this.tasks.push(task);
                 });
             }
         });
         
-        // Сохраняем без уведомления
+        console.log(`generateTasks завершена, всего задач: ${this.tasks.length}`);
+        
+        // Сохраняем в историю
         this._saveTasksToHistoryInternal(dateStr);
     }
     
@@ -233,12 +250,30 @@ class TaskManager {
         
         try {
             const historyKey = `tasks_${this.siteType}_${dateStr}`;
+            
+            // Загружаем существующую историю
+            let existingTasks = [];
+            try {
+                const existing = localStorage.getItem(historyKey);
+                if (existing) {
+                    existingTasks = JSON.parse(existing);
+                }
+            } catch (e) {
+                console.warn('Ошибка загрузки существующей истории:', e);
+            }
+            
+            // Объединяем задачи - сохраняем все текущие задачи
             localStorage.setItem(historyKey, JSON.stringify(this.tasks));
-            console.log(`✅ История сохранена для ${dateStr}`);
+            console.log(`✅ История сохранена для ${dateStr}, задач: ${this.tasks.length}`);
+            
+            // Для отладки: проверим, сохранились ли исполнители
+            const saved = JSON.parse(localStorage.getItem(historyKey));
+            const totalExecutors = saved.reduce((sum, t) => sum + (t.executors?.length || 0), 0);
+            console.log(`  Из них исполнителей: ${totalExecutors}`);
+            
         } catch (error) {
             console.error('Ошибка сохранения в историю:', error);
         } finally {
-            // Сбрасываем флаг через setTimeout
             setTimeout(() => {
                 this._isSaving = false;
             }, 100);
@@ -526,6 +561,24 @@ class TaskManager {
         if (value === undefined || value === null) return 0;
         const parsed = parseInt(value);
         return isNaN(parsed) ? 0 : parsed;
+    }
+    
+    // Метод для отладки - проверить, что сохранено в истории
+    debugHistory() {
+        const dateStr = this.formatDate(this.currentDate);
+        const historyKey = `tasks_${this.siteType}_${dateStr}`;
+        const history = localStorage.getItem(historyKey);
+        if (history) {
+            const tasks = JSON.parse(history);
+            console.log('=== ОТЛАДКА ИСТОРИИ ===');
+            console.log(`Дата: ${dateStr}`);
+            console.log(`Задач в истории: ${tasks.length}`);
+            tasks.forEach(t => {
+                console.log(`  Задача ${t.id}: ${t.executors?.length || 0} исполнителей`);
+            });
+        } else {
+            console.log(`Нет истории для ${dateStr}`);
+        }
     }
 }
 
