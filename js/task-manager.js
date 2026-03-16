@@ -1,4 +1,4 @@
-// js/task-manager.js - УНИВЕРСАЛЬНЫЙ МЕНЕДЖЕР ЗАДАЧ
+// js/task-manager.js - УНИВЕРСАЛЬНЫЙ МЕНЕДЖЕР ЗАДАЧ (ИСПРАВЛЕННАЯ ВЕРСИЯ)
 
 class TaskManager {
     constructor(siteType, customOperations = {}) {
@@ -8,9 +8,12 @@ class TaskManager {
         this.orders = [];
         this.tasks = [];
         
+        // Флаг для предотвращения рекурсии
+        this._isSaving = false;
+        this._isLoading = false;
+        
         // База операций по умолчанию для каждого участка
         this.baseOperations = {
-            // Токарный участок
             tokarniy: {
                 'XRAY 6-T2 BT 220 Шторка х2': [
                     'Заготовка',
@@ -21,11 +24,8 @@ class TaskManager {
                 ],
                 'XGRAY v.1': ['Заготовка', 'Точение профиля', 'Точение планки'],
                 'XGRAY v.2': ['Заготовка', 'Точение профиля', 'Точение планки'],
-                'XSMART': ['Заготовка', 'Точение корпуса'],
                 'default': ['Заготовка', 'Точение', 'Доводка']
             },
-            
-            // Слесарный участок
             slesarniy: {
                 'XRAY 6-T2 BT 220 Шторка х2': [
                     'Нарезка резьбы Корпус+V',
@@ -36,38 +36,15 @@ class TaskManager {
                     'Голтовка Кронштейна',
                     'УВ корпуса'
                 ],
-                'XGRAY v.1': ['Сборка корпуса', 'Установка линз', 'Герметизация'],
                 'default': ['Сборка', 'Доводка', 'Контроль']
             },
-            
-            // Фрезерный участок
             frezerniy: {
-                'XRAY 6-T2 BT 220 Шторка х2': [
-                    'Фрезеровка корпуса',
-                    'Фрезеровка крышки',
-                    'Сверление отверстий'
-                ],
                 'default': ['Фрезеровка', 'Сверление', 'Обработка']
             },
-            
-            // Лазерно-гибочный
             lazerno: {
-                'XRAY 6-T2 BT 220 Шторка х2': [
-                    'Раскрой Основания платы',
-                    'Раскрой Фоновая заглушка',
-                    'Раскрой Кронштейн BT',
-                    'Гибка Кронштейн BT'
-                ],
                 'default': ['Раскрой', 'Гибка', 'Резка']
             },
-            
-            // Полимерный
             polimerniy: {
-                'XRAY 6-T2 BT 220 Шторка х2': [
-                    'Корпус',
-                    'Фоновая заглушка',
-                    'Покраска'
-                ],
                 'default': ['Полимеризация', 'Покраска', 'Напыление']
             }
         };
@@ -76,14 +53,23 @@ class TaskManager {
     // ============== ЗАГРУЗКА ДАННЫХ ==============
     
     loadData() {
+        // Предотвращаем повторный вход
+        if (this._isLoading) return this.tasks;
+        this._isLoading = true;
+        
         try {
-            this.orders = loadOrdersFromStorage() || [];
+            this.orders = typeof loadOrdersFromStorage === 'function' 
+                ? loadOrdersFromStorage() || [] 
+                : [];
             this.generateTasks();
         } catch (error) {
             console.error('Ошибка загрузки данных:', error);
             this.orders = [];
             this.tasks = [];
+        } finally {
+            this._isLoading = false;
         }
+        
         return this.tasks;
     }
     
@@ -156,13 +142,14 @@ class TaskManager {
             }
         });
         
-        this.saveTasksToHistory(dateStr);
+        // Сохраняем без уведомления (флаг _isSaving предотвратит рекурсию)
+        this._saveTasksToHistoryInternal(dateStr);
     }
     
     // ============== РАБОТА С ОПЕРАЦИЯМИ ==============
     
     getOperationsForProduct(productName) {
-        // 1. Сначала ищем в кастомных операциях (из страницы участка)
+        // 1. Сначала ищем в кастомных операциях
         if (this.customOperations[productName]) {
             return this.customOperations[productName];
         }
@@ -226,47 +213,35 @@ class TaskManager {
         return null;
     }
     
-    saveTasksToHistory(dateStr) {
+    // Внутренний метод сохранения без уведомления
+    _saveTasksToHistoryInternal(dateStr) {
+        if (this._isSaving) return;
+        this._isSaving = true;
+        
         try {
             const historyKey = `tasks_${this.siteType}_${dateStr}`;
-            
-            // Проверяем, не было ли изменений из другой вкладки
-            const existingData = localStorage.getItem(historyKey);
-            if (existingData) {
-                const existingTasks = JSON.parse(existingData);
-                // Объединяем данные (более новый приоритет)
-                this.mergeTaskHistory(existingTasks);
-            }
-            
             localStorage.setItem(historyKey, JSON.stringify(this.tasks));
-            
-            // Оповещаем другие вкладки об изменении
-            this.notifyHistoryChanged(dateStr);
         } catch (error) {
             console.error('Ошибка сохранения в историю:', error);
+        } finally {
+            this._isSaving = false;
         }
     }
     
-    mergeTaskHistory(existingTasks) {
-        // Для каждой текущей задачи ищем в существующей истории
-        this.tasks.forEach(currentTask => {
-            const existingTask = existingTasks.find(et => et.id === currentTask.id);
-            if (existingTask) {
-                // Если у существующей задачи больше выполненное количество, берём его
-                if (existingTask.completedQuantity > currentTask.completedQuantity) {
-                    currentTask.completedQuantity = existingTask.completedQuantity;
-                    currentTask.executors = existingTask.executors;
-                    currentTask.status = existingTask.status;
-                }
-            }
-        });
+    // Публичный метод с уведомлением
+    saveTasksToHistory(dateStr) {
+        this._saveTasksToHistoryInternal(dateStr);
+        this.notifyHistoryChanged(dateStr);
     }
     
     notifyHistoryChanged(dateStr) {
-        const event = new CustomEvent('taskHistoryChanged', {
-            detail: { siteType: this.siteType, date: dateStr }
-        });
-        window.dispatchEvent(event);
+        // Используем setTimeout, чтобы избежать синхронной рекурсии
+        setTimeout(() => {
+            const event = new CustomEvent('taskHistoryChanged', {
+                detail: { siteType: this.siteType, date: dateStr }
+            });
+            window.dispatchEvent(event);
+        }, 0);
     }
     
     // ============== УПРАВЛЕНИЕ ИСПОЛНИТЕЛЯМИ ==============
@@ -279,7 +254,6 @@ class TaskManager {
         
         if (!task.executors) task.executors = [];
         
-        // Создаём уникальный ID для исполнителя
         const executorId = `${executorName.trim()}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
         
         task.executors.push({
@@ -301,33 +275,26 @@ class TaskManager {
         const executor = task.executors.find(e => e.id === executorId);
         if (!executor) return false;
         
-        // Валидация количества
         quantity = this.safeParseInt(quantity);
         quantity = Math.max(0, Math.min(quantity, task.totalQuantity));
         
-        const oldQuantity = executor.quantity;
         executor.quantity = quantity;
         
-        // Пересчитываем общее выполнение
         const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
         
-        // Если превысили общее количество, корректируем
         if (totalAssigned > task.totalQuantity) {
-            // Пропорционально уменьшаем
             const ratio = task.totalQuantity / totalAssigned;
             task.executors.forEach(e => {
                 if (e.id === executorId) {
-                    e.quantity = quantity; // текущий не меняем
+                    e.quantity = quantity;
                 } else {
                     e.quantity = Math.floor(e.quantity * ratio);
                 }
             });
         }
         
-        // Обновляем общее выполнение
         task.completedQuantity = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
         
-        // Обновляем статус задачи
         if (task.completedQuantity >= task.totalQuantity) {
             task.status = 'completed';
             this.updateOrderStatus(taskId, 'completed');
@@ -364,10 +331,8 @@ class TaskManager {
         
         task.executors = task.executors.filter(e => e.id !== executorId);
         
-        // Пересчитываем общее выполнение
         task.completedQuantity = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
         
-        // Обновляем статус
         if (task.completedQuantity === 0) {
             task.status = 'pending';
             this.updateOrderStatus(taskId, 'pending');
@@ -377,18 +342,14 @@ class TaskManager {
         return true;
     }
     
-    // ============== ЗАВЕРШЕНИЕ ЗАДАЧИ ==============
-    
     completeTask(taskId) {
         const task = this.tasks.find(t => t.id === taskId);
         if (!task) return false;
         
-        // Распределяем оставшееся количество
         const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
         const remaining = task.totalQuantity - totalAssigned;
         
         if (remaining > 0 && task.executors.length > 0) {
-            // Добавляем остаток первому активному исполнителю
             const activeExecutor = task.executors.find(e => e.status === 'in_progress') || task.executors[0];
             activeExecutor.quantity = (activeExecutor.quantity || 0) + remaining;
         }
@@ -405,11 +366,9 @@ class TaskManager {
         return true;
     }
     
-    // ============== ОБНОВЛЕНИЕ СТАТУСА В ЗАКАЗЕ ==============
-    
     updateOrderStatus(taskId, status) {
         const [orderId] = taskId.split('_');
-        const orders = loadOrdersFromStorage() || [];
+        const orders = typeof loadOrdersFromStorage === 'function' ? loadOrdersFromStorage() || [] : [];
         const orderIndex = orders.findIndex(o => o.id == orderId);
         
         if (orderIndex === -1) return;
@@ -417,18 +376,22 @@ class TaskManager {
         if (!orders[orderIndex].tasks) orders[orderIndex].tasks = {};
         
         orders[orderIndex].tasks[taskId] = this.convertTaskStatus(status);
-        saveOrdersToStorage(orders);
+        
+        if (typeof saveOrdersToStorage === 'function') {
+            saveOrdersToStorage(orders);
+        }
         
         this.notifyOtherTabs(taskId, status);
     }
     
-    // ============== УВЕДОМЛЕНИЯ ==============
-    
     notifyOtherTabs(taskId, status) {
-        const event = new CustomEvent('taskStatusChanged', {
-            detail: { taskId, status }
-        });
-        window.dispatchEvent(event);
+        // Используем setTimeout для асинхронной отправки
+        setTimeout(() => {
+            const event = new CustomEvent('taskStatusChanged', {
+                detail: { taskId, status }
+            });
+            window.dispatchEvent(event);
+        }, 0);
     }
     
     // ============== НАВИГАЦИЯ ПО ДАТАМ ==============
@@ -442,12 +405,6 @@ class TaskManager {
     prevDay() {
         const newDate = new Date(this.currentDate);
         newDate.setDate(newDate.getDate() - 1);
-        
-        // Проверка на выходной (опционально)
-        // if (!this.isWorkingDay(newDate)) {
-        //     return this.prevDay.call(this); // пропускаем выходной
-        // }
-        
         this.currentDate = newDate;
         this.loadData();
         return this.tasks;
@@ -465,11 +422,6 @@ class TaskManager {
         this.currentDate = new Date();
         this.loadData();
         return this.tasks;
-    }
-    
-    isWorkingDay(date) {
-        const day = date.getDay();
-        return day !== 0 && day !== 6; // не воскресенье и не суббота
     }
     
     formatDate(date) {
@@ -502,4 +454,8 @@ class TaskManager {
 }
 
 // Делаем класс глобально доступным
-window.TaskManager = TaskManager;
+if (typeof window !== 'undefined') {
+    window.TaskManager = TaskManager;
+}
+
+console.log('✅ task-manager.js загружен (исправленная версия)');
