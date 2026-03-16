@@ -3,6 +3,7 @@ let products = [];
 let brackets = [];
 let lyres = [];
 let orders = [];
+let materialsReport = null;
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', async function() {
@@ -18,13 +19,29 @@ async function loadAllData() {
         lyres = await loadLyres() || [];
         orders = loadOrdersFromStorage() || [];
         
-        console.log('Продукты загружены:', products.length);
-        console.log('Кронштейны загружены:', brackets.length);
-        console.log('Лир загружены:', lyres.length);
+        console.log('✅ Продукты загружены:', products.length);
+        console.log('✅ Кронштейны загружены:', brackets.length);
+        console.log('✅ Лиры загружены:', lyres.length);
+        console.log('✅ Заказы загружены:', orders.length);
         
         populateSelects();
         loadOrders();
         updateStatistics();
+        
+        // Инициализация отчета по материалам (ИСПРАВЛЕНО - убран await)
+        if (typeof MaterialsReport !== 'undefined') {
+            window.materialsReport = new MaterialsReport();
+            window.materialsReport.materialsDB.brackets = brackets;
+            window.materialsReport.materialsDB.lyres = lyres;
+            
+            window.materialsReport.loadMaterialsData()
+                .then(() => {
+                    console.log('✅ Отчет по материалам инициализирован');
+                })
+                .catch(err => {
+                    console.error('❌ Ошибка инициализации отчета:', err);
+                });
+        }
         
         // Слушаем изменения из других вкладок
         window.addEventListener('storage', function(e) {
@@ -42,7 +59,7 @@ async function loadAllData() {
         });
         
     } catch (error) {
-        console.error('Ошибка загрузки:', error);
+        console.error('❌ Ошибка загрузки:', error);
     }
 }
 
@@ -170,7 +187,7 @@ function closeOrderModal() {
 }
 
 // Обработка формы заказа
-document.getElementById('orderForm').addEventListener('submit', function(e) {
+document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
     
     const product = document.getElementById('productSelect').value;
@@ -214,7 +231,7 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
     alert('✅ Заказ успешно создан!');
 });
 
-// ============== ВАША СУЩЕСТВУЮЩАЯ ФУНКЦИЯ getOperationCount ==============
+// ============== ФУНКЦИЯ getOperationCount ==============
 // Получение количества операций для изделия
 function getOperationCount(productName, siteKey) {
     const operations = {
@@ -356,9 +373,13 @@ function getOperationCount(productName, siteKey) {
     return 1; // По умолчанию
 }
 
-// ============== НОВАЯ ФУНКЦИЯ createSiteRow ==============
+// ============== ФУНКЦИЯ createSiteRow ==============
 // Создание строки участка с квадратиками
 function createSiteRow(name, order, siteKey) {
+    if (!order.items || order.items.length === 0) {
+        return '<div>Нет изделий</div>';
+    }
+    
     const item = order.items[0];
     const operationCount = getOperationCount(item.product, siteKey);
     
@@ -371,7 +392,7 @@ function createSiteRow(name, order, siteKey) {
         
         if (status === 'green') completedCount++;
         
-        squares += `<div class="square ${status}" data-task="${taskId}"></div>`;
+        squares += `<div class="square ${status}" data-task="${taskId}" title="Операция ${i+1}"></div>`;
     }
     
     // Дополнительные задачи
@@ -391,9 +412,9 @@ function createSiteRow(name, order, siteKey) {
     const totalOperations = operationCount + (order.extraTasks?.filter(t => t.site === siteKey).length || 0);
     
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #1a1e24; border-radius: 5px; border: 1px solid #2a2f38; margin-bottom: 5px;">
-            <span style="color: #fff; min-width: 120px;">${name}</span>
-            <div style="display: flex; gap: 5px;">
+        <div class="site-item">
+            <span class="site-name">${name}</span>
+            <div class="squares">
                 ${squares}
             </div>
             <span style="color: #a0a0a0; font-size: 12px; margin: 0 10px;">${completedCount}/${totalOperations}</span>
@@ -402,7 +423,7 @@ function createSiteRow(name, order, siteKey) {
     `;
 }
 
-// ============== ОБНОВЛЁННАЯ ФУНКЦИЯ loadOrders ==============
+// ============== ФУНКЦИЯ loadOrders ==============
 // Загрузка заказов
 function loadOrders() {
     const ordersList = document.getElementById('ordersList');
@@ -411,7 +432,7 @@ function loadOrders() {
     ordersList.innerHTML = '';
     
     if (orders.length === 0) {
-        ordersList.innerHTML = '<div style="text-align: center; padding: 50px; background: #1a1e24; border-radius: 8px; color: #666;">📭 Нет заказов</div>';
+        ordersList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">Нет заказов</div></div>';
         return;
     }
     
@@ -472,7 +493,7 @@ function loadOrders() {
             
             <div class="sites-section">
                 <h4 style="margin-bottom: 15px;">🏭 Производственные участки</h4>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div class="sites-grid">
                     ${createSiteRow('🔧 Токарный', order, 'tokarniy')}
                     ${createSiteRow('🔨 Слесарный', order, 'slesarniy')}
                     ${createSiteRow('⚙️ Фрезерный', order, 'frezerniy')}
@@ -480,6 +501,8 @@ function loadOrders() {
                     ${createSiteRow('🧪 Полимерный', order, 'polimerniy')}
                 </div>
             </div>
+            
+            ${order.additional ? `<div style="margin-top: 15px; padding: 10px; background: #15191f; border-radius: 5px; color: #a0a0a0;">📝 ${order.additional}</div>` : ''}
         `;
         
         header.addEventListener('click', function(e) {
@@ -494,6 +517,43 @@ function loadOrders() {
     });
 }
 
+// ============== ФУНКЦИЯ showMaterialsReport ==============
+// Показать отчет по материалам
+async function showMaterialsReport(orderId) {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) {
+        alert('Заказ не найден');
+        return;
+    }
+    
+    if (!window.materialsReport) {
+        alert('Отчет по материалам не доступен');
+        return;
+    }
+    
+    try {
+        const modal = document.getElementById('materialsModal');
+        const reportDiv = document.getElementById('materialsReport');
+        
+        if (!modal || !reportDiv) {
+            alert('Модальное окно не найдено');
+            return;
+        }
+        
+        // Показываем загрузку
+        reportDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Загрузка отчета...</p></div>';
+        modal.style.display = 'block';
+        
+        // Генерируем отчет
+        const reportHTML = await window.materialsReport.generateReport(order);
+        reportDiv.innerHTML = reportHTML;
+        
+    } catch (error) {
+        console.error('Ошибка генерации отчета:', error);
+        alert('Ошибка при загрузке отчета по материалам');
+    }
+}
+
 // ============== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==============
 // Форматирование даты
 function formatDate(dateString) {
@@ -505,7 +565,7 @@ function formatDate(dateString) {
 // Обновление статистики
 function updateStatistics() {
     document.getElementById('totalOrders').textContent = orders.length;
-    const totalItems = orders.reduce((sum, order) => sum + order.items[0].quantity, 0);
+    const totalItems = orders.reduce((sum, order) => sum + (order.items[0]?.quantity || 0), 0);
     document.getElementById('totalItems').textContent = totalItems;
     
     let activeTasks = 0;
@@ -524,21 +584,7 @@ function updateStatistics() {
     document.getElementById('completedTasks').textContent = completedTasks;
 }
 
-if (typeof MaterialsReport !== 'undefined') {
-    window.materialsReport = new MaterialsReport();
-    window.materialsReport.materialsDB.brackets = brackets;
-    window.materialsReport.materialsDB.lyres = lyres;
-    
-    // Убираем await, используем then()
-    window.materialsReport.loadMaterialsData()
-        .then(() => {
-            console.log('✅ Отчет по материалам инициализирован');
-        })
-        .catch(err => {
-            console.error('❌ Ошибка инициализации отчета:', err);
-        });
-}
-
+// Удаление заказа
 function deleteOrder(orderId) {
     if (confirm('Удалить заказ?')) {
         orders = orders.filter(o => o.id !== orderId);
@@ -548,6 +594,7 @@ function deleteOrder(orderId) {
     }
 }
 
+// Добавление дополнительной задачи
 function addExtraTask(orderId, siteKey) {
     const taskName = prompt('Введите название дополнительной задачи:');
     if (!taskName) return;
@@ -567,15 +614,28 @@ function addExtraTask(orderId, siteKey) {
     loadOrders();
 }
 
+// Экспорт заказов
 function exportOrders() {
-    alert('Экспорт заказов');
+    const dataStr = JSON.stringify(orders, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `orders_export_${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
 }
 
+// Закрытие модального окна материалов
 function closeMaterialsModal() {
-    document.getElementById('materialsModal').style.display = 'none';
+    const modal = document.getElementById('materialsModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
-// Глобальные функции
+// ============== ЭКСПОРТ ФУНКЦИЙ В ГЛОБАЛЬНУЮ ОБЛАСТЬ ==============
 window.openOrderModal = openOrderModal;
 window.closeOrderModal = closeOrderModal;
 window.loadProductSizes = loadProductSizes;
@@ -584,3 +644,5 @@ window.showMaterialsReport = showMaterialsReport;
 window.deleteOrder = deleteOrder;
 window.addExtraTask = addExtraTask;
 window.closeMaterialsModal = closeMaterialsModal;
+
+console.log('✅ app.js загружен');
