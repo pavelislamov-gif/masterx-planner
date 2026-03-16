@@ -524,9 +524,13 @@ function updateStatistics() {
     document.getElementById('completedTasks').textContent = completedTasks;
 }
 
-// Заглушки для функций
-function showMaterialsReport(orderId) {
-    alert('Отчет по материалам будет позже');
+// Инициализация отчета по материалам
+if (typeof MaterialsReport !== 'undefined') {
+    materialsReport = new MaterialsReport();
+    materialsReport.materialsDB.brackets = brackets;
+    materialsReport.materialsDB.lyres = lyres;
+    await materialsReport.loadMaterialsData();
+    console.log('✅ Отчет по материалам инициализирован');
 }
 
 function deleteOrder(orderId) {
