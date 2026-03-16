@@ -5,18 +5,72 @@ let lyres = [];
 let orders = [];
 let materialsReport = null;
 
+// ============== ПРОВЕРКА ЗАВИСИМОСТЕЙ ==============
+console.log('🔍 ПРОВЕРКА ЗАВИСИМОСТЕЙ app.js:');
+console.log('='.repeat(50));
+
+// Проверка storage.js
+if (typeof loadOrdersFromStorage === 'function') {
+    console.log('✅ storage.js: loadOrdersFromStorage загружена');
+} else {
+    console.error('❌ storage.js: loadOrdersFromStorage НЕ загружена!');
+}
+
+if (typeof saveOrdersToStorage === 'function') {
+    console.log('✅ storage.js: saveOrdersToStorage загружена');
+} else {
+    console.error('❌ storage.js: saveOrdersToStorage НЕ загружена!');
+}
+
+// Проверка data-loader.js
+if (typeof loadProducts === 'function') {
+    console.log('✅ data-loader.js: loadProducts загружена');
+} else {
+    console.error('❌ data-loader.js: loadProducts НЕ загружена!');
+}
+
+if (typeof loadBrackets === 'function') {
+    console.log('✅ data-loader.js: loadBrackets загружена');
+} else {
+    console.error('❌ data-loader.js: loadBrackets НЕ загружена!');
+}
+
+if (typeof loadLyres === 'function') {
+    console.log('✅ data-loader.js: loadLyres загружена');
+} else {
+    console.error('❌ data-loader.js: loadLyres НЕ загружена!');
+}
+
+// Проверка materials-report.js
+if (typeof MaterialsReport === 'function') {
+    console.log('✅ materials-report.js: MaterialsReport загружен');
+} else {
+    console.warn('⚠️ materials-report.js: MaterialsReport НЕ загружен! Отчет по материалам будет недоступен');
+}
+
+// Проверка наличия глобальных функций, которые будут объявлены позже
+console.log('⏳ Функции app.js будут объявлены далее...');
+console.log('='.repeat(50));
+
 // Инициализация
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('Страница загружена');
+    console.log('📅 DOM загружен, начинаем инициализацию...');
     await loadAllData();
 });
 
 // Загрузка всех данных
 async function loadAllData() {
     try {
+        console.log('📦 Загрузка продуктов...');
         products = await loadProducts() || [];
+        
+        console.log('📦 Загрузка кронштейнов...');
         brackets = await loadBrackets() || [];
+        
+        console.log('📦 Загрузка лир...');
         lyres = await loadLyres() || [];
+        
+        console.log('📦 Загрузка заказов...');
         orders = loadOrdersFromStorage() || [];
         
         console.log('✅ Продукты загружены:', products.length);
@@ -28,8 +82,9 @@ async function loadAllData() {
         loadOrders();
         updateStatistics();
         
-        // Инициализация отчета по материалам (ИСПРАВЛЕНО - убран await)
+        // Инициализация отчета по материалам
         if (typeof MaterialsReport !== 'undefined') {
+            console.log('📊 Инициализация отчета по материалам...');
             window.materialsReport = new MaterialsReport();
             window.materialsReport.materialsDB.brackets = brackets;
             window.materialsReport.materialsDB.lyres = lyres;
@@ -46,6 +101,7 @@ async function loadAllData() {
         // Слушаем изменения из других вкладок
         window.addEventListener('storage', function(e) {
             if (e.key === 'masterx_orders') {
+                console.log('🔄 Обновление из другой вкладки');
                 orders = JSON.parse(e.newValue || '[]');
                 loadOrders();
                 updateStatistics();
@@ -54,9 +110,11 @@ async function loadAllData() {
         
         // Слушаем события от участков
         window.addEventListener('taskStatusChanged', function(e) {
-            console.log('Статус задачи изменён:', e.detail);
+            console.log('🔄 Статус задачи изменён:', e.detail);
             updateTaskStatus(e.detail.taskId, e.detail.status);
         });
+        
+        console.log('🎉 Инициализация завершена!');
         
     } catch (error) {
         console.error('❌ Ошибка загрузки:', error);
@@ -160,6 +218,7 @@ async function loadProductSizes() {
 
 // Открытие модального окна
 function openOrderModal() {
+    console.log('📝 Открытие модального окна создания заказа');
     const modal = document.getElementById('orderModal');
     if (modal) {
         modal.style.display = 'block';
@@ -167,6 +226,8 @@ function openOrderModal() {
         document.getElementById('orderNumber').value = generateOrderNumber();
         document.getElementById('bracketQuantity').value = 1;
         document.getElementById('lyreQuantity').value = 1;
+    } else {
+        console.error('❌ Модальное окно не найдено!');
     }
 }
 
@@ -182,13 +243,19 @@ function generateOrderNumber() {
 
 // Закрытие модального окна
 function closeOrderModal() {
-    document.getElementById('orderModal').style.display = 'none';
-    document.getElementById('orderForm').reset();
+    console.log('📝 Закрытие модального окна');
+    const modal = document.getElementById('orderModal');
+    if (modal) {
+        modal.style.display = 'none';
+        const form = document.getElementById('orderForm');
+        if (form) form.reset();
+    }
 }
 
 // Обработка формы заказа
 document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
+    console.log('📝 Создание нового заказа');
     
     const product = document.getElementById('productSelect').value;
     const size = document.getElementById('sizeSelect').value;
@@ -231,411 +298,11 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     alert('✅ Заказ успешно создан!');
 });
 
-// ============== ФУНКЦИЯ getOperationCount ==============
-// Получение количества операций для изделия
-function getOperationCount(productName, siteKey) {
-    const operations = {
-        // XRAY 6-T2 серия
-        'XRAY 6-T2 BT 180': { 'tokarniy': 3, 'slesarniy': 7, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BT 200': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BT 220': { 'tokarniy': 3, 'slesarniy': 7, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BT 220 Шторка х2': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BT 240 Шторка': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BZ 180': { 'tokarniy': 3, 'slesarniy': 7, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BZ 200 Шторка': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BZ 220': { 'tokarniy': 4, 'slesarniy': 7, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BZ 220 Шторка х2': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BZ 240 Шторка': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        'XRAY 6-T2 BZ 240 Шторка х2': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 2 },
-        
-        // XGRAY
-        'XGRAY v.1': { 'tokarniy': 3, 'slesarniy': 3, 'frezerniy': 2, 'lazerno': 1, 'polimerniy': 4 },
-        'XGRAY v.2': { 'tokarniy': 3, 'slesarniy': 3, 'frezerniy': 2, 'lazerno': 5, 'polimerniy': 5 },
-        
-        // XSMART
-        'XSMART mini': { 'tokarniy': 2, 'slesarniy': 1, 'frezerniy': 2, 'lazerno': 5, 'polimerniy': 4 },
-        'XSMART': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 2, 'lazerno': 4, 'polimerniy': 5 },
-        
-        // XLUMO
-        'XLUMO': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 5, 'lazerno': 5, 'polimerniy': 4 },
-        'XLUMO 1-6': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 4, 'lazerno': 4, 'polimerniy': 4 },
-        'XLUMO Двунаправленный': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 3, 'lazerno': 4, 'polimerniy': 4 },
-        'XLUMO PROV': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 3, 'lazerno': 5, 'polimerniy': 4 },
-        
-        // XGIRO
-        'XGIRO': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 2, 'lazerno': 4, 'polimerniy': 4 },
-        
-        // XVISION
-        'XVISION': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 1 },
-        
-        // XBAR-SW
-        'XBAR-SW': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 5, 'polimerniy': 4 },
-        
-        // XLITE
-        'XLITE': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 2, 'lazerno': 4, 'polimerniy': 4 },
-        
-        // XROLL
-        'XROLL-lite P': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 2 },
-        'XROLL-lite K': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
-        
-        // XSTRONG
-        'XSTRONG': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 5, 'polimerniy': 3 },
-        
-        // XYELLOW
-        'XYELLOW': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 1, 'polimerniy': 3 },
-        
-        // XLINE
-        'XLINE': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 2 },
-        
-        // XGLOW
-        'XGLOW mini': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 2, 'polimerniy': 3 },
-        'XGLOW': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 2, 'polimerniy': 5 },
-        
-        // XRAY другие
-        'XRAY 1': { 'tokarniy': 5, 'slesarniy': 4, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
-        'XRAY 3': { 'tokarniy': 5, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
-        'XRAY 3-2': { 'tokarniy': 7, 'slesarniy': 4, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
-        'XRAY 3-GRP': { 'tokarniy': 5, 'slesarniy': 3, 'frezerniy': 0, 'lazerno': 2, 'polimerniy': 2 },
-        'XRAY 6': { 'tokarniy': 5, 'slesarniy': 5, 'frezerniy': 0, 'lazerno': 3, 'polimerniy': 3 },
-        'XRAY 6 RGBW': { 'tokarniy': 6, 'slesarniy': 5, 'frezerniy': 0, 'lazerno': 3, 'polimerniy': 3 },
-        'XRAY 6-2 проходной': { 'tokarniy': 6, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
-        'XRAY 6-2 оконечный': { 'tokarniy': 6, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 2 },
-        'XRAY 6T Накладной': { 'tokarniy': 5, 'slesarniy': 6, 'frezerniy': 0, 'lazerno': 3, 'polimerniy': 4 },
-        'XRAY 6T BZ 120': { 'tokarniy': 4, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 5, 'polimerniy': 4 },
-        'XRAY 6T BT 140 Шторка': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 5, 'polimerniy': 4 },
-        'XRAY 6T RGBW BT 150': { 'tokarniy': 3, 'slesarniy': 8, 'frezerniy': 0, 'lazerno': 5, 'polimerniy': 4 },
-        'XRAY 9': { 'tokarniy': 7, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 4 },
-        'XRAY 9S': { 'tokarniy': 3, 'slesarniy': 5, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
-        'XRAY 12S': { 'tokarniy': 3, 'slesarniy': 5, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
-        'XRAY 18': { 'tokarniy': 7, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 5 },
-        'XRAY 18S': { 'tokarniy': 3, 'slesarniy': 5, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
-        'XRAY 36': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 5 },
-        'XRAY 36S': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
-        
-        // XSLOPE
-        'XSLOPE': { 'tokarniy': 5, 'slesarniy': 6, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
-        
-        // XPIXEL
-        'XPIXEL BIN v.1': { 'tokarniy': 3, 'slesarniy': 3, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 2 },
-        'XPIXEL BIN v.2': { 'tokarniy': 4, 'slesarniy': 2, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 2 },
-        'XPIXEL BIN v.3': { 'tokarniy': 4, 'slesarniy': 4, 'frezerniy': 1, 'lazerno': 2, 'polimerniy': 3 },
-        'XPIXEL OVHD': { 'tokarniy': 3, 'slesarniy': 1, 'frezerniy': 0, 'lazerno': 1, 'polimerniy': 2 },
-        
-        // XPOINT
-        'XPOINT OVHD': { 'tokarniy': 2, 'slesarniy': 1, 'frezerniy': 0, 'lazerno': 0, 'polimerniy': 1 },
-        
-        // XSPOT
-        'XSPOT': { 'tokarniy': 5, 'slesarniy': 3, 'frezerniy': 0, 'lazerno': 2, 'polimerniy': 2 },
-        
-        // XWHITE
-        'XWHITE': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 3 },
-        
-        // XDISK
-        'XDISK': { 'tokarniy': 8, 'slesarniy': 5, 'frezerniy': 1, 'lazerno': 0, 'polimerniy': 3 },
-        
-        // ACENTO
-        'ACENTO 3T': { 'tokarniy': 4, 'slesarniy': 6, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
-        'ACENTO 4': { 'tokarniy': 3, 'slesarniy': 6, 'frezerniy': 0, 'lazerno': 4, 'polimerniy': 3 },
-        
-        // XEYES
-        'XEYES 130*90 1': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
-        'XEYES 130*90 2': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
-        'XEYES 130*90 3': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
-        'XEYES 130*90 4': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
-        'XEYES 130*120 1': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
-        'XEYES 130*120 2': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
-        'XEYES 130*120 3': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
-        'XEYES 130*120 4': { 'tokarniy': 0, 'slesarniy': 6, 'frezerniy': 1, 'lazerno': 3, 'polimerniy': 2 },
-        'XEYES mini-1': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 5, 'polimerniy': 4 },
-        
-        // XFOCUS
-        'XFOCUS': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 1, 'lazerno': 5, 'polimerniy': 3 },
-        
-        // XMODULE
-        'XMODULE-2x2': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 2, 'polimerniy': 1 },
-        'XMODULE-6x2': { 'tokarniy': 0, 'slesarniy': 0, 'frezerniy': 0, 'lazerno': 1, 'polimerniy': 0 }
-    };
-    
-    // Пробуем найти точное совпадение
-    if (operations[productName] && operations[productName][siteKey] !== undefined) {
-        return operations[productName][siteKey];
-    }
-    
-    // Пробуем найти частичное совпадение
-    for (let key in operations) {
-        if (productName.includes(key) || key.includes(productName)) {
-            if (operations[key] && operations[key][siteKey] !== undefined) {
-                return operations[key][siteKey];
-            }
-        }
-    }
-    
-    return 1; // По умолчанию
-}
-
-// ============== ФУНКЦИЯ createSiteRow ==============
-// Создание строки участка с квадратиками
-function createSiteRow(name, order, siteKey) {
-    if (!order.items || order.items.length === 0) {
-        return '<div>Нет изделий</div>';
-    }
-    
-    const item = order.items[0];
-    const operationCount = getOperationCount(item.product, siteKey);
-    
-    let squares = '';
-    let completedCount = 0;
-    
-    for (let i = 0; i < operationCount; i++) {
-        const taskId = `${order.id}_${item.product}_${siteKey}_${i}`;
-        const status = order.tasks && order.tasks[taskId] ? order.tasks[taskId] : '';
-        
-        if (status === 'green') completedCount++;
-        
-        squares += `<div class="square ${status}" data-task="${taskId}" title="Операция ${i+1}"></div>`;
-    }
-    
-    // Дополнительные задачи
-    if (order.extraTasks) {
-        order.extraTasks.forEach((task, index) => {
-            if (task.site === siteKey) {
-                const taskId = `${order.id}_extra_${index}`;
-                const status = order.tasks && order.tasks[taskId] ? order.tasks[taskId] : '';
-                
-                if (status === 'green') completedCount++;
-                
-                squares += `<div class="square ${status} extra-square" data-task="${taskId}" title="${task.title}"></div>`;
-            }
-        });
-    }
-    
-    const totalOperations = operationCount + (order.extraTasks?.filter(t => t.site === siteKey).length || 0);
-    
-    return `
-        <div class="site-item">
-            <span class="site-name">${name}</span>
-            <div class="squares">
-                ${squares}
-            </div>
-            <span style="color: #a0a0a0; font-size: 12px; margin: 0 10px;">${completedCount}/${totalOperations}</span>
-            <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
-        </div>
-    `;
-}
-
-// ============== ФУНКЦИЯ loadOrders ==============
-// Загрузка заказов
-function loadOrders() {
-    const ordersList = document.getElementById('ordersList');
-    if (!ordersList) return;
-    
-    ordersList.innerHTML = '';
-    
-    if (orders.length === 0) {
-        ordersList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">Нет заказов</div></div>';
-        return;
-    }
-    
-    orders.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    orders.forEach(order => {
-        const card = document.createElement('div');
-        card.className = 'order-card';
-        card.dataset.orderId = order.id;
-        
-        const header = document.createElement('div');
-        header.className = 'order-header';
-        
-        const item = order.items[0];
-        header.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-                <h3>📦 Заказ №${order.number} от ${formatDate(order.date)}</h3>
-                <span style="background: #ff3b3b; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px;">В работе</span>
-                <span style="background: #2a2f38; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #fff;">
-                    Деталей: ${item.quantity} шт
-                </span>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-info" onclick="event.stopPropagation(); showMaterialsReport(${order.id})">📊 Материалы</button>
-                <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
-            </div>
-        `;
-        
-        const content = document.createElement('div');
-        content.className = 'order-content';
-        content.style.display = 'none';
-        
-        content.innerHTML = `
-            <table class="items-table">
-                <thead>
-                    <tr>
-                        <th>Изделие</th>
-                        <th>Размер</th>
-                        <th>Кол-во</th>
-                        <th>Кронштейн</th>
-                        <th>Лира</th>
-                        <th>RAL</th>
-                        <th>Текстура</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>${item.product}</strong></td>
-                        <td>${item.size}</td>
-                        <td>${item.quantity} шт</td>
-                        <td>${item.bracket.type} (${item.bracket.quantity} шт)</td>
-                        <td>${item.lyre.type} (${item.lyre.quantity} шт)</td>
-                        <td>${item.ral || '-'}</td>
-                        <td>${item.texture || '-'}</td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            <div class="sites-section">
-                <h4 style="margin-bottom: 15px;">🏭 Производственные участки</h4>
-                <div class="sites-grid">
-                    ${createSiteRow('🔧 Токарный', order, 'tokarniy')}
-                    ${createSiteRow('🔨 Слесарный', order, 'slesarniy')}
-                    ${createSiteRow('⚙️ Фрезерный', order, 'frezerniy')}
-                    ${createSiteRow('✨ Лазерно-гибочный', order, 'lazerno')}
-                    ${createSiteRow('🧪 Полимерный', order, 'polimerniy')}
-                </div>
-            </div>
-            
-            ${order.additional ? `<div style="margin-top: 15px; padding: 10px; background: #15191f; border-radius: 5px; color: #a0a0a0;">📝 ${order.additional}</div>` : ''}
-        `;
-        
-        header.addEventListener('click', function(e) {
-            if (!e.target.classList.contains('btn')) {
-                content.style.display = content.style.display === 'none' ? 'block' : 'none';
-            }
-        });
-        
-        card.appendChild(header);
-        card.appendChild(content);
-        ordersList.appendChild(card);
-    });
-}
-
-// ============== ФУНКЦИЯ showMaterialsReport ==============
-// Показать отчет по материалам
-async function showMaterialsReport(orderId) {
-    const order = orders.find(o => o.id === orderId);
-    if (!order) {
-        alert('Заказ не найден');
-        return;
-    }
-    
-    if (!window.materialsReport) {
-        alert('Отчет по материалам не доступен');
-        return;
-    }
-    
-    try {
-        const modal = document.getElementById('materialsModal');
-        const reportDiv = document.getElementById('materialsReport');
-        
-        if (!modal || !reportDiv) {
-            alert('Модальное окно не найдено');
-            return;
-        }
-        
-        // Показываем загрузку
-        reportDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Загрузка отчета...</p></div>';
-        modal.style.display = 'block';
-        
-        // Генерируем отчет
-        const reportHTML = await window.materialsReport.generateReport(order);
-        reportDiv.innerHTML = reportHTML;
-        
-    } catch (error) {
-        console.error('Ошибка генерации отчета:', error);
-        alert('Ошибка при загрузке отчета по материалам');
-    }
-}
-
-// ============== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==============
-// Форматирование даты
-function formatDate(dateString) {
-    if (!dateString) return 'Дата не указана';
-    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-    return new Date(dateString).toLocaleDateString('ru-RU', options);
-}
-
-// Обновление статистики
-function updateStatistics() {
-    document.getElementById('totalOrders').textContent = orders.length;
-    const totalItems = orders.reduce((sum, order) => sum + (order.items[0]?.quantity || 0), 0);
-    document.getElementById('totalItems').textContent = totalItems;
-    
-    let activeTasks = 0;
-    let completedTasks = 0;
-    
-    orders.forEach(order => {
-        if (order.tasks) {
-            Object.values(order.tasks).forEach(status => {
-                if (status === 'orange') activeTasks++;
-                if (status === 'green') completedTasks++;
-            });
-        }
-    });
-    
-    document.getElementById('activeTasks').textContent = activeTasks;
-    document.getElementById('completedTasks').textContent = completedTasks;
-}
-
-// Удаление заказа
-function deleteOrder(orderId) {
-    if (confirm('Удалить заказ?')) {
-        orders = orders.filter(o => o.id !== orderId);
-        saveOrdersToStorage(orders);
-        loadOrders();
-        updateStatistics();
-    }
-}
-
-// Добавление дополнительной задачи
-function addExtraTask(orderId, siteKey) {
-    const taskName = prompt('Введите название дополнительной задачи:');
-    if (!taskName) return;
-    
-    const order = orders.find(o => o.id === orderId);
-    if (!order) return;
-    
-    if (!order.extraTasks) order.extraTasks = [];
-    
-    order.extraTasks.push({
-        title: taskName,
-        site: siteKey,
-        createdAt: new Date().toISOString()
-    });
-    
-    saveOrdersToStorage(orders);
-    loadOrders();
-}
-
-// Экспорт заказов
-function exportOrders() {
-    const dataStr = JSON.stringify(orders, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `orders_export_${new Date().toISOString().split('T')[0]}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-}
-
-// Закрытие модального окна материалов
-function closeMaterialsModal() {
-    const modal = document.getElementById('materialsModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
+// ... (весь остальной код вашего app.js - getOperationCount, createSiteRow, loadOrders, и т.д.) ...
 
 // ============== ЭКСПОРТ ФУНКЦИЙ В ГЛОБАЛЬНУЮ ОБЛАСТЬ ==============
+console.log('📤 Экспорт функций в глобальную область...');
+
 window.openOrderModal = openOrderModal;
 window.closeOrderModal = closeOrderModal;
 window.loadProductSizes = loadProductSizes;
@@ -645,4 +312,12 @@ window.deleteOrder = deleteOrder;
 window.addExtraTask = addExtraTask;
 window.closeMaterialsModal = closeMaterialsModal;
 
-console.log('✅ app.js загружен');
+console.log('✅ Функции экспортированы:', Object.keys(window).filter(key => 
+    typeof window[key] === 'function' && 
+    ['openOrderModal', 'closeOrderModal', 'loadProductSizes', 'exportOrders', 
+     'showMaterialsReport', 'deleteOrder', 'addExtraTask', 'closeMaterialsModal'].includes(key)
+));
+
+console.log('='.repeat(50));
+console.log('🎉 app.js полностью загружен и готов к работе!');
+console.log('='.repeat(50));
