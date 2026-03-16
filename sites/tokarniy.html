@@ -852,44 +852,64 @@
                 return div;
             }
             
-            // ============== ФОРМА ДОБАВЛЕНИЯ ИСПОЛНИТЕЛЯ ==============
-            function showAddExecutorForm(task) {
-                const executorList = document.getElementById(`executors-${task.id}`);
-                if (!executorList) return;
+// ============== ФОРМА ДОБАВЛЕНИЯ ИСПОЛНИТЕЛЯ ==============
+function showAddExecutorForm(task) {
+    const executorList = document.getElementById(`executors-${task.id}`);
+    if (!executorList) return;
+    
+    // Удаляем старую форму, если есть
+    const oldForm = executorList.parentNode.querySelector('.new-executor-form');
+    if (oldForm) oldForm.remove();
+    
+    const formDiv = document.createElement('div');
+    formDiv.className = 'new-executor-form';
+    
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'ФИО исполнителя';
+    input.style.flex = '1';
+    
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn btn-success';
+    addBtn.textContent = 'Добавить';
+    addBtn.onclick = function() {
+        const name = input.value.trim();
+        if (name) {
+            console.log('Добавление исполнителя:', name);
+            
+            // Добавляем исполнителя
+            const result = taskManager.addExecutor(task.id, name);
+            
+            if (result) {
+                console.log('✅ Исполнитель добавлен');
+                formDiv.remove();
                 
-                const oldForm = executorList.parentNode.querySelector('.new-executor-form');
-                if (oldForm) oldForm.remove();
-                
-                const formDiv = document.createElement('div');
-                formDiv.className = 'new-executor-form';
-                
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.placeholder = 'ФИО исполнителя';
-                
-                const addBtn = document.createElement('button');
-                addBtn.className = 'btn btn-success';
-                addBtn.textContent = 'Добавить';
-                addBtn.onclick = () => {
-                    if (input.value.trim()) {
-                        taskManager.addExecutor(task.id, input.value);
-                        // Не вызываем loadTasks здесь, так как addExecutor вызовет saveTasksToHistory,
-                        // который через событие обновит страницу
-                        formDiv.remove();
-                    }
-                };
-                
-                const cancelBtn = document.createElement('button');
-                cancelBtn.className = 'btn btn-danger';
-                cancelBtn.textContent = 'Отмена';
-                cancelBtn.onclick = () => formDiv.remove();
-                
-                formDiv.appendChild(input);
-                formDiv.appendChild(addBtn);
-                formDiv.appendChild(cancelBtn);
-                
-                executorList.parentNode.insertBefore(formDiv, executorList.nextSibling);
+                // ПРИНУДИТЕЛЬНО ОБНОВЛЯЕМ ЗАДАЧИ
+                setTimeout(() => {
+                    loadTasks(); // Прямой вызов для обновления
+                }, 100);
+            } else {
+                alert('Ошибка при добавлении исполнителя');
             }
+        } else {
+            alert('Введите ФИО');
+        }
+    };
+    
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn btn-danger';
+    cancelBtn.textContent = 'Отмена';
+    cancelBtn.onclick = function() {
+        formDiv.remove();
+    };
+    
+    formDiv.appendChild(input);
+    formDiv.appendChild(addBtn);
+    formDiv.appendChild(cancelBtn);
+    
+    executorList.parentNode.insertBefore(formDiv, executorList.nextSibling);
+    input.focus(); // Автоматически ставим фокус на поле ввода
+}
             
             // ============== ДЕЙСТВИЯ С ЗАДАЧАМИ ==============
             window.toggleWorkStatus = function(taskId, executorId, btn) {
