@@ -425,7 +425,7 @@
             </select>
             <button class="btn btn-primary" onclick="applyFilters()">🔍 Применить</button>
             <button class="btn btn-warning" onclick="clearHistory()">🗑️ Очистить историю</button>
-            <button class="btn btn-info" onclick="forceRefresh()">🔄 Обновить</button>
+            <button class="btn btn-info" onclick="debugStorage()">🔍 Отладка</button>
         </div>
 
         <!-- СТАТИСТИКА -->
@@ -906,13 +906,9 @@
                         formDiv.remove();
                         
                         // НЕМЕДЛЕННОЕ обновление
-                        taskManager.loadData();
-                        loadTasks();
-                        
-                        // Дополнительное обновление для гарантии
                         setTimeout(() => {
                             loadTasks();
-                        }, 300);
+                        }, 100);
                     } else {
                         alert('Не удалось добавить исполнителя. Возможно, он уже существует.');
                     }
@@ -1004,11 +1000,27 @@
                 link.click();
             };
             
-            // ============== ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ ==============
-            window.forceRefresh = function() {
-                console.log('🔄 Принудительное обновление');
-                taskManager.loadData();
-                loadTasks();
+            // ============== ОТЛАДКА ==============
+            window.debugStorage = function() {
+                console.log('=== ХРАНИЛИЩЕ LOCALSTORAGE ===');
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('tasks_tokarniy_')) {
+                        const value = localStorage.getItem(key);
+                        try {
+                            const tasks = JSON.parse(value);
+                            console.log(`${key}: ${tasks.length} задач`);
+                            tasks.forEach(t => {
+                                console.log(`  ${t.id}: ${t.executors?.length || 0} исп.`);
+                            });
+                        } catch (e) {
+                            console.log(`${key}: ошибка парсинга`);
+                        }
+                    }
+                }
+                if (taskManager.debugHistory) {
+                    taskManager.debugHistory();
+                }
             };
         }
     </script>
