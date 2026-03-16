@@ -19,23 +19,55 @@ async function loadAllData() {
         orders = loadOrdersFromStorage() || [];
         
         console.log('Продукты загружены:', products.length);
-        console.log('Первый продукт:', products[0]);
         console.log('Кронштейны загружены:', brackets.length);
         console.log('Лир загружены:', lyres.length);
         
         populateSelects();
         loadOrders();
         updateStatistics();
+        
+        // Слушаем изменения из других вкладок
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'masterx_orders') {
+                orders = JSON.parse(e.newValue || '[]');
+                loadOrders();
+                updateStatistics();
+            }
+        });
+        
+        // Слушаем события от участков
+        window.addEventListener('taskStatusChanged', function(e) {
+            console.log('Статус задачи изменён:', e.detail);
+            updateTaskStatus(e.detail.taskId, e.detail.status);
+        });
+        
     } catch (error) {
         console.error('Ошибка загрузки:', error);
     }
+}
+
+// Обновление статуса задачи
+function updateTaskStatus(taskId, status) {
+    const [orderId] = taskId.split('_');
+    const order = orders.find(o => o.id == orderId);
+    
+    if (!order) return;
+    
+    if (!order.tasks) order.tasks = {};
+    
+    let squareStatus = '';
+    if (status === 'in_progress') squareStatus = 'orange';
+    if (status === 'completed') squareStatus = 'green';
+    
+    order.tasks[taskId] = squareStatus;
+    saveOrdersToStorage(orders);
+    loadOrders(); // Перезагружаем для обновления квадратиков
 }
 
 // Заполнение выпадающих списков
 function populateSelects() {
     console.log('Заполнение select-ов...');
     
-    // Изделия
     const productSelect = document.getElementById('productSelect');
     if (productSelect) {
         productSelect.innerHTML = '<option value="">Выберите изделие</option>';
@@ -45,10 +77,8 @@ function populateSelects() {
             option.textContent = product.name;
             productSelect.appendChild(option);
         });
-        console.log('Изделий добавлено:', products.length);
     }
     
-    // Кронштейны
     const bracketSelect = document.getElementById('bracketSelect');
     if (bracketSelect) {
         bracketSelect.innerHTML = '<option value="">Выберите кронштейн</option>';
@@ -64,10 +94,8 @@ function populateSelects() {
             option.textContent = bracket.name;
             bracketSelect.appendChild(option);
         });
-        console.log('Кронштейнов добавлено:', brackets.length + 1);
     }
     
-    // Лиры
     const lyreSelect = document.getElementById('lyreSelect');
     if (lyreSelect) {
         lyreSelect.innerHTML = '<option value="">Выберите лиру</option>';
@@ -83,22 +111,18 @@ function populateSelects() {
             option.textContent = lyre.name;
             lyreSelect.appendChild(option);
         });
-        console.log('Лир добавлено:', lyres.length + 1);
     }
 }
 
 // Загрузка размеров для выбранного изделия
 async function loadProductSizes() {
     const productName = document.getElementById('productSelect').value;
-    console.log('Выбран продукт:', productName);
-    
     const product = products.find(p => p.name === productName);
     const sizeSelect = document.getElementById('sizeSelect');
     
     sizeSelect.innerHTML = '<option value="">Загрузка размеров...</option>';
     sizeSelect.disabled = true;
     
-    // Небольшая задержка для имитации загрузки
     setTimeout(() => {
         sizeSelect.innerHTML = '<option value="">Выберите размер</option>';
         
@@ -109,7 +133,6 @@ async function loadProductSizes() {
                 option.textContent = size;
                 sizeSelect.appendChild(option);
             });
-            console.log('Размеров загружено:', product.sizes.length);
         } else {
             sizeSelect.innerHTML = '<option value="">Нет доступных размеров</option>';
         }
@@ -150,7 +173,6 @@ function closeOrderModal() {
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
-    // Проверка обязательных полей
     const product = document.getElementById('productSelect').value;
     const size = document.getElementById('sizeSelect').value;
     
@@ -283,17 +305,52 @@ function loadOrders() {
     });
 }
 
-// Создание строки участка
+// Получение количества операций для изделия
+function getOperationCount(productName, siteKey) {
+    const operations = {
+        'XRAY 6-T2 BZ 220 Шторка х2': {
+            'tokarniy': 5,
+            'slesarniy': 7,
+            'frezerniy': 1,
+            'lazerno': 4,
+            'polimerniy': 2
+        },
+        'XGRAY v.1': {
+            'tokarniy': 3,
+            'slesarniy': 3,
+            'frezerniy': 2,
+            'lazerno': 1,
+            'polimerniy': 4
+        }
+    };
+    
+    return operations[productName]?.[siteKey] || 3;
+}
+
+// Создание строки участка с квадратиками
 function createSiteRow(name, order, siteKey) {
+    const item = order.items[0];
+    const operationCount = getOperationCount(item.product, siteKey);
+    
+    let squares = '';
+    let completedCount = 0;
+    
+    for (let i = 0; i < operationCount; i++) {
+        const taskId = `${order.id}_${item.product}_${siteKey}_${i}`;
+        const status = order.tasks && order.tasks[taskId] ? order.tasks[taskId] : '';
+        
+        if (status === 'green') completedCount++;
+        
+        squares += `<div class="square ${status}" data-task="${taskId}"></div>`;
+    }
+    
     return `
         <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #1a1e24; border-radius: 5px; border: 1px solid #2a2f38;">
             <span style="color: #fff; min-width: 120px;">${name}</span>
             <div style="display: flex; gap: 5px;">
-                <div class="square"></div>
-                <div class="square"></div>
-                <div class="square"></div>
+                ${squares}
             </div>
-            <span style="color: #a0a0a0; font-size: 12px;">0/3</span>
+            <span style="color: #a0a0a0; font-size: 12px;">${completedCount}/${operationCount}</span>
             <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
         </div>
     `;
@@ -309,6 +366,21 @@ function updateStatistics() {
     document.getElementById('totalOrders').textContent = orders.length;
     const totalItems = orders.reduce((sum, order) => sum + order.items[0].quantity, 0);
     document.getElementById('totalItems').textContent = totalItems;
+    
+    let activeTasks = 0;
+    let completedTasks = 0;
+    
+    orders.forEach(order => {
+        if (order.tasks) {
+            Object.values(order.tasks).forEach(status => {
+                if (status === 'orange') activeTasks++;
+                if (status === 'green') completedTasks++;
+            });
+        }
+    });
+    
+    document.getElementById('activeTasks').textContent = activeTasks;
+    document.getElementById('completedTasks').textContent = completedTasks;
 }
 
 // Заглушки для функций
@@ -326,7 +398,22 @@ function deleteOrder(orderId) {
 }
 
 function addExtraTask(orderId, siteKey) {
-    alert(`Добавить задачу на участок ${siteKey}`);
+    const taskName = prompt('Введите название дополнительной задачи:');
+    if (!taskName) return;
+    
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    if (!order.extraTasks) order.extraTasks = [];
+    
+    order.extraTasks.push({
+        title: taskName,
+        site: siteKey,
+        createdAt: new Date().toISOString()
+    });
+    
+    saveOrdersToStorage(orders);
+    loadOrders();
 }
 
 function exportOrders() {
