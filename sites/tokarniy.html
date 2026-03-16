@@ -425,6 +425,7 @@
             </select>
             <button class="btn btn-primary" onclick="applyFilters()">🔍 Применить</button>
             <button class="btn btn-warning" onclick="clearHistory()">🗑️ Очистить историю</button>
+            <button class="btn btn-info" onclick="forceRefresh()">🔄 Обновить</button>
         </div>
 
         <!-- СТАТИСТИКА -->
@@ -650,6 +651,8 @@
                 // Получаем отфильтрованные задачи
                 let tasks = taskManager.getTasksByStatus(currentFilter);
                 
+                console.log('Загружено задач:', tasks.length);
+                
                 // Обновляем статистику
                 const stats = taskManager.getStats();
                 document.getElementById('totalTasks').textContent = stats.total;
@@ -782,7 +785,7 @@
                     });
                 } else {
                     const noExecutors = document.createElement('p');
-                    noExecutors.style.cssText = 'color: #a0a0a0; padding: 15px; text-align: center;';
+                    noExecutors.style.cssText = 'color: #a0a0a0; padding: 15px; text-align: center; font-style: italic;';
                     noExecutors.textContent = 'Нет исполнителей';
                     executorList.appendChild(noExecutors);
                 }
@@ -808,16 +811,15 @@
             
             // ============== СОЗДАНИЕ ЭЛЕМЕНТА ИСПОЛНИТЕЛЯ ==============
             function createExecutorItem(task, executor) {
+                console.log('createExecutorItem:', task.id, executor);
+                
                 const div = document.createElement('div');
                 div.className = `executor-item ${executor.status === 'completed' ? 'completed' : ''}`;
+                div.dataset.executorId = executor.id;
                 
                 const nameSpan = document.createElement('span');
                 nameSpan.className = 'executor-name';
                 nameSpan.textContent = executor.name;
-                nameSpan.style.padding = '6px 10px';
-                nameSpan.style.background = '#1e232b';
-                nameSpan.style.borderRadius = '4px';
-                nameSpan.style.flex = '2';
                 div.appendChild(nameSpan);
                 
                 const quantityInput = document.createElement('input');
@@ -827,10 +829,10 @@
                 quantityInput.min = 0;
                 quantityInput.max = task.totalQuantity;
                 quantityInput.disabled = task.status === 'completed';
-                quantityInput.onchange = (e) => {
+                quantityInput.onchange = function(e) {
                     const val = parseInt(e.target.value) || 0;
                     taskManager.updateExecutorQuantity(task.id, executor.id, val);
-                    setTimeout(() => loadTasks(), 100);
+                    setTimeout(() => loadTasks(), 200);
                 };
                 div.appendChild(quantityInput);
                 
@@ -838,15 +840,24 @@
                 workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''}`;
                 workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
                 workBtn.disabled = task.status === 'completed';
-                workBtn.onclick = () => toggleWorkStatus(task.id, executor.id, workBtn);
+                workBtn.onclick = function() {
+                    const newStatus = workBtn.classList.contains('active') ? 'pending' : 'in_progress';
+                    taskManager.updateExecutorStatus(task.id, executor.id, newStatus);
+                    workBtn.classList.toggle('active');
+                    workBtn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
+                    setTimeout(() => loadTasks(), 200);
+                };
                 div.appendChild(workBtn);
                 
                 const removeBtn = document.createElement('button');
                 removeBtn.className = 'btn btn-danger btn-sm';
                 removeBtn.innerHTML = '✕';
-                removeBtn.style.padding = '4px 8px';
-                removeBtn.style.marginLeft = '5px';
-                removeBtn.onclick = () => removeExecutor(task.id, executor.id);
+                removeBtn.onclick = function() {
+                    if (confirm('Удалить этого исполнителя?')) {
+                        taskManager.removeExecutor(task.id, executor.id);
+                        setTimeout(() => loadTasks(), 200);
+                    }
+                };
                 div.appendChild(removeBtn);
                 
                 return div;
@@ -886,7 +897,7 @@
                         return;
                     }
                     
-                    // Добавляем исполнителя через taskManager
+                    // Добавляем исполнителя
                     const result = taskManager.addExecutor(task.id, name);
                     console.log('Результат добавления:', result);
                     
@@ -894,10 +905,14 @@
                         console.log('✅ Исполнитель добавлен успешно');
                         formDiv.remove();
                         
-                        // Принудительно обновляем список задач
+                        // НЕМЕДЛЕННОЕ обновление
+                        taskManager.loadData();
+                        loadTasks();
+                        
+                        // Дополнительное обновление для гарантии
                         setTimeout(() => {
                             loadTasks();
-                        }, 200);
+                        }, 300);
                     } else {
                         alert('Не удалось добавить исполнителя. Возможно, он уже существует.');
                     }
@@ -924,14 +939,13 @@
                 taskManager.updateExecutorStatus(taskId, executorId, newStatus);
                 btn.classList.toggle('active');
                 btn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
-                
-                setTimeout(() => loadTasks(), 100);
+                setTimeout(() => loadTasks(), 200);
             };
             
             window.removeExecutor = function(taskId, executorId) {
                 if (confirm('Удалить этого исполнителя?')) {
                     taskManager.removeExecutor(taskId, executorId);
-                    setTimeout(() => loadTasks(), 100);
+                    setTimeout(() => loadTasks(), 200);
                 }
             };
             
@@ -950,7 +964,7 @@
                 
                 if (confirm(message)) {
                     taskManager.completeTask(taskId);
-                    setTimeout(() => loadTasks(), 100);
+                    setTimeout(() => loadTasks(), 200);
                 }
             };
             
@@ -988,6 +1002,13 @@
                 link.href = URL.createObjectURL(blob);
                 link.download = `tokarniy_${dateStr}.csv`;
                 link.click();
+            };
+            
+            // ============== ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ ==============
+            window.forceRefresh = function() {
+                console.log('🔄 Принудительное обновление');
+                taskManager.loadData();
+                loadTasks();
             };
         }
     </script>
