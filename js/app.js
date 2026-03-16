@@ -332,439 +332,151 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-// ============== ОСНОВНЫЕ ФУНКЦИИ ПЛАНИРОВЩИКА ==============
-
-// Загрузка и отображение заказов
-function loadOrders() {
-    console.log('loadOrders вызвана, заказов:', orders.length);
-    const ordersList = document.getElementById('ordersList');
-    if (!ordersList) {
-        console.error('ordersList не найден');
-        return;
-    }
-    
-    ordersList.innerHTML = '';
-    
-    if (!orders || orders.length === 0) {
-        ordersList.innerHTML = `
-            <div style="text-align: center; padding: 50px; background: white; border-radius: 10px;">
-                <p style="font-size: 18px; color: #666;">📭 Нет заказов</p>
-                <p style="color: #999;">Нажмите "+ Новый заказ" чтобы создать первый заказ</p>
-            </div>
-        `;
-        return;
-    }
-    
-    const sortedOrders = [...orders].sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    sortedOrders.forEach(order => {
-        const orderCard = createOrderCard(order);
-        ordersList.appendChild(orderCard);
-    });
-    
-    console.log('Отображено заказов:', sortedOrders.length);
-}
-
 // ============== БАЗА ОПЕРАЦИЙ ИЗ ТЕХКАРТ ==============
 
 // Получение количества операций для изделия по участку (из техкарт)
 function getSiteOperationsCount(productName, siteKey) {
     const operationsDB = {
-        // ТОКАРНЫЙ УЧАСТОК
         'tokarniy': {
-            'XRAY 1': 5,
-            'XRAY 3': 5,
-            'XRAY 3-2': 7,
-            'XRAY 3-GRP': 5,
-            'XRAY 6': 5,
-            'XRAY 6 RGBW': 6,
-            'XRAY 6-2 проходной': 6,
-            'XRAY 6-2 оконечный': 6,
-            'XRAY 6-T2 BT 180': 3,
-            'XRAY 6-T2 BT 200': 3,
-            'XRAY 6-T2 BT 220': 3,
             'XRAY 6-T2 BT 220 Шторка x2': 3,
-            'XRAY 6-T2 BT 240 Шторка': 3,
-            'XRAY 6-T2 BZ 180': 3,
-            'XRAY 6-T2 BZ 200 Шторка': 3,
-            'XRAY 6-T2 BZ 220': 4,
-            'XRAY 6-T2 BZ 220 Шторка x2': 3,
-            'XRAY 6-T2 BZ 240 Шторка': 3,
-            'XRAY 6-T2 BZ 240 Шторка x2': 3,
-            'XRAY 6T Накладной': 5,
-            'XRAY 6T BT 120': 3,
-            'XRAY 6T BT 140 Шторка': 3,
-            'XRAY 6T BZ 120': 4,
-            'XRAY 6T BZ 140 Шторка': 3,
-            'XRAY 6T RGBW BT 150': 3,
-            'XRAY 9': 7,
-            'XRAY 9S': 3,
-            'XRAY 12S': 3,
-            'XRAY 18': 7,
-            'XRAY 18S': 3,
-            'XRAY 36': 0,
-            'XRAY 36S': 0,
-            'XSLOPE': 5,
-            'XPIXEL BIN v.1': 3,
-            'XPIXEL BIN v.2': 4,
-            'XPIXEL BIN v.3': 4,
-            'XPIXEL OVHD': 3,
-            'XDISK': 8,
-            'XPOINT OVHD': 2,
-            'XSPOT': 5,
-            'ACENTO 3T': 4,
-            'ACENTO 4': 3,
             'XGRAY v.1': 3,
             'XGRAY v.2': 3,
             'XSMART mini': 2
         },
-        
-        // СЛЕСАРНЫЙ УЧАСТОК
         'slesarniy': {
-            'XRAY 1': 4,
-            'XRAY 3': 5,
-            'XRAY 3-2': 4,
-            'XRAY 3-GRP': 3,
-            'XRAY 6': 5,
-            'XRAY 6 RGBW': 5,
-            'XRAY 6-2 проходной': 5,
-            'XRAY 6-2 оконечный': 5,
-            'XRAY 6-T2 BT 180': 7,
-            'XRAY 6-T2 BT 200': 8,
-            'XRAY 6-T2 BT 220': 7,
-            'XRAY 6-T2 BT 220 Шторка x2': 8,
-            'XRAY 6-T2 BT 240 Шторка': 8,
-            'XRAY 6-T2 BZ 180': 7,
-            'XRAY 6-T2 BZ 200 Шторка': 8,
-            'XRAY 6-T2 BZ 220': 7,
-            'XRAY 6-T2 BZ 220 Шторка x2': 8,
-            'XRAY 6-T2 BZ 240 Шторка': 8,
-            'XRAY 6-T2 BZ 240 Шторка x2': 8,
-            'XRAY 6T Накладной': 6,
-            'XRAY 6T BT 120': 8,
-            'XRAY 6T BT 140 Шторка': 8,
-            'XRAY 6T BZ 120': 8,
-            'XRAY 6T BZ 140 Шторка': 8,
-            'XRAY 6T RGBW BT 150': 8,
-            'XRAY 9': 5,
-            'XRAY 9S': 5,
-            'XRAY 12S': 5,
-            'XRAY 18': 5,
-            'XRAY 18S': 5,
-            'XRAY 36': 0,
-            'XRAY 36S': 0,
-            'XSLOPE': 6,
-            'XPIXEL BIN v.1': 3,
-            'XPIXEL BIN v.2': 2,
-            'XPIXEL BIN v.3': 4,
-            'XPIXEL OVHD': 1,
-            'XDISK': 5,
-            'XPOINT OVHD': 1,
-            'XSPOT': 3,
-            'ACENTO 3T': 6,
-            'ACENTO 4': 6,
+            'XRAY 6-T2 BT 220 Шторка x2': 7,
             'XGRAY v.1': 3,
-            'XGRAY v.2': 3,
             'XSMART mini': 1
         },
-        
-        // ФРЕЗЕРНЫЙ УЧАСТОК
         'frezerniy': {
-            'XRAY 1': 1,
-            'XRAY 3': 1,
-            'XRAY 3-2': 1,
-            'XRAY 3-GRP': 0,
-            'XRAY 6': 0,
-            'XRAY 6 RGBW': 0,
-            'XRAY 6-2 проходной': 1,
-            'XRAY 6-2 оконечный': 1,
-            'XRAY 6-T2 BT 180': 0,
-            'XRAY 6-T2 BT 200': 0,
-            'XRAY 6-T2 BT 220': 0,
-            'XRAY 6-T2 BT 220 Шторка x2': 0,
-            'XRAY 6-T2 BT 240 Шторка': 0,
-            'XRAY 6-T2 BZ 180': 0,
-            'XRAY 6-T2 BZ 200 Шторка': 0,
-            'XRAY 6-T2 BZ 220': 0,
-            'XRAY 6-T2 BZ 220 Шторка x2': 0,
-            'XRAY 6-T2 BZ 240 Шторка': 0,
-            'XRAY 6T Накладной': 0,
-            'XRAY 6T BT 120': 0,
-            'XRAY 6T BT 140 Шторка': 0,
-            'XRAY 6T BZ 120': 0,
-            'XRAY 6T BZ 140 Шторка': 0,
-            'XRAY 6T RGBW BT 150': 0,
-            'XRAY 9': 1,
-            'XRAY 9S': 0,
-            'XRAY 12S': 0,
-            'XRAY 18': 1,
-            'XRAY 18S': 0,
-            'XRAY 36': 1,
-            'XRAY 36S': 0,
-            'XSLOPE': 0,
-            'XPIXEL BIN v.1': 1,
-            'XPIXEL BIN v.2': 1,
-            'XPIXEL BIN v.3': 1,
-            'XPIXEL OVHD': 0,
-            'XDISK': 1,
-            'XPOINT OVHD': 0,
-            'XSPOT': 0,
-            'ACENTO 3T': 0,
-            'ACENTO 4': 0,
-            'XROLL-lite P': 1,
-            'XROLL-lite K': 1,
-            'XWHITE': 1,
-            'XEYES 130*90 1': 1,
-            'XEYES 130*90 2': 1,
-            'XEYES 130*90 3': 1,
-            'XEYES 130*90 4': 1,
-            'XEYES 130*120 1': 1,
-            'XEYES 130*120 2': 1,
-            'XEYES 130*120 3': 1,
-            'XEYES 130*120 4': 1,
-            'XEYES mini-1': 0,
-            'XGIRO': 2,
-            'XGLOW': 2,
-            'XGLOW mini': 0,
+            'XRAY 6-T2 BT 220 Шторка x2': 1,
             'XGRAY v.1': 2,
-            'XGRAY v.2': 2,
-            'XLITE': 2,
-            'XSMART': 2,
-            'XSMART MINI': 2,
-            'XSTRONG': 1,
-            'XLUMO': 5,
-            'XLUMO 1-6': 4,
-            'XLUMO Двунаправленный': 3,
-            'XLUMO PROV': 3,
-            'XVISION': 0,
-            'XBAR-SW': 1,
-            'XFOCUS': 1,
-            'XYELLOW': 1,
-            'XGRAY v.2': 2,
-            'XLINE': 1
+            'XLUMO': 5
         },
-        
-        // ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК
         'lazerno': {
-            'XRAY 1': 2,
-            'XRAY 3': 2,
-            'XRAY 3-2': 2,
-            'XRAY 3-GRP': 2,
-            'XRAY 6': 3,
-            'XRAY 6 RGBW': 3,
-            'XRAY 6-2 проходной': 2,
-            'XRAY 6-2 оконечный': 2,
-            'XRAY 6-T2 BT 180': 4,
-            'XRAY 6-T2 BT 200': 4,
-            'XRAY 6-T2 BT 220': 4,
             'XRAY 6-T2 BT 220 Шторка x2': 4,
-            'XRAY 6-T2 BT 240 Шторка': 4,
-            'XRAY 6-T2 BZ 180': 4,
-            'XRAY 6-T2 BZ 200 Шторка': 4,
-            'XRAY 6-T2 BZ 220': 4,
-            'XRAY 6-T2 BZ 220 Шторка x2': 4,
-            'XRAY 6-T2 BZ 240 Шторка': 4,
-            'XRAY 6T Накладной': 3,
-            'XRAY 6T BT 120': 5,
-            'XRAY 6T BT 140 Шторка': 5,
-            'XRAY 6T BZ 120': 5,
-            'XRAY 6T BZ 140 Шторка': 5,
-            'XRAY 6T RGBW BT 150': 5,
-            'XRAY 9': 2,
-            'XRAY 9S': 4,
-            'XRAY 12S': 4,
-            'XRAY 18': 3,
-            'XRAY 18S': 4,
-            'XRAY 36': 3,
-            'XRAY 36S': 4,
-            'XSLOPE': 4,
-            'XPIXEL BIN v.1': 0,
-            'XPIXEL BIN v.2': 0,
-            'XPIXEL BIN v.3': 2,
-            'XPIXEL OVHD': 1,
-            'XDISK': 0,
-            'XPOINT OVHD': 0,
-            'XSPOT': 2,
-            'ACENTO 3T': 4,
-            'ACENTO 4': 4,
-            'XROLL-lite P': 0,
-            'XROLL-lite K': 2,
-            'XWHITE': 0,
-            'XEYES 130*90 1': 3,
-            'XEYES 130*90 2': 3,
-            'XEYES 130*90 3': 3,
-            'XEYES 130*90 4': 3,
-            'XEYES 130*120 1': 3,
-            'XEYES 130*120 2': 3,
-            'XEYES 130*120 3': 3,
-            'XEYES 130*120 4': 3,
-            'XEYES mini-1': 5,
-            'XGIRO': 4,
-            'XGLOW': 2,
-            'XGLOW mini': 2,
             'XGRAY v.1': 1,
-            'XGRAY v.2': 5,
-            'XLITE': 4,
-            'XSMART': 4,
-            'XSMART MINI': 5,
-            'XSTRONG': 5,
-            'XLUMO': 5,
-            'XLUMO 1-6': 4,
-            'XLUMO Двунаправленный': 4,
-            'XLUMO PROV': 5,
-            'XVISION': 4,
-            'XBAR-SW': 5,
-            'XMODULE-2x2': 2,
-            'XMODULE-6x2': 1,
-            'XFOCUS': 5,
-            'XYELLOW': 1,
-            'XGRAY v.2': 5,
-            'XLINE': 0
+            'XGRAY v.2': 5
         },
-        
-        // ПОЛИМЕРНЫЙ УЧАСТОК
         'polimerniy': {
-            'XRAY 1': 2,
-            'XRAY 3': 2,
-            'XRAY 3-2': 2,
-            'XRAY 3-GRP': 2,
-            'XRAY 6': 3,
-            'XRAY 6 RGBW': 3,
-            'XRAY 6-2 проходной': 2,
-            'XRAY 6-2 оконечный': 2,
-            'XRAY 6-T2 BT 180': 2,
-            'XRAY 6-T2 BT 200': 2,
-            'XRAY 6-T2 BT 220': 2,
             'XRAY 6-T2 BT 220 Шторка x2': 2,
-            'XRAY 6-T2 BT 240 Шторка': 2,
-            'XRAY 6-T2 BZ 180': 2,
-            'XRAY 6-T2 BZ 200 Шторка': 2,
-            'XRAY 6-T2 BZ 220': 2,
-            'XRAY 6-T2 BZ 220 Шторка x2': 2,
-            'XRAY 6-T2 BZ 240 Шторка': 2,
-            'XRAY 6T Накладной': 4,
-            'XRAY 6T BT 120': 4,
-            'XRAY 6T BT 140 Шторка': 4,
-            'XRAY 6T BZ 120': 4,
-            'XRAY 6T BZ 140 Шторка': 4,
-            'XRAY 6T RGBW BT 150': 4,
-            'XRAY 9': 4,
-            'XRAY 9S': 3,
-            'XRAY 12S': 3,
-            'XRAY 18': 5,
-            'XRAY 18S': 3,
-            'XRAY 36': 5,
-            'XRAY 36S': 3,
-            'XSLOPE': 3,
-            'XPIXEL BIN v.1': 2,
-            'XPIXEL BIN v.2': 2,
-            'XPIXEL BIN v.3': 3,
-            'XPIXEL OVHD': 2,
-            'XDISK': 3,
-            'XPOINT OVHD': 1,
-            'XSPOT': 2,
-            'ACENTO 3T': 3,
-            'ACENTO 4': 3,
-            'XROLL-lite P': 2,
-            'XROLL-lite K': 2,
-            'XWHITE': 3,
-            'XEYES 130*90 1': 2,
-            'XEYES 130*90 2': 2,
-            'XEYES 130*90 3': 2,
-            'XEYES 130*90 4': 2,
-            'XEYES 130*120 1': 2,
-            'XEYES 130*120 2': 2,
-            'XEYES 130*120 3': 2,
-            'XEYES 130*120 4': 2,
-            'XEYES mini-1': 4,
-            'XGIRO': 4,
-            'XGLOW': 5,
-            'XGLOW mini': 3,
             'XGRAY v.1': 4,
-            'XGRAY v.2': 5,
-            'XLITE': 4,
-            'XSMART': 5,
-            'XSMART MINI': 4,
-            'XSTRONG': 3,
-            'XLUMO': 4,
-            'XLUMO 1-6': 4,
-            'XLUMO Двунаправленный': 4,
-            'XLUMO PROV': 4,
-            'XVISION': 1,
-            'XBAR-SW': 4,
-            'XMODULE-2x2': 1,
-            'XMODULE-6x2': 0,
-            'XFOCUS': 3,
-            'XYELLOW': 3,
-            'XGRAY v.2': 5,
-            'XLINE': 2
+            'XSMART mini': 4
         }
     };
     
-    // Пытаемся найти точное совпадение
     if (operationsDB[siteKey] && operationsDB[siteKey][productName] !== undefined) {
         return operationsDB[siteKey][productName];
     }
     
-    // Если нет точного совпадения, ищем по частичному
     for (let key in operationsDB[siteKey]) {
         if (productName.includes(key) || key.includes(productName)) {
             return operationsDB[siteKey][key];
         }
     }
     
-    return 1; // По умолчанию 1 операция
+    return 1;
 }
 
-// Создание строки участка с кнопкой добавления задачи
+// Получение общего количества выполненных деталей для задачи из всех дат
+function getTotalCompletedForTask(taskId, siteKey) {
+    let totalCompleted = 0;
+    
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(`tasks_${siteKey}_`)) {
+            try {
+                const tasks = JSON.parse(localStorage.getItem(key));
+                const task = tasks.find(t => t.id === taskId);
+                if (task && task.executors) {
+                    const taskTotal = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
+                    totalCompleted += taskTotal;
+                }
+            } catch (e) {}
+        }
+    }
+    
+    return totalCompleted;
+}
+
+// Создание строки участка с квадратиками и количеством
 function createSiteRow(siteDisplayName, order, siteKey) {
     if (!order.items || !order.items[0]) {
         return `<div class="site-item"><div class="site-name">${siteDisplayName}</div><div class="squares"><div class="square"></div></div></div>`;
     }
     
     const operationsCount = getSiteOperationsCount(order.items[0].product, siteKey);
+    const totalProductQuantity = order.items[0].quantity || 1;
     
     let squaresHtml = '';
-    let completedCount = 0;
+    let completedTasks = 0;
+    let totalCompletedOverall = 0;
     
     // Основные операции
     for (let i = 0; i < operationsCount; i++) {
         const taskId = `${order.id}_${order.items[0].product}_${siteKey}_${i}`;
-        const status = order.tasks && order.tasks[taskId] ? order.tasks[taskId] : '';
+        const taskStatus = order.tasks && order.tasks[taskId] ? order.tasks[taskId] : '';
         
-        if (status === 'green') completedCount++;
+        // Получаем общее количество выполненных деталей по этой задаче от ВСЕХ исполнителей
+        const completedQuantity = getTotalCompletedForTask(taskId, siteKey);
         
-        squaresHtml += `<div class="square ${status}"></div>`;
+        // Определяем цвет квадратика на основе общего выполнения
+        let squareColor = '';
+        if (taskStatus === 'green' || completedQuantity >= totalProductQuantity) {
+            squareColor = 'green';
+            completedTasks++;
+        } else if (taskStatus === 'orange' || completedQuantity > 0) {
+            squareColor = 'orange';
+        }
+        
+        totalCompletedOverall += completedQuantity;
+        
+        // Формируем текст для отображения внутри квадратика
+        const displayText = completedQuantity > 0 ? `${completedQuantity}` : '';
+        
+        // Добавляем всплывающую подсказку с деталями
+        const tooltip = `Выполнено: ${completedQuantity}/${totalProductQuantity} шт`;
+        
+        squaresHtml += `<div class="square ${squareColor}" data-task="${taskId}" title="${tooltip}">${displayText}</div>`;
     }
     
-    // Дополнительные задачи для этого участка
-    let extraCount = 0;
+    // Дополнительные задачи
     if (order.extraTasks) {
         order.extraTasks.forEach((task, index) => {
             if (task.site === siteKey) {
-                extraCount++;
                 const taskId = `${order.id}_extra_${index}`;
-                const status = order.tasks && order.tasks[taskId] ? order.tasks[taskId] : '';
+                const taskStatus = order.tasks && order.tasks[taskId] ? order.tasks[taskId] : '';
                 
-                if (status === 'green') completedCount++;
+                const completedQuantity = getTotalCompletedForTask(taskId, siteKey);
                 
-                squaresHtml += `<div class="square ${status} extra-square" title="${task.title}"></div>`;
+                let squareColor = '';
+                if (taskStatus === 'green' || completedQuantity >= 1) {
+                    squareColor = 'green';
+                    completedTasks++;
+                } else if (taskStatus === 'orange' || completedQuantity > 0) {
+                    squareColor = 'orange';
+                }
+                
+                const displayText = completedQuantity > 0 ? `1` : '';
+                const tooltip = `Доп. задача: ${completedQuantity > 0 ? 'выполнена' : 'ожидает'}`;
+                
+                squaresHtml += `<div class="square ${squareColor} extra-square" data-task="${taskId}" title="${tooltip}">${displayText}</div>`;
             }
         });
     }
     
-    const totalOperations = operationsCount + extraCount;
+    const totalOperations = operationsCount + (order.extraTasks?.filter(t => t.site === siteKey).length || 0);
     
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: white; border-radius: 5px; border: 1px solid #dee2e6;">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <span style="font-weight: bold; min-width: 120px;">${siteDisplayName}</span>
-                <div class="squares" style="display: flex; gap: 5px;">
-                    ${squaresHtml || '<div class="square"></div>'}
-                </div>
-                <span style="font-size: 12px; color: #666;">Выполнено: ${completedCount}/${totalOperations}</span>
+        <div class="site-item">
+            <div class="site-name">${siteDisplayName}</div>
+            <div class="squares">
+                ${squaresHtml || '<div class="square"></div>'}
             </div>
-            <button class="btn btn-sm btn-primary" onclick="addExtraTaskToSite(${order.id}, '${siteKey}')" style="padding: 3px 8px; font-size: 12px;">➕</button>
+            <div style="font-size: 12px; color: #666; margin: 0 15px;">
+                ${totalCompletedOverall}/${totalProductQuantity * operationsCount}
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="addExtraTaskToSite(${order.id}, '${siteKey}')">➕</button>
         </div>
     `;
 }
@@ -832,6 +544,28 @@ function addExtraTaskToSite(orderId, siteKey) {
         loadOrders();
         showNotification('Дополнительная задача создана', 'success');
     });
+}
+
+// Удалить дополнительную задачу
+function deleteExtraTask(orderId, taskIndex) {
+    const order = orders.find(o => o.id === orderId);
+    if (!order || !order.extraTasks) return;
+    
+    if (confirm('Удалить эту дополнительную задачу?')) {
+        order.extraTasks.splice(taskIndex, 1);
+        
+        if (order.tasks) {
+            Object.keys(order.tasks).forEach(key => {
+                if (key.includes(`_extra_${taskIndex}`)) {
+                    delete order.tasks[key];
+                }
+            });
+        }
+        
+        saveOrdersToStorage(orders);
+        loadOrders();
+        showNotification('Задача удалена', 'info');
+    }
 }
 
 // Создание карточки заказа
@@ -968,29 +702,22 @@ function createOrderCard(order) {
         extraTasksSection.innerHTML = '<h4 style="margin-top: 20px;">📋 Дополнительные задачи</h4>';
         
         const extraTasksTable = document.createElement('table');
-        extraTasksTable.className = 'extra-tasks-table';
-        extraTasksTable.style.width = '100%';
-        extraTasksTable.style.borderCollapse = 'collapse';
-        extraTasksTable.style.marginBottom = '15px';
+        extraTasksTable.className = 'items-table';
+        extraTasksTable.style.marginTop = '10px';
         
         let extraRows = '';
         order.extraTasks.forEach((task, index) => {
             const taskId = `${order.id}_extra_${index}`;
             const taskStatus = order.tasks && order.tasks[taskId] ? order.tasks[taskId] : '';
             
+            const statusText = taskStatus === 'green' ? '✅' : (taskStatus === 'orange' ? '🟠' : '⬜');
+            
             extraRows += `
                 <tr>
-                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">
-                        <strong>${task.title}</strong><br>
-                        <small style="color: #666;">${task.description || ''}</small><br>
-                        <small style="color: #999;">Участок: ${getSiteName(task.site)}</small>
-                    </td>
-                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">
-                        <div class="squares">
-                            <div class="square ${taskStatus}"></div>
-                        </div>
-                    </td>
-                    <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">
+                    <td><strong>${task.title}</strong><br><small style="color: #666;">${task.description || ''}</small></td>
+                    <td>${getSiteName(task.site)}</td>
+                    <td style="text-align: center;">${statusText}</td>
+                    <td style="text-align: center;">
                         <button class="btn btn-sm btn-danger" onclick="deleteExtraTask(${order.id}, ${index})">❌</button>
                     </td>
                 </tr>
@@ -999,10 +726,11 @@ function createOrderCard(order) {
         
         extraTasksTable.innerHTML = `
             <thead>
-                <tr style="background: #f0f0f0;">
-                    <th style="padding: 8px; text-align: left;">Задача</th>
-                    <th style="padding: 8px; text-align: center;">Статус</th>
-                    <th style="padding: 8px; text-align: center;"></th>
+                <tr>
+                    <th>Задача</th>
+                    <th>Участок</th>
+                    <th style="text-align: center;">Статус</th>
+                    <th style="text-align: center;"></th>
                 </tr>
             </thead>
             <tbody>
@@ -1014,12 +742,12 @@ function createOrderCard(order) {
         content.appendChild(extraTasksSection);
     }
     
-    // Участки - в заданном порядке с кнопками
+    // Участки
     const sitesSection = document.createElement('div');
     sitesSection.className = 'sites-section';
     sitesSection.innerHTML = `
         <h4 style="margin-bottom: 15px;">🏭 Производственные участки</h4>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="sites-grid">
             ${createSiteRow('🔧 Токарный', order, 'tokarniy')}
             ${createSiteRow('🔨 Слесарный', order, 'slesarniy')}
             ${createSiteRow('⚙️ Фрезерный', order, 'frezerniy')}
@@ -1053,26 +781,35 @@ function getSiteName(site) {
     return names[site] || site;
 }
 
-// Удалить дополнительную задачу
-function deleteExtraTask(orderId, taskIndex) {
-    const order = orders.find(o => o.id === orderId);
-    if (!order || !order.extraTasks) return;
-    
-    if (confirm('Удалить эту дополнительную задачу?')) {
-        order.extraTasks.splice(taskIndex, 1);
-        
-        if (order.tasks) {
-            Object.keys(order.tasks).forEach(key => {
-                if (key.includes(`_extra_${taskIndex}`)) {
-                    delete order.tasks[key];
-                }
-            });
-        }
-        
-        saveOrdersToStorage(orders);
-        loadOrders();
-        showNotification('Задача удалена', 'info');
+// Загрузка и отображение заказов
+function loadOrders() {
+    console.log('loadOrders вызвана, заказов:', orders.length);
+    const ordersList = document.getElementById('ordersList');
+    if (!ordersList) {
+        console.error('ordersList не найден');
+        return;
     }
+    
+    ordersList.innerHTML = '';
+    
+    if (!orders || orders.length === 0) {
+        ordersList.innerHTML = `
+            <div style="text-align: center; padding: 50px; background: white; border-radius: 10px;">
+                <p style="font-size: 18px; color: #666;">📭 Нет заказов</p>
+                <p style="color: #999;">Нажмите "+ Новый заказ" чтобы создать первый заказ</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const sortedOrders = [...orders].sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    sortedOrders.forEach(order => {
+        const orderCard = createOrderCard(order);
+        ordersList.appendChild(orderCard);
+    });
+    
+    console.log('Отображено заказов:', sortedOrders.length);
 }
 
 // Открыть модальное окно редактирования заказа
@@ -1367,84 +1104,6 @@ window.onclick = function(event) {
         closeMaterialsModal();
     }
 };
-
-// Добавляем анимации
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-    
-    .square.orange {
-        background: #ffc107;
-        border-color: #ffc107;
-        animation: pulse 1s infinite;
-    }
-    
-    .square.green {
-        background: #28a745;
-        border-color: #28a745;
-    }
-    
-    .extra-square {
-        border-style: dashed;
-    }
-    
-    @keyframes pulse {
-        0% {
-            transform: scale(1);
-        }
-        50% {
-            transform: scale(1.1);
-        }
-        100% {
-            transform: scale(1);
-        }
-    }
-    
-    .order-card {
-        transition: all 0.3s ease;
-    }
-    
-    .order-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    }
-    
-    .btn-warning {
-        background: #ffc107;
-        color: #000;
-    }
-    
-    .btn-warning:hover {
-        background: #e0a800;
-    }
-    
-    .btn-sm {
-        padding: 3px 8px;
-        font-size: 12px;
-    }
-`;
-
-document.head.appendChild(style);
 
 // ============================================
 // Глобальные функции для вызова из HTML
