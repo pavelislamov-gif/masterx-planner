@@ -6,23 +6,33 @@ let orders = [];
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', async function() {
+    console.log('Страница загружена');
     await loadAllData();
 });
 
 // Загрузка всех данных
 async function loadAllData() {
-    products = await loadProducts() || [];
-    brackets = await loadBrackets() || [];
-    lyres = await loadLyres() || [];
-    orders = loadOrdersFromStorage() || [];
-    
-    populateSelects();
-    loadOrders();
+    try {
+        products = await loadProducts() || [];
+        brackets = await loadBrackets() || [];
+        lyres = await loadLyres() || [];
+        orders = loadOrdersFromStorage() || [];
+        
+        console.log('Продукты:', products.length);
+        console.log('Кронштейны:', brackets.length);
+        console.log('Лир:', lyres.length);
+        console.log('Заказы:', orders.length);
+        
+        populateSelects();
+        loadOrders();
+    } catch (error) {
+        console.error('Ошибка загрузки:', error);
+    }
 }
 
 // Заполнение выпадающих списков
 function populateSelects() {
-    // Заполнение изделий
+    // Изделия
     const productSelect = document.getElementById('productSelect');
     if (productSelect) {
         productSelect.innerHTML = '<option value="">Выберите изделие</option>';
@@ -34,12 +44,11 @@ function populateSelects() {
         });
     }
     
-    // Заполнение кронштейнов
+    // Кронштейны
     const bracketSelect = document.getElementById('bracketSelect');
     if (bracketSelect) {
         bracketSelect.innerHTML = '<option value="">Выберите кронштейн</option>';
         
-        // Добавляем опцию "отсутствует"
         const absentOption = document.createElement('option');
         absentOption.value = "отсутствует";
         absentOption.textContent = "🚫 отсутствует";
@@ -53,12 +62,11 @@ function populateSelects() {
         });
     }
     
-    // Заполнение лир
+    // Лиры
     const lyreSelect = document.getElementById('lyreSelect');
     if (lyreSelect) {
         lyreSelect.innerHTML = '<option value="">Выберите лиру</option>';
         
-        // Добавляем опцию "отсутствует"
         const absentOption = document.createElement('option');
         absentOption.value = "отсутствует";
         absentOption.textContent = "🚫 отсутствует";
@@ -92,9 +100,12 @@ async function loadProductSizes() {
 
 // Открытие модального окна
 function openOrderModal() {
-    document.getElementById('orderModal').style.display = 'block';
-    document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('orderNumber').value = generateOrderNumber();
+    const modal = document.getElementById('orderModal');
+    if (modal) {
+        modal.style.display = 'block';
+        document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('orderNumber').value = generateOrderNumber();
+    }
 }
 
 // Генерация номера заказа
@@ -146,7 +157,7 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
     saveOrdersToStorage(orders);
     loadOrders();
     closeOrderModal();
-    alert('✅ Заказ успешно создан!');
+    alert('✅ Заказ создан!');
 });
 
 // Загрузка заказов
@@ -196,3 +207,5 @@ function loadOrders() {
 window.openOrderModal = openOrderModal;
 window.closeOrderModal = closeOrderModal;
 window.loadProductSizes = loadProductSizes;
+window.exportOrders = function() { alert('Экспорт заказов'); };
+window.closeMaterialsModal = function() { document.getElementById('materialsModal').style.display = 'none'; };
