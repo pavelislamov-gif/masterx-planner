@@ -1,4 +1,4 @@
-// js/task-manager.js - УНИВЕРСАЛЬНЫЙ МЕНЕДЖЕР ЗАДАЧ (ИСПРАВЛЕННАЯ ВЕРСИЯ)
+// js/task-manager.js - УНИВЕРСАЛЬНЫЙ МЕНЕДЖЕР ЗАДАЧ (С ЗАЩИТОЙ ОТ РЕКУРСИИ)
 
 class TaskManager {
     constructor(siteType, customOperations = {}) {
@@ -8,9 +8,11 @@ class TaskManager {
         this.orders = [];
         this.tasks = [];
         
-        // Флаг для предотвращения рекурсии
+        // Флаги для предотвращения рекурсии
         this._isSaving = false;
         this._isLoading = false;
+        this._isNotifying = false;
+        this._lastNotificationTime = 0;
         
         // База операций по умолчанию для каждого участка
         this.baseOperations = {
@@ -54,7 +56,11 @@ class TaskManager {
     
     loadData() {
         // Предотвращаем повторный вход
-        if (this._isLoading) return this.tasks;
+        if (this._isLoading) {
+            console.log('loadData: уже загружается, пропускаем');
+            return this.tasks;
+        }
+        
         this._isLoading = true;
         
         try {
@@ -67,7 +73,10 @@ class TaskManager {
             this.orders = [];
             this.tasks = [];
         } finally {
-            this._isLoading = false;
+            // Сбрасываем флаг через setTimeout, чтобы избежать рекурсии
+            setTimeout(() => {
+                this._isLoading = false;
+            }, 100);
         }
         
         return this.tasks;
@@ -142,7 +151,7 @@ class TaskManager {
             }
         });
         
-        // Сохраняем без уведомления (флаг _isSaving предотвратит рекурсию)
+        // Сохраняем без уведомления
         this._saveTasksToHistoryInternal(dateStr);
     }
     
@@ -215,33 +224,72 @@ class TaskManager {
     
     // Внутренний метод сохранения без уведомления
     _saveTasksToHistoryInternal(dateStr) {
-        if (this._isSaving) return;
+        if (this._isSaving) {
+            console.log('saveTasksToHistoryInternal: уже сохраняется, пропускаем');
+            return;
+        }
+        
         this._isSaving = true;
         
         try {
             const historyKey = `tasks_${this.siteType}_${dateStr}`;
             localStorage.setItem(historyKey, JSON.stringify(this.tasks));
+            console.log(`✅ История сохранена для ${dateStr}`);
         } catch (error) {
             console.error('Ошибка сохранения в историю:', error);
         } finally {
-            this._isSaving = false;
+            // Сбрасываем флаг через setTimeout
+            setTimeout(() => {
+                this._isSaving = false;
+            }, 100);
         }
     }
     
-    // Публичный метод с уведомлением
+    // Публичный метод с уведомлением (с защитой от спама)
     saveTasksToHistory(dateStr) {
         this._saveTasksToHistoryInternal(dateStr);
+        
+        // Защита от слишком частых уведомлений
+        const now = Date.now();
+        if (now - this._lastNotificationTime < 500) { // Не чаще чем раз в 500ms
+            console.log('saveTasksToHistory: слишком часто, пропускаем уведомление');
+            return;
+        }
+        
+        this._lastNotificationTime = now;
         this.notifyHistoryChanged(dateStr);
     }
     
     notifyHistoryChanged(dateStr) {
-        // Используем setTimeout, чтобы избежать синхронной рекурсии
+        // Предотвращаем множественные уведомления
+        if (this._isNotifying) {
+            console.log('notifyHistoryChanged: уже уведомляем, пропускаем');
+            return;
+        }
+        
+        this._isNotifying = true;
+        
+        // Используем setTimeout для асинхронной отправки
         setTimeout(() => {
-            const event = new CustomEvent('taskHistoryChanged', {
-                detail: { siteType: this.siteType, date: dateStr }
-            });
-            window.dispatchEvent(event);
-        }, 0);
+            try {
+                const event = new CustomEvent('taskHistoryChanged', {
+                    detail: { 
+                        siteType: this.siteType, 
+                        date: dateStr,
+                        timestamp: Date.now()
+                    }
+                });
+                window.dispatchEvent(event);
+                console.log(`📢 Уведомление об изменении истории отправлено для ${dateStr}`);
+            } catch (error) {
+                console.error('Ошибка при отправке уведомления:', error);
+            } finally {
+                // Сбрасываем флаг через некоторое время
+                setTimeout(() => {
+                    this._isNotifying = false;
+                }, 300);
+            }
+        }, 10);
     }
     
     // ============== УПРАВЛЕНИЕ ИСПОЛНИТЕЛЯМИ ==============
@@ -385,13 +433,17 @@ class TaskManager {
     }
     
     notifyOtherTabs(taskId, status) {
-        // Используем setTimeout для асинхронной отправки
+        // Используем setTimeout и защиту от дублирования
         setTimeout(() => {
             const event = new CustomEvent('taskStatusChanged', {
-                detail: { taskId, status }
+                detail: { 
+                    taskId, 
+                    status,
+                    timestamp: Date.now()
+                }
             });
             window.dispatchEvent(event);
-        }, 0);
+        }, 10);
     }
     
     // ============== НАВИГАЦИЯ ПО ДАТАМ ==============
@@ -458,4 +510,4 @@ if (typeof window !== 'undefined') {
     window.TaskManager = TaskManager;
 }
 
-console.log('✅ task-manager.js загружен (исправленная версия)');
+console.log('✅ task-manager.js загружен (версия с защитой от рекурсии)');
