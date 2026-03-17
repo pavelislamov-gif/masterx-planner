@@ -361,17 +361,18 @@ header {
     gap: 12px;
 }
 
-/* Исправленный блок строки участка */
+/* Исправленный блок строки участка — квадратики прижаты к левому краю */
 .site-item {
     display: flex;
-    align-items: center;        /* Выравнивание по вертикали */
-    justify-content: space-between;
+    align-items: center;
+    justify-content: flex-start;  /* вместо space-between */
     padding: 12px 20px;
     background: #1a1e24;
     border-radius: 8px;
     border: 1px solid #2a2f38;
     transition: all 0.3s;
-    gap: 15px;                  /* Единый отступ между элементами */
+    gap: 15px;
+    flex-wrap: wrap;              /* чтобы на узких экранах переносилось */
 }
 
 .site-item:hover {
@@ -384,12 +385,13 @@ header {
     min-width: 140px;
     color: #fff;
     font-size: 14px;
+    flex-shrink: 0;               /* запрещаем сжатие */
 }
 
 .squares {
     display: flex;
     gap: 6px;
-    flex-shrink: 0;             /* Запрещаем сжатие */
+    flex-shrink: 0;               /* не даём сжиматься */
 }
 
 .square {
@@ -432,9 +434,10 @@ header {
 .site-item span:not(.site-name) {
     font-size: 12px;
     color: #a0a0a0;
-    line-height: 32px;           /* Равняем по высоте квадратика */
-    white-space: nowrap;         /* Запрещаем перенос */
-    margin: 0 5px;               /* Небольшой отступ по бокам */
+    line-height: 32px;
+    white-space: nowrap;
+    margin-left: auto;             /* прижимаем к правому краю */
+    margin-right: 10px;
 }
 
 /* Кнопка "+" */
