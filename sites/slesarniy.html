@@ -6,7 +6,7 @@
     <title>MasterX - Слесарный участок</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        /* ========== СТИЛИ (полностью скопированы из tokarniy.html) ========== */
+        /* ========== СТИЛИ ДЛЯ СТРАНИЦЫ СЛЕСАРНОГО УЧАСТКА ========== */
         .date-navigation {
             background: linear-gradient(135deg, #1a1e24, #0f1217);
             padding: 15px 25px;
@@ -457,7 +457,7 @@
             </div>
         </div>
 
-        <!-- ФИЛЬТРЫ (без кнопки "Отладка") -->
+        <!-- ФИЛЬТРЫ -->
         <div class="filter-section">
             <select id="statusFilter" class="search-box" style="width: auto; padding: 6px 10px;">
                 <option value="all">Все задачи</option>
@@ -501,6 +501,7 @@
 
     <script>
         // ============== ОПЕРАЦИИ ДЛЯ СЛЕСАРНОГО УЧАСТКА ==============
+        // Данные из файла ClusterX - Техкарта_Слесарный.csv
         const slesarniyOperations = {
             'XRAY 1': [
                 'Нарезка резьбы Корпус+V',
@@ -1113,8 +1114,455 @@
             ]
         };
 
-        // Дальше идет полный код из токарного участка (функции loadTasks, createTaskCard и т.д.)
-        // ... (полностью копируется из tokarniy.html, начиная с проверки TaskManager)
+        // ============== ИНИЦИАЛИЗАЦИЯ ==============
+        if (typeof TaskManager === 'undefined') {
+            console.error('❌ TaskManager не загружен! Проверьте подключение task-manager.js');
+            document.getElementById('tasksList').innerHTML = `
+                <div class="no-tasks">
+                    <p style="font-size: 18px;">❌ Ошибка загрузки</p>
+                    <p style="color: #666;">Не удалось загрузить менеджер задач</p>
+                </div>
+            `;
+        } else {
+            // Создаем экземпляр TaskManager для слесарного участка
+            const taskManager = new TaskManager('slesarniy', slesarniyOperations);
+            let currentFilter = 'all';
+            
+            let _historyTimer = null;
+            let _loadTimer = null;
+            
+            window.taskManager = taskManager;
+            
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('✅ Страница слесарного участка загружена');
+                updateDateDisplay();
+                loadTasks();
+                
+                window.addEventListener('taskStatusChanged', function() {
+                    if (_loadTimer) clearTimeout(_loadTimer);
+                    _loadTimer = setTimeout(() => {
+                        loadTasks();
+                    }, 100);
+                });
+                
+                window.addEventListener('taskHistoryChanged', function(e) {
+                    if (e.detail.siteType === 'slesarniy') {
+                        console.log('🔄 Изменение истории для слесарного участка');
+                        if (_historyTimer) clearTimeout(_historyTimer);
+                        _historyTimer = setTimeout(() => {
+                            loadTasks();
+                        }, 200);
+                    }
+                });
+                
+                window.addEventListener('storage', function(e) {
+                    if (e.key === 'masterx_orders' || (e.key && e.key.startsWith('tasks_slesarniy_'))) {
+                        console.log('🔄 Изменение в localStorage');
+                        if (_loadTimer) clearTimeout(_loadTimer);
+                        _loadTimer = setTimeout(() => {
+                            taskManager.loadData();
+                            loadTasks();
+                        }, 100);
+                    }
+                });
+            });
+            
+            // ============== НАВИГАЦИЯ ПО ДАТАМ ==============
+            window.changeDate = function(action) {
+                switch(action) {
+                    case 'prev': 
+                        taskManager.prevDay(); 
+                        break;
+                    case 'next': 
+                        taskManager.nextDay(); 
+                        break;
+                    case 'today': 
+                        taskManager.today(); 
+                        break;
+                }
+                updateDateDisplay();
+                loadTasks();
+            };
+            
+            function updateDateDisplay() {
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                const dateStr = taskManager.currentDate.toLocaleDateString('ru-RU', options);
+                const isToday = taskManager.formatDate(taskManager.currentDate) === taskManager.formatDate(new Date());
+                
+                document.getElementById('currentDateDisplay').innerHTML = `
+                    ${dateStr} ${!isToday ? '<span class="history-indicator">(история)</span>' : ''}
+                `;
+            }
+            
+            // ============== ФИЛЬТРАЦИЯ ==============
+            window.applyFilters = function() {
+                currentFilter = document.getElementById('statusFilter').value;
+                loadTasks();
+            };
+            
+            // ============== ЗАГРУЗКА ЗАДАЧ ==============
+            function loadTasks() {
+                console.log('loadTasks вызвана');
+                const tasksList = document.getElementById('tasksList');
+                
+                taskManager.loadData();
+                let tasks = taskManager.getTasksByStatus(currentFilter);
+                
+                const stats = taskManager.getStats();
+                document.getElementById('totalTasks').textContent = stats.total;
+                document.getElementById('tasksInProgress').textContent = stats.inProgress;
+                document.getElementById('tasksCompleted').textContent = stats.completed;
+                
+                tasksList.innerHTML = '';
+                
+                if (tasks.length === 0) {
+                    tasksList.innerHTML = `
+                        <div class="no-tasks">
+                            <p style="font-size: 16px;">📭 Нет задач на этот день</p>
+                            <p style="color: #666; font-size: 13px;">Выберите другую дату или создайте заказ</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Группируем по заказам
+                const byOrder = {};
+                tasks.forEach(task => {
+                    if (!byOrder[task.orderId]) {
+                        byOrder[task.orderId] = {
+                            number: task.orderNumber,
+                            tasks: []
+                        };
+                    }
+                    byOrder[task.orderId].tasks.push(task);
+                });
+                
+                Object.values(byOrder).forEach(order => {
+                    const orderDiv = document.createElement('div');
+                    orderDiv.className = 'order-card';
+                    
+                    // Заголовок заказа (кликабельный)
+                    const header = document.createElement('div');
+                    header.className = 'order-header';
+                    header.innerHTML = `
+                        <h3>📦 Заказ №${order.number}</h3>
+                        <span class="collapse-icon">▼</span>
+                    `;
+                    
+                    // Контент заказа
+                    const content = document.createElement('div');
+                    content.className = 'order-content';
+                    
+                    // Группируем по изделиям
+                    const byProduct = {};
+                    order.tasks.forEach(task => {
+                        const key = task.product;
+                        if (!byProduct[key]) {
+                            byProduct[key] = {
+                                product: task.product,
+                                size: task.size,
+                                totalQuantity: task.totalQuantity,
+                                tasks: []
+                            };
+                        }
+                        byProduct[key].tasks.push(task);
+                    });
+                    
+                    Object.values(byProduct).forEach(product => {
+                        const productInfo = document.createElement('div');
+                        productInfo.className = 'product-info';
+                        productInfo.innerHTML = `
+                            <strong>${product.product}</strong> | 
+                            Размер: ${product.size || 'Стандартный'} | 
+                            Всего: ${product.totalQuantity} шт
+                        `;
+                        content.appendChild(productInfo);
+                        
+                        product.tasks.sort((a, b) => a.index - b.index);
+                        
+                        product.tasks.forEach(task => {
+                            content.appendChild(createTaskCard(task));
+                        });
+                    });
+                    
+                    header.addEventListener('click', function(e) {
+                        if (e.target.tagName === 'BUTTON') return;
+                        content.classList.toggle('collapsed');
+                        header.classList.toggle('collapsed');
+                    });
+                    
+                    orderDiv.appendChild(header);
+                    orderDiv.appendChild(content);
+                    tasksList.appendChild(orderDiv);
+                });
+            }
+            
+            // ============== СОЗДАНИЕ КАРТОЧКИ ЗАДАЧИ ==============
+            function createTaskCard(task) {
+                const card = document.createElement('div');
+                card.className = `task-card ${task.status === 'completed' ? 'completed' : ''}`;
+                card.dataset.taskId = task.id;
+                
+                // Заголовок операции
+                const header = document.createElement('div');
+                header.className = 'task-header';
+                header.innerHTML = `
+                    <span class="task-title">
+                        ${task.operation}
+                        ${task.isExtra ? '<span class="extra-task-badge">Доп.</span>' : ''}
+                    </span>
+                `;
+                card.appendChild(header);
+                
+                // Описание (для доп. задач)
+                if (task.isExtra && task.description) {
+                    const desc = document.createElement('div');
+                    desc.className = 'task-description';
+                    desc.textContent = task.description;
+                    card.appendChild(desc);
+                }
+                
+                // Прогресс
+                const progress = document.createElement('div');
+                progress.className = 'task-progress';
+                progress.textContent = `Выполнено: ${task.completedQuantity}/${task.totalQuantity} шт`;
+                card.appendChild(progress);
+                
+                // Предупреждение, если назначено больше нормы
+                const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
+                if (totalAssigned > task.totalQuantity) {
+                    const warning = document.createElement('div');
+                    warning.className = 'warning-message';
+                    warning.textContent = `⚠️ Назначено ${totalAssigned} из ${task.totalQuantity}`;
+                    card.appendChild(warning);
+                }
+                
+                // Заголовки колонок
+                const headers = document.createElement('div');
+                headers.className = 'executor-header';
+                headers.innerHTML = `
+                    <span>ФИО</span>
+                    <span>Кол-во</span>
+                    <span>Статус</span>
+                    <span></span>
+                `;
+                card.appendChild(headers);
+                
+                // Список исполнителей
+                const executorList = document.createElement('div');
+                executorList.className = 'executor-list';
+                executorList.id = `executors-${task.id}`;
+                
+                if (task.executors && task.executors.length > 0) {
+                    task.executors.forEach(executor => {
+                        executorList.appendChild(createExecutorItem(task, executor));
+                    });
+                } else {
+                    const noExecutors = document.createElement('p');
+                    noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 12px;';
+                    noExecutors.textContent = 'Нет исполнителей';
+                    executorList.appendChild(noExecutors);
+                }
+                card.appendChild(executorList);
+                
+                // Контейнер для кнопки добавления и формы
+                const actionContainer = document.createElement('div');
+                actionContainer.className = 'action-container';
+                
+                // Кнопка добавления исполнителя
+                if (task.status !== 'completed') {
+                    const addBtn = document.createElement('button');
+                    addBtn.className = 'btn-add-executor';
+                    addBtn.textContent = '+ Добавить исполнителя';
+                    addBtn.onclick = () => showAddExecutorForm(task, actionContainer);
+                    actionContainer.appendChild(addBtn);
+                }
+                
+                card.appendChild(actionContainer);
+                
+                // Кнопка ГОТОВО – всегда в самом низу
+                const readyBtn = document.createElement('button');
+                readyBtn.className = 'btn-ready';
+                readyBtn.textContent = '✅ ГОТОВО';
+                readyBtn.disabled = task.status === 'completed';
+                readyBtn.onclick = () => completeTask(task.id);
+                card.appendChild(readyBtn);
+                
+                return card;
+            }
+            
+            // ============== СОЗДАНИЕ ЭЛЕМЕНТА ИСПОЛНИТЕЛЯ ==============
+            function createExecutorItem(task, executor) {
+                const div = document.createElement('div');
+                div.className = `executor-item ${executor.status === 'completed' ? 'completed' : ''}`;
+                div.dataset.executorId = executor.id;
+                
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.className = 'executor-name';
+                nameInput.value = executor.name;
+                nameInput.placeholder = 'ФИО';
+                nameInput.disabled = task.status === 'completed';
+                nameInput.onchange = function(e) {
+                    console.log('Имя изменено на:', e.target.value);
+                };
+                div.appendChild(nameInput);
+                
+                const quantityInput = document.createElement('input');
+                quantityInput.type = 'number';
+                quantityInput.className = 'executor-quantity';
+                quantityInput.value = executor.quantity || 0;
+                quantityInput.min = 0;
+                quantityInput.max = task.totalQuantity;
+                quantityInput.disabled = task.status === 'completed';
+                quantityInput.onchange = function(e) {
+                    const val = parseInt(e.target.value) || 0;
+                    taskManager.updateExecutorQuantity(task.id, executor.id, val);
+                    setTimeout(() => loadTasks(), 200);
+                };
+                div.appendChild(quantityInput);
+                
+                const workBtn = document.createElement('button');
+                workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''}`;
+                workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
+                workBtn.disabled = task.status === 'completed';
+                workBtn.onclick = function() {
+                    const newStatus = workBtn.classList.contains('active') ? 'pending' : 'in_progress';
+                    taskManager.updateExecutorStatus(task.id, executor.id, newStatus);
+                    workBtn.classList.toggle('active');
+                    workBtn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
+                    setTimeout(() => loadTasks(), 200);
+                };
+                div.appendChild(workBtn);
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn btn-danger btn-sm';
+                removeBtn.innerHTML = '✕';
+                removeBtn.onclick = function() {
+                    if (confirm('Удалить этого исполнителя?')) {
+                        taskManager.removeExecutor(task.id, executor.id);
+                        setTimeout(() => loadTasks(), 200);
+                    }
+                };
+                div.appendChild(removeBtn);
+                
+                return div;
+            }
+            
+            // ============== ФОРМА ДОБАВЛЕНИЯ ИСПОЛНИТЕЛЯ ==============
+            function showAddExecutorForm(task, actionContainer) {
+                console.log('showAddExecutorForm вызвана для задачи:', task.id);
+                
+                // Удаляем старую форму, если есть
+                const oldForm = actionContainer.querySelector('.new-executor-form');
+                if (oldForm) oldForm.remove();
+                
+                const formDiv = document.createElement('div');
+                formDiv.className = 'new-executor-form';
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = 'ФИО исполнителя';
+                
+                const addBtn = document.createElement('button');
+                addBtn.className = 'btn btn-success';
+                addBtn.textContent = 'Добавить';
+                addBtn.onclick = () => {
+                    const name = input.value.trim();
+                    if (!name) {
+                        alert('Введите ФИО исполнителя');
+                        return;
+                    }
+                    
+                    const result = taskManager.addExecutor(task.id, name);
+                    if (result) {
+                        formDiv.remove();
+                        setTimeout(() => loadTasks(), 100);
+                    } else {
+                        alert('Не удалось добавить исполнителя. Возможно, он уже существует.');
+                    }
+                };
+                
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'btn btn-danger';
+                cancelBtn.textContent = 'Отмена';
+                cancelBtn.onclick = () => formDiv.remove();
+                
+                formDiv.appendChild(input);
+                formDiv.appendChild(addBtn);
+                formDiv.appendChild(cancelBtn);
+                
+                // Вставляем форму в контейнер действий
+                actionContainer.appendChild(formDiv);
+            }
+            
+            // ============== ДЕЙСТВИЯ С ЗАДАЧАМИ ==============
+            window.toggleWorkStatus = function(taskId, executorId, btn) {
+                const newStatus = btn.classList.contains('active') ? 'pending' : 'in_progress';
+                taskManager.updateExecutorStatus(taskId, executorId, newStatus);
+                btn.classList.toggle('active');
+                btn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
+                setTimeout(() => loadTasks(), 200);
+            };
+            
+            window.removeExecutor = function(taskId, executorId) {
+                if (confirm('Удалить этого исполнителя?')) {
+                    taskManager.removeExecutor(taskId, executorId);
+                    setTimeout(() => loadTasks(), 200);
+                }
+            };
+            
+            window.completeTask = function(taskId) {
+                const task = taskManager.tasks.find(t => t.id === taskId);
+                if (!task) return;
+                
+                const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
+                
+                let message = 'Завершить эту задачу?';
+                if (totalAssigned < task.totalQuantity) {
+                    message = `Назначено только ${totalAssigned} из ${task.totalQuantity} шт. Продолжить?`;
+                } else if (totalAssigned > task.totalQuantity) {
+                    message = `Назначено ${totalAssigned} из ${task.totalQuantity} шт. Продолжить?`;
+                }
+                
+                if (confirm(message)) {
+                    taskManager.completeTask(taskId);
+                    setTimeout(() => loadTasks(), 200);
+                }
+            };
+            
+            // ============== ОЧИСТКА ИСТОРИИ ==============
+            window.clearHistory = function() {
+                if (!confirm('Очистить историю задач для текущей даты?')) return;
+                const dateStr = taskManager.formatDate(taskManager.currentDate);
+                localStorage.removeItem(`tasks_slesarniy_${dateStr}`);
+                taskManager.loadData();
+                loadTasks();
+            };
+            
+            // ============== ЭКСПОРТ В EXCEL ==============
+            window.exportToExcel = function() {
+                const tasks = taskManager.tasks;
+                const dateStr = taskManager.formatDate(taskManager.currentDate);
+                
+                let csv = "Заказ,Изделие,Операция,Исполнитель,Количество,Статус\n";
+                tasks.forEach(task => {
+                    if (task.executors.length > 0) {
+                        task.executors.forEach(executor => {
+                            csv += `${task.orderNumber},${task.product},${task.operation},${executor.name},${executor.quantity},${executor.status}\n`;
+                        });
+                    } else {
+                        csv += `${task.orderNumber},${task.product},${task.operation},Нет,0,${task.status}\n`;
+                    }
+                });
+                
+                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `slesarniy_${dateStr}.csv`;
+                link.click();
+            };
+        }
     </script>
 </body>
 </html>
