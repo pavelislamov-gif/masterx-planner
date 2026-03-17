@@ -29,28 +29,53 @@
         .order-card {
             background: #1a1e24;
             border-radius: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;  /* уменьшено */
             border: 1px solid #2a2f38;
             overflow: hidden;
         }
         
         .order-header {
-            padding: 15px 20px;
+            padding: 12px 20px;    /* уменьшено */
             background: #232830;
             border-bottom: 1px solid #2a2f38;
+            cursor: pointer;        /* добавляем курсор */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
         .order-header h3 {
             color: #fff;
-            font-size: 18px;
+            font-size: 16px;        /* чуть меньше */
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        .order-header .collapse-icon {
+            color: #a0a0a0;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+        
+        .order-header.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+        
+        .order-content {
+            padding: 15px 20px;     /* уменьшено */
+            transition: all 0.2s;
+        }
+        
+        .order-content.collapsed {
+            display: none;
         }
         
         .product-info {
-            padding: 12px 20px;
+            padding: 10px 15px;     /* уменьшено */
             background: #15191f;
             border-bottom: 1px solid #2a2f38;
             color: #a0a0a0;
-            font-size: 14px;
+            font-size: 13px;        /* меньше */
         }
         
         .product-info strong {
@@ -58,7 +83,7 @@
         }
         
         .task-card {
-            padding: 15px 20px;
+            padding: 12px 15px;     /* уменьшено */
             border-bottom: 1px solid #2a2f38;
             transition: all 0.3s;
         }
@@ -77,20 +102,20 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;      /* меньше */
         }
         
         .task-title {
-            font-size: 16px;
+            font-size: 14px;          /* меньше */
             font-weight: 600;
             color: #fff;
         }
         
         .task-progress {
-            font-size: 13px;
+            font-size: 12px;          /* меньше */
             color: #4cd964;
-            margin-bottom: 15px;
-            padding: 5px 10px;
+            margin-bottom: 10px;      /* меньше */
+            padding: 4px 8px;
             background: #1e232b;
             border-radius: 20px;
             display: inline-block;
@@ -100,8 +125,8 @@
             display: flex;
             gap: 10px;
             padding: 0 10px;
-            margin-bottom: 8px;
-            font-size: 12px;
+            margin-bottom: 6px;
+            font-size: 11px;          /* меньше */
             color: #a0a0a0;
         }
         
@@ -114,10 +139,10 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 8px 10px;
+            padding: 6px 10px;       /* меньше */
             background: #15191f;
             border-radius: 6px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;       /* меньше */
             border: 1px solid #2a2f38;
         }
         
@@ -128,7 +153,7 @@
             border: 1px solid #2a2f38;
             border-radius: 4px;
             color: #fff;
-            font-size: 13px;
+            font-size: 12px;          /* меньше */
         }
         
         .executor-quantity {
@@ -139,19 +164,19 @@
             border-radius: 4px;
             color: #fff;
             text-align: center;
-            font-size: 13px;
+            font-size: 12px;
         }
         
         .btn-work {
             background: #ffc107;
             color: #000;
-            padding: 4px 10px;
+            padding: 4px 8px;         /* меньше */
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;          /* меньше */
             transition: all 0.3s;
-            width: 80px;
+            width: 70px;              /* чуть уже */
             font-weight: 600;
         }
         
@@ -174,31 +199,28 @@
         .btn-add-executor {
             background: #6c757d;
             color: white;
-            padding: 6px 12px;
+            padding: 5px 10px;        /* меньше */
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
-            margin: 10px 0;
-            transition: all 0.3s;
-            width: 160px;
+            font-size: 11px;           /* меньше */
+            margin: 8px 0;             /* меньше */
+            width: 140px;
         }
         
         .btn-add-executor:hover {
             background: #5a6268;
         }
         
-        /* Контейнер для кнопки добавления и формы */
         .action-container {
-            margin: 10px 0;
+            margin: 8px 0;             /* меньше */
         }
         
-        /* Форма добавления исполнителя */
         .new-executor-form {
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-top: 10px;
+            margin-top: 8px;
             padding: 8px;
             background: #15191f;
             border: 1px solid #2a2f38;
@@ -207,35 +229,34 @@
         }
         
         .new-executor-form input {
-            width: 180px;
+            width: 160px;              /* чуть меньше */
             flex: none;
-            padding: 6px 10px;
+            padding: 5px 8px;
             background: #1e232b;
             border: 1px solid #2a2f38;
             border-radius: 4px;
             color: #fff;
-            font-size: 13px;
+            font-size: 12px;
         }
         
         .new-executor-form .btn {
-            padding: 6px 14px;
-            font-size: 13px;
+            padding: 5px 12px;
+            font-size: 12px;
             white-space: nowrap;
         }
         
-        /* Кнопка ГОТОВО – всегда внизу */
         .btn-ready {
             background: #28a745;
             color: white;
-            padding: 6px 20px;
+            padding: 5px 16px;        /* меньше */
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            margin: 15px 0 0 0;
+            margin: 10px 0 0 0;
             width: auto;
-            min-width: 120px;
+            min-width: 100px;          /* меньше */
             display: inline-block;
             transition: all 0.3s;
         }
@@ -252,17 +273,17 @@
         .extra-task-badge {
             background: #ff3b3b;
             color: white;
-            padding: 2px 8px;
+            padding: 2px 6px;
             border-radius: 20px;
-            font-size: 11px;
-            margin-left: 10px;
+            font-size: 10px;
+            margin-left: 8px;
         }
         
         .task-description {
             color: #a0a0a0;
-            font-size: 12px;
-            margin: 5px 0 10px 0;
-            padding: 8px;
+            font-size: 11px;
+            margin: 5px 0 8px 0;
+            padding: 6px;
             background: #15191f;
             border-radius: 4px;
             border-left: 3px solid #ff3b3b;
@@ -270,7 +291,7 @@
         
         .no-tasks {
             text-align: center;
-            padding: 50px;
+            padding: 40px;
             background: #1a1e24;
             border-radius: 12px;
             color: #a0a0a0;
@@ -278,7 +299,7 @@
         }
         
         .history-indicator {
-            font-size: 13px;
+            font-size: 12px;
             color: #a0a0a0;
             margin-left: 10px;
         }
@@ -287,10 +308,10 @@
             background: #ff3b3b20;
             border: 1px solid #ff3b3b;
             color: #ff3b3b;
-            padding: 8px;
+            padding: 6px;
             border-radius: 4px;
-            margin: 10px 0;
-            font-size: 12px;
+            margin: 8px 0;
+            font-size: 11px;
         }
         
         .filter-section {
@@ -302,11 +323,11 @@
         }
         
         .search-box {
-            padding: 8px 15px;
+            padding: 6px 12px;
             background: #1a1e24;
             border: 1px solid #2a2f38;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 12px;
             color: #e0e0e0;
         }
         
@@ -314,7 +335,7 @@
             display: flex;
             gap: 15px;
             margin-bottom: 20px;
-            padding: 15px;
+            padding: 12px 15px;
             background: linear-gradient(135deg, #1a1e24, #0f1217);
             border-radius: 10px;
             border: 1px solid #2a2f38;
@@ -323,23 +344,23 @@
         .stat-item {
             flex: 1;
             text-align: center;
-            padding: 10px;
+            padding: 8px;
             background: #15191f;
             border-radius: 6px;
             border: 1px solid #2a2f38;
         }
         
         .stat-value {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
             background: linear-gradient(135deg, #00d4ff, #0077ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
         
         .stat-label {
-            font-size: 12px;
+            font-size: 11px;
             color: #a0a0a0;
         }
         
@@ -366,7 +387,7 @@
         
         .btn-sm {
             padding: 3px 6px;
-            font-size: 11px;
+            font-size: 10px;
         }
         
         .btn-danger {
@@ -374,7 +395,7 @@
             color: white;
             border: none;
             padding: 3px 6px;
-            font-size: 11px;
+            font-size: 10px;
         }
         
         .btn-danger:hover {
@@ -422,7 +443,7 @@
                     Master<span class="x-red">X</span>
                 </div>
             </div>
-            <h1 style="margin:0; color: white; font-size:18px;">Токарный участок</h1>
+            <h1 style="margin:0; color: white; font-size:18px;">🔧 Токарный участок</h1>
         </header>
 
         <!-- НАВИГАЦИЯ ПО ДАТАМ -->
@@ -690,11 +711,19 @@
                     const orderDiv = document.createElement('div');
                     orderDiv.className = 'order-card';
                     
+                    // Заголовок заказа (кликабельный)
                     const header = document.createElement('div');
                     header.className = 'order-header';
-                    header.innerHTML = `<h3 style="font-size: 16px;">📦 Заказ №${order.number}</h3>`;
-                    orderDiv.appendChild(header);
+                    header.innerHTML = `
+                        <h3>📦 Заказ №${order.number}</h3>
+                        <span class="collapse-icon">▼</span>
+                    `;
                     
+                    // Контент заказа (список задач)
+                    const content = document.createElement('div');
+                    content.className = 'order-content';
+                    
+                    // Группируем по изделиям внутри этого заказа
                     const byProduct = {};
                     order.tasks.forEach(task => {
                         const key = task.product;
@@ -717,15 +746,25 @@
                             Размер: ${product.size || 'Стандартный'} | 
                             Всего: ${product.totalQuantity} шт
                         `;
-                        orderDiv.appendChild(productInfo);
+                        content.appendChild(productInfo);
                         
                         product.tasks.sort((a, b) => a.index - b.index);
                         
                         product.tasks.forEach(task => {
-                            orderDiv.appendChild(createTaskCard(task));
+                            content.appendChild(createTaskCard(task));
                         });
                     });
                     
+                    // Добавляем обработчик клика на заголовок
+                    header.addEventListener('click', function(e) {
+                        // Чтобы клик не срабатывал, если нажали на кнопку внутри (если будут)
+                        if (e.target.tagName === 'BUTTON') return;
+                        content.classList.toggle('collapsed');
+                        header.classList.toggle('collapsed');
+                    });
+                    
+                    orderDiv.appendChild(header);
+                    orderDiv.appendChild(content);
                     tasksList.appendChild(orderDiv);
                 });
             }
@@ -740,7 +779,7 @@
                 const header = document.createElement('div');
                 header.className = 'task-header';
                 header.innerHTML = `
-                    <span class="task-title" style="font-size: 14px;">
+                    <span class="task-title">
                         ${task.operation}
                         ${task.isExtra ? '<span class="extra-task-badge">Доп.</span>' : ''}
                     </span>
@@ -792,7 +831,7 @@
                     });
                 } else {
                     const noExecutors = document.createElement('p');
-                    noExecutors.style.cssText = 'color: #a0a0a0; padding: 10px; text-align: center; font-style: italic; font-size: 12px;';
+                    noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 12px;';
                     noExecutors.textContent = 'Нет исполнителей';
                     executorList.appendChild(noExecutors);
                 }
@@ -925,7 +964,6 @@
                 formDiv.appendChild(addBtn);
                 formDiv.appendChild(cancelBtn);
                 
-                // Вставляем форму в контейнер действий (после кнопки добавления)
                 actionContainer.appendChild(formDiv);
             }
             
@@ -993,8 +1031,6 @@
                 link.download = `tokarniy_${dateStr}.csv`;
                 link.click();
             };
-            
-            // Функция debugStorage удалена, так как кнопка отладки убрана
         }
     </script>
 </body>
