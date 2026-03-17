@@ -414,7 +414,7 @@
 </head>
 <body>
     <div class="container">
-        <!-- ШАПКА -->
+        <!-- ШАПКА (без кнопки "На главную") -->
         <header>
             <div class="logo-container">
                 <img src="../images/logo.png" alt="MasterX Logo" class="logo-img" onerror="this.style.display='none'">
@@ -423,7 +423,6 @@
                 </div>
             </div>
             <h1 style="margin:0; color: white; font-size:18px;">🔧 Токарный участок</h1>
-            <a href="../index.html" class="btn btn-primary" style="padding: 6px 12px; font-size: 13px;">🏠 На главную</a>
         </header>
 
         <!-- НАВИГАЦИЯ ПО ДАТАМ -->
@@ -437,7 +436,7 @@
             </div>
         </div>
 
-        <!-- ФИЛЬТРЫ -->
+        <!-- ФИЛЬТРЫ (без кнопки "Отладка") -->
         <div class="filter-section">
             <select id="statusFilter" class="search-box" style="width: auto; padding: 6px 10px;">
                 <option value="all">Все задачи</option>
@@ -447,7 +446,6 @@
             </select>
             <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="applyFilters()">🔍 Применить</button>
             <button class="btn btn-warning" style="padding: 6px 12px; font-size: 12px;" onclick="clearHistory()">🗑️ Очистить историю</button>
-            <button class="btn btn-info" style="padding: 6px 12px; font-size: 12px;" onclick="debugStorage()">🔍 Отладка</button>
         </div>
 
         <!-- СТАТИСТИКА -->
@@ -996,27 +994,7 @@
                 link.click();
             };
             
-            window.debugStorage = function() {
-                console.log('=== ХРАНИЛИЩЕ LOCALSTORAGE ===');
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (key.startsWith('tasks_tokarniy_')) {
-                        const value = localStorage.getItem(key);
-                        try {
-                            const tasks = JSON.parse(value);
-                            console.log(`${key}: ${tasks.length} задач`);
-                            tasks.forEach(t => {
-                                console.log(`  ${t.id}: ${t.executors?.length || 0} исп.`);
-                            });
-                        } catch (e) {
-                            console.log(`${key}: ошибка парсинга`);
-                        }
-                    }
-                }
-                if (taskManager.debugHistory) {
-                    taskManager.debugHistory();
-                }
-            };
+            // Функция debugStorage удалена, так как кнопка отладки убрана
         }
     </script>
 </body>
