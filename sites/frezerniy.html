@@ -5,27 +5,944 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MasterX - Фрезерный участок</title>
     <link rel="stylesheet" href="../css/style.css">
-    <style> /* те же стили */ </style>
+    <style>
+        /* ========== СТИЛИ (полностью скопированы из tokarniy.html) ========== */
+        .date-navigation {
+            background: linear-gradient(135deg, #1a1e24, #0f1217);
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid #2a2f38;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .order-card {
+            background: #1a1e24;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #2a2f38;
+            overflow: hidden;
+        }
+        
+        .order-header {
+            padding: 12px 20px;
+            background: #232830;
+            border-bottom: 1px solid #2a2f38;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .order-header h3 {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        .order-header .collapse-icon {
+            color: #a0a0a0;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+        
+        .order-header.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+        
+        .order-content {
+            padding: 15px 20px;
+            transition: all 0.2s;
+        }
+        
+        .order-content.collapsed {
+            display: none;
+        }
+        
+        .product-info {
+            padding: 10px 15px;
+            background: #15191f;
+            border-bottom: 1px solid #2a2f38;
+            color: #a0a0a0;
+            font-size: 13px;
+        }
+        
+        .product-info strong {
+            color: #ff3b3b;
+        }
+        
+        .task-card {
+            padding: 12px 15px;
+            border-bottom: 1px solid #2a2f38;
+            transition: all 0.3s;
+        }
+        
+        .task-card:last-child {
+            border-bottom: none;
+        }
+        
+        .task-card.completed {
+            opacity: 0.8;
+            background: #1a2a1a;
+            border-left: 3px solid #2ecc71;
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .task-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .task-progress {
+            font-size: 12px;
+            color: #4cd964;
+            margin-bottom: 10px;
+            padding: 4px 8px;
+            background: #1e232b;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .executor-header {
+            display: flex;
+            gap: 10px;
+            padding: 0 10px;
+            margin-bottom: 6px;
+            font-size: 11px;
+            color: #a0a0a0;
+        }
+        
+        .executor-header span:nth-child(1) { width: 140px; }
+        .executor-header span:nth-child(2) { width: 70px; text-align: center; }
+        .executor-header span:nth-child(3) { width: 80px; text-align: center; }
+        .executor-header span:nth-child(4) { width: 30px; }
+        
+        .executor-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 10px;
+            background: #15191f;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            border: 1px solid #2a2f38;
+        }
+        
+        .executor-name {
+            width: 140px;
+            padding: 4px 8px;
+            background: #1e232b;
+            border: 1px solid #2a2f38;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 12px;
+        }
+        
+        .executor-quantity {
+            width: 70px;
+            padding: 4px;
+            background: #1e232b;
+            border: 1px solid #2a2f38;
+            border-radius: 4px;
+            color: #fff;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .btn-work {
+            background: #ffc107;
+            color: #000;
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.3s;
+            width: 70px;
+            font-weight: 600;
+        }
+        
+        .btn-work.active {
+            background: #fd7e14;
+            color: white;
+        }
+        
+        .btn-work.completed {
+            background: #28a745;
+            color: white;
+            cursor: not-allowed;
+        }
+        
+        .btn-work:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-add-executor {
+            background: #6c757d;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            margin: 8px 0;
+            width: 140px;
+        }
+        
+        .btn-add-executor:hover {
+            background: #5a6268;
+        }
+        
+        .action-container {
+            margin: 8px 0;
+        }
+        
+        .new-executor-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            padding: 8px;
+            background: #15191f;
+            border: 1px solid #2a2f38;
+            border-radius: 6px;
+            flex-wrap: wrap;
+        }
+        
+        .new-executor-form input {
+            width: 160px;
+            flex: none;
+            padding: 5px 8px;
+            background: #1e232b;
+            border: 1px solid #2a2f38;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 12px;
+        }
+        
+        .new-executor-form .btn {
+            padding: 5px 12px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        
+        .btn-ready {
+            background: #28a745;
+            color: white;
+            padding: 5px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 10px 0 0 0;
+            width: auto;
+            min-width: 100px;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        
+        .btn-ready:hover:not(:disabled) {
+            background: #218838;
+        }
+        
+        .btn-ready:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .extra-task-badge {
+            background: #ff3b3b;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 20px;
+            font-size: 10px;
+            margin-left: 8px;
+        }
+        
+        .task-description {
+            color: #a0a0a0;
+            font-size: 11px;
+            margin: 5px 0 8px 0;
+            padding: 6px;
+            background: #15191f;
+            border-radius: 4px;
+            border-left: 3px solid #ff3b3b;
+        }
+        
+        .no-tasks {
+            text-align: center;
+            padding: 40px;
+            background: #1a1e24;
+            border-radius: 12px;
+            color: #a0a0a0;
+            border: 1px solid #2a2f38;
+        }
+        
+        .history-indicator {
+            font-size: 12px;
+            color: #a0a0a0;
+            margin-left: 10px;
+        }
+        
+        .warning-message {
+            background: #ff3b3b20;
+            border: 1px solid #ff3b3b;
+            color: #ff3b3b;
+            padding: 6px;
+            border-radius: 4px;
+            margin: 8px 0;
+            font-size: 11px;
+        }
+        
+        .filter-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            padding: 6px 12px;
+            background: #1a1e24;
+            border: 1px solid #2a2f38;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #e0e0e0;
+        }
+        
+        .order-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #1a1e24, #0f1217);
+            border-radius: 10px;
+            border: 1px solid #2a2f38;
+        }
+        
+        .stat-item {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            background: #15191f;
+            border-radius: 6px;
+            border: 1px solid #2a2f38;
+        }
+        
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d4ff, #0077ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2px;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #a0a0a0;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #a0a0a0;
+        }
+        
+        .spinner {
+            width: 30px;
+            height: 30px;
+            margin: 0 auto 10px;
+            border: 2px solid #2a2f38;
+            border-top: 2px solid #ff3b3b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .btn-sm {
+            padding: 3px 6px;
+            font-size: 10px;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 3px 6px;
+            font-size: 10px;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+            border: none;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #000;
+            border: none;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+            border: none;
+        }
+        
+        .btn-info:hover {
+            background: #138496;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <header>... <h1>Фрезерный участок</h1> ...</header>
-        <!-- ... навигация, фильтры, статистика ... -->
-        <div id="tasksList">...</div>
+        <!-- ШАПКА -->
+        <header>
+            <div class="logo-container">
+                <img src="../images/logo.png" alt="MasterX Logo" class="logo-img" onerror="this.style.display='none'">
+                <div class="logo-text">
+                    Master<span class="x-red">X</span>
+                </div>
+            </div>
+            <h1 style="margin:0; color: white; font-size:18px;">Фрезерный участок</h1>
+        </header>
+
+        <!-- НАВИГАЦИЯ ПО ДАТАМ -->
+        <div class="date-navigation">
+            <h2 id="currentDateDisplay" style="font-size: 15px; color: #fff; margin: 0;"></h2>
+            <div class="nav-buttons">
+                <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="changeDate('prev')">← Вчера</button>
+                <button class="btn btn-success" style="padding: 6px 12px; font-size: 12px;" onclick="changeDate('today')">Сегодня</button>
+                <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="changeDate('next')">Завтра →</button>
+                <button class="btn btn-info" style="padding: 6px 12px; font-size: 12px;" onclick="exportToExcel()">📊 Excel</button>
+            </div>
+        </div>
+
+        <!-- ФИЛЬТРЫ (без отладки) -->
+        <div class="filter-section">
+            <select id="statusFilter" class="search-box" style="width: auto; padding: 6px 10px;">
+                <option value="all">Все задачи</option>
+                <option value="pending">Ожидают</option>
+                <option value="in_progress">В работе</option>
+                <option value="completed">Завершённые</option>
+            </select>
+            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="applyFilters()">🔍 Применить</button>
+            <button class="btn btn-warning" style="padding: 6px 12px; font-size: 12px;" onclick="clearHistory()">🗑️ Очистить историю</button>
+        </div>
+
+        <!-- СТАТИСТИКА -->
+        <div class="order-stats">
+            <div class="stat-item">
+                <div class="stat-value" id="totalTasks">0</div>
+                <div class="stat-label">Всего задач</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="tasksInProgress">0</div>
+                <div class="stat-label">В работе</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="tasksCompleted">0</div>
+                <div class="stat-label">Выполнено</div>
+            </div>
+        </div>
+
+        <!-- СПИСОК ЗАДАЧ -->
+        <div id="tasksList" class="tasks-list">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Загрузка задач...</p>
+            </div>
+        </div>
     </div>
+
+    <!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ -->
     <script src="../js/storage.js"></script>
     <script src="../js/data-loader.js"></script>
     <script src="../js/task-manager.js"></script>
+
     <script>
+        // ============== ОПЕРАЦИИ ДЛЯ ФРЕЗЕРНОГО УЧАСТКА ==============
         const frezerniyOperations = {
             'XRAY 6-T2 BT 220 Шторка х2': [
                 'Фрезеровка корпуса',
                 'Фрезеровка крышки',
                 'Сверление отверстий'
             ]
+            // Можно добавить операции для других продуктов по мере необходимости
         };
-        const taskManager = new TaskManager('frezerniy', frezerniyOperations);
-        // ... остальной код (аналогично слесарному)
+
+        // ============== ИНИЦИАЛИЗАЦИЯ ==============
+        if (typeof TaskManager === 'undefined') {
+            console.error('❌ TaskManager не загружен! Проверьте подключение task-manager.js');
+            document.getElementById('tasksList').innerHTML = `
+                <div class="no-tasks">
+                    <p style="font-size: 18px;">❌ Ошибка загрузки</p>
+                    <p style="color: #666;">Не удалось загрузить менеджер задач</p>
+                </div>
+            `;
+        } else {
+            const taskManager = new TaskManager('frezerniy', frezerniyOperations);
+            let currentFilter = 'all';
+            
+            let _historyTimer = null;
+            let _loadTimer = null;
+            
+            window.taskManager = taskManager;
+            
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('✅ Страница фрезерного участка загружена');
+                updateDateDisplay();
+                loadTasks();
+                
+                window.addEventListener('taskStatusChanged', function() {
+                    if (_loadTimer) clearTimeout(_loadTimer);
+                    _loadTimer = setTimeout(() => {
+                        loadTasks();
+                    }, 100);
+                });
+                
+                window.addEventListener('taskHistoryChanged', function(e) {
+                    if (e.detail.siteType === 'frezerniy') {
+                        if (_historyTimer) clearTimeout(_historyTimer);
+                        _historyTimer = setTimeout(() => {
+                            loadTasks();
+                        }, 200);
+                    }
+                });
+                
+                window.addEventListener('storage', function(e) {
+                    if (e.key === 'masterx_orders' || (e.key && e.key.startsWith('tasks_frezerniy_'))) {
+                        if (_loadTimer) clearTimeout(_loadTimer);
+                        _loadTimer = setTimeout(() => {
+                            taskManager.loadData();
+                            loadTasks();
+                        }, 100);
+                    }
+                });
+            });
+            
+            // ============== НАВИГАЦИЯ ПО ДАТАМ ==============
+            window.changeDate = function(action) {
+                switch(action) {
+                    case 'prev': 
+                        taskManager.prevDay(); 
+                        break;
+                    case 'next': 
+                        taskManager.nextDay(); 
+                        break;
+                    case 'today': 
+                        taskManager.today(); 
+                        break;
+                }
+                updateDateDisplay();
+                loadTasks();
+            };
+            
+            function updateDateDisplay() {
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                const dateStr = taskManager.currentDate.toLocaleDateString('ru-RU', options);
+                const isToday = taskManager.formatDate(taskManager.currentDate) === taskManager.formatDate(new Date());
+                
+                document.getElementById('currentDateDisplay').innerHTML = `
+                    ${dateStr} ${!isToday ? '<span class="history-indicator">(история)</span>' : ''}
+                `;
+            }
+            
+            // ============== ФИЛЬТРАЦИЯ ==============
+            window.applyFilters = function() {
+                currentFilter = document.getElementById('statusFilter').value;
+                loadTasks();
+            };
+            
+            // ============== ЗАГРУЗКА ЗАДАЧ ==============
+            function loadTasks() {
+                console.log('loadTasks вызвана');
+                const tasksList = document.getElementById('tasksList');
+                
+                taskManager.loadData();
+                let tasks = taskManager.getTasksByStatus(currentFilter);
+                
+                const stats = taskManager.getStats();
+                document.getElementById('totalTasks').textContent = stats.total;
+                document.getElementById('tasksInProgress').textContent = stats.inProgress;
+                document.getElementById('tasksCompleted').textContent = stats.completed;
+                
+                tasksList.innerHTML = '';
+                
+                if (tasks.length === 0) {
+                    tasksList.innerHTML = `
+                        <div class="no-tasks">
+                            <p style="font-size: 16px;">📭 Нет задач на этот день</p>
+                            <p style="color: #666; font-size: 13px;">Выберите другую дату или создайте заказ</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Группируем по заказам
+                const byOrder = {};
+                tasks.forEach(task => {
+                    if (!byOrder[task.orderId]) {
+                        byOrder[task.orderId] = {
+                            number: task.orderNumber,
+                            tasks: []
+                        };
+                    }
+                    byOrder[task.orderId].tasks.push(task);
+                });
+                
+                Object.values(byOrder).forEach(order => {
+                    const orderDiv = document.createElement('div');
+                    orderDiv.className = 'order-card';
+                    
+                    // Заголовок заказа (кликабельный)
+                    const header = document.createElement('div');
+                    header.className = 'order-header';
+                    header.innerHTML = `
+                        <h3>📦 Заказ №${order.number}</h3>
+                        <span class="collapse-icon">▼</span>
+                    `;
+                    
+                    // Контент заказа
+                    const content = document.createElement('div');
+                    content.className = 'order-content';
+                    
+                    // Группируем по изделиям
+                    const byProduct = {};
+                    order.tasks.forEach(task => {
+                        const key = task.product;
+                        if (!byProduct[key]) {
+                            byProduct[key] = {
+                                product: task.product,
+                                size: task.size,
+                                totalQuantity: task.totalQuantity,
+                                tasks: []
+                            };
+                        }
+                        byProduct[key].tasks.push(task);
+                    });
+                    
+                    Object.values(byProduct).forEach(product => {
+                        const productInfo = document.createElement('div');
+                        productInfo.className = 'product-info';
+                        productInfo.innerHTML = `
+                            <strong>${product.product}</strong> | 
+                            Размер: ${product.size || 'Стандартный'} | 
+                            Всего: ${product.totalQuantity} шт
+                        `;
+                        content.appendChild(productInfo);
+                        
+                        product.tasks.sort((a, b) => a.index - b.index);
+                        
+                        product.tasks.forEach(task => {
+                            content.appendChild(createTaskCard(task));
+                        });
+                    });
+                    
+                    header.addEventListener('click', function(e) {
+                        if (e.target.tagName === 'BUTTON') return;
+                        content.classList.toggle('collapsed');
+                        header.classList.toggle('collapsed');
+                    });
+                    
+                    orderDiv.appendChild(header);
+                    orderDiv.appendChild(content);
+                    tasksList.appendChild(orderDiv);
+                });
+            }
+            
+            // ============== СОЗДАНИЕ КАРТОЧКИ ЗАДАЧИ ==============
+            function createTaskCard(task) {
+                const card = document.createElement('div');
+                card.className = `task-card ${task.status === 'completed' ? 'completed' : ''}`;
+                card.dataset.taskId = task.id;
+                
+                const header = document.createElement('div');
+                header.className = 'task-header';
+                header.innerHTML = `
+                    <span class="task-title">
+                        ${task.operation}
+                        ${task.isExtra ? '<span class="extra-task-badge">Доп.</span>' : ''}
+                    </span>
+                `;
+                card.appendChild(header);
+                
+                if (task.isExtra && task.description) {
+                    const desc = document.createElement('div');
+                    desc.className = 'task-description';
+                    desc.textContent = task.description;
+                    card.appendChild(desc);
+                }
+                
+                const progress = document.createElement('div');
+                progress.className = 'task-progress';
+                progress.textContent = `Выполнено: ${task.completedQuantity}/${task.totalQuantity} шт`;
+                card.appendChild(progress);
+                
+                const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
+                if (totalAssigned > task.totalQuantity) {
+                    const warning = document.createElement('div');
+                    warning.className = 'warning-message';
+                    warning.textContent = `⚠️ Назначено ${totalAssigned} из ${task.totalQuantity}`;
+                    card.appendChild(warning);
+                }
+                
+                const headers = document.createElement('div');
+                headers.className = 'executor-header';
+                headers.innerHTML = `
+                    <span>ФИО</span>
+                    <span>Кол-во</span>
+                    <span>Статус</span>
+                    <span></span>
+                `;
+                card.appendChild(headers);
+                
+                const executorList = document.createElement('div');
+                executorList.className = 'executor-list';
+                executorList.id = `executors-${task.id}`;
+                
+                if (task.executors && task.executors.length > 0) {
+                    task.executors.forEach(executor => {
+                        executorList.appendChild(createExecutorItem(task, executor));
+                    });
+                } else {
+                    const noExecutors = document.createElement('p');
+                    noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 12px;';
+                    noExecutors.textContent = 'Нет исполнителей';
+                    executorList.appendChild(noExecutors);
+                }
+                card.appendChild(executorList);
+                
+                const actionContainer = document.createElement('div');
+                actionContainer.className = 'action-container';
+                
+                if (task.status !== 'completed') {
+                    const addBtn = document.createElement('button');
+                    addBtn.className = 'btn-add-executor';
+                    addBtn.textContent = '+ Добавить исполнителя';
+                    addBtn.onclick = () => showAddExecutorForm(task, actionContainer);
+                    actionContainer.appendChild(addBtn);
+                }
+                
+                card.appendChild(actionContainer);
+                
+                const readyBtn = document.createElement('button');
+                readyBtn.className = 'btn-ready';
+                readyBtn.textContent = '✅ ГОТОВО';
+                readyBtn.disabled = task.status === 'completed';
+                readyBtn.onclick = () => completeTask(task.id);
+                card.appendChild(readyBtn);
+                
+                return card;
+            }
+            
+            // ============== СОЗДАНИЕ ЭЛЕМЕНТА ИСПОЛНИТЕЛЯ ==============
+            function createExecutorItem(task, executor) {
+                const div = document.createElement('div');
+                div.className = `executor-item ${executor.status === 'completed' ? 'completed' : ''}`;
+                div.dataset.executorId = executor.id;
+                
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.className = 'executor-name';
+                nameInput.value = executor.name;
+                nameInput.placeholder = 'ФИО';
+                nameInput.disabled = task.status === 'completed';
+                nameInput.onchange = function(e) {
+                    console.log('Имя изменено на:', e.target.value);
+                };
+                div.appendChild(nameInput);
+                
+                const quantityInput = document.createElement('input');
+                quantityInput.type = 'number';
+                quantityInput.className = 'executor-quantity';
+                quantityInput.value = executor.quantity || 0;
+                quantityInput.min = 0;
+                quantityInput.max = task.totalQuantity;
+                quantityInput.disabled = task.status === 'completed';
+                quantityInput.onchange = function(e) {
+                    const val = parseInt(e.target.value) || 0;
+                    taskManager.updateExecutorQuantity(task.id, executor.id, val);
+                    setTimeout(() => loadTasks(), 200);
+                };
+                div.appendChild(quantityInput);
+                
+                const workBtn = document.createElement('button');
+                workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''}`;
+                workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
+                workBtn.disabled = task.status === 'completed';
+                workBtn.onclick = function() {
+                    const newStatus = workBtn.classList.contains('active') ? 'pending' : 'in_progress';
+                    taskManager.updateExecutorStatus(task.id, executor.id, newStatus);
+                    workBtn.classList.toggle('active');
+                    workBtn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
+                    setTimeout(() => loadTasks(), 200);
+                };
+                div.appendChild(workBtn);
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn btn-danger btn-sm';
+                removeBtn.innerHTML = '✕';
+                removeBtn.onclick = function() {
+                    if (confirm('Удалить этого исполнителя?')) {
+                        taskManager.removeExecutor(task.id, executor.id);
+                        setTimeout(() => loadTasks(), 200);
+                    }
+                };
+                div.appendChild(removeBtn);
+                
+                return div;
+            }
+            
+            // ============== ФОРМА ДОБАВЛЕНИЯ ИСПОЛНИТЕЛЯ ==============
+            function showAddExecutorForm(task, actionContainer) {
+                console.log('showAddExecutorForm вызвана для задачи:', task.id);
+                
+                const oldForm = actionContainer.querySelector('.new-executor-form');
+                if (oldForm) oldForm.remove();
+                
+                const formDiv = document.createElement('div');
+                formDiv.className = 'new-executor-form';
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = 'ФИО исполнителя';
+                
+                const addBtn = document.createElement('button');
+                addBtn.className = 'btn btn-success';
+                addBtn.textContent = 'Добавить';
+                addBtn.onclick = () => {
+                    const name = input.value.trim();
+                    if (!name) {
+                        alert('Введите ФИО исполнителя');
+                        return;
+                    }
+                    
+                    const result = taskManager.addExecutor(task.id, name);
+                    if (result) {
+                        formDiv.remove();
+                        setTimeout(() => loadTasks(), 100);
+                    } else {
+                        alert('Не удалось добавить исполнителя. Возможно, он уже существует.');
+                    }
+                };
+                
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'btn btn-danger';
+                cancelBtn.textContent = 'Отмена';
+                cancelBtn.onclick = () => formDiv.remove();
+                
+                formDiv.appendChild(input);
+                formDiv.appendChild(addBtn);
+                formDiv.appendChild(cancelBtn);
+                
+                actionContainer.appendChild(formDiv);
+            }
+            
+            // ============== ДЕЙСТВИЯ С ЗАДАЧАМИ ==============
+            window.toggleWorkStatus = function(taskId, executorId, btn) {
+                const newStatus = btn.classList.contains('active') ? 'pending' : 'in_progress';
+                taskManager.updateExecutorStatus(taskId, executorId, newStatus);
+                btn.classList.toggle('active');
+                btn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
+                setTimeout(() => loadTasks(), 200);
+            };
+            
+            window.removeExecutor = function(taskId, executorId) {
+                if (confirm('Удалить этого исполнителя?')) {
+                    taskManager.removeExecutor(taskId, executorId);
+                    setTimeout(() => loadTasks(), 200);
+                }
+            };
+            
+            window.completeTask = function(taskId) {
+                const task = taskManager.tasks.find(t => t.id === taskId);
+                if (!task) return;
+                
+                const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
+                
+                let message = 'Завершить эту задачу?';
+                if (totalAssigned < task.totalQuantity) {
+                    message = `Назначено только ${totalAssigned} из ${task.totalQuantity} шт. Продолжить?`;
+                } else if (totalAssigned > task.totalQuantity) {
+                    message = `Назначено ${totalAssigned} из ${task.totalQuantity} шт. Продолжить?`;
+                }
+                
+                if (confirm(message)) {
+                    taskManager.completeTask(taskId);
+                    setTimeout(() => loadTasks(), 200);
+                }
+            };
+            
+            window.clearHistory = function() {
+                if (!confirm('Очистить историю задач для текущей даты?')) return;
+                const dateStr = taskManager.formatDate(taskManager.currentDate);
+                localStorage.removeItem(`tasks_frezerniy_${dateStr}`);
+                taskManager.loadData();
+                loadTasks();
+            };
+            
+            window.exportToExcel = function() {
+                const tasks = taskManager.tasks;
+                const dateStr = taskManager.formatDate(taskManager.currentDate);
+                
+                let csv = "Заказ,Изделие,Операция,Исполнитель,Количество,Статус\n";
+                tasks.forEach(task => {
+                    if (task.executors.length > 0) {
+                        task.executors.forEach(executor => {
+                            csv += `${task.orderNumber},${task.product},${task.operation},${executor.name},${executor.quantity},${executor.status}\n`;
+                        });
+                    } else {
+                        csv += `${task.orderNumber},${task.product},${task.operation},Нет,0,${task.status}\n`;
+                    }
+                });
+                
+                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `frezerniy_${dateStr}.csv`;
+                link.click();
+            };
+        }
     </script>
 </body>
 </html>
