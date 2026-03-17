@@ -1,4 +1,4 @@
-// js/materials-report.js - ОТЧЕТ ПО МАТЕРИАЛАМ
+// js/materials-report.js - ОТЧЕТ ПО МАТЕРИАЛАМ (без общих итогов)
 
 class MaterialsReport {
     constructor() {
@@ -27,7 +27,6 @@ class MaterialsReport {
             }
             const norms = await response.json();
             
-            // Загружаем все данные
             this.materialsDB = {
                 aluminum: norms.aluminum || [],
                 steel: norms.steel || [],
@@ -239,11 +238,6 @@ class MaterialsReport {
             return Number(val).toFixed(dec);
         };
         
-        // Подсчет итогов
-        const totalSheetArea = sheetMaterials.reduce((sum, item) => sum + (item.totalArea || 0), 0);
-        const totalProfileLength = profiles.reduce((sum, item) => sum + (item.totalLength || 0), 0);
-        const totalRodLength = rods.reduce((sum, item) => sum + (item.totalValue || 0), 0);
-        
         let html = `
             <div class="materials-report">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -376,25 +370,7 @@ class MaterialsReport {
                 `;
             }
             
-            html += `
-                <div style="margin-top: 30px; padding: 15px; background: #2a2f38; border-radius: 5px;">
-                    <h4>📊 Итого:</h4>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                        <div style="background: #1a1e24; padding: 10px; border-radius: 5px;">
-                            <div style="color: #a0a0a0;">Листовые материалы:</div>
-                            <div style="font-size: 20px; font-weight: bold;">${fmt(totalSheetArea)} м²</div>
-                        </div>
-                        <div style="background: #1a1e24; padding: 10px; border-radius: 5px;">
-                            <div style="color: #a0a0a0;">Профили:</div>
-                            <div style="font-size: 20px; font-weight: bold;">${fmt(totalProfileLength, 0)} мм</div>
-                        </div>
-                        <div style="background: #1a1e24; padding: 10px; border-radius: 5px;">
-                            <div style="color: #a0a0a0;">Прутки:</div>
-                            <div style="font-size: 20px; font-weight: bold;">${fmt(totalRodLength, 0)} мм</div>
-                        </div>
-                    </div>
-                </div>
-            `;
+            // БЛОК С ОБЩИМИ ИТОГАМИ УДАЛЕН
         }
         
         html += `</div>`;
