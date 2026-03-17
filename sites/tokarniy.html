@@ -188,12 +188,17 @@
             background: #5a6268;
         }
         
-        /* ========== УЛУЧШЕННАЯ ФОРМА ДОБАВЛЕНИЯ ИСПОЛНИТЕЛЯ ========== */
+        /* Контейнер для кнопки добавления и формы */
+        .action-container {
+            margin: 10px 0;
+        }
+        
+        /* Форма добавления исполнителя */
         .new-executor-form {
             display: flex;
             align-items: center;
             gap: 8px;
-            margin: 10px 0;
+            margin-top: 10px;
             padding: 8px;
             background: #15191f;
             border: 1px solid #2a2f38;
@@ -201,10 +206,9 @@
             flex-wrap: wrap;
         }
         
-        /* Уменьшаем поле ввода ФИО */
         .new-executor-form input {
-            width: 180px;           /* Фиксированная ширина */
-            flex: none;              /* Запрещаем растягивание */
+            width: 180px;
+            flex: none;
             padding: 6px 10px;
             background: #1e232b;
             border: 1px solid #2a2f38;
@@ -219,7 +223,7 @@
             white-space: nowrap;
         }
         
-        /* Кнопка ГОТОВО – компактная и снизу */
+        /* Кнопка ГОТОВО – всегда внизу */
         .btn-ready {
             background: #28a745;
             color: white;
@@ -229,10 +233,10 @@
             cursor: pointer;
             font-size: 13px;
             font-weight: 600;
-            margin: 15px auto 0 auto;
+            margin: 15px 0 0 0;
             width: auto;
             min-width: 120px;
-            display: block;
+            display: inline-block;
             transition: all 0.3s;
         }
         
@@ -734,6 +738,7 @@
                 card.className = `task-card ${task.status === 'completed' ? 'completed' : ''}`;
                 card.dataset.taskId = task.id;
                 
+                // Заголовок операции
                 const header = document.createElement('div');
                 header.className = 'task-header';
                 header.innerHTML = `
@@ -744,6 +749,7 @@
                 `;
                 card.appendChild(header);
                 
+                // Описание (для доп. задач)
                 if (task.isExtra && task.description) {
                     const desc = document.createElement('div');
                     desc.className = 'task-description';
@@ -751,11 +757,13 @@
                     card.appendChild(desc);
                 }
                 
+                // Прогресс
                 const progress = document.createElement('div');
                 progress.className = 'task-progress';
                 progress.textContent = `Выполнено: ${task.completedQuantity}/${task.totalQuantity} шт`;
                 card.appendChild(progress);
                 
+                // Предупреждение, если назначено больше нормы
                 const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
                 if (totalAssigned > task.totalQuantity) {
                     const warning = document.createElement('div');
@@ -764,6 +772,7 @@
                     card.appendChild(warning);
                 }
                 
+                // Заголовки колонок
                 const headers = document.createElement('div');
                 headers.className = 'executor-header';
                 headers.innerHTML = `
@@ -774,6 +783,7 @@
                 `;
                 card.appendChild(headers);
                 
+                // Список исполнителей
                 const executorList = document.createElement('div');
                 executorList.className = 'executor-list';
                 executorList.id = `executors-${task.id}`;
@@ -790,15 +800,22 @@
                 }
                 card.appendChild(executorList);
                 
+                // Контейнер для кнопки добавления и формы
+                const actionContainer = document.createElement('div');
+                actionContainer.className = 'action-container';
+                
+                // Кнопка добавления исполнителя
                 if (task.status !== 'completed') {
                     const addBtn = document.createElement('button');
                     addBtn.className = 'btn-add-executor';
                     addBtn.textContent = '+ Добавить исполнителя';
-                    addBtn.onclick = () => showAddExecutorForm(task);
-                    card.appendChild(addBtn);
+                    addBtn.onclick = () => showAddExecutorForm(task, actionContainer);
+                    actionContainer.appendChild(addBtn);
                 }
                 
-                // Кнопка ГОТОВО – всегда внизу после всех элементов
+                card.appendChild(actionContainer);
+                
+                // Кнопка ГОТОВО – всегда в самом низу
                 const readyBtn = document.createElement('button');
                 readyBtn.className = 'btn-ready';
                 readyBtn.textContent = '✅ ГОТОВО';
@@ -868,13 +885,11 @@
             }
             
             // ============== ФОРМА ДОБАВЛЕНИЯ ИСПОЛНИТЕЛЯ ==============
-            function showAddExecutorForm(task) {
+            function showAddExecutorForm(task, actionContainer) {
                 console.log('showAddExecutorForm вызвана для задачи:', task.id);
                 
-                const executorList = document.getElementById(`executors-${task.id}`);
-                if (!executorList) return;
-                
-                const oldForm = executorList.parentNode.querySelector('.new-executor-form');
+                // Удаляем старую форму, если есть
+                const oldForm = actionContainer.querySelector('.new-executor-form');
                 if (oldForm) oldForm.remove();
                 
                 const formDiv = document.createElement('div');
@@ -887,7 +902,7 @@
                 const addBtn = document.createElement('button');
                 addBtn.className = 'btn btn-success';
                 addBtn.textContent = 'Добавить';
-                addBtn.onclick = function() {
+                addBtn.onclick = () => {
                     const name = input.value.trim();
                     if (!name) {
                         alert('Введите ФИО исполнителя');
@@ -906,16 +921,14 @@
                 const cancelBtn = document.createElement('button');
                 cancelBtn.className = 'btn btn-danger';
                 cancelBtn.textContent = 'Отмена';
-                cancelBtn.onclick = function() {
-                    formDiv.remove();
-                };
+                cancelBtn.onclick = () => formDiv.remove();
                 
                 formDiv.appendChild(input);
                 formDiv.appendChild(addBtn);
                 formDiv.appendChild(cancelBtn);
                 
-                executorList.parentNode.insertBefore(formDiv, executorList.nextSibling);
-                input.focus();
+                // Вставляем форму в контейнер действий (после кнопки добавления)
+                actionContainer.appendChild(formDiv);
             }
             
             // ============== ДЕЙСТВИЯ С ЗАДАЧАМИ ==============
