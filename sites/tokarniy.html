@@ -105,7 +105,7 @@
             color: #a0a0a0;
         }
         
-        .executor-header span:nth-child(1) { width: 140px; }  /* Уменьшено */
+        .executor-header span:nth-child(1) { width: 140px; }
         .executor-header span:nth-child(2) { width: 70px; text-align: center; }
         .executor-header span:nth-child(3) { width: 80px; text-align: center; }
         .executor-header span:nth-child(4) { width: 30px; }
@@ -122,7 +122,7 @@
         }
         
         .executor-name {
-            width: 140px;  /* Фиксированная ширина */
+            width: 140px;
             padding: 4px 8px;
             background: #1e232b;
             border: 1px solid #2a2f38;
@@ -132,7 +132,7 @@
         }
         
         .executor-quantity {
-            width: 70px;  /* Фиксированная ширина */
+            width: 70px;
             padding: 4px;
             background: #1e232b;
             border: 1px solid #2a2f38;
@@ -151,7 +151,7 @@
             cursor: pointer;
             font-size: 12px;
             transition: all 0.3s;
-            width: 80px;  /* Фиксированная ширина */
+            width: 80px;
             font-weight: 600;
         }
         
@@ -188,17 +188,49 @@
             background: #5a6268;
         }
         
+        /* ========== УЛУЧШЕННАЯ ФОРМА ДОБАВЛЕНИЯ ИСПОЛНИТЕЛЯ ========== */
+        .new-executor-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 0;
+            padding: 8px;
+            background: #15191f;
+            border: 1px solid #2a2f38;
+            border-radius: 6px;
+            flex-wrap: wrap;
+        }
+        
+        .new-executor-form input {
+            flex: 1 1 200px;        /* Поле занимает доступное место, но не меньше 200px */
+            min-width: 180px;        /* Минимальная ширина, чтобы не было слишком узко */
+            padding: 6px 10px;
+            background: #1e232b;
+            border: 1px solid #2a2f38;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 13px;
+        }
+        
+        .new-executor-form .btn {
+            padding: 6px 14px;
+            font-size: 13px;
+            white-space: nowrap;      /* Запрещаем перенос текста */
+        }
+        
         .btn-ready {
             background: #28a745;
             color: white;
-            padding: 8px 20px;
+            padding: 6px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
-            margin-top: 15px;
-            width: 100%;
+            margin: 15px auto 0 auto; /* центрирование */
+            width: auto;
+            min-width: 120px;
+            display: block;
             transition: all 0.3s;
         }
         
@@ -209,31 +241,6 @@
         .btn-ready:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-        }
-        
-        .new-executor-form {
-            display: flex;
-            gap: 8px;
-            margin: 10px 0;
-            padding: 8px;
-            background: #15191f;
-            border: 1px solid #2a2f38;
-            border-radius: 6px;
-        }
-        
-        .new-executor-form input {
-            flex: 1;
-            padding: 6px 10px;
-            background: #1e232b;
-            border: 1px solid #2a2f38;
-            border-radius: 4px;
-            color: #fff;
-            font-size: 13px;
-        }
-        
-        .new-executor-form button {
-            padding: 6px 12px;
-            font-size: 12px;
         }
         
         .extra-task-badge {
@@ -557,7 +564,6 @@
         };
         
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
-        // Проверяем, загружен ли TaskManager
         if (typeof TaskManager === 'undefined') {
             console.error('❌ TaskManager не загружен! Проверьте подключение task-manager.js');
             document.getElementById('tasksList').innerHTML = `
@@ -567,15 +573,12 @@
                 </div>
             `;
         } else {
-            // Создаем экземпляр TaskManager с операциями для токарного участка
             const taskManager = new TaskManager('tokarniy', tokarniyOperations);
             let currentFilter = 'all';
             
-            // Таймеры для защиты от рекурсии
             let _historyTimer = null;
             let _loadTimer = null;
             
-            // Глобальные функции для доступа из HTML
             window.taskManager = taskManager;
             
             document.addEventListener('DOMContentLoaded', function() {
@@ -583,19 +586,15 @@
                 updateDateDisplay();
                 loadTasks();
                 
-                // Слушаем изменения из других вкладок
                 window.addEventListener('taskStatusChanged', function() {
-                    console.log('🔄 Получено событие taskStatusChanged');
                     if (_loadTimer) clearTimeout(_loadTimer);
                     _loadTimer = setTimeout(() => {
                         loadTasks();
                     }, 100);
                 });
                 
-                // Слушаем изменения истории
                 window.addEventListener('taskHistoryChanged', function(e) {
                     if (e.detail.siteType === 'tokarniy') {
-                        console.log('🔄 Изменение истории для токарного участка');
                         if (_historyTimer) clearTimeout(_historyTimer);
                         _historyTimer = setTimeout(() => {
                             loadTasks();
@@ -603,10 +602,8 @@
                     }
                 });
                 
-                // Слушаем изменения в localStorage
                 window.addEventListener('storage', function(e) {
                     if (e.key === 'masterx_orders' || (e.key && e.key.startsWith('tasks_tokarniy_'))) {
-                        console.log('🔄 Изменение в localStorage');
                         if (_loadTimer) clearTimeout(_loadTimer);
                         _loadTimer = setTimeout(() => {
                             taskManager.loadData();
@@ -654,15 +651,9 @@
                 console.log('loadTasks вызвана');
                 const tasksList = document.getElementById('tasksList');
                 
-                // Загружаем данные
                 taskManager.loadData();
-                
-                // Получаем отфильтрованные задачи
                 let tasks = taskManager.getTasksByStatus(currentFilter);
                 
-                console.log('Загружено задач:', tasks.length);
-                
-                // Обновляем статистику
                 const stats = taskManager.getStats();
                 document.getElementById('totalTasks').textContent = stats.total;
                 document.getElementById('tasksInProgress').textContent = stats.inProgress;
@@ -680,7 +671,6 @@
                     return;
                 }
                 
-                // Группируем по заказам
                 const byOrder = {};
                 tasks.forEach(task => {
                     if (!byOrder[task.orderId]) {
@@ -701,7 +691,6 @@
                     header.innerHTML = `<h3 style="font-size: 16px;">📦 Заказ №${order.number}</h3>`;
                     orderDiv.appendChild(header);
                     
-                    // Группируем по изделиям
                     const byProduct = {};
                     order.tasks.forEach(task => {
                         const key = task.product;
@@ -765,7 +754,6 @@
                 progress.textContent = `Выполнено: ${task.completedQuantity}/${task.totalQuantity} шт`;
                 card.appendChild(progress);
                 
-                // Предупреждение если есть расхождения
                 const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
                 if (totalAssigned > task.totalQuantity) {
                     const warning = document.createElement('div');
@@ -808,7 +796,6 @@
                     card.appendChild(addBtn);
                 }
                 
-                // Кнопка ГОТОВО - теперь всегда внизу после всех элементов
                 const readyBtn = document.createElement('button');
                 readyBtn.className = 'btn-ready';
                 readyBtn.textContent = '✅ ГОТОВО';
@@ -821,13 +808,10 @@
             
             // ============== СОЗДАНИЕ ЭЛЕМЕНТА ИСПОЛНИТЕЛЯ ==============
             function createExecutorItem(task, executor) {
-                console.log('createExecutorItem:', task.id, executor);
-                
                 const div = document.createElement('div');
                 div.className = `executor-item ${executor.status === 'completed' ? 'completed' : ''}`;
                 div.dataset.executorId = executor.id;
                 
-                // Поле ФИО - теперь меньшего размера
                 const nameInput = document.createElement('input');
                 nameInput.type = 'text';
                 nameInput.className = 'executor-name';
@@ -837,11 +821,9 @@
                 nameInput.onchange = function(e) {
                     // Здесь можно добавить логику сохранения измененного имени
                     console.log('Имя изменено на:', e.target.value);
-                    // Но пока просто логируем
                 };
                 div.appendChild(nameInput);
                 
-                // Поле количества - уже есть функция редактирования
                 const quantityInput = document.createElement('input');
                 quantityInput.type = 'number';
                 quantityInput.className = 'executor-quantity';
@@ -856,7 +838,6 @@
                 };
                 div.appendChild(quantityInput);
                 
-                // Кнопка статуса
                 const workBtn = document.createElement('button');
                 workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''}`;
                 workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
@@ -870,7 +851,6 @@
                 };
                 div.appendChild(workBtn);
                 
-                // Кнопка удаления
                 const removeBtn = document.createElement('button');
                 removeBtn.className = 'btn btn-danger btn-sm';
                 removeBtn.innerHTML = '✕';
@@ -890,12 +870,8 @@
                 console.log('showAddExecutorForm вызвана для задачи:', task.id);
                 
                 const executorList = document.getElementById(`executors-${task.id}`);
-                if (!executorList) {
-                    console.error('executorList не найден');
-                    return;
-                }
+                if (!executorList) return;
                 
-                // Удаляем старую форму, если есть
                 const oldForm = executorList.parentNode.querySelector('.new-executor-form');
                 if (oldForm) oldForm.remove();
                 
@@ -911,23 +887,15 @@
                 addBtn.textContent = 'Добавить';
                 addBtn.onclick = function() {
                     const name = input.value.trim();
-                    console.log('Попытка добавить исполнителя:', name);
-                    
                     if (!name) {
                         alert('Введите ФИО исполнителя');
                         return;
                     }
                     
                     const result = taskManager.addExecutor(task.id, name);
-                    console.log('Результат добавления:', result);
-                    
                     if (result) {
-                        console.log('✅ Исполнитель добавлен успешно');
                         formDiv.remove();
-                        
-                        setTimeout(() => {
-                            loadTasks();
-                        }, 100);
+                        setTimeout(() => loadTasks(), 100);
                     } else {
                         alert('Не удалось добавить исполнителя. Возможно, он уже существует.');
                     }
@@ -983,24 +951,19 @@
                 }
             };
             
-            // ============== ОЧИСТКА ИСТОРИИ ==============
             window.clearHistory = function() {
                 if (!confirm('Очистить историю задач для текущей даты?')) return;
-                
                 const dateStr = taskManager.formatDate(taskManager.currentDate);
                 localStorage.removeItem(`tasks_tokarniy_${dateStr}`);
-                
                 taskManager.loadData();
                 loadTasks();
             };
             
-            // ============== ЭКСПОРТ В EXCEL ==============
             window.exportToExcel = function() {
                 const tasks = taskManager.tasks;
                 const dateStr = taskManager.formatDate(taskManager.currentDate);
                 
                 let csv = "Заказ,Изделие,Операция,Исполнитель,Количество,Статус\n";
-                
                 tasks.forEach(task => {
                     if (task.executors.length > 0) {
                         task.executors.forEach(executor => {
@@ -1018,7 +981,6 @@
                 link.click();
             };
             
-            // ============== ОТЛАДКА ==============
             window.debugStorage = function() {
                 console.log('=== ХРАНИЛИЩЕ LOCALSTORAGE ===');
                 for (let i = 0; i < localStorage.length; i++) {
