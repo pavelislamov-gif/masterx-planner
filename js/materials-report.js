@@ -1,4 +1,4 @@
-// js/materials-report.js - ОТЧЕТ ПО МАТЕРИАЛАМ (без общих итогов)
+// js/materials-report.js - ОТЧЕТ ПО МАТЕРИАЛАМ (с поддержкой размеров)
 
 class MaterialsReport {
     constructor() {
@@ -77,6 +77,8 @@ class MaterialsReport {
             const productName = item.product || '';
             const productSize = item.size || 'Стандартный';
             
+            console.log(`📦 Обработка изделия: ${productName}, размер: ${productSize}, кол-во: ${productQty}`);
+            
             // ============== 1. ЛИСТОВЫЕ МАТЕРИАЛЫ ==============
             const allSheets = [
                 ...this.materialsDB.aluminum.map(m => ({ ...m, materialType: 'Алюминий' })),
@@ -87,7 +89,7 @@ class MaterialsReport {
                 ...this.materialsDB.other.map(m => ({ ...m, materialType: m.material || 'Прочее' }))
             ];
             
-            // Ищем материалы для этого продукта
+            // Ищем материалы для этого продукта (не зависят от размера)
             const sheetMatches = allSheets.filter(m => m.product === productName);
             
             // Группируем по материалу и толщине
@@ -167,32 +169,82 @@ class MaterialsReport {
                 }
             });
             
-            // ============== 5. СПЕЦИФИКАЦИИ ПРОДУКТА (ПРОФИЛИ) ==============
+            // ============== 5. СПЕЦИФИКАЦИИ ПРОДУКТА (ПРОФИЛИ) - ЗАВИСЯТ ОТ РАЗМЕРА ==============
             const productSpec = this.materialsDB.productSpecs[productName];
-            if (productSpec && productSpec[productSize]) {
-                const specs = productSpec[productSize];
+            
+            if (productSpec) {
+                console.log(`📋 Найдены спецификации для ${productName}`);
                 
-                Object.entries(specs).forEach(([profileName, profileData]) => {
-                    const existingProfile = profiles.find(p => p.name === profileName);
-                    if (existingProfile) {
-                        existingProfile.totalLength += (profileData.value || 0) * productQty;
-                        existingProfile.quantity += productQty;
-                    } else {
-                        profiles.push({
-                            name: profileName,
-                            lengthPerUnit: profileData.value || 0,
-                            unit: profileData.unit || 'мм',
-                            quantity: productQty,
-                            totalLength: (profileData.value || 0) * productQty
-                        });
+                // Ищем точное совпадение размера
+                let sizeSpec = null;
+                let matchedSize = null;
+                
+                // Пробуем найти точное совпадение
+                if (productSpec[productSize]) {
+                    sizeSpec = productSpec[productSize];
+                    matchedSize = productSize;
+                    console.log(`✅ Точное совпадение размера: ${productSize}`);
+                } else {
+                    // Пробуем найти частичное совпадение (убираем пробелы, приводим к одному формату)
+                    const normalizedSize = productSize.replace(/\s+/g, ' ').trim();
+                    
+                    for (let size in productSpec) {
+                        const normalizedKey = size.replace(/\s+/g, ' ').trim();
+                        if (normalizedKey === normalizedSize) {
+                            sizeSpec = productSpec[size];
+                            matchedSize = size;
+                            console.log(`✅ Найдено совпадение после нормализации: ${size}`);
+                            break;
+                        }
                     }
-                });
+                    
+                    // Если всё ещё не нашли, пробуем contains
+                    if (!sizeSpec) {
+                        for (let size in productSpec) {
+                            if (productSize.includes(size) || size.includes(productSize)) {
+                                sizeSpec = productSpec[size];
+                                matchedSize = size;
+                                console.log(`✅ Частичное совпадение: ${size}`);
+                                break;
+                            }
+                        }
+                    }
+                }
                 
-                productSpecs.push({
-                    product: productName,
-                    size: productSize,
-                    specs: specs
-                });
+                if (sizeSpec) {
+                    console.log(`📊 Спецификация для размера ${matchedSize}:`, sizeSpec);
+                    
+                    Object.entries(sizeSpec).forEach(([profileName, profileData]) => {
+                        // Проверяем, что profileData - объект с value
+                        const value = profileData.value || profileData;
+                        const unit = profileData.unit || 'мм';
+                        
+                        const existingProfile = profiles.find(p => p.name === profileName);
+                        if (existingProfile) {
+                            existingProfile.totalLength += (value || 0) * productQty;
+                            existingProfile.quantity += productQty;
+                        } else {
+                            profiles.push({
+                                name: profileName,
+                                lengthPerUnit: value || 0,
+                                unit: unit,
+                                quantity: productQty,
+                                totalLength: (value || 0) * productQty
+                            });
+                        }
+                    });
+                    
+                    productSpecs.push({
+                        product: productName,
+                        size: productSize,
+                        matchedSize: matchedSize,
+                        specs: sizeSpec
+                    });
+                } else {
+                    console.warn(`⚠️ Размер ${productSize} не найден в спецификациях для ${productName}`);
+                }
+            } else {
+                console.warn(`⚠️ Нет спецификаций для продукта ${productName}`);
             }
         });
         
@@ -274,6 +326,8 @@ class MaterialsReport {
                             <th>Кол-во</th>
                             <th>Кронштейн</th>
                             <th>Лира</th>
+                            <th>RAL</th>
+                            <th>Текстура</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -284,6 +338,8 @@ class MaterialsReport {
                                 <td>${item.quantity}</td>
                                 <td>${item.bracket.type} (${item.bracket.quantity} шт)</td>
                                 <td>${item.lyre.type} (${item.lyre.quantity} шт)</td>
+                                <td>${item.ral || '-'}</td>
+                                <td>${item.texture || '-'}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -328,6 +384,7 @@ class MaterialsReport {
                                 <th>Расход на 1 шт (мм)</th>
                                 <th>Кол-во</th>
                                 <th>Общий расход (мм)</th>
+                                <th>Общий расход (м)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -337,6 +394,7 @@ class MaterialsReport {
                                     <td style="text-align: right;">${profile.lengthPerUnit}</td>
                                     <td style="text-align: right;">${profile.quantity}</td>
                                     <td style="text-align: right;">${fmt(profile.totalLength, 0)}</td>
+                                    <td style="text-align: right;">${(profile.totalLength / 1000).toFixed(3)}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -354,6 +412,7 @@ class MaterialsReport {
                                 <th>Расход на 1 шт (мм)</th>
                                 <th>Кол-во</th>
                                 <th>Общий расход (мм)</th>
+                                <th>Общий расход (м)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -363,6 +422,7 @@ class MaterialsReport {
                                     <td style="text-align: right;">${rod.valuePerUnit}</td>
                                     <td style="text-align: right;">${rod.quantity}</td>
                                     <td style="text-align: right;">${fmt(rod.totalValue, 0)}</td>
+                                    <td style="text-align: right;">${(rod.totalValue / 1000).toFixed(3)}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -370,7 +430,14 @@ class MaterialsReport {
                 `;
             }
             
-            // БЛОК С ОБЩИМИ ИТОГАМИ УДАЛЕН
+            // Добавляем информацию о подобранных размерах для отладки (можно убрать в продакшене)
+            if (productSpecs.length > 0 && productSpecs.some(ps => ps.matchedSize)) {
+                html += `
+                    <div style="margin-top: 20px; padding: 10px; background: #1e232b; border-radius: 5px; font-size: 12px; color: #a0a0a0;">
+                        <p><small>✓ Подобраны профили для размеров: ${productSpecs.map(ps => `${ps.product} (${ps.size})`).join(', ')}</small></p>
+                    </div>
+                `;
+            }
         }
         
         html += `</div>`;
