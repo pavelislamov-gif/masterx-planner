@@ -201,9 +201,10 @@
             flex-wrap: wrap;
         }
         
+        /* Уменьшаем поле ввода ФИО */
         .new-executor-form input {
-            flex: 1 1 200px;        /* Поле занимает доступное место, но не меньше 200px */
-            min-width: 180px;        /* Минимальная ширина, чтобы не было слишком узко */
+            width: 180px;           /* Фиксированная ширина */
+            flex: none;              /* Запрещаем растягивание */
             padding: 6px 10px;
             background: #1e232b;
             border: 1px solid #2a2f38;
@@ -215,9 +216,10 @@
         .new-executor-form .btn {
             padding: 6px 14px;
             font-size: 13px;
-            white-space: nowrap;      /* Запрещаем перенос текста */
+            white-space: nowrap;
         }
         
+        /* Кнопка ГОТОВО – компактная и снизу */
         .btn-ready {
             background: #28a745;
             color: white;
@@ -227,7 +229,7 @@
             cursor: pointer;
             font-size: 13px;
             font-weight: 600;
-            margin: 15px auto 0 auto; /* центрирование */
+            margin: 15px auto 0 auto;
             width: auto;
             min-width: 120px;
             display: block;
@@ -796,6 +798,7 @@
                     card.appendChild(addBtn);
                 }
                 
+                // Кнопка ГОТОВО – всегда внизу после всех элементов
                 const readyBtn = document.createElement('button');
                 readyBtn.className = 'btn-ready';
                 readyBtn.textContent = '✅ ГОТОВО';
@@ -819,7 +822,6 @@
                 nameInput.placeholder = 'ФИО';
                 nameInput.disabled = task.status === 'completed';
                 nameInput.onchange = function(e) {
-                    // Здесь можно добавить логику сохранения измененного имени
                     console.log('Имя изменено на:', e.target.value);
                 };
                 div.appendChild(nameInput);
