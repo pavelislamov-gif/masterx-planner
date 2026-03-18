@@ -291,10 +291,20 @@ function clearOrderForm() {
 
 // ============== СОХРАНЕНИЕ ЗАКАЗА ==============
 function saveOrder() {
+    console.log('saveOrder вызвана');
+    
+    // Проверяем обязательные поля
+    const customer = document.getElementById('orderCustomer')?.value;
+    if (!customer) {
+        alert('⚠️ Введите заказчика');
+        return;
+    }
+    
     const orderData = {
-        id: currentOrderId || Date.now(),
+        id: currentOrderId || Date.now(), // Если новый заказ - создаем ID из timestamp
+        number: 'ЗАКАЗ-' + (currentOrderId || Date.now()), // Генерируем номер заказа
         date: document.getElementById('orderDate')?.value || new Date().toISOString().split('T')[0],
-        customer: document.getElementById('orderCustomer')?.value || '',
+        customer: customer,
         
         // Изделие
         product: document.getElementById('productSelect')?.value || '',
@@ -312,22 +322,44 @@ function saveOrder() {
         // Дополнительно
         ral: document.getElementById('ralValue')?.value || '',
         texture: document.getElementById('textureValue')?.value || '',
-        notes: document.getElementById('orderNotes')?.value || ''
+        notes: document.getElementById('orderNotes')?.value || '',
+        
+        // Для совместимости
+        items: [],
+        totalQuantity: 0
     };
     
+    // Подсчитываем общее количество
+    orderData.totalQuantity = orderData.productQuantity + orderData.bracketQuantity + orderData.lyreQuantity;
+    
+    console.log('Сохраняем заказ:', orderData);
+    
+    // Получаем существующие заказы
     let orders = loadOrdersFromStorage() || [];
     
     if (currentOrderId) {
+        // Редактирование существующего заказа
         const index = orders.findIndex(o => o.id == currentOrderId);
-        if (index !== -1) orders[index] = orderData;
+        if (index !== -1) {
+            orders[index] = orderData;
+            console.log('Заказ обновлен');
+        }
     } else {
+        // Новый заказ
         orders.push(orderData);
+        console.log('Новый заказ добавлен');
     }
     
+    // Сохраняем в localStorage
     saveOrdersToStorage(orders);
-    closeOrderModal();
+    
+    // Обновляем таблицу
     loadOrders();
-    alert('✅ Заказ сохранен');
+    
+    // Закрываем модальное окно
+    closeOrderModal();
+    
+    alert('✅ Заказ успешно сохранен');
 }
 
 // ============== УДАЛЕНИЕ ЗАКАЗА ==============
