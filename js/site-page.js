@@ -1,3 +1,6 @@
+// js/site-page.js - Управление страницами участков
+
+import { loadOrdersFromStorage } from './storage.js';
 // js/site-page.js - Управление страницами участков (БЕЗ EXPORT)
 
 // Текущий участок определяется из HTML
@@ -9,7 +12,7 @@ let taskManager;
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('site-page.js загружен, участок:', currentSite);
-    
+
     // Проверяем, загружен ли TaskManager
     if (typeof TaskManager === 'undefined') {
         console.error('❌ TaskManager не загружен! Проверьте подключение task-manager.js');
@@ -21,22 +24,22 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // Загружаем кастомные операции для участка
     const customOps = await loadCustomOperations(currentSite);
-    
+
     // Создаем экземпляр TaskManager
     taskManager = new TaskManager(currentSite, customOps);
-    
+
     // Загружаем данные на сегодня
     taskManager.today();
-    
+
     // Обновляем отображение даты
     updateDateDisplay();
-    
+
     // Создаем контейнер для задач (если его нет)
     ensureTasksContainer();
-    
+
     // Отображаем задачи
     displayTasks();
-    
+
     // Слушаем изменения истории
     window.addEventListener('taskHistoryChanged', function(e) {
         if (e.detail.siteType === currentSite) {
@@ -73,7 +76,7 @@ function createErrorContainer() {
 // Эти функции будут доступны глобально
 window.changeDate = function(direction) {
     console.log('changeDate:', direction);
-    
+
     if (!taskManager) {
         alert('TaskManager не инициализирован');
         return;
@@ -86,13 +89,15 @@ window.changeDate = function(direction) {
     } else if (direction === 'today') {
         taskManager.today();
     }
-    
+
     updateDateDisplay();
     displayTasks();
 };
 
 window.exportToExcel = function() {
     console.log('exportToExcel');
+    // Здесь будет функция экспорта в Excel
+    alert('Экспорт в Excel будет доступен позже');
     
     if (!taskManager) {
         alert('Нет данных для экспорта');
@@ -150,6 +155,7 @@ function formatDateForFilename(date) {
 // Обновление отображения даты
 function updateDateDisplay() {
     const dateDisplay = document.getElementById('currentDateDisplay');
+    if (dateDisplay) {
     if (dateDisplay && taskManager) {
         dateDisplay.textContent = formatDateDisplay(taskManager.currentDate);
     }
@@ -163,9 +169,9 @@ async function loadCustomOperations(site) {
             throw new Error('Файл norms.json не найден');
         }
         const data = await response.json();
-        
+
         const customOps = {};
-        
+
         if (data.products) {
             Object.values(data.products).forEach(product => {
                 if (product.operations) {
@@ -180,7 +186,7 @@ async function loadCustomOperations(site) {
                 }
             });
         }
-        
+
         console.log('Загружены кастомные операции:', customOps);
         return customOps;
     } catch (error) {
@@ -194,7 +200,7 @@ async function loadCustomOperations(site) {
 function ensureTasksContainer() {
     // Проверяем, есть ли контейнер для задач
     let tasksContainer = document.getElementById('tasksContainer');
-    
+
     // Если нет - создаем
     if (!tasksContainer) {
         const main = document.querySelector('main') || document.body;
@@ -215,8 +221,9 @@ function ensureTasksContainer() {
 
 function displayTasks() {
     const tasksContainer = document.getElementById('tasksContainer');
+    if (!tasksContainer) return;
     if (!tasksContainer || !taskManager) return;
-    
+
     if (!taskManager.tasks || taskManager.tasks.length === 0) {
         tasksContainer.innerHTML = `
             <div style="text-align: center; padding: 60px 20px;">
@@ -231,10 +238,10 @@ function displayTasks() {
         `;
         return;
     }
-    
+
     // Считаем статистику
     const stats = getStats();
-    
+
     let html = `
         <div class="tasks-header" style="
             display: flex;
@@ -255,15 +262,15 @@ function displayTasks() {
         </div>
         <div class="tasks-list"></div>
     `;
-    
+
     tasksContainer.innerHTML = html;
-    
+
     const tasksList = tasksContainer.querySelector('.tasks-list');
-    
+
     taskManager.tasks.forEach(task => {
         const progress = task.totalQuantity ? 
             Math.round((task.completedQuantity / task.totalQuantity) * 100) : 0;
-        
+
         tasksList.innerHTML += `
             <div class="task-card" data-task-id="${task.id}" style="
                 background: white;
@@ -344,7 +351,7 @@ function renderExecutors(task) {
     if (!task.executors || task.executors.length === 0) {
         return '';
     }
-    
+
     return `
         <div style="margin-top: 10px;">
             <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Исполнители:</div>
@@ -385,12 +392,12 @@ function formatDateDisplay(date) {
     tomorrow.setDate(tomorrow.getDate() + 1);
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    
+
     const dateStr = date.toDateString();
     const todayStr = today.toDateString();
     const tomorrowStr = tomorrow.toDateString();
     const yesterdayStr = yesterday.toDateString();
-    
+
     let prefix = '';
     if (dateStr === todayStr) {
         prefix = 'Сегодня, ';
@@ -399,7 +406,7 @@ function formatDateDisplay(date) {
     } else if (dateStr === yesterdayStr) {
         prefix = 'Вчера, ';
     }
-    
+
     const options = { day: 'numeric', month: 'long', year: 'numeric' };
     return prefix + date.toLocaleDateString('ru-RU', options);
 }
@@ -438,4 +445,6 @@ function getStatusText(status) {
     }
 }
 
+// Экспортируем
+export { taskManager, displayTasks };
 console.log('✅ site-page.js загружен (без export)');
