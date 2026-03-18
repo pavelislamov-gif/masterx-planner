@@ -30,6 +30,7 @@ class TaskManager {
                 'XGRAY v.1': ['Заготовка', 'Точение профиля', 'Точение планки'],
                 'XGRAY v.2': ['Заготовка', 'Точение профиля', 'Точение планки'],
                 'default': ['Заготовка', 'Точение', 'Доводка']
+            },
 // Загрузка задач из localStorage
 export function loadTasks() {
     const savedTasks = localStorage.getItem('production_tasks');
