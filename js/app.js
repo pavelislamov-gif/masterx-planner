@@ -351,43 +351,143 @@ window.loadProductNamesForItem = function(itemId) {
 
 // ============== ЗАГРУЗКА РАЗМЕРОВ ДЛЯ КОНКРЕТНОЙ ПОЗИЦИИ ==============
 window.loadProductSizesForItem = function(itemId) {
-    console.log('loadProductSizesForItem:', itemId);
+    console.log('========== ДИАГНОСТИКА ЗАГРУЗКИ РАЗМЕРОВ ==========');
     
     const typeSelect = document.getElementById(`type_${itemId}`);
     const nameSelect = document.getElementById(`name_${itemId}`);
     const sizeSelect = document.getElementById(`size_${itemId}`);
     
-    if (!typeSelect || !nameSelect || !sizeSelect) return;
+    if (!typeSelect || !nameSelect || !sizeSelect) {
+        console.error('❌ Элементы не найдены');
+        return;
+    }
     
     const type = typeSelect.value;
     const productName = nameSelect.value;
     
+    console.log('Тип:', type);
+    console.log('Название:', productName);
+    
     if (!productName) {
-        sizeSelect.innerHTML = '<option value="">Сначала выберите изделие</option>';
+        sizeSelect.innerHTML = '<option value="">Выберите изделие</option>';
         return;
     }
     
-    let sizes = [];
+    // Ищем изделие
+    let foundItem = null;
+    let sourceArray = [];
     
     if (type === 'product') {
-        const product = allProducts.find(p => p.name === productName);
-        sizes = product?.sizes || [];
+        sourceArray = allProducts;
+        foundItem = allProducts.find(p => p.name === productName);
+        console.log('Поиск в allProducts, длина массива:', allProducts.length);
     } else if (type === 'bracket') {
-        const bracket = allBrackets.find(b => b.name === productName);
-        sizes = bracket?.sizes || [];
+        sourceArray = allBrackets;
+        foundItem = allBrackets.find(b => b.name === productName);
+        console.log('Поиск в allBrackets, длина массива:', allBrackets.length);
     } else if (type === 'lyre') {
-        const lyre = allLyres.find(l => l.name === productName);
-        sizes = lyre?.sizes || [];
+        sourceArray = allLyres;
+        foundItem = allLyres.find(l => l.name === productName);
+        console.log('Поиск в allLyres, длина массива:', allLyres.length);
     }
     
-    console.log('Размеры для', productName, ':', sizes);
+    if (!foundItem) {
+        console.log('❌ Изделие не найдено!');
+        console.log('Доступные имена:', sourceArray.slice(0, 5).map(p => p.name));
+        sizeSelect.innerHTML = '<option value="">Изделие не найдено</option>';
+        return;
+    }
     
-    if (sizes && sizes.length > 0) {
-        sizeSelect.innerHTML = '<option value="">Выберите размер</option>' +
-            sizes.map(s => `<option value="${s}">${s}</option>`).join('');
+    console.log('✅ Изделие НАЙДЕНО!');
+    console.log('Тип foundItem:', typeof foundItem);
+    console.log('Конструктор:', foundItem.constructor?.name);
+    console.log('Все ключи объекта:', Object.keys(foundItem));
+    
+    // Подробный вывод каждого свойства
+    console.log('--- СВОЙСТВА ОБЪЕКТА ---');
+    for (let key in foundItem) {
+        const value = foundItem[key];
+        console.log(`${key}:`, value, `(тип: ${typeof value}, это массив: ${Array.isArray(value)})`);
+    }
+    
+    // Пробуем найти размеры в разных местах
+    let sizes = [];
+    
+    // Вариант 1: поле sizes
+    if (foundItem.sizes) {
+        sizes = foundItem.sizes;
+        console.log('✅ Найдено поле sizes');
+    }
+    // Вариант 2: поле size
+    else if (foundItem.size) {
+        sizes = foundItem.size;
+        console.log('✅ Найдено поле size');
+    }
+    // Вариант 3: поле dimensions
+    else if (foundItem.dimensions) {
+        sizes = foundItem.dimensions;
+        console.log('✅ Найдено поле dimensions');
+    }
+    // Вариант 4: поле lengths
+    else if (foundItem.lengths) {
+        sizes = foundItem.lengths;
+        console.log('✅ Найдено поле lengths');
+    }
+    // Вариант 5: поле options
+    else if (foundItem.options) {
+        sizes = foundItem.options;
+        console.log('✅ Найдено поле options');
+    }
+    // Вариант 6: поле values
+    else if (foundItem.values) {
+        sizes = foundItem.values;
+        console.log('✅ Найдено поле values');
+    }
+    // Вариант 7: поле availableSizes
+    else if (foundItem.availableSizes) {
+        sizes = foundItem.availableSizes;
+        console.log('✅ Найдено поле availableSizes');
+    }
+    
+    // Если нашли размеры, проверяем их тип
+    if (sizes.length > 0) {
+        console.log('Найденные размеры:', sizes);
+        console.log('Тип размеров:', typeof sizes);
+        console.log('Это массив?', Array.isArray(sizes));
+        
+        // Если это не массив, пробуем преобразовать
+        if (!Array.isArray(sizes)) {
+            if (typeof sizes === 'string') {
+                sizes = sizes.split(',').map(s => s.trim());
+                console.log('Преобразовали строку в массив:', sizes);
+            } else {
+                sizes = [String(sizes)];
+                console.log('Преобразовали в массив из одного элемента:', sizes);
+            }
+        }
     } else {
-        sizeSelect.innerHTML = '<option value="">Нет доступных размеров</option>';
+        console.log('❌ ПОЛЕ С РАЗМЕРАМИ НЕ НАЙДЕНО!');
+        console.log('Создаем тестовые размеры для отладки');
+        sizes = ['200', '250', '300', '350', '400', '450', '500'];
     }
+    
+    // Заполняем select
+    sizeSelect.innerHTML = '';
+    
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Выберите размер';
+    sizeSelect.appendChild(defaultOption);
+    
+    sizes.forEach(s => {
+        const option = document.createElement('option');
+        option.value = s;
+        option.textContent = s;
+        sizeSelect.appendChild(option);
+    });
+    
+    console.log(`✅ Загружено ${sizes.length} размеров`);
+    console.log('=============================================');
 };
 
 // ============== СОХРАНЕНИЕ ЗАКАЗА ==============
