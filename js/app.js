@@ -187,28 +187,26 @@ function openOrderModal(orderId = null) {
     
     currentOrderId = orderId;
     const modal = document.getElementById('orderModal');
-    const title = document.getElementById('modalTitle');
     
-    if (!modal) return;
+    if (!modal) {
+        console.error('❌ Модальное окно orderModal не найдено!');
+        return;
+    }
+    
+    const title = document.getElementById('modalTitle');
+    if (title) {
+        title.textContent = orderId ? 'Редактирование заказа' : 'Новый заказ';
+    } else {
+        console.warn('⚠️ Элемент modalTitle не найден');
+    }
     
     if (orderId) {
-        title.textContent = 'Редактирование заказа';
         loadOrderData(orderId);
     } else {
-        title.textContent = 'Новый заказ';
         clearOrderForm();
     }
     
     modal.style.display = 'block';
-}
-
-function closeOrderModal() {
-    console.log('closeOrderModal');
-    const modal = document.getElementById('orderModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-    currentOrderId = null;
 }
 
 // ============== ЗАГРУЗКА ДАННЫХ ЗАКАЗА ==============
