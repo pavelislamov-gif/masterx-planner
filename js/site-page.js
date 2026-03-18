@@ -1,6 +1,4 @@
-// js/site-page.js - Управление страницами участков
-
-import { loadOrdersFromStorage } from './storage.js';
+// js/site-page.js - Управление страницами участков (БЕЗ EXPORT)
 
 // Текущий участок определяется из HTML
 const currentSite = document.querySelector('.site-page')?.dataset?.site || 'unknown';
@@ -11,6 +9,15 @@ let taskManager;
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('site-page.js загружен, участок:', currentSite);
+    
+    // Проверяем, загружен ли TaskManager
+    if (typeof TaskManager === 'undefined') {
+        console.error('❌ TaskManager не загружен! Проверьте подключение task-manager.js');
+        showError('Ошибка загрузки модуля задач');
+        return;
+    }
+    
+    console.log('✅ TaskManager загружен успешно');
     
     // Загружаем кастомные операции для участка
     const customOps = await loadCustomOperations(currentSite);
@@ -39,11 +46,38 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 });
 
+// Функция для отображения ошибки
+function showError(message) {
+    const container = document.getElementById('tasksContainer') || createErrorContainer();
+    if (container) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; background: #ffebee; border-radius: 8px; margin: 20px;">
+                <p style="color: #c62828; font-size: 1.2rem; margin-bottom: 10px;">❌ ${message}</p>
+                <p style="color: #666;">Убедитесь, что файл task-manager.js подключен перед site-page.js</p>
+                <p style="color: #999; font-size: 0.9rem; margin-top: 15px;">Порядок подключения: storage.js → data-loader.js → task-operations.js → task-manager.js → site-page.js</p>
+            </div>
+        `;
+    }
+}
+
+function createErrorContainer() {
+    const main = document.querySelector('main') || document.body;
+    const container = document.createElement('div');
+    container.id = 'tasksContainer';
+    main.appendChild(container);
+    return container;
+}
+
 // ============== ФУНКЦИИ ДЛЯ ONCLICK КНОПОК ==============
 
 // Эти функции будут доступны глобально
 window.changeDate = function(direction) {
     console.log('changeDate:', direction);
+    
+    if (!taskManager) {
+        alert('TaskManager не инициализирован');
+        return;
+    }
     
     if (direction === 'prev') {
         taskManager.prevDay();
@@ -59,14 +93,64 @@ window.changeDate = function(direction) {
 
 window.exportToExcel = function() {
     console.log('exportToExcel');
-    // Здесь будет функция экспорта в Excel
-    alert('Экспорт в Excel будет доступен позже');
+    
+    if (!taskManager) {
+        alert('Нет данных для экспорта');
+        return;
+    }
+    
+    // Простая функция экспорта в CSV
+    exportTasksToCSV();
 };
+
+// Функция экспорта в CSV
+function exportTasksToCSV() {
+    if (!taskManager.tasks || taskManager.tasks.length === 0) {
+        alert('Нет задач для экспорта');
+        return;
+    }
+    
+    // Создаем заголовки CSV
+    const headers = ['Заказ', 'Изделие', 'Операция', 'Статус', 'Прогресс', 'Исполнители'];
+    
+    // Создаем строки данных
+    const rows = taskManager.tasks.map(task => [
+        task.orderNumber || 'б/н',
+        task.product || '',
+        task.operation || '',
+        getStatusText(task.status),
+        `${task.completedQuantity || 0}/${task.totalQuantity || 1}`,
+        (task.executors || []).map(e => e.name).join(', ')
+    ]);
+    
+    // Объединяем в CSV
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    // Скачиваем файл
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `tasks_${currentSite}_${formatDateForFilename(taskManager.currentDate)}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Вспомогательная функция для имени файла
+function formatDateForFilename(date) {
+    const d = new Date(date);
+    return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
+}
 
 // Обновление отображения даты
 function updateDateDisplay() {
     const dateDisplay = document.getElementById('currentDateDisplay');
-    if (dateDisplay) {
+    if (dateDisplay && taskManager) {
         dateDisplay.textContent = formatDateDisplay(taskManager.currentDate);
     }
 }
@@ -75,6 +159,9 @@ function updateDateDisplay() {
 async function loadCustomOperations(site) {
     try {
         const response = await fetch('../data/norms.json');
+        if (!response.ok) {
+            throw new Error('Файл norms.json не найден');
+        }
         const data = await response.json();
         
         const customOps = {};
@@ -94,6 +181,7 @@ async function loadCustomOperations(site) {
             });
         }
         
+        console.log('Загружены кастомные операции:', customOps);
         return customOps;
     } catch (error) {
         console.error('Ошибка загрузки операций:', error);
@@ -127,7 +215,7 @@ function ensureTasksContainer() {
 
 function displayTasks() {
     const tasksContainer = document.getElementById('tasksContainer');
-    if (!tasksContainer) return;
+    if (!tasksContainer || !taskManager) return;
     
     if (!taskManager.tasks || taskManager.tasks.length === 0) {
         tasksContainer.innerHTML = `
@@ -350,5 +438,4 @@ function getStatusText(status) {
     }
 }
 
-// Экспортируем
-export { taskManager, displayTasks };
+console.log('✅ site-page.js загружен (без export)');
