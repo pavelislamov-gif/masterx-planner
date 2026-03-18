@@ -984,18 +984,17 @@ async function loadAllData() {
                 });
         }
 
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'masterx_orders') {
-                console.log('🔄 Изменение в localStorage (orders)');
-                orders = JSON.parse(e.newValue || '[]');
-                loadOrders();
-                updateStatistics();
-            }
-            if (e.key && e.key.startsWith('tasks_')) {
-                console.log('🔄 Изменение в localStorage (tasks)');
-                syncTasksFromHistory();
-            }
+window.addEventListener('storage', function(e) {
+    if (e.key === 'taskStatusChanged') {
+        const data = JSON.parse(e.newValue);
+        // Обновляем цвет квадратика
+        const squares = document.querySelectorAll(`[data-task="${data.taskId}"]`);
+        squares.forEach(square => {
+            square.style.backgroundColor = data.status === 'in_progress' ? '#ff9800' : 
+                                         data.status === 'completed' ? '#4caf50' : '#9e9e9e';
         });
+    }
+});
 
         window.addEventListener('taskStatusChanged', function(e) {
             console.log('🔄 Статус задачи изменён:', e.detail);
