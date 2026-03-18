@@ -164,7 +164,7 @@ header {
     margin: 2% auto;
     padding: 30px;
     width: 90%;
-    max-width: 500px;
+    max-width: 500px;        /* ← ИЗМЕНИТЕ ЭТО ЗНАЧЕНИЕ */
     max-height: 90vh;
     overflow-y: auto;
     border-radius: 12px;
