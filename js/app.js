@@ -26,7 +26,9 @@ async function loadAllData() {
         loadOrders();
         
         // Синхронизируем задачи с заказами
-        syncTasksFromHistory();
+        if (typeof syncTasksFromHistory === 'function') {
+            syncTasksFromHistory();
+        }
         
         // Заполняем выпадающие списки
         populateSelects();
@@ -66,11 +68,11 @@ function loadOrders() {
     
     let html = '';
     orders.forEach(order => {
-        const orderDate = new Date(order.date).toLocaleDateString('ru-RU');
+        const orderDate = order.date ? new Date(order.date).toLocaleDateString('ru-RU') : '—';
         const deadline = order.deadline ? new Date(order.deadline).toLocaleDateString('ru-RU') : '—';
         
         html += `
-            <tr data-order-id="${order.id}" style="cursor: pointer;" onclick="window.openOrderModal(${order.id})">
+            <tr data-order-id="${order.id}" style="cursor: pointer;" onclick="openOrderModal(${order.id})">
                 <td>${order.number || '—'}</td>
                 <td>${order.customer || '—'}</td>
                 <td>${orderDate}</td>
@@ -83,8 +85,8 @@ function loadOrders() {
                 <td>${order.items?.length || 0}</td>
                 <td>${order.totalQuantity || 0}</td>
                 <td>
-                    <button class="btn-icon" onclick="event.stopPropagation(); window.addExtraTask(${order.id})" title="Доп. задача">➕</button>
-                    <button class="btn-icon" onclick="event.stopPropagation(); window.deleteOrder(${order.id})" title="Удалить">🗑️</button>
+                    <button class="btn-icon" onclick="event.stopPropagation(); addExtraTask(${order.id})" title="Доп. задача">➕</button>
+                    <button class="btn-icon" onclick="event.stopPropagation(); deleteOrder(${order.id})" title="Удалить">🗑️</button>
                 </td>
             </tr>
         `;
@@ -105,10 +107,15 @@ function updateStatistics() {
     const completedOrders = orders.filter(o => o.status === 'completed').length;
     const totalItems = orders.reduce((sum, o) => sum + (o.totalQuantity || 0), 0);
     
-    document.getElementById('totalOrders')?.textContent = totalOrders;
-    document.getElementById('activeOrders')?.textContent = activeOrders;
-    document.getElementById('completedOrders')?.textContent = completedOrders;
-    document.getElementById('totalItems')?.textContent = totalItems;
+    const totalOrdersEl = document.getElementById('totalOrders');
+    const activeOrdersEl = document.getElementById('activeOrders');
+    const completedOrdersEl = document.getElementById('completedOrders');
+    const totalItemsEl = document.getElementById('totalItems');
+    
+    if (totalOrdersEl) totalOrdersEl.textContent = totalOrders;
+    if (activeOrdersEl) activeOrdersEl.textContent = activeOrders;
+    if (completedOrdersEl) completedOrdersEl.textContent = completedOrders;
+    if (totalItemsEl) totalItemsEl.textContent = totalItems;
 }
 
 function getStatusText(status) {
@@ -118,7 +125,7 @@ function getStatusText(status) {
         'completed': 'Завершён',
         'delayed': 'Просрочен'
     };
-    return statuses[status] || status;
+    return statuses[status] || status || 'Новый';
 }
 
 // ============== ЗАПОЛНЕНИЕ SELECT-ОВ ==============
@@ -149,10 +156,10 @@ function populateSelects() {
 
 // ============== ЗАГРУЗКА РАЗМЕРОВ ПРОДУКТА ==============
 function loadProductSizes() {
-    const type = document.getElementById('productType').value;
-    const productName = document.getElementById('productSelect').value;
-    const bracketName = document.getElementById('bracketSelect').value;
-    const lyreName = document.getElementById('lyreSelect').value;
+    const type = document.getElementById('productType')?.value;
+    const productName = document.getElementById('productSelect')?.value;
+    const bracketName = document.getElementById('bracketSelect')?.value;
+    const lyreName = document.getElementById('lyreSelect')?.value;
     
     let sizes = [];
     
@@ -211,62 +218,94 @@ function loadOrderData(orderId) {
     
     if (!order) return;
     
-    document.getElementById('orderNumber').value = order.number || '';
-    document.getElementById('orderCustomer').value = order.customer || '';
-    document.getElementById('orderDate').value = order.date || '';
-    document.getElementById('orderDeadline').value = order.deadline || '';
-    document.getElementById('orderStatus').value = order.status || 'new';
-    document.getElementById('orderNotes').value = order.notes || '';
+    const numberInput = document.getElementById('orderNumber');
+    const customerInput = document.getElementById('orderCustomer');
+    const dateInput = document.getElementById('orderDate');
+    const deadlineInput = document.getElementById('orderDeadline');
+    const statusSelect = document.getElementById('orderStatus');
+    const notesInput = document.getElementById('orderNotes');
+    
+    if (numberInput) numberInput.value = order.number || '';
+    if (customerInput) customerInput.value = order.customer || '';
+    if (dateInput) dateInput.value = order.date || '';
+    if (deadlineInput) deadlineInput.value = order.deadline || '';
+    if (statusSelect) statusSelect.value = order.status || 'new';
+    if (notesInput) notesInput.value = order.notes || '';
     
     // Загрузка позиций
     const itemsContainer = document.getElementById('orderItems');
-    if (itemsContainer && order.items) {
+    if (itemsContainer && itemsContainer.innerHTML) {
         itemsContainer.innerHTML = '';
-        order.items.forEach((item, index) => {
-            addOrderItem(item, index);
-        });
+        if (order.items && order.items.length) {
+            order.items.forEach((item, index) => {
+                addOrderItem(item, index);
+            });
+        } else {
+            addOrderItem();
+        }
     }
 }
 
 function clearOrderForm() {
-    document.getElementById('orderNumber').value = '';
-    document.getElementById('orderCustomer').value = '';
-    document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('orderDeadline').value = '';
-    document.getElementById('orderStatus').value = 'new';
-    document.getElementById('orderNotes').value = '';
-    document.getElementById('orderItems').innerHTML = '';
-    addOrderItem();
+    const numberInput = document.getElementById('orderNumber');
+    const customerInput = document.getElementById('orderCustomer');
+    const dateInput = document.getElementById('orderDate');
+    const deadlineInput = document.getElementById('orderDeadline');
+    const statusSelect = document.getElementById('orderStatus');
+    const notesInput = document.getElementById('orderNotes');
+    const itemsContainer = document.getElementById('orderItems');
+    
+    if (numberInput) numberInput.value = '';
+    if (customerInput) customerInput.value = '';
+    if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+    if (deadlineInput) deadlineInput.value = '';
+    if (statusSelect) statusSelect.value = 'new';
+    if (notesInput) notesInput.value = '';
+    if (itemsContainer) {
+        itemsContainer.innerHTML = '';
+        addOrderItem();
+    }
 }
 
-function addOrderItem(item = null, index = 0) {
+function addOrderItem(item = null) {
     const container = document.getElementById('orderItems');
+    if (!container) return;
+    
     const itemDiv = document.createElement('div');
     itemDiv.className = 'order-item';
+    itemDiv.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px;';
+    
     itemDiv.innerHTML = `
-        <select class="item-type" style="width: 100px;">
+        <select class="item-type" style="width: 120px; padding: 5px;">
             <option value="product" ${item?.type === 'product' ? 'selected' : ''}>Продукт</option>
             <option value="bracket" ${item?.type === 'bracket' ? 'selected' : ''}>Кронштейн</option>
             <option value="lyre" ${item?.type === 'lyre' ? 'selected' : ''}>Лира</option>
         </select>
-        <input type="text" class="item-name" placeholder="Название" value="${item?.product || ''}" style="flex: 2;">
-        <input type="text" class="item-size" placeholder="Размер" value="${item?.size || ''}" style="flex: 1;">
-        <input type="number" class="item-quantity" placeholder="Кол-во" value="${item?.quantity || 1}" style="width: 80px;">
-        <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: #ff3b3b; cursor: pointer;">✕</button>
+        <input type="text" class="item-name" placeholder="Название" value="${item?.product || ''}" style="flex: 2; padding: 5px;">
+        <input type="text" class="item-size" placeholder="Размер" value="${item?.size || ''}" style="flex: 1; padding: 5px;">
+        <input type="number" class="item-quantity" placeholder="Кол-во" value="${item?.quantity || 1}" style="width: 80px; padding: 5px;">
+        <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: #ff3b3b; cursor: pointer; font-size: 18px;">✕</button>
     `;
     container.appendChild(itemDiv);
 }
 
 // ============== СОХРАНЕНИЕ ЗАКАЗА ==============
 function saveOrder() {
+    const numberInput = document.getElementById('orderNumber');
+    const customerInput = document.getElementById('orderCustomer');
+    const dateInput = document.getElementById('orderDate');
+    const deadlineInput = document.getElementById('orderDeadline');
+    const statusSelect = document.getElementById('orderStatus');
+    const notesInput = document.getElementById('orderNotes');
+    
     const orderData = {
         id: currentOrderId || Date.now(),
-        number: document.getElementById('orderNumber').value,
-        customer: document.getElementById('orderCustomer').value,
-        date: document.getElementById('orderDate').value,
-        deadline: document.getElementById('orderDeadline').value,
-        status: document.getElementById('orderStatus').value,
-        notes: document.getElementById('orderNotes').value,
+        number: numberInput ? numberInput.value : '',
+        customer: customerInput ? customerInput.value : '',
+        date: dateInput ? dateInput.value : new Date().toISOString().split('T')[0],
+        deadline: deadlineInput ? deadlineInput.value : '',
+        status: statusSelect ? statusSelect.value : 'new',
+        notes: notesInput ? notesInput.value : '',
         items: [],
         totalQuantity: 0
     };
@@ -486,7 +525,7 @@ function addExtraTask(orderId) {
     
     orders[orderIndex].extraTasks.push({
         title: extraTask,
-        site: 'slesarniy', // По умолчанию слесарный
+        site: 'slesarniy',
         description: ''
     });
     
@@ -611,9 +650,11 @@ window.closeMaterialsModal = closeMaterialsModal;
 window.syncTasksFromHistory = syncTasksFromHistory;
 
 console.log('📤 Экспорт функций в глобальную область...');
-console.log('✅ Функции экспортированы:', Object.keys(window).filter(key => 
-    typeof window[key] === 'function' && 
-    ['openOrderModal', 'closeOrderModal', 'loadProductSizes', 'exportOrders', 
-     'showMaterialsReport', 'deleteOrder', 'addExtraTask', 'closeMaterialsModal', 'syncTasksFromHistory'].includes(key)
-));
+
+// Проверяем, что функции экспортированы
+const exportedFunctions = ['openOrderModal', 'closeOrderModal', 'loadProductSizes', 'exportOrders', 
+    'showMaterialsReport', 'deleteOrder', 'addExtraTask', 'closeMaterialsModal', 'syncTasksFromHistory'];
+    
+const availableFunctions = exportedFunctions.filter(name => typeof window[name] === 'function');
+console.log('✅ Функции экспортированы:', availableFunctions);
 console.log('✅ app.js полностью загружен');
