@@ -1,4 +1,8 @@
-// js/task-manager.js - УНИВЕРСАЛЬНЫЙ МЕНЕДЖЕР ЗАДАЧ (БЕЗ EXPORT)
+@@ -1,590 +1,135 @@
+// js/task-manager.js - УНИВЕРСАЛЬНЫЙ МЕНЕДЖЕР ЗАДАЧ (ИСПРАВЛЕННАЯ ВЕРСИЯ)
+// Хранилище задач
+let tasks = [];
+let currentFilterDate = new Date().toISOString().split('T')[0]; // Сегодня по умолчанию
 
 class TaskManager {
     constructor(siteType, customOperations = {}) {
@@ -27,6 +31,23 @@ class TaskManager {
                 'XGRAY v.1': ['Заготовка', 'Точение профиля', 'Точение планки'],
                 'XGRAY v.2': ['Заготовка', 'Точение профиля', 'Точение планки'],
                 'default': ['Заготовка', 'Точение', 'Доводка']
+// Загрузка задач из localStorage
+export function loadTasks() {
+    const savedTasks = localStorage.getItem('production_tasks');
+    if (savedTasks) {
+        tasks = JSON.parse(savedTasks);
+    } else {
+        // Тестовые данные
+        tasks = [
+            {
+                id: 1,
+                title: 'Изготовление вала',
+                description: 'Вал приводной, чертеж 123',
+                site: 'tokarniy',
+                status: 'in-progress',
+                date: '2026-03-18', // Сегодня
+                deadline: '2026-03-18',
+                assignee: 'Петров'
             },
             slesarniy: {
                 'XRAY 6-T2 BT 220 Шторка х2': [
@@ -39,11 +60,29 @@ class TaskManager {
                     'УВ корпуса'
                 ],
                 'default': ['Сборка', 'Доводка', 'Контроль']
+            {
+                id: 2,
+                title: 'Фрезеровка корпуса',
+                description: 'Корпус редуктора',
+                site: 'frezerniy',
+                status: 'new',
+                date: '2026-03-18', // Сегодня
+                deadline: '2026-03-19',
+                assignee: 'Сидоров'
             },
             frezerniy: {
                 'default': ['Фрезеровка', 'Сверление', 'Обработка']
+            {
+                id: 3,
+                title: 'Гибка листа',
+                description: 'Лист 3мм, чертеж 456',
+                site: 'lazerno-gibochniy',
+                status: 'pending',
+                date: '2026-03-19', // Завтра
+                deadline: '2026-03-20',
+                assignee: 'Иванов'
             },
-            'lazerno-gibochniy': {
+            lazerno: {
                 'default': ['Раскрой', 'Гибка', 'Резка']
             },
             polimerniy: {
@@ -64,13 +103,9 @@ class TaskManager {
         this._isLoading = true;
         
         try {
-            // Загружаем заказы из глобальной функции если она есть
-            if (typeof window.loadOrdersFromStorage === 'function') {
-                this.orders = window.loadOrdersFromStorage() || [];
-            } else {
-                this.orders = [];
-            }
-            
+            this.orders = typeof loadOrdersFromStorage === 'function' 
+                ? loadOrdersFromStorage() || [] 
+                : [];
             this.generateTasks();
         } catch (error) {
             console.error('Ошибка загрузки данных:', error);
@@ -86,40 +121,95 @@ class TaskManager {
         return this.tasks;
     }
     
-generateTasks() {
-    console.log('generateTasks начата для даты:', this.formatDate(this.currentDate));
-    
-    const dateStr = this.formatDate(this.currentDate);
-    
-    // Загружаем историю ТОЛЬКО для ЭТОЙ даты
-    let historyTasks = [];
-    try {
-        const historyKey = `tasks_${this.siteType}_${dateStr}`;
-        const history = localStorage.getItem(historyKey);
-        if (history) {
-            historyTasks = JSON.parse(history);
-            console.log(`Загружено ${historyTasks.length} задач из истории для ${dateStr}`);
-        } else {
-            console.log(`Нет истории для ${dateStr}`);
+    generateTasks() {
+        console.log('generateTasks начата');
+        this.tasks = [];
+        const dateStr = this.formatDate(this.currentDate);
+        
+        // Загружаем историю для этой даты
+        let historyTasks = [];
+        try {
+            const historyKey = `tasks_${this.siteType}_${dateStr}`;
+            const history = localStorage.getItem(historyKey);
+            if (history) {
+                historyTasks = JSON.parse(history);
+                console.log(`Загружено ${historyTasks.length} задач из истории`);
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки истории:', error);
         }
-    } catch (error) {
-        console.error('Ошибка загрузки истории:', error);
+        
+        this.orders.forEach(order => {
+            if (order.status !== 'active') return;
+            
+            order.items.forEach(item => {
+                const productName = item.product;
+                const operations = this.getOperationsForProduct(productName);
+                
+                operations.forEach((op, index) => {
+                    const taskId = `${order.id}_${this.siteType}_${index}`;
+                    const taskStatus = order.tasks?.[taskId];
+                    
+                    // Ищем задачу в истории
+                    const historyTask = historyTasks.find(t => t.id === taskId);
+                    
+                    const task = {
+                        id: taskId,
+                        orderId: order.id,
+                        orderNumber: order.number,
+                        product: productName,
+                        size: item.size || 'Стандартный',
+                        totalQuantity: parseInt(item.quantity) || 1,
+                        completedQuantity: historyTask?.completedQuantity || 0,
+                        operation: op,
+                        index: index,
+                        status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
+                        executors: historyTask?.executors || [],
+                        date: dateStr,
+                        isExtra: false
+                    };
+                    
+                    console.log(`Создана задача ${taskId} с ${task.executors.length} исполнителями:`, task.executors);
+                    this.tasks.push(task);
+                });
+            });
+            
+            // Дополнительные задачи
+            if (order.extraTasks) {
+                order.extraTasks.forEach((extra, index) => {
+                    if (extra.site !== this.siteType) return;
+                    
+                    const taskId = `${order.id}_extra_${index}`;
+                    const taskStatus = order.tasks?.[taskId];
+                    
+                    const historyTask = historyTasks.find(t => t.id === taskId);
+                    
+                    const task = {
+                        id: taskId,
+                        orderId: order.id,
+                        orderNumber: order.number,
+                        product: extra.title,
+                        description: extra.description || '',
+                        totalQuantity: 1,
+                        completedQuantity: historyTask?.completedQuantity || 0,
+                        operation: extra.title,
+                        isExtra: true,
+                        status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
+                        executors: historyTask?.executors || [],
+                        date: dateStr
+                    };
+                    
+                    console.log(`Создана доп. задача ${taskId} с ${task.executors.length} исполнителями:`, task.executors);
+                    this.tasks.push(task);
+                });
+            }
+        });
+        
+        console.log(`generateTasks завершена, всего задач: ${this.tasks.length}`);
+        
+        // Сохраняем в историю
+        this._saveTasksToHistoryInternal(dateStr);
     }
-    
-    // Если есть задачи в истории для этой даты - используем их
-    if (historyTasks.length > 0) {
-        this.tasks = historyTasks;
-        console.log(`Использую ${this.tasks.length} задач из истории для ${dateStr}`);
-        return;
-    }
-    
-    // Если нет истории - создаем пустой список
-    this.tasks = [];
-    console.log(`Создан пустой список задач для ${dateStr}`);
-    
-    // Сохраняем пустой список в историю
-    this._saveTasksToHistoryInternal(dateStr);
-}
     
     // ============== РАБОТА С ОПЕРАЦИЯМИ ==============
     
@@ -138,8 +228,17 @@ generateTasks() {
         // 3. Частичное совпадение
         const allOps = { ...this.customOperations, ...siteOps };
         for (const key in allOps) {
-            if (key !== 'default' && productName && productName.includes(key)) {
+            if (key !== 'default' && productName.includes(key)) {
                 return allOps[key];
+            {
+                id: 4,
+                title: 'Полировка деталей',
+                description: 'Комплект деталей',
+                site: 'polimerniy',
+                status: 'new',
+                date: '2026-03-20', // Послезавтра
+                deadline: '2026-03-21',
+                assignee: 'Козлов'
             }
         }
         
@@ -152,7 +251,7 @@ generateTasks() {
             'tokarniy': 'Токарная операция',
             'slesarniy': 'Слесарная операция',
             'frezerniy': 'Фрезерная операция',
-            'lazerno-gibochniy': 'Лазерная операция',
+            'lazerno': 'Лазерная операция',
             'polimerniy': 'Полимерная операция'
         };
         return names[this.siteType] || 'Операция';
@@ -190,28 +289,91 @@ generateTasks() {
     
     // Внутренний метод сохранения без уведомления
     _saveTasksToHistoryInternal(dateStr) {
-    if (this._isSaving) {
-        console.log('saveTasksToHistoryInternal: уже сохраняется, пропускаем');
-        return;
+        if (this._isSaving) {
+            console.log('saveTasksToHistoryInternal: уже сохраняется, пропускаем');
+            return;
+        }
+        
+        this._isSaving = true;
+        
+        try {
+            const historyKey = `tasks_${this.siteType}_${dateStr}`;
+            
+            // Загружаем существующую историю
+            let existingTasks = [];
+            try {
+                const existing = localStorage.getItem(historyKey);
+                if (existing) {
+                    existingTasks = JSON.parse(existing);
+                }
+            } catch (e) {
+                console.warn('Ошибка загрузки существующей истории:', e);
+            }
+            
+            // Объединяем задачи - сохраняем все текущие задачи
+            localStorage.setItem(historyKey, JSON.stringify(this.tasks));
+            console.log(`✅ История сохранена для ${dateStr}, задач: ${this.tasks.length}`);
+            
+            // Для отладки: проверим, сохранились ли исполнители
+            const saved = JSON.parse(localStorage.getItem(historyKey));
+            const totalExecutors = saved.reduce((sum, t) => sum + (t.executors?.length || 0), 0);
+            console.log(`  Из них исполнителей: ${totalExecutors}`);
+            
+        } catch (error) {
+            console.error('Ошибка сохранения в историю:', error);
+        } finally {
+            setTimeout(() => {
+                this._isSaving = false;
+            }, 100);
+        }
     }
     
-    this._isSaving = true;
+    // Публичный метод с уведомлением
+    saveTasksToHistory(dateStr) {
+        this._saveTasksToHistoryInternal(dateStr);
+        
+        // Защита от слишком частых уведомлений
+        const now = Date.now();
+        if (now - this._lastNotificationTime < 500) {
+            console.log('saveTasksToHistory: слишком часто, пропускаем уведомление');
+            return;
+        }
+        
+        this._lastNotificationTime = now;
+        this.notifyHistoryChanged(dateStr);
+    }
     
-    try {
-        const historyKey = `tasks_${this.siteType}_${dateStr}`;
+    notifyHistoryChanged(dateStr) {
+        // Предотвращаем множественные уведомления
+        if (this._isNotifying) {
+            console.log('notifyHistoryChanged: уже уведомляем, пропускаем');
+            return;
+        }
         
-        // Сохраняем ТОЛЬКО задачи для этой конкретной даты
-        localStorage.setItem(historyKey, JSON.stringify(this.tasks));
-        console.log(`✅ История сохранена для ${dateStr}, задач: ${this.tasks.length}`);
+        this._isNotifying = true;
         
-    } catch (error) {
-        console.error('Ошибка сохранения в историю:', error);
-    } finally {
+        // Используем setTimeout для асинхронной отправки
         setTimeout(() => {
-            this._isSaving = false;
-        }, 100);
+            try {
+                const event = new CustomEvent('taskHistoryChanged', {
+                    detail: { 
+                        siteType: this.siteType, 
+                        date: dateStr,
+                        timestamp: Date.now()
+                    }
+                });
+                window.dispatchEvent(event);
+                console.log(`📢 Уведомление об изменении истории отправлено для ${dateStr}`);
+            } catch (error) {
+                console.error('Ошибка при отправке уведомления:', error);
+            } finally {
+                // Сбрасываем флаг через некоторое время
+                setTimeout(() => {
+                    this._isNotifying = false;
+                }, 300);
+            }
+        }, 10);
     }
-}
     
     // ============== УПРАВЛЕНИЕ ИСПОЛНИТЕЛЯМИ ==============
     
@@ -234,7 +396,7 @@ generateTasks() {
         }
         
         // Проверяем, нет ли уже такого исполнителя
-        const existing = task.executors.find(e => e.name && e.name.toLowerCase() === executorName.trim().toLowerCase());
+        const existing = task.executors.find(e => e.name.toLowerCase() === executorName.trim().toLowerCase());
         if (existing) {
             console.warn('Исполнитель уже существует:', executorName);
             return false;
@@ -254,6 +416,7 @@ generateTasks() {
         task.executors.push(newExecutor);
         
         console.log('✅ Исполнитель добавлен, теперь исполнителей:', task.executors.length);
+        console.log('Текущие исполнители:', task.executors);
         
         // Сохраняем в историю
         this.saveTasksToHistory(this.formatDate(this.currentDate));
@@ -298,6 +461,8 @@ generateTasks() {
         
         this.saveTasksToHistory(this.formatDate(this.currentDate));
         return true;
+        ];
+        saveTasks();
     }
     
     updateExecutorStatus(taskId, executorId, status) {
@@ -356,25 +521,74 @@ generateTasks() {
         
         this.updateOrderStatus(taskId, 'completed');
         this.saveTasksToHistory(this.formatDate(this.currentDate));
+    return tasks;
+}
+
+// Сохранение задач
+export function saveTasks() {
+    localStorage.setItem('production_tasks', JSON.stringify(tasks));
+}
+
+// Получение задач для конкретного участка и даты
+export function getTasksBySiteAndDate(site, date = currentFilterDate) {
+    return tasks.filter(task => 
+        task.site === site && task.date === date
+    );
+}
+
+// Получение задач на сегодня для участка
+export function getTodayTasksBySite(site) {
+    const today = new Date().toISOString().split('T')[0];
+    return getTasksBySiteAndDate(site, today);
+}
+
+// Получение задач на выбранную дату
+export function getTasksByDate(date) {
+    return tasks.filter(task => task.date === date);
+}
+
+// Установка текущей даты фильтрации
+export function setFilterDate(date) {
+    currentFilterDate = date;
+    return currentFilterDate;
+}
+
+// Получение текущей даты фильтрации
+export function getCurrentFilterDate() {
+    return currentFilterDate;
+}
+
+// Добавление задачи
+export function addTask(task) {
+    task.id = Date.now();
+    task.date = task.date || new Date().toISOString().split('T')[0]; // Дата выполнения задачи
+    tasks.push(task);
+    saveTasks();
+    return task;
+}
+
+// Обновление задачи
+export function updateTask(updatedTask) {
+    const index = tasks.findIndex(t => t.id === updatedTask.id);
+    if (index !== -1) {
+        tasks[index] = updatedTask;
+        saveTasks();
         return true;
     }
     
     updateOrderStatus(taskId, status) {
         const [orderId] = taskId.split('_');
+        const orders = typeof loadOrdersFromStorage === 'function' ? loadOrdersFromStorage() || [] : [];
+        const orderIndex = orders.findIndex(o => o.id == orderId);
         
-        if (typeof window.loadOrdersFromStorage === 'function') {
-            const orders = window.loadOrdersFromStorage() || [];
-            const orderIndex = orders.findIndex(o => o.id == orderId);
-            
-            if (orderIndex !== -1) {
-                if (!orders[orderIndex].tasks) orders[orderIndex].tasks = {};
-                
-                orders[orderIndex].tasks[taskId] = this.convertTaskStatus(status);
-                
-                if (typeof window.saveOrdersToStorage === 'function') {
-                    window.saveOrdersToStorage(orders);
-                }
-            }
+        if (orderIndex === -1) return;
+        
+        if (!orders[orderIndex].tasks) orders[orderIndex].tasks = {};
+        
+        orders[orderIndex].tasks[taskId] = this.convertTaskStatus(status);
+        
+        if (typeof saveOrdersToStorage === 'function') {
+            saveOrdersToStorage(orders);
         }
         
         this.notifyOtherTabs(taskId, status);
@@ -395,13 +609,11 @@ generateTasks() {
     
     // ============== НАВИГАЦИЯ ПО ДАТАМ ==============
     
-setDate(date) {
-    // Исправление: создаем дату без учета часового пояса
-    const [year, month, day] = date.split('-');
-    this.currentDate = new Date(year, month - 1, day, 12, 0, 0); // Фиксируем полдень
-    this.loadData();
-    return this.tasks;
-}
+    setDate(date) {
+        this.currentDate = new Date(date);
+        this.loadData();
+        return this.tasks;
+    }
     
     prevDay() {
         const newDate = new Date(this.currentDate);
@@ -470,11 +682,33 @@ setDate(date) {
             console.log(`Нет истории для ${dateStr}`);
         }
     }
+    return false;
 }
 
 // Делаем класс глобально доступным
 if (typeof window !== 'undefined') {
     window.TaskManager = TaskManager;
+// Удаление задачи
+export function deleteTask(taskId) {
+    tasks = tasks.filter(t => t.id !== taskId);
+    saveTasks();
 }
 
-console.log('✅ task-manager.js загружен (без export)');
+console.log('✅ task-manager.js загружен (исправленная версия)');
+// Получение статистики по задачам на дату
+export function getTasksStats(date = currentFilterDate) {
+    const tasksOnDate = tasks.filter(task => task.date === date);
+    
+    return {
+        total: tasksOnDate.length,
+        active: tasksOnDate.filter(t => t.status !== 'completed').length,
+        completed: tasksOnDate.filter(t => t.status === 'completed').length,
+        bySite: {
+            tokarniy: tasksOnDate.filter(t => t.site === 'tokarniy').length,
+            frezerniy: tasksOnDate.filter(t => t.site === 'frezerniy').length,
+            'lazerno-gibochniy': tasksOnDate.filter(t => t.site === 'lazerno-gibochniy').length,
+            polimerniy: tasksOnDate.filter(t => t.site === 'polimerniy').length,
+            slesarniy: tasksOnDate.filter(t => t.site === 'slesarniy').length
+        }
+    };
+}
