@@ -454,7 +454,7 @@ function getOperationCount(productName, siteKey) {
     'XPOINT OVHD': 2,
     'XSPOT': 6,
     'ACENTO 3T': 5,
-    'ACENTO 4': 3
+    'ACENTO 4': 3,
     'ACENTO 4': 3
     // Остальные изделия не указываем - они вернут 1 по умолчанию
 };
