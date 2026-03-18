@@ -1,7 +1,6 @@
 // js/site-page.js - Управление страницами участков
 
 import { loadOrdersFromStorage } from './storage.js';
-// js/site-page.js - Управление страницами участков (БЕЗ EXPORT)
 
 // Текущий участок определяется из HTML
 const currentSite = document.querySelector('.site-page')?.dataset?.site || 'unknown';
@@ -13,15 +12,6 @@ let taskManager;
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('site-page.js загружен, участок:', currentSite);
 
-    // Проверяем, загружен ли TaskManager
-    if (typeof TaskManager === 'undefined') {
-        console.error('❌ TaskManager не загружен! Проверьте подключение task-manager.js');
-        showError('Ошибка загрузки модуля задач');
-        return;
-    }
-    
-    console.log('✅ TaskManager загружен успешно');
-    
     // Загружаем кастомные операции для участка
     const customOps = await loadCustomOperations(currentSite);
 
@@ -31,15 +21,19 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Загружаем данные на сегодня
     taskManager.today();
 
+    // Находим контейнер для задач (если его нет, создаем)
     // Обновляем отображение даты
     updateDateDisplay();
-
+    
     // Создаем контейнер для задач (если его нет)
     ensureTasksContainer();
 
     // Отображаем задачи
     displayTasks();
 
+    // НАВИГАЦИЯ: добавляем обработчики для существующих кнопок
+    setupNavigationButtons();
+    
     // Слушаем изменения истории
     window.addEventListener('taskHistoryChanged', function(e) {
         if (e.detail.siteType === currentSite) {
@@ -49,38 +43,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 });
 
-// Функция для отображения ошибки
-function showError(message) {
-    const container = document.getElementById('tasksContainer') || createErrorContainer();
-    if (container) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px; background: #ffebee; border-radius: 8px; margin: 20px;">
-                <p style="color: #c62828; font-size: 1.2rem; margin-bottom: 10px;">❌ ${message}</p>
-                <p style="color: #666;">Убедитесь, что файл task-manager.js подключен перед site-page.js</p>
-                <p style="color: #999; font-size: 0.9rem; margin-top: 15px;">Порядок подключения: storage.js → data-loader.js → task-operations.js → task-manager.js → site-page.js</p>
-            </div>
-        `;
-    }
-}
-
-function createErrorContainer() {
-    const main = document.querySelector('main') || document.body;
-    const container = document.createElement('div');
-    container.id = 'tasksContainer';
-    main.appendChild(container);
-    return container;
-}
-
 // ============== ФУНКЦИИ ДЛЯ ONCLICK КНОПОК ==============
 
 // Эти функции будут доступны глобально
 window.changeDate = function(direction) {
     console.log('changeDate:', direction);
-
-    if (!taskManager) {
-        alert('TaskManager не инициализирован');
-        return;
-    }
     
     if (direction === 'prev') {
         taskManager.prevDay();
@@ -89,7 +56,7 @@ window.changeDate = function(direction) {
     } else if (direction === 'today') {
         taskManager.today();
     }
-
+    
     updateDateDisplay();
     displayTasks();
 };
@@ -98,65 +65,12 @@ window.exportToExcel = function() {
     console.log('exportToExcel');
     // Здесь будет функция экспорта в Excel
     alert('Экспорт в Excel будет доступен позже');
-    
-    if (!taskManager) {
-        alert('Нет данных для экспорта');
-        return;
-    }
-    
-    // Простая функция экспорта в CSV
-    exportTasksToCSV();
 };
-
-// Функция экспорта в CSV
-function exportTasksToCSV() {
-    if (!taskManager.tasks || taskManager.tasks.length === 0) {
-        alert('Нет задач для экспорта');
-        return;
-    }
-    
-    // Создаем заголовки CSV
-    const headers = ['Заказ', 'Изделие', 'Операция', 'Статус', 'Прогресс', 'Исполнители'];
-    
-    // Создаем строки данных
-    const rows = taskManager.tasks.map(task => [
-        task.orderNumber || 'б/н',
-        task.product || '',
-        task.operation || '',
-        getStatusText(task.status),
-        `${task.completedQuantity || 0}/${task.totalQuantity || 1}`,
-        (task.executors || []).map(e => e.name).join(', ')
-    ]);
-    
-    // Объединяем в CSV
-    const csvContent = [
-        headers.join(','),
-        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
-    
-    // Скачиваем файл
-    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `tasks_${currentSite}_${formatDateForFilename(taskManager.currentDate)}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-// Вспомогательная функция для имени файла
-function formatDateForFilename(date) {
-    const d = new Date(date);
-    return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
-}
 
 // Обновление отображения даты
 function updateDateDisplay() {
     const dateDisplay = document.getElementById('currentDateDisplay');
     if (dateDisplay) {
-    if (dateDisplay && taskManager) {
         dateDisplay.textContent = formatDateDisplay(taskManager.currentDate);
     }
 }
@@ -165,9 +79,6 @@ function updateDateDisplay() {
 async function loadCustomOperations(site) {
     try {
         const response = await fetch('../data/norms.json');
-        if (!response.ok) {
-            throw new Error('Файл norms.json не найден');
-        }
         const data = await response.json();
 
         const customOps = {};
@@ -187,11 +98,74 @@ async function loadCustomOperations(site) {
             });
         }
 
-        console.log('Загружены кастомные операции:', customOps);
         return customOps;
     } catch (error) {
         console.error('Ошибка загрузки операций:', error);
         return {};
+    }
+}
+
+// ============== НАСТРОЙКА КНОПОК НАВИГАЦИИ ==============
+
+function setupNavigationButtons() {
+    // Кнопка "Вчера"
+    const yesterdayBtn = document.getElementById('yesterdayBtn') || 
+                         document.querySelector('[data-action="yesterday"]') ||
+                         document.querySelector('.yesterday-btn');
+    
+    if (yesterdayBtn) {
+        yesterdayBtn.addEventListener('click', () => {
+            console.log('Нажата кнопка Вчера');
+            taskManager.prevDay();
+            updateActiveButton(yesterdayBtn);
+            displayTasks();
+        });
+    }
+    
+    // Кнопка "Сегодня"
+    const todayBtn = document.getElementById('todayBtn') || 
+                     document.querySelector('[data-action="today"]') ||
+                     document.querySelector('.today-btn');
+    
+    if (todayBtn) {
+        todayBtn.addEventListener('click', () => {
+            console.log('Нажата кнопка Сегодня');
+            taskManager.today();
+            updateActiveButton(todayBtn);
+            displayTasks();
+        });
+    }
+    
+    // Кнопка "Завтра"
+    const tomorrowBtn = document.getElementById('tomorrowBtn') || 
+                        document.querySelector('[data-action="tomorrow"]') ||
+                        document.querySelector('.tomorrow-btn');
+    
+    if (tomorrowBtn) {
+        tomorrowBtn.addEventListener('click', () => {
+            console.log('Нажата кнопка Завтра');
+            taskManager.nextDay();
+            updateActiveButton(tomorrowBtn);
+            displayTasks();
+        });
+    }
+    
+    // Если кнопки найдены по ID, добавляем класс active на сегодня
+    if (todayBtn) {
+        todayBtn.classList.add('active');
+    }
+}
+
+// Подсветка активной кнопки
+function updateActiveButton(clickedBtn) {
+    // Убираем active у всех
+    document.querySelectorAll('.nav-btn, .yesterday-btn, .today-btn, .tomorrow-btn, [data-action]').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Добавляем active нажатой кнопке
+    if (clickedBtn) {
+        clickedBtn.classList.add('active');
     }
 }
 
@@ -222,8 +196,10 @@ function ensureTasksContainer() {
 function displayTasks() {
     const tasksContainer = document.getElementById('tasksContainer');
     if (!tasksContainer) return;
-    if (!tasksContainer || !taskManager) return;
 
+    // Обновляем заголовок с датой
+    updatePageTitle();
+    
     if (!taskManager.tasks || taskManager.tasks.length === 0) {
         tasksContainer.innerHTML = `
             <div style="text-align: center; padding: 60px 20px;">
@@ -232,6 +208,7 @@ function displayTasks() {
                     Нет задач на ${formatDateDisplay(taskManager.currentDate)}
                 </p>
                 <p style="color: #bbb; font-size: 0.95rem; margin-top: 10px;">
+                    Выберите другой день или создайте новую задачу
                     Выберите другой день с помощью кнопок выше
                 </p>
             </div>
@@ -280,6 +257,7 @@ function displayTasks() {
                 padding: 16px;
                 margin-bottom: 12px;
                 box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                transition: all 0.2s;
             ">
                 <div style="display: flex; justify-content: space-between;">
                     <div style="flex: 1;">
@@ -384,6 +362,17 @@ function getStats() {
     };
 }
 
+// ============== ОБНОВЛЕНИЕ ЗАГОЛОВКА ==============
+
+function updatePageTitle() {
+    const titleElement = document.querySelector('h2') || document.querySelector('.page-title');
+    if (titleElement) {
+        const siteName = getSiteName(currentSite);
+        titleElement.innerHTML = `${siteName} участок — ${formatDateDisplay(taskManager.currentDate)}`;
+    }
+}
+
+// ============== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==============
 // ============== ФОРМАТИРОВАНИЕ ДАТЫ ==============
 
 function formatDateDisplay(date) {
@@ -400,17 +389,33 @@ function formatDateDisplay(date) {
 
     let prefix = '';
     if (dateStr === todayStr) {
+        return 'сегодня';
         prefix = 'Сегодня, ';
     } else if (dateStr === tomorrowStr) {
+        return 'завтра';
         prefix = 'Завтра, ';
     } else if (dateStr === yesterdayStr) {
+        return 'вчера';
+    } else {
+        const options = { day: 'numeric', month: 'long' };
+        return date.toLocaleDateString('ru-RU', options);
         prefix = 'Вчера, ';
     }
-
+    
     const options = { day: 'numeric', month: 'long', year: 'numeric' };
     return prefix + date.toLocaleDateString('ru-RU', options);
 }
 
+function getSiteName(site) {
+    const names = {
+        'frezerniy': 'Фрезерный',
+        'tokarniy': 'Токарный',
+        'slesarniy': 'Слесарный',
+        'lazerno-gibochniy': 'Лазерно-гибочный',
+        'polimerniy': 'Полимерный'
+    };
+    return names[site] || site;
+}
 // ============== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==============
 
 function getStatusColor(status) {
@@ -447,4 +452,3 @@ function getStatusText(status) {
 
 // Экспортируем
 export { taskManager, displayTasks };
-console.log('✅ site-page.js загружен (без export)');
