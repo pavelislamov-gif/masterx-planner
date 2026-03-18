@@ -21,14 +21,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Загружаем данные на сегодня
     taskManager.today();
     
-    // Находим контейнер для задач (если его нет, создаем)
+    // Обновляем отображение даты
+    updateDateDisplay();
+    
+    // Создаем контейнер для задач (если его нет)
     ensureTasksContainer();
     
     // Отображаем задачи
     displayTasks();
-    
-    // НАВИГАЦИЯ: добавляем обработчики для существующих кнопок
-    setupNavigationButtons();
     
     // Слушаем изменения истории
     window.addEventListener('taskHistoryChanged', function(e) {
@@ -38,6 +38,38 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
 });
+
+// ============== ФУНКЦИИ ДЛЯ ONCLICK КНОПОК ==============
+
+// Эти функции будут доступны глобально
+window.changeDate = function(direction) {
+    console.log('changeDate:', direction);
+    
+    if (direction === 'prev') {
+        taskManager.prevDay();
+    } else if (direction === 'next') {
+        taskManager.nextDay();
+    } else if (direction === 'today') {
+        taskManager.today();
+    }
+    
+    updateDateDisplay();
+    displayTasks();
+};
+
+window.exportToExcel = function() {
+    console.log('exportToExcel');
+    // Здесь будет функция экспорта в Excel
+    alert('Экспорт в Excel будет доступен позже');
+};
+
+// Обновление отображения даты
+function updateDateDisplay() {
+    const dateDisplay = document.getElementById('currentDateDisplay');
+    if (dateDisplay) {
+        dateDisplay.textContent = formatDateDisplay(taskManager.currentDate);
+    }
+}
 
 // Загрузка кастомных операций для участка
 async function loadCustomOperations(site) {
@@ -69,70 +101,6 @@ async function loadCustomOperations(site) {
     }
 }
 
-// ============== НАСТРОЙКА КНОПОК НАВИГАЦИИ ==============
-
-function setupNavigationButtons() {
-    // Кнопка "Вчера"
-    const yesterdayBtn = document.getElementById('yesterdayBtn') || 
-                         document.querySelector('[data-action="yesterday"]') ||
-                         document.querySelector('.yesterday-btn');
-    
-    if (yesterdayBtn) {
-        yesterdayBtn.addEventListener('click', () => {
-            console.log('Нажата кнопка Вчера');
-            taskManager.prevDay();
-            updateActiveButton(yesterdayBtn);
-            displayTasks();
-        });
-    }
-    
-    // Кнопка "Сегодня"
-    const todayBtn = document.getElementById('todayBtn') || 
-                     document.querySelector('[data-action="today"]') ||
-                     document.querySelector('.today-btn');
-    
-    if (todayBtn) {
-        todayBtn.addEventListener('click', () => {
-            console.log('Нажата кнопка Сегодня');
-            taskManager.today();
-            updateActiveButton(todayBtn);
-            displayTasks();
-        });
-    }
-    
-    // Кнопка "Завтра"
-    const tomorrowBtn = document.getElementById('tomorrowBtn') || 
-                        document.querySelector('[data-action="tomorrow"]') ||
-                        document.querySelector('.tomorrow-btn');
-    
-    if (tomorrowBtn) {
-        tomorrowBtn.addEventListener('click', () => {
-            console.log('Нажата кнопка Завтра');
-            taskManager.nextDay();
-            updateActiveButton(tomorrowBtn);
-            displayTasks();
-        });
-    }
-    
-    // Если кнопки найдены по ID, добавляем класс active на сегодня
-    if (todayBtn) {
-        todayBtn.classList.add('active');
-    }
-}
-
-// Подсветка активной кнопки
-function updateActiveButton(clickedBtn) {
-    // Убираем active у всех
-    document.querySelectorAll('.nav-btn, .yesterday-btn, .today-btn, .tomorrow-btn, [data-action]').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Добавляем active нажатой кнопке
-    if (clickedBtn) {
-        clickedBtn.classList.add('active');
-    }
-}
-
 // ============== СОЗДАНИЕ КОНТЕЙНЕРА ДЛЯ ЗАДАЧ ==============
 
 function ensureTasksContainer() {
@@ -161,9 +129,6 @@ function displayTasks() {
     const tasksContainer = document.getElementById('tasksContainer');
     if (!tasksContainer) return;
     
-    // Обновляем заголовок с датой
-    updatePageTitle();
-    
     if (!taskManager.tasks || taskManager.tasks.length === 0) {
         tasksContainer.innerHTML = `
             <div style="text-align: center; padding: 60px 20px;">
@@ -172,7 +137,7 @@ function displayTasks() {
                     Нет задач на ${formatDateDisplay(taskManager.currentDate)}
                 </p>
                 <p style="color: #bbb; font-size: 0.95rem; margin-top: 10px;">
-                    Выберите другой день или создайте новую задачу
+                    Выберите другой день с помощью кнопок выше
                 </p>
             </div>
         `;
@@ -220,7 +185,6 @@ function displayTasks() {
                 padding: 16px;
                 margin-bottom: 12px;
                 box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-                transition: all 0.2s;
             ">
                 <div style="display: flex; justify-content: space-between;">
                     <div style="flex: 1;">
@@ -325,17 +289,7 @@ function getStats() {
     };
 }
 
-// ============== ОБНОВЛЕНИЕ ЗАГОЛОВКА ==============
-
-function updatePageTitle() {
-    const titleElement = document.querySelector('h2') || document.querySelector('.page-title');
-    if (titleElement) {
-        const siteName = getSiteName(currentSite);
-        titleElement.innerHTML = `${siteName} участок — ${formatDateDisplay(taskManager.currentDate)}`;
-    }
-}
-
-// ============== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==============
+// ============== ФОРМАТИРОВАНИЕ ДАТЫ ==============
 
 function formatDateDisplay(date) {
     const today = new Date();
@@ -349,28 +303,20 @@ function formatDateDisplay(date) {
     const tomorrowStr = tomorrow.toDateString();
     const yesterdayStr = yesterday.toDateString();
     
+    let prefix = '';
     if (dateStr === todayStr) {
-        return 'сегодня';
+        prefix = 'Сегодня, ';
     } else if (dateStr === tomorrowStr) {
-        return 'завтра';
+        prefix = 'Завтра, ';
     } else if (dateStr === yesterdayStr) {
-        return 'вчера';
-    } else {
-        const options = { day: 'numeric', month: 'long' };
-        return date.toLocaleDateString('ru-RU', options);
+        prefix = 'Вчера, ';
     }
+    
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    return prefix + date.toLocaleDateString('ru-RU', options);
 }
 
-function getSiteName(site) {
-    const names = {
-        'frezerniy': 'Фрезерный',
-        'tokarniy': 'Токарный',
-        'slesarniy': 'Слесарный',
-        'lazerno-gibochniy': 'Лазерно-гибочный',
-        'polimerniy': 'Полимерный'
-    };
-    return names[site] || site;
-}
+// ============== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==============
 
 function getStatusColor(status) {
     switch(status) {
