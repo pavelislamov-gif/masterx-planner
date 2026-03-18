@@ -5,6 +5,43 @@
 const TASK_OPERATIONS = {
 // ============== ТОКАРНЫЙ УЧАСТОК (обновлено по техкарте) ==============
 tokarniy: {
+    // ========== ЯВНО УКАЗЫВАЕМ, ЧТО ЭТИ ИЗДЕЛИЯ НЕ ОБРАБАТЫВАЮТСЯ ==========
+    'XRAY 36': [],
+    'XRAY 36S': [],
+    'XROLL-lite P': [],
+    'XROLL-lite K': [],
+    'XWHITE': [],
+    'XEYES 130*90 1': [],
+    'XEYES 130*90 2': [],
+    'XEYES 130*90 3': [],
+    'XEYES 130*90 4': [],
+    'XEYES 130*120 1': [],
+    'XEYES 130*120 2': [],
+    'XEYES 130*120 3': [],
+    'XEYES 130*120 4': [],
+    'XEYES mini-1': [],
+    'XGIRO': [],
+    'XGLOW': [],
+    'XGLOW mini': [],
+    'XGRAY v.1': [],
+    'XGRAY v.2': [],
+    'XLITE': [],
+    'XSMART': [],
+    'XSMART mini': [],
+    'XSTRONG': [],
+    'XLUMO': [],
+    'XLUMO 1-6': [],
+    'XLUMO Двунаправленный': [],
+    'XLUMO PROV': [],
+    'XVISION': [],
+    'XBAR-SW': [],
+    'XMODULE-2x2': [],
+    'XMODULE-6x2': [],
+    'XFOCUS': [],
+    'XYELLOW': [],
+    'XLINE': [],
+    
+    // ========== ИЗДЕЛИЯ, КОТОРЫЕ ОБРАБАТЫВАЮТСЯ ==========
     // XRAY 1: 7 операций
     'XRAY 1': [
         'Заготовка',
