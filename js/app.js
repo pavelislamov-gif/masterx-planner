@@ -1084,26 +1084,35 @@ console.log('✅ Функции экспортированы:', Object.keys(wind
 ));
 console.log('✅ app.js полностью загружен');
 
-// ============== СИНХРОНИЗАЦИЯ ЦВЕТОВ КВАДРАТИКОВ ==============
+/// ============== СИНХРОНИЗАЦИЯ ЦВЕТОВ КВАДРАТИКОВ ==============
 window.addEventListener('taskStatusChanged', function(e) {
     const { taskId, status } = e.detail;
     console.log('🔄 Статус задачи изменен:', taskId, status);
     
-    // Ищем квадратики по data-task (именно так, как у вас в HTML)
-    document.querySelectorAll(`[data-task="${taskId}"]`).forEach(square => {
+    // Пробуем найти точное совпадение
+    let squares = document.querySelectorAll(`[data-task="${taskId}"]`);
+    
+    // Если не нашли, пробуем обрезать последний индекс
+    if (squares.length === 0) {
+        // Убираем последний _число (например из "1773857065650_slesarniy_0_1" делаем "1773857065650_slesarniy_0")
+        const baseTaskId = taskId.substring(0, taskId.lastIndexOf('_'));
+        console.log('🔄 Пробуем базовый taskId:', baseTaskId);
+        squares = document.querySelectorAll(`[data-task="${baseTaskId}"]`);
+    }
+    
+    squares.forEach(square => {
         console.log('✅ Найден квадратик, меняем цвет на:', status);
         
-        // Меняем цвет в зависимости от статуса
         if (status === 'completed') {
-            square.style.backgroundColor = '#4caf50'; // зеленый
+            square.style.backgroundColor = '#4caf50';
             square.style.borderColor = '#2e7d32';
             square.title = 'Завершено';
         } else if (status === 'in_progress') {
-            square.style.backgroundColor = '#ff9800'; // оранжевый
+            square.style.backgroundColor = '#ff9800';
             square.style.borderColor = '#e65100';
             square.title = 'В работе';
         } else {
-            square.style.backgroundColor = '#9e9e9e'; // серый
+            square.style.backgroundColor = '#9e9e9e';
             square.style.borderColor = '#616161';
             square.title = 'Ожидает';
         }
