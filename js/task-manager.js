@@ -320,14 +320,15 @@ class TaskManager {
         return true;
     }
     
-updateExecutorStatus(taskId, executorId, status) {
-    console.log('updateExecutorStatus вызван:', { taskId, executorId, status });
-    // status должен быть 'in_progress'
-    
-    // ... код ...
-    
-    this.updateOrderStatus(taskId, task.status); // Здесь task.status должен быть 'in_progress'
-}
+    // ============== ОСНОВНОЙ МЕТОД ИЗМЕНЕНИЯ СТАТУСА ==============
+    updateExecutorStatus(taskId, executorId, status) {
+        console.log('updateExecutorStatus вызван:', { taskId, executorId, status });
+        
+        const task = this.tasks.find(t => t.id === taskId);
+        if (!task) {
+            console.warn('Задача не найдена:', taskId);
+            return false;
+        }
         
         const executor = task.executors.find(e => e.id === executorId);
         if (!executor) {
@@ -335,26 +336,38 @@ updateExecutorStatus(taskId, executorId, status) {
             return false;
         }
         
+        // Обновляем статус исполнителя
         executor.status = status;
         console.log('Статус исполнителя обновлен:', executor);
         
+        // Определяем новый статус задачи на основе всех исполнителей
         const allCompleted = task.executors.every(e => e.status === 'completed');
+        const anyInProgress = task.executors.some(e => e.status === 'in_progress');
         
+        let newTaskStatus;
         if (allCompleted) {
-            task.status = 'completed';
+            newTaskStatus = 'completed';
             console.log('Все исполнители завершили, задача выполнена');
-        } else if (status === 'in_progress') {
-            task.status = 'in_progress';
+        } else if (anyInProgress) {
+            newTaskStatus = 'in_progress';
             console.log('Задача в работе');
         } else {
-            task.status = 'pending';
+            newTaskStatus = 'pending';
+            console.log('Задача ожидает');
         }
         
-        this.updateOrderStatus(taskId, task.status);
+        // Обновляем статус задачи
+        task.status = newTaskStatus;
+        
+        // Обновляем статус в заказе
+        this.updateOrderStatus(taskId, newTaskStatus);
+        
+        // Сохраняем в историю
         this.saveTasksToHistory(this.formatDate(this.currentDate));
         
         return true;
     }
+    // ============================================================
     
     removeExecutor(taskId, executorId) {
         console.log('removeExecutor:', taskId, executorId);
@@ -420,14 +433,18 @@ updateExecutorStatus(taskId, executorId, status) {
     }
     
     // ============== МЕТОД ДЛЯ УВЕДОМЛЕНИЯ ДРУГИХ ВКЛАДОК ==============
-notifyOtherTabs(taskId, status) {
-    console.log('📢 notifyOtherTabs:', taskId, status); // status должен быть 'in_progress'
-    localStorage.setItem('taskStatusChanged', JSON.stringify({
-        taskId: taskId,
-        status: status,  // Сохраняется правильный статус?
-        timestamp: Date.now()
-    }));
-}
+    notifyOtherTabs(taskId, status) {
+        console.log('📢 notifyOtherTabs:', taskId, status);
+        
+        // Сохраняем в localStorage для других вкладок
+        const data = {
+            taskId: taskId,
+            status: status,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('taskStatusChanged', JSON.stringify(data));
+        console.log('💾 Сохранено в localStorage:', data);
+    }
     
     // ============== НАВИГАЦИЯ ПО ДАТАМ ==============
     
