@@ -182,11 +182,10 @@ function openOrderModal(orderId = null) {
         return;
     }
     
+    // Пытаемся найти заголовок, но не выводим предупреждение
     const title = document.getElementById('modalTitle');
     if (title) {
         title.textContent = orderId ? 'Редактирование заказа' : 'Новый заказ';
-    } else {
-        console.warn('⚠️ Элемент modalTitle не найден');
     }
     
     if (orderId) {
