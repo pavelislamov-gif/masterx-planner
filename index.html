@@ -64,82 +64,65 @@
             <button class="btn btn-primary" onclick="exportOrders()">📥 Экспорт заказов</button>
         </div>
 
-        <!-- МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ЗАКАЗА -->
-        <div id="orderModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="window.closeOrderModal()">&times;</span>
-                <h2 style="color: #fff; margin-bottom: 20px;">📋 Создание нового заказа</h2>
-                <form id="orderForm">
-                    <div class="form-group">
-                        <label>📅 Дата заказа:</label>
-                        <input type="date" id="orderDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label>🔢 Номер заказа:</label>
-                        <input type="text" id="orderNumber" placeholder="Например: З-2024-001" required>
-                    </div>
-                    <div class="form-group">
-                        <label>🏷️ Изделие:</label>
-                        <select id="productSelect" onchange="window.loadProductSizes()" required>
-                            <option value="">Выберите изделие</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>📏 Размер/Имя:</label>
-                        <select id="sizeSelect" required>
-                            <option value="">Сначала выберите изделие</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>🔢 Кол-во изделий:</label>
-                        <input type="number" id="quantity" min="1" value="1" required>
-                    </div>
-                    
-                    <!-- Кронштейн с количеством -->
-                    <div class="form-group">
-                        <label>🔧 Тип кронштейна:</label>
-                        <div class="quantity-row">
-                            <select id="bracketSelect">
-                                <option value="">Выберите кронштейн</option>
-                            </select>
-                            <input type="number" id="bracketQuantity" min="0" value="1" placeholder="Кол-во">
-                        </div>
-                    </div>
-                    
-                    <!-- Лира с количеством -->
-                    <div class="form-group">
-                        <label>🎸 Тип лиры:</label>
-                        <div class="quantity-row">
-                            <select id="lyreSelect">
-                                <option value="">Выберите лиру</option>
-                            </select>
-                            <input type="number" id="lyreQuantity" min="0" value="1" placeholder="Кол-во">
-                        </div>
-                    </div>
-                    
-                    <!-- Цвет RAL и текстура -->
-                    <div class="form-group">
-                        <label>🎨 Цвет RAL (вручную):</label>
-                        <input type="text" id="ralInput" placeholder="Например: RAL 9003">
-                    </div>
-                    <div class="form-group">
-                        <label>🧵 Текстура:</label>
-                        <select id="textureSelect">
-                            <option value="">Выберите текстуру</option>
-                            <option value="матовая">Матовая</option>
-                            <option value="глянцевая">Глянцевая</option>
-                            <option value="сатиновая">Муар</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>📝 Дополнительные детали:</label>
-                        <textarea id="additionalDetails" rows="3" placeholder="Особые требования или примечания..."></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-success" style="width: 100%; padding: 12px;">✅ Создать заказ</button>
-                </form>
+<!-- МОДАЛЬНОЕ ОКНО ЗАКАЗА -->
+<div id="orderModal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <span class="close" onclick="closeOrderModal()">&times;</span>
+        <h2 id="modalTitle">Новый заказ</h2>
+        
+        <form id="orderForm" onsubmit="event.preventDefault(); saveOrder();">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div>
+                    <label>Номер заказа:</label>
+                    <input type="text" id="orderNumber" class="form-control" style="width: 100%; padding: 8px;">
+                </div>
+                <div>
+                    <label>Заказчик:</label>
+                    <input type="text" id="orderCustomer" class="form-control" style="width: 100%; padding: 8px;">
+                </div>
+                <div>
+                    <label>Дата заказа:</label>
+                    <input type="date" id="orderDate" class="form-control" style="width: 100%; padding: 8px;">
+                </div>
+                <div>
+                    <label>Срок:</label>
+                    <input type="date" id="orderDeadline" class="form-control" style="width: 100%; padding: 8px;">
+                </div>
+                <div>
+                    <label>Статус:</label>
+                    <select id="orderStatus" class="form-control" style="width: 100%; padding: 8px;">
+                        <option value="new">Новый</option>
+                        <option value="active">В работе</option>
+                        <option value="completed">Завершён</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Примечание:</label>
+                    <input type="text" id="orderNotes" class="form-control" style="width: 100%; padding: 8px;">
+                </div>
             </div>
-        </div>
+            
+            <h3>Позиции заказа</h3>
+            
+            <!-- ========== КОНТЕЙНЕР ДЛЯ ПОЗИЦИЙ ========== -->
+            <div id="orderItems" style="margin: 15px 0; min-height: 50px;"></div>
+            <!-- =========================================== -->
+            
+            <button type="button" onclick="addOrderItem()" style="background: #4CAF50; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 15px;">
+                + Добавить позицию
+            </button>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="closeOrderModal()" style="background: #f44336; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
+                    Отмена
+                </button>
+                <button type="submit" style="background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
+                    Сохранить заказ
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
         <!-- МОДАЛЬНОЕ ОКНО МАТЕРИАЛОВ -->
         <div id="materialsModal" class="modal">
