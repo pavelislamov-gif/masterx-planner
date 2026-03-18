@@ -86,101 +86,40 @@ class TaskManager {
         return this.tasks;
     }
     
-    generateTasks() {
-        console.log('generateTasks начата');
-        this.tasks = [];
-        const dateStr = this.formatDate(this.currentDate);
-        
-        // Загружаем историю для этой даты
-        let historyTasks = [];
-        try {
-            const historyKey = `tasks_${this.siteType}_${dateStr}`;
-            const history = localStorage.getItem(historyKey);
-            if (history) {
-                historyTasks = JSON.parse(history);
-                console.log(`Загружено ${historyTasks.length} задач из истории`);
-            }
-        } catch (error) {
-            console.error('Ошибка загрузки истории:', error);
+generateTasks() {
+    console.log('generateTasks начата для даты:', this.formatDate(this.currentDate));
+    
+    const dateStr = this.formatDate(this.currentDate);
+    
+    // Загружаем историю ТОЛЬКО для ЭТОЙ даты
+    let historyTasks = [];
+    try {
+        const historyKey = `tasks_${this.siteType}_${dateStr}`;
+        const history = localStorage.getItem(historyKey);
+        if (history) {
+            historyTasks = JSON.parse(history);
+            console.log(`Загружено ${historyTasks.length} задач из истории для ${dateStr}`);
+        } else {
+            console.log(`Нет истории для ${dateStr}`);
         }
-        
-        // Если нет заказов, просто используем историю
-        if (!this.orders || this.orders.length === 0) {
-            this.tasks = historyTasks;
-            return;
-        }
-        
-        this.orders.forEach(order => {
-            if (order.status !== 'active') return;
-            
-            if (order.items && Array.isArray(order.items)) {
-                order.items.forEach((item, idx) => {
-                    const productName = item.product || 'Изделие';
-                    const operations = this.getOperationsForProduct(productName);
-                    
-                    operations.forEach((op, index) => {
-                        const taskId = `${order.id}_${this.siteType}_${idx}_${index}`;
-                        const taskStatus = order.tasks?.[taskId];
-                        
-                        // Ищем задачу в истории
-                        const historyTask = historyTasks.find(t => t.id === taskId);
-                        
-                        const task = {
-                            id: taskId,
-                            orderId: order.id,
-                            orderNumber: order.number || order.id,
-                            product: productName,
-                            size: item.size || 'Стандартный',
-                            totalQuantity: parseInt(item.quantity) || 1,
-                            completedQuantity: historyTask?.completedQuantity || 0,
-                            operation: op,
-                            index: index,
-                            status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
-                            executors: historyTask?.executors || [],
-                            date: dateStr,
-                            isExtra: false
-                        };
-                        
-                        this.tasks.push(task);
-                    });
-                });
-            }
-            
-            // Дополнительные задачи
-            if (order.extraTasks && Array.isArray(order.extraTasks)) {
-                order.extraTasks.forEach((extra, index) => {
-                    if (extra.site !== this.siteType) return;
-                    
-                    const taskId = `${order.id}_extra_${index}`;
-                    const taskStatus = order.tasks?.[taskId];
-                    
-                    const historyTask = historyTasks.find(t => t.id === taskId);
-                    
-                    const task = {
-                        id: taskId,
-                        orderId: order.id,
-                        orderNumber: order.number || order.id,
-                        product: extra.title || 'Доп. задача',
-                        description: extra.description || '',
-                        totalQuantity: 1,
-                        completedQuantity: historyTask?.completedQuantity || 0,
-                        operation: extra.title || 'Доп. операция',
-                        isExtra: true,
-                        status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
-                        executors: historyTask?.executors || [],
-                        date: dateStr
-                    };
-                    
-                    this.tasks.push(task);
-                });
-            }
-        });
-        
-        console.log(`generateTasks завершена, всего задач: ${this.tasks.length}`);
-        
-        // Сохраняем в историю
-        this._saveTasksToHistoryInternal(dateStr);
+    } catch (error) {
+        console.error('Ошибка загрузки истории:', error);
     }
+    
+    // Если есть задачи в истории для этой даты - используем их
+    if (historyTasks.length > 0) {
+        this.tasks = historyTasks;
+        console.log(`Использую ${this.tasks.length} задач из истории для ${dateStr}`);
+        return;
+    }
+    
+    // Если нет истории - создаем пустой список
+    this.tasks = [];
+    console.log(`Создан пустой список задач для ${dateStr}`);
+    
+    // Сохраняем пустой список в историю
+    this._saveTasksToHistoryInternal(dateStr);
+}
     
     // ============== РАБОТА С ОПЕРАЦИЯМИ ==============
     
@@ -251,83 +190,28 @@ class TaskManager {
     
     // Внутренний метод сохранения без уведомления
     _saveTasksToHistoryInternal(dateStr) {
-        if (this._isSaving) {
-            console.log('saveTasksToHistoryInternal: уже сохраняется, пропускаем');
-            return;
-        }
-        
-        this._isSaving = true;
-        
-        try {
-            const historyKey = `tasks_${this.siteType}_${dateStr}`;
-            
-            // Загружаем существующую историю
-            let existingTasks = [];
-            try {
-                const existing = localStorage.getItem(historyKey);
-                if (existing) {
-                    existingTasks = JSON.parse(existing);
-                }
-            } catch (e) {
-                console.warn('Ошибка загрузки существующей истории:', e);
-            }
-            
-            // Объединяем задачи - сохраняем все текущие задачи
-            localStorage.setItem(historyKey, JSON.stringify(this.tasks));
-            console.log(`✅ История сохранена для ${dateStr}, задач: ${this.tasks.length}`);
-            
-        } catch (error) {
-            console.error('Ошибка сохранения в историю:', error);
-        } finally {
-            setTimeout(() => {
-                this._isSaving = false;
-            }, 100);
-        }
+    if (this._isSaving) {
+        console.log('saveTasksToHistoryInternal: уже сохраняется, пропускаем');
+        return;
     }
     
-    // Публичный метод с уведомлением
-    saveTasksToHistory(dateStr) {
-        this._saveTasksToHistoryInternal(dateStr);
-        
-        // Защита от слишком частых уведомлений
-        const now = Date.now();
-        if (now - this._lastNotificationTime < 500) {
-            return;
-        }
-        
-        this._lastNotificationTime = now;
-        this.notifyHistoryChanged(dateStr);
-    }
+    this._isSaving = true;
     
-    notifyHistoryChanged(dateStr) {
-        // Предотвращаем множественные уведомления
-        if (this._isNotifying) {
-            return;
-        }
+    try {
+        const historyKey = `tasks_${this.siteType}_${dateStr}`;
         
-        this._isNotifying = true;
+        // Сохраняем ТОЛЬКО задачи для этой конкретной даты
+        localStorage.setItem(historyKey, JSON.stringify(this.tasks));
+        console.log(`✅ История сохранена для ${dateStr}, задач: ${this.tasks.length}`);
         
-        // Используем setTimeout для асинхронной отправки
+    } catch (error) {
+        console.error('Ошибка сохранения в историю:', error);
+    } finally {
         setTimeout(() => {
-            try {
-                const event = new CustomEvent('taskHistoryChanged', {
-                    detail: { 
-                        siteType: this.siteType, 
-                        date: dateStr,
-                        timestamp: Date.now()
-                    }
-                });
-                window.dispatchEvent(event);
-                console.log(`📢 Уведомление об изменении истории отправлено для ${dateStr}`);
-            } catch (error) {
-                console.error('Ошибка при отправке уведомления:', error);
-            } finally {
-                setTimeout(() => {
-                    this._isNotifying = false;
-                }, 300);
-            }
-        }, 10);
+            this._isSaving = false;
+        }, 100);
     }
+}
     
     // ============== УПРАВЛЕНИЕ ИСПОЛНИТЕЛЯМИ ==============
     
