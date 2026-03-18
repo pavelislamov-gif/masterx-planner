@@ -66,33 +66,109 @@
 
 <!-- МОДАЛЬНОЕ ОКНО ЗАКАЗА -->
 <div id="orderModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeOrderModal()">&times;</span>
-        <h2 id="modalTitle">Новый заказ</h2>
+    <div class="modal-content" style="max-width: 600px; background: linear-gradient(135deg, #1a1e24, #0f1217); color: #fff; border: 1px solid #2a2f38;">
+        <span class="close" onclick="closeOrderModal()" style="color: #ff3b3b;">&times;</span>
+        <h2 id="modalTitle" style="color: #fff; border-bottom: 1px solid #2a2f38; padding-bottom: 10px;">Новый заказ</h2>
         
         <form id="orderForm" onsubmit="event.preventDefault(); saveOrder();">
-            <div class="form-group">
-                <label for="orderNumber">Номер заказа:</label>
-                <input type="text" id="orderNumber" required>
+            <!-- ОСНОВНЫЕ ПОЛЯ -->
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Дата заказа:</label>
+                <input type="date" id="orderDate" style="width: 100%; padding: 8px; background: #0f1217; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
             </div>
             
-            <div class="form-group">
-                <label for="orderCustomer">Заказчик:</label>
-                <input type="text" id="orderCustomer">
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Заказчик:</label>
+                <input type="text" id="orderCustomer" placeholder="Введите заказчика" style="width: 100%; padding: 8px; background: #0f1217; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
             </div>
             
-            <div class="form-group">
-                <label for="orderDate">Дата заказа:</label>
-                <input type="date" id="orderDate">
+            <!-- ИЗДЕЛИЕ С РАЗМЕРАМИ -->
+            <div style="margin-bottom: 15px; background: #0f1217; padding: 15px; border-radius: 4px; border: 1px solid #2a2f38;">
+                <h3 style="color: #ff3b3b; margin-top: 0; margin-bottom: 10px; font-size: 16px;">🔧 Изделие</h3>
+                
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Выберите изделие:</label>
+                    <select id="productSelect" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+                        <option value="">Выберите изделие</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Размер:</label>
+                    <select id="productSizeSelect" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+                        <option value="">Сначала выберите изделие</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Количество:</label>
+                    <input type="number" id="productQuantity" value="1" min="1" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+                </div>
             </div>
             
-            <div class="form-group">
-                <label for="orderItems">Позиции заказа:</label>
-                <div id="orderItems"></div>
-                <button type="button" onclick="addOrderItem()">+ Добавить позицию</button>
+            <!-- КРОНШТЕЙНЫ -->
+            <div style="margin-bottom: 15px; background: #0f1217; padding: 15px; border-radius: 4px; border: 1px solid #2a2f38;">
+                <h3 style="color: #ff3b3b; margin-top: 0; margin-bottom: 10px; font-size: 16px;">🔩 Кронштейн</h3>
+                
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Выберите кронштейн:</label>
+                    <select id="bracketSelect" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+                        <option value="">Выберите кронштейн</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Количество:</label>
+                    <input type="number" id="bracketQuantity" value="0" min="0" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+                </div>
             </div>
             
-            <button type="submit" class="btn btn-primary">Сохранить заказ</button>
+            <!-- ЛИРЫ -->
+            <div style="margin-bottom: 15px; background: #0f1217; padding: 15px; border-radius: 4px; border: 1px solid #2a2f38;">
+                <h3 style="color: #ff3b3b; margin-top: 0; margin-bottom: 10px; font-size: 16px;">🎸 Лира</h3>
+                
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Выберите лиру:</label>
+                    <select id="lyreSelect" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+                        <option value="">Выберите лиру</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Количество:</label>
+                    <input type="number" id="lyreQuantity" value="0" min="0" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+                </div>
+            </div>
+            
+            <!-- ДОПОЛНИТЕЛЬНЫЕ ПАРАМЕТРЫ -->
+            <div style="margin-bottom: 15px; background: #0f1217; padding: 15px; border-radius: 4px; border: 1px solid #2a2f38;">
+                <h3 style="color: #ff3b3b; margin-top: 0; margin-bottom: 10px; font-size: 16px;">🎨 Параметры</h3>
+                
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">RAL:</label>
+                    <input type="text" id="ralValue" placeholder="Например: RAL 9003" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+                </div>
+                
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Текстура:</label>
+                    <input type="text" id="textureValue" placeholder="Например: матовая, глянцевая" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+                </div>
+                
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Примечание:</label>
+                    <textarea id="orderNotes" rows="2" placeholder="Дополнительная информация" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; resize: vertical;"></textarea>
+                </div>
+            </div>
+            
+            <!-- КНОПКИ -->
+            <div style="display: flex; gap: 10px; justify-content: flex-end; border-top: 1px solid #2a2f38; padding-top: 20px;">
+                <button type="button" onclick="closeOrderModal()" style="background: #2a2f38; color: #fff; padding: 10px 25px; border: none; border-radius: 4px; cursor: pointer;">
+                    Отмена
+                </button>
+                <button type="submit" style="background: #ff3b3b; color: white; padding: 10px 25px; border: none; border-radius: 4px; cursor: pointer;">
+                    Сохранить заказ
+                </button>
+            </div>
         </form>
     </div>
 </div>
