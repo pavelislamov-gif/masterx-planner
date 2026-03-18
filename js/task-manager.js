@@ -409,28 +409,24 @@ class TaskManager {
 updateOrderStatus(taskId, status) {
     console.log('updateOrderStatus:', taskId, status);
     
-    // ... существующий код ...
+    const [orderId] = taskId.split('_');
     
-    // Отправляем уведомление
-    this.notifyOtherTabs(taskId, status);
-}
+    if (typeof window.loadOrdersFromStorage === 'function') {
+        const orders = window.loadOrdersFromStorage() || [];
+        const orderIndex = orders.findIndex(o => o.id == orderId);
         
-        this.notifyOtherTabs(taskId, status);
+        if (orderIndex !== -1) {
+            if (!orders[orderIndex].tasks) orders[orderIndex].tasks = {};
+            orders[orderIndex].tasks[taskId] = this.convertTaskStatus(status);
+            
+            if (typeof window.saveOrdersToStorage === 'function') {
+                window.saveOrdersToStorage(orders);
+            }
+        }
     }
     
-notifyOtherTabs(taskId, status) {
-    console.log('📢 Отправка уведомления taskStatusChanged:', taskId, status);
-    
-    // 1. Отправляем кастомное событие (для этой же вкладки)
-    const event = new CustomEvent('taskStatusChanged', {
-        detail: { taskId, status, timestamp: Date.now() }
-    });
-    window.dispatchEvent(event);
-    
-    // 2. Сохраняем в localStorage (для других вкладок)
-    const data = { taskId, status, timestamp: Date.now() };
-    localStorage.setItem('taskStatusChanged', JSON.stringify(data));
-    console.log('💾 Сохранено в localStorage:', data);
+    // ВАЖНО: вызываем notifyOtherTabs
+    this.notifyOtherTabs(taskId, status);
 }
     
     // ============== НАВИГАЦИЯ ПО ДАТАМ ==============
