@@ -134,50 +134,86 @@ function populateSelects() {
     
     // Заполнение продуктов
     const productSelect = document.getElementById('productSelect');
-    if (productSelect && allProducts.length) {
-        productSelect.innerHTML = '<option value="">Выберите продукт</option>' +
-            allProducts.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+    if (productSelect) {
+        if (allProducts && allProducts.length) {
+            productSelect.innerHTML = '<option value="">Выберите продукт</option>' +
+                allProducts.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+            console.log(`✅ Загружено ${allProducts.length} продуктов`);
+        } else {
+            productSelect.innerHTML = '<option value="">Нет продуктов</option>';
+            console.warn('⚠️ Нет продуктов для загрузки');
+        }
     }
     
     // Заполнение кронштейнов
     const bracketSelect = document.getElementById('bracketSelect');
-    if (bracketSelect && allBrackets.length) {
-        bracketSelect.innerHTML = '<option value="">Выберите кронштейн</option>' +
-            allBrackets.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
+    if (bracketSelect) {
+        if (allBrackets && allBrackets.length) {
+            bracketSelect.innerHTML = '<option value="">Выберите кронштейн</option>' +
+                allBrackets.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
+            console.log(`✅ Загружено ${allBrackets.length} кронштейнов`);
+        } else {
+            bracketSelect.innerHTML = '<option value="">Нет кронштейнов</option>';
+        }
     }
     
     // Заполнение лир
     const lyreSelect = document.getElementById('lyreSelect');
-    if (lyreSelect && allLyres.length) {
-        lyreSelect.innerHTML = '<option value="">Выберите лиру</option>' +
-            allLyres.map(l => `<option value="${l.name}">${l.name}</option>`).join('');
+    if (lyreSelect) {
+        if (allLyres && allLyres.length) {
+            lyreSelect.innerHTML = '<option value="">Выберите лиру</option>' +
+                allLyres.map(l => `<option value="${l.name}">${l.name}</option>`).join('');
+            console.log(`✅ Загружено ${allLyres.length} лир`);
+        } else {
+            lyreSelect.innerHTML = '<option value="">Нет лир</option>';
+        }
     }
 }
 
 // ============== ЗАГРУЗКА РАЗМЕРОВ ПРОДУКТА ==============
 function loadProductSizes() {
+    console.log('loadProductSizes вызвана');
+    
     const type = document.getElementById('productType')?.value;
     const productName = document.getElementById('productSelect')?.value;
     const bracketName = document.getElementById('bracketSelect')?.value;
     const lyreName = document.getElementById('lyreSelect')?.value;
     
+    console.log('Тип:', type);
+    console.log('Продукт:', productName);
+    console.log('Кронштейн:', bracketName);
+    console.log('Лира:', lyreName);
+    
     let sizes = [];
     
     if (type === 'product' && productName) {
         const product = allProducts.find(p => p.name === productName);
+        console.log('Найден продукт:', product);
         sizes = product?.sizes || [];
     } else if (type === 'bracket' && bracketName) {
         const bracket = allBrackets.find(b => b.name === bracketName);
+        console.log('Найден кронштейн:', bracket);
         sizes = bracket?.sizes || [];
     } else if (type === 'lyre' && lyreName) {
         const lyre = allLyres.find(l => l.name === lyreName);
+        console.log('Найдена лира:', lyre);
         sizes = lyre?.sizes || [];
     }
     
+    console.log('Размеры для загрузки:', sizes);
+    
     const sizeSelect = document.getElementById('sizeSelect');
     if (sizeSelect) {
-        sizeSelect.innerHTML = '<option value="">Выберите размер</option>' +
-            sizes.map(s => `<option value="${s}">${s}</option>`).join('');
+        if (sizes && sizes.length > 0) {
+            sizeSelect.innerHTML = '<option value="">Выберите размер</option>' +
+                sizes.map(s => `<option value="${s}">${s}</option>`).join('');
+            console.log(`✅ Загружено ${sizes.length} размеров`);
+        } else {
+            sizeSelect.innerHTML = '<option value="">Нет доступных размеров</option>';
+            console.log('⚠️ Нет размеров для выбранного изделия');
+        }
+    } else {
+        console.error('❌ Элемент sizeSelect не найден');
     }
 }
 
