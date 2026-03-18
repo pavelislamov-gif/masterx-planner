@@ -406,22 +406,14 @@ class TaskManager {
         return true;
     }
     
-    updateOrderStatus(taskId, status) {
-        const [orderId] = taskId.split('_');
-        
-        if (typeof window.loadOrdersFromStorage === 'function') {
-            const orders = window.loadOrdersFromStorage() || [];
-            const orderIndex = orders.findIndex(o => o.id == orderId);
-            
-            if (orderIndex !== -1) {
-                if (!orders[orderIndex].tasks) orders[orderIndex].tasks = {};
-                orders[orderIndex].tasks[taskId] = this.convertTaskStatus(status);
-                
-                if (typeof window.saveOrdersToStorage === 'function') {
-                    window.saveOrdersToStorage(orders);
-                }
-            }
-        }
+updateOrderStatus(taskId, status) {
+    console.log('updateOrderStatus:', taskId, status);
+    
+    // ... существующий код ...
+    
+    // Отправляем уведомление
+    this.notifyOtherTabs(taskId, status);
+}
         
         this.notifyOtherTabs(taskId, status);
     }
