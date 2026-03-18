@@ -395,11 +395,11 @@ generateTasks() {
     
     // ============== НАВИГАЦИЯ ПО ДАТАМ ==============
     
-    setDate(date) {
-        this.currentDate = new Date(date);
-        this.loadData();
-        return this.tasks;
-    }
+setDate(date) {
+    this.currentDate = new Date(date);  // ПРОБЛЕМА: учитывает часовой пояс
+    this.loadData();
+    return this.tasks;
+}
     
     prevDay() {
         const newDate = new Date(this.currentDate);
