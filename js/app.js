@@ -1089,8 +1089,10 @@ window.addEventListener('taskStatusChanged', function(e) {
     const { taskId, status } = e.detail;
     console.log('🔄 Статус задачи изменен:', taskId, status);
     
-    // Находим все квадратики с таким taskId
-    document.querySelectorAll(`[data-task-id="${taskId}"]`).forEach(square => {
+    // Ищем квадратики по data-task (именно так, как у вас в HTML)
+    document.querySelectorAll(`[data-task="${taskId}"]`).forEach(square => {
+        console.log('✅ Найден квадратик, меняем цвет на:', status);
+        
         // Меняем цвет в зависимости от статуса
         if (status === 'completed') {
             square.style.backgroundColor = '#4caf50'; // зеленый
