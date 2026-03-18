@@ -245,6 +245,16 @@ function openOrderModal(orderId = null) {
     modal.style.display = 'block';
 }
 
+// ============== ЗАКРЫТИЕ МОДАЛЬНОГО ОКНА ЗАКАЗА ==============
+function closeOrderModal() {
+    console.log('closeOrderModal');
+    const modal = document.getElementById('orderModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    currentOrderId = null;
+}
+
 // ============== ЗАГРУЗКА ДАННЫХ ЗАКАЗА ==============
 function loadOrderData(orderId) {
     const orders = loadOrdersFromStorage() || [];
@@ -268,11 +278,11 @@ function loadOrderData(orderId) {
     
     // Загрузка позиций
     const itemsContainer = document.getElementById('orderItems');
-    if (itemsContainer && itemsContainer.innerHTML) {
+    if (itemsContainer) {
         itemsContainer.innerHTML = '';
         if (order.items && order.items.length) {
-            order.items.forEach((item, index) => {
-                addOrderItem(item, index);
+            order.items.forEach((item) => {
+                addOrderItem(item);
             });
         } else {
             addOrderItem();
@@ -307,18 +317,18 @@ function addOrderItem(item = null) {
     
     const itemDiv = document.createElement('div');
     itemDiv.className = 'order-item';
-    itemDiv.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px;';
+    itemDiv.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: center;';
     
     itemDiv.innerHTML = `
-        <select class="item-type" style="width: 120px; padding: 5px;">
+        <select class="item-type" style="width: 120px; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
             <option value="product" ${item?.type === 'product' ? 'selected' : ''}>Продукт</option>
             <option value="bracket" ${item?.type === 'bracket' ? 'selected' : ''}>Кронштейн</option>
             <option value="lyre" ${item?.type === 'lyre' ? 'selected' : ''}>Лира</option>
         </select>
-        <input type="text" class="item-name" placeholder="Название" value="${item?.product || ''}" style="flex: 2; padding: 5px;">
-        <input type="text" class="item-size" placeholder="Размер" value="${item?.size || ''}" style="flex: 1; padding: 5px;">
-        <input type="number" class="item-quantity" placeholder="Кол-во" value="${item?.quantity || 1}" style="width: 80px; padding: 5px;">
-        <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: #ff3b3b; cursor: pointer; font-size: 18px;">✕</button>
+        <input type="text" class="item-name" placeholder="Название" value="${item?.product || ''}" style="flex: 2; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+        <input type="text" class="item-size" placeholder="Размер" value="${item?.size || ''}" style="flex: 1; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+        <input type="number" class="item-quantity" placeholder="Кол-во" value="${item?.quantity || 1}" style="width: 80px; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+        <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: #ff3b3b; cursor: pointer; font-size: 18px; width: 30px;">✕</button>
     `;
     container.appendChild(itemDiv);
 }
