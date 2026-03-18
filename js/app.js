@@ -1083,3 +1083,27 @@ console.log('✅ Функции экспортированы:', Object.keys(wind
      'showMaterialsReport', 'deleteOrder', 'addExtraTask', 'closeMaterialsModal', 'syncTasksFromHistory'].includes(key)
 ));
 console.log('✅ app.js полностью загружен');
+
+// ============== СИНХРОНИЗАЦИЯ ЦВЕТОВ КВАДРАТИКОВ ==============
+window.addEventListener('taskStatusChanged', function(e) {
+    const { taskId, status } = e.detail;
+    console.log('🔄 Статус задачи изменен:', taskId, status);
+    
+    // Находим все квадратики с таким taskId
+    document.querySelectorAll(`[data-task-id="${taskId}"]`).forEach(square => {
+        // Меняем цвет в зависимости от статуса
+        if (status === 'completed') {
+            square.style.backgroundColor = '#4caf50'; // зеленый
+            square.style.borderColor = '#2e7d32';
+            square.title = 'Завершено';
+        } else if (status === 'in_progress') {
+            square.style.backgroundColor = '#ff9800'; // оранжевый
+            square.style.borderColor = '#e65100';
+            square.title = 'В работе';
+        } else {
+            square.style.backgroundColor = '#9e9e9e'; // серый
+            square.style.borderColor = '#616161';
+            square.title = 'Ожидает';
+        }
+    });
+});
