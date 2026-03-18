@@ -427,12 +427,18 @@ class TaskManager {
     }
     
 notifyOtherTabs(taskId, status) {
-    // Сохраняем в localStorage для других вкладок
-    localStorage.setItem('taskStatusChanged', JSON.stringify({
-        taskId: taskId,
-        status: status,  // 'in_progress' или 'completed'
-        timestamp: Date.now()
-    }));
+    console.log('📢 Отправка уведомления taskStatusChanged:', taskId, status);
+    
+    // 1. Отправляем кастомное событие (для этой же вкладки)
+    const event = new CustomEvent('taskStatusChanged', {
+        detail: { taskId, status, timestamp: Date.now() }
+    });
+    window.dispatchEvent(event);
+    
+    // 2. Сохраняем в localStorage (для других вкладок)
+    const data = { taskId, status, timestamp: Date.now() };
+    localStorage.setItem('taskStatusChanged', JSON.stringify(data));
+    console.log('💾 Сохранено в localStorage:', data);
 }
     
     // ============== НАВИГАЦИЯ ПО ДАТАМ ==============
