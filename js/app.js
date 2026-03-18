@@ -137,7 +137,7 @@ function loadOrders() {
     if (orders.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="11" style="text-align: center; padding: 40px;">
+                <td colspan="13" style="text-align: center; padding: 40px;">
                     📭 Нет активных заказов
                 </td>
             </tr>
@@ -162,6 +162,8 @@ function loadOrders() {
                 <td>${order.bracketQuantity || 0}</td>
                 <td>${order.lyre || '—'}</td>
                 <td>${order.lyreQuantity || 0}</td>
+                <td>${order.ral || '—'}</td>
+                <td>${order.texture || '—'}</td>
                 <td>
                     <button class="btn-icon" onclick="event.stopPropagation(); deleteOrder(${order.id})" title="Удалить">🗑️</button>
                 </td>
@@ -172,7 +174,6 @@ function loadOrders() {
     tbody.innerHTML = html;
     updateStatistics();
 }
-
 // ============== СТАТИСТИКА ==============
 function updateStatistics() {
     const orders = loadOrdersFromStorage() || [];
