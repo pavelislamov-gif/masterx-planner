@@ -64,114 +64,82 @@
             <button class="btn btn-primary" onclick="exportOrders()">📥 Экспорт заказов</button>
         </div>
 
-<!-- МОДАЛЬНОЕ ОКНО ЗАКАЗА -->
-<div id="orderModal" class="modal">
-    <div class="modal-content" style="max-width: 600px; background: linear-gradient(135deg, #1a1e24, #0f1217); color: #fff; border: 1px solid #2a2f38;">
-        <span class="close" onclick="closeOrderModal()" style="color: #ff3b3b;">&times;</span>
-        <h2 id="modalTitle" style="color: #fff; border-bottom: 1px solid #2a2f38; padding-bottom: 10px;">Новый заказ</h2>
-        
-        <form id="orderForm" onsubmit="event.preventDefault(); saveOrder();">
-            <!-- ОСНОВНЫЕ ПОЛЯ -->
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Дата заказа:</label>
-                <input type="date" id="orderDate" style="width: 100%; padding: 8px; background: #0f1217; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+        <!-- МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ЗАКАЗА -->
+        <div id="orderModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="window.closeOrderModal()">&times;</span>
+                <h2 style="color: #fff; margin-bottom: 20px;">📋 Создание нового заказа</h2>
+                <form id="orderForm">
+                    <div class="form-group">
+                        <label>📅 Дата заказа:</label>
+                        <input type="date" id="orderDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>🔢 Номер заказа:</label>
+                        <input type="text" id="orderNumber" placeholder="Например: З-2024-001" required>
+                    </div>
+                    <div class="form-group">
+                        <label>🏷️ Изделие:</label>
+                        <select id="productSelect" onchange="window.loadProductSizes()" required>
+                            <option value="">Выберите изделие</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>📏 Размер/Имя:</label>
+                        <select id="sizeSelect" required>
+                            <option value="">Сначала выберите изделие</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>🔢 Кол-во изделий:</label>
+                        <input type="number" id="quantity" min="1" value="1" required>
+                    </div>
+
+                    <!-- Кронштейн с количеством -->
+                    <div class="form-group">
+                        <label>🔧 Тип кронштейна:</label>
+                        <div class="quantity-row">
+                            <select id="bracketSelect">
+                                <option value="">Выберите кронштейн</option>
+                            </select>
+                            <input type="number" id="bracketQuantity" min="0" value="1" placeholder="Кол-во">
+                        </div>
+                    </div>
+
+                    <!-- Лира с количеством -->
+                    <div class="form-group">
+                        <label>🎸 Тип лиры:</label>
+                        <div class="quantity-row">
+                            <select id="lyreSelect">
+                                <option value="">Выберите лиру</option>
+                            </select>
+                            <input type="number" id="lyreQuantity" min="0" value="1" placeholder="Кол-во">
+                        </div>
+                    </div>
+
+                    <!-- Цвет RAL и текстура -->
+                    <div class="form-group">
+                        <label>🎨 Цвет RAL (вручную):</label>
+                        <input type="text" id="ralInput" placeholder="Например: RAL 9003">
+                    </div>
+                    <div class="form-group">
+                        <label>🧵 Текстура:</label>
+                        <select id="textureSelect">
+                            <option value="">Выберите текстуру</option>
+                            <option value="матовая">Матовая</option>
+                            <option value="глянцевая">Глянцевая</option>
+                            <option value="сатиновая">Муар</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>📝 Дополнительные детали:</label>
+                        <textarea id="additionalDetails" rows="3" placeholder="Особые требования или примечания..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success" style="width: 100%; padding: 12px;">✅ Создать заказ</button>
+                </form>
             </div>
-            
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Заказчик:</label>
-                <input type="text" id="orderCustomer" placeholder="Введите заказчика" style="width: 100%; padding: 8px; background: #0f1217; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
-            </div>
-            
-            <!-- ИЗДЕЛИЕ С РАЗМЕРАМИ -->
-            <div style="margin-bottom: 15px; background: #0f1217; padding: 15px; border-radius: 4px; border: 1px solid #2a2f38;">
-                <h3 style="color: #ff3b3b; margin-top: 0; margin-bottom: 10px; font-size: 16px;">🔧 Изделие</h3>
-                
-                <div style="margin-bottom: 10px;">
-                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Выберите изделие:</label>
-                    <select id="productSelect" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
-                        <option value="">Выберите изделие</option>
-                    </select>
-                </div>
-                
-                <div style="margin-bottom: 10px;">
-                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Размер:</label>
-                    <select id="productSizeSelect" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
-                        <option value="">Сначала выберите изделие</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Количество:</label>
-                    <input type="number" id="productQuantity" value="1" min="1" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
-                </div>
-            </div>
-            
-            <!-- КРОНШТЕЙНЫ -->
-            <div style="margin-bottom: 15px; background: #0f1217; padding: 15px; border-radius: 4px; border: 1px solid #2a2f38;">
-                <h3 style="color: #ff3b3b; margin-top: 0; margin-bottom: 10px; font-size: 16px;">🔩 Кронштейн</h3>
-                
-                <div style="margin-bottom: 10px;">
-                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Выберите кронштейн:</label>
-                    <select id="bracketSelect" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
-                        <option value="">Выберите кронштейн</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Количество:</label>
-                    <input type="number" id="bracketQuantity" value="0" min="0" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
-                </div>
-            </div>
-            
-            <!-- ЛИРЫ -->
-            <div style="margin-bottom: 15px; background: #0f1217; padding: 15px; border-radius: 4px; border: 1px solid #2a2f38;">
-                <h3 style="color: #ff3b3b; margin-top: 0; margin-bottom: 10px; font-size: 16px;">🎸 Лира</h3>
-                
-                <div style="margin-bottom: 10px;">
-                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Выберите лиру:</label>
-                    <select id="lyreSelect" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
-                        <option value="">Выберите лиру</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Количество:</label>
-                    <input type="number" id="lyreQuantity" value="0" min="0" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
-                </div>
-            </div>
-            
-            <!-- ДОПОЛНИТЕЛЬНЫЕ ПАРАМЕТРЫ -->
-            <div style="margin-bottom: 15px; background: #0f1217; padding: 15px; border-radius: 4px; border: 1px solid #2a2f38;">
-                <h3 style="color: #ff3b3b; margin-top: 0; margin-bottom: 10px; font-size: 16px;">🎨 Параметры</h3>
-                
-                <div style="margin-bottom: 10px;">
-                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">RAL:</label>
-                    <input type="text" id="ralValue" placeholder="Например: RAL 9003" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
-                </div>
-                
-                <div style="margin-bottom: 10px;">
-                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Текстура:</label>
-                    <input type="text" id="textureValue" placeholder="Например: матовая, глянцевая" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
-                </div>
-                
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #a0a0a0;">Примечание:</label>
-                    <textarea id="orderNotes" rows="2" placeholder="Дополнительная информация" style="width: 100%; padding: 8px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; resize: vertical;"></textarea>
-                </div>
-            </div>
-            
-            <!-- КНОПКИ -->
-            <div style="display: flex; gap: 10px; justify-content: flex-end; border-top: 1px solid #2a2f38; padding-top: 20px;">
-                <button type="button" onclick="closeOrderModal()" style="background: #2a2f38; color: #fff; padding: 10px 25px; border: none; border-radius: 4px; cursor: pointer;">
-                    Отмена
-                </button>
-                <button type="submit" style="background: #ff3b3b; color: white; padding: 10px 25px; border: none; border-radius: 4px; cursor: pointer;">
-                    Сохранить заказ
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+        </div>
 
         <!-- МОДАЛЬНОЕ ОКНО МАТЕРИАЛОВ -->
         <div id="materialsModal" class="modal">
@@ -182,30 +150,10 @@
         </div>
 
         <!-- СПИСОК ЗАКАЗОВ -->
-<div class="orders-list">
-    <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-            <tr style="background: #2a2f38; color: #fff;">
-                <th style="padding: 12px;">ID</th>
-                <th style="padding: 12px;">Заказчик</th>
-                <th style="padding: 12px;">Дата</th>
-                <th style="padding: 12px;">Изделие</th>
-                <th style="padding: 12px;">Размер</th>
-                <th style="padding: 12px;">Кол-во</th>
-                <th style="padding: 12px;">Кронштейн</th>
-                <th style="padding: 12px;">Кол-во</th>
-                <th style="padding: 12px;">Лира</th>
-                <th style="padding: 12px;">Кол-во</th>
-                <th style="padding: 12px;">RAL</th>
-                <th style="padding: 12px;">Текстура</th>
-                <th style="padding: 12px;">Действия</th>
-            </tr>
-        </thead>
-        <tbody id="ordersTableBody">
+        <div id="ordersList" class="orders-list">
             <!-- Заказы будут загружаться сюда -->
-        </tbody>
-    </table>
-</div>
+        </div>
+    </div>
 
     <!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ В ПРАВИЛЬНОМ ПОРЯДКЕ -->
     <script src="js/storage.js"></script>
@@ -214,22 +162,22 @@
     <script src="js/materials-report.js"></script>
     <script src="js/task-manager.js"></script>
     <script src="js/app.js"></script>
-    
+
     <!-- ДИАГНОСТИКА -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('='.repeat(50));
             console.log('🔍 ДИАГНОСТИКА ЗАГРУЗКИ СКРИПТОВ');
             console.log('='.repeat(50));
-            
+
             console.log('📦 storage.js:', typeof loadOrdersFromStorage === 'function' ? '✅' : '❌');
             console.log('📦 data-loader.js:', typeof loadProducts === 'function' ? '✅' : '❌');
             console.log('📦 materials-report.js:', typeof MaterialsReport === 'function' ? '✅' : '❌');
             console.log('📦 task-manager.js:', typeof TaskManager === 'function' ? '✅' : '❌');
             console.log('📦 app.js:', typeof openOrderModal === 'function' ? '✅' : '❌');
-            
+
             console.log('='.repeat(50));
-            
+
             if (typeof openOrderModal === 'function') {
                 console.log('🎉 ВСЁ РАБОТАЕТ! openOrderModal доступна');
             } else {
