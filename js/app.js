@@ -397,6 +397,35 @@ function exportOrders() {
     link.click();
 }
 
+// ============== ДОПОЛНИТЕЛЬНЫЕ ОБРАБОТЧИКИ ==============
+// Добавляем обработчик отправки формы
+document.addEventListener('DOMContentLoaded', function() {
+    const orderForm = document.getElementById('orderForm');
+    if (orderForm) {
+        orderForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveOrder();
+        });
+        console.log('✅ Обработчик формы добавлен');
+    }
+});
+
+// Добавляем кнопку сохранения если её нет в форме
+setTimeout(function() {
+    const modalContent = document.querySelector('.modal-content');
+    if (modalContent && !document.querySelector('button[type="submit"]')) {
+        const saveBtn = document.createElement('button');
+        saveBtn.type = 'submit';
+        saveBtn.textContent = 'Сохранить заказ';
+        saveBtn.style.cssText = 'background: #ff3b3b; color: white; padding: 10px 25px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px;';
+        
+        const form = document.getElementById('orderForm');
+        if (form) {
+            form.appendChild(saveBtn);
+        }
+    }
+}, 500);
+
 // ============== ИНИЦИАЛИЗАЦИЯ ==============
 document.addEventListener('DOMContentLoaded', function() {
     console.log('📅 DOM загружен, начинаем инициализацию...');
