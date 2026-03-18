@@ -213,38 +213,29 @@ export function loadTasks() {
     
     // ============== РАБОТА С ОПЕРАЦИЯМИ ==============
     
-    getOperationsForProduct(productName) {
-        // 1. Сначала ищем в кастомных операциях
-        if (this.customOperations[productName]) {
-            return this.customOperations[productName];
-        }
-        
-        // 2. Потом в базовых для этого участка
-        const siteOps = this.baseOperations[this.siteType] || {};
-        if (siteOps[productName]) {
-            return siteOps[productName];
-        }
-        
-        // 3. Частичное совпадение
-        const allOps = { ...this.customOperations, ...siteOps };
-        for (const key in allOps) {
-            if (key !== 'default' && productName.includes(key)) {
-                return allOps[key];
-            {
-                id: 4,
-                title: 'Полировка деталей',
-                description: 'Комплект деталей',
-                site: 'polimerniy',
-                status: 'new',
-                date: '2026-03-20', // Послезавтра
-                deadline: '2026-03-21',
-                assignee: 'Козлов'
-            }
-        }
-        
-        // 4. По умолчанию
-        return siteOps.default || [this.getDefaultOperationName()];
+getOperationsForProduct(productName) {
+    // 1. Сначала ищем в кастомных операциях
+    if (this.customOperations[productName]) {
+        return this.customOperations[productName];
     }
+    
+    // 2. Потом в базовых для этого участка
+    const siteOps = this.baseOperations[this.siteType] || {};
+    if (siteOps[productName]) {
+        return siteOps[productName];
+    }
+    
+    // 3. Частичное совпадение
+    const allOps = { ...this.customOperations, ...siteOps };
+    for (const key in allOps) {
+        if (key !== 'default' && productName && productName.includes(key)) {
+            return allOps[key];
+        }
+    }
+    
+    // 4. По умолчанию
+    return siteOps.default || [this.getDefaultOperationName()];
+}
     
     getDefaultOperationName() {
         const names = {
