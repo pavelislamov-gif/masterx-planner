@@ -1088,12 +1088,14 @@ window.addEventListener('taskStatusChanged', function(e) {
     const { taskId, status } = e.detail;
     console.log('🔄 Статус задачи изменен:', taskId, status);
     
-    // Пробуем найти точное совпадение
+    // 1. Обновляем статус в заказе
+    updateTaskStatus(taskId, status);
+    
+    // 2. Ищем и обновляем цвет квадратика
     let squares = document.querySelectorAll(`[data-task="${taskId}"]`);
     
     // Если не нашли, пробуем обрезать последний индекс
     if (squares.length === 0) {
-        // Убираем последний _число (например из "1773857065650_slesarniy_0_1" делаем "1773857065650_slesarniy_0")
         const baseTaskId = taskId.substring(0, taskId.lastIndexOf('_'));
         console.log('🔄 Пробуем базовый taskId:', baseTaskId);
         squares = document.querySelectorAll(`[data-task="${baseTaskId}"]`);
