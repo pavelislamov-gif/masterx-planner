@@ -320,50 +320,41 @@ class TaskManager {
         return true;
     }
     
-    // ============== НОВЫЙ МЕТОД updateExecutorStatus ==============
     updateExecutorStatus(taskId, executorId, status) {
         console.log('updateExecutorStatus вызван:', { taskId, executorId, status });
         
-        // Находим задачу
         const task = this.tasks.find(t => t.id === taskId);
         if (!task) {
             console.warn('Задача не найдена:', taskId);
             return false;
         }
         
-        // Находим исполнителя
         const executor = task.executors.find(e => e.id === executorId);
         if (!executor) {
             console.warn('Исполнитель не найден:', executorId);
             return false;
         }
         
-        // Обновляем статус исполнителя
         executor.status = status;
         console.log('Статус исполнителя обновлен:', executor);
         
-        // Проверяем, все ли исполнители завершили работу
         const allCompleted = task.executors.every(e => e.status === 'completed');
         
         if (allCompleted) {
-            // Если все завершили - задача выполнена
             task.status = 'completed';
             console.log('Все исполнители завершили, задача выполнена');
         } else if (status === 'in_progress') {
-            // Если хотя бы один в работе - задача в работе
             task.status = 'in_progress';
             console.log('Задача в работе');
+        } else {
+            task.status = 'pending';
         }
         
-        // Обновляем статус в заказе
         this.updateOrderStatus(taskId, task.status);
-        
-        // Сохраняем в историю
         this.saveTasksToHistory(this.formatDate(this.currentDate));
         
         return true;
     }
-    // ============================================================
     
     removeExecutor(taskId, executorId) {
         console.log('removeExecutor:', taskId, executorId);
@@ -406,22 +397,41 @@ class TaskManager {
         return true;
     }
     
-notifyOtherTabs(taskId, status) {
-    console.log('📢 notifyOtherTabs:', taskId, status);
+    updateOrderStatus(taskId, status) {
+        console.log('updateOrderStatus:', taskId, status);
+        
+        const [orderId] = taskId.split('_');
+        
+        if (typeof window.loadOrdersFromStorage === 'function') {
+            const orders = window.loadOrdersFromStorage() || [];
+            const orderIndex = orders.findIndex(o => o.id == orderId);
+            
+            if (orderIndex !== -1) {
+                if (!orders[orderIndex].tasks) orders[orderIndex].tasks = {};
+                orders[orderIndex].tasks[taskId] = this.convertTaskStatus(status);
+                
+                if (typeof window.saveOrdersToStorage === 'function') {
+                    window.saveOrdersToStorage(orders);
+                }
+            }
+        }
+        
+        this.notifyOtherTabs(taskId, status);
+    }
     
-    // Сохраняем в localStorage для других вкладок
-    const data = {
-        taskId: taskId,
-        status: status,
-        timestamp: Date.now()
-    };
-    localStorage.setItem('taskStatusChanged', JSON.stringify(data));
-    console.log('💾 Сохранено в localStorage:', data);
-}
-    
-    // ВАЖНО: вызываем notifyOtherTabs
-    this.notifyOtherTabs(taskId, status);
-}
+    // ============== МЕТОД ДЛЯ УВЕДОМЛЕНИЯ ДРУГИХ ВКЛАДОК ==============
+    notifyOtherTabs(taskId, status) {
+        console.log('📢 notifyOtherTabs:', taskId, status);
+        
+        // Сохраняем в localStorage для других вкладок
+        const data = {
+            taskId: taskId,
+            status: status,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('taskStatusChanged', JSON.stringify(data));
+        console.log('💾 Сохранено в localStorage:', data);
+    }
     
     // ============== НАВИГАЦИЯ ПО ДАТАМ ==============
     
@@ -511,7 +521,6 @@ function loadTasks() {
     if (savedTasks) {
         tasks = JSON.parse(savedTasks);
     } else {
-        // Тестовые данные
         tasks = [
             {
                 id: 1,
