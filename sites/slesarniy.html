@@ -19,13 +19,13 @@
             flex-wrap: wrap;
             gap: 15px;
         }
-        
+
         .nav-buttons {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
-        
+
         .order-card {
             background: #1a1e24;
             border-radius: 12px;
@@ -33,7 +33,7 @@
             border: 1px solid #2a2f38;
             overflow: hidden;
         }
-        
+
         .order-header {
             padding: 12px 20px;
             background: #232830;
@@ -43,33 +43,33 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .order-header h3 {
             color: #fff;
             font-size: 16px;
             font-weight: 500;
             margin: 0;
         }
-        
+
         .order-header .collapse-icon {
             color: #a0a0a0;
             font-size: 14px;
             transition: transform 0.2s;
         }
-        
+
         .order-header.collapsed .collapse-icon {
             transform: rotate(-90deg);
         }
-        
+
         .order-content {
             padding: 15px 20px;
             transition: all 0.2s;
         }
-        
+
         .order-content.collapsed {
             display: none;
         }
-        
+
         .product-info {
             padding: 10px 15px;
             background: #15191f;
@@ -77,40 +77,40 @@
             color: #a0a0a0;
             font-size: 13px;
         }
-        
+
         .product-info strong {
             color: #ff3b3b;
         }
-        
+
         .task-card {
             padding: 12px 15px;
             border-bottom: 1px solid #2a2f38;
             transition: all 0.3s;
         }
-        
+
         .task-card:last-child {
             border-bottom: none;
         }
-        
+
         .task-card.completed {
             opacity: 0.8;
             background: #1a2a1a;
             border-left: 3px solid #2ecc71;
         }
-        
+
         .task-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
         }
-        
+
         .task-title {
             font-size: 14px;
             font-weight: 600;
             color: #fff;
         }
-        
+
         .task-progress {
             font-size: 12px;
             color: #4cd964;
@@ -120,7 +120,7 @@
             border-radius: 20px;
             display: inline-block;
         }
-        
+
         .executor-header {
             display: flex;
             gap: 10px;
@@ -129,12 +129,12 @@
             font-size: 11px;
             color: #a0a0a0;
         }
-        
+
         .executor-header span:nth-child(1) { width: 140px; }
         .executor-header span:nth-child(2) { width: 70px; text-align: center; }
         .executor-header span:nth-child(3) { width: 80px; text-align: center; }
         .executor-header span:nth-child(4) { width: 30px; }
-        
+
         .executor-item {
             display: flex;
             align-items: center;
@@ -145,7 +145,7 @@
             margin-bottom: 4px;
             border: 1px solid #2a2f38;
         }
-        
+
         .executor-name {
             width: 140px;
             padding: 4px 8px;
@@ -155,7 +155,7 @@
             color: #fff;
             font-size: 12px;
         }
-        
+
         .executor-quantity {
             width: 70px;
             padding: 4px;
@@ -166,7 +166,7 @@
             text-align: center;
             font-size: 12px;
         }
-        
+
         .btn-work {
             background: #ffc107;
             color: #000;
@@ -179,23 +179,23 @@
             width: 70px;
             font-weight: 600;
         }
-        
+
         .btn-work.active {
             background: #fd7e14;
             color: white;
         }
-        
+
         .btn-work.completed {
             background: #28a745;
             color: white;
             cursor: not-allowed;
         }
-        
+
         .btn-work:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
+
         .btn-add-executor {
             background: #6c757d;
             color: white;
@@ -207,15 +207,15 @@
             margin: 8px 0;
             width: 140px;
         }
-        
+
         .btn-add-executor:hover {
             background: #5a6268;
         }
-        
+
         .action-container {
             margin: 8px 0;
         }
-        
+
         .new-executor-form {
             display: flex;
             align-items: center;
@@ -227,7 +227,7 @@
             border-radius: 6px;
             flex-wrap: wrap;
         }
-        
+
         .new-executor-form input {
             width: 160px;
             flex: none;
@@ -238,13 +238,13 @@
             color: #fff;
             font-size: 12px;
         }
-        
+
         .new-executor-form .btn {
             padding: 5px 12px;
             font-size: 12px;
             white-space: nowrap;
         }
-        
+
         .btn-ready {
             background: #28a745;
             color: white;
@@ -260,16 +260,16 @@
             display: inline-block;
             transition: all 0.3s;
         }
-        
+
         .btn-ready:hover:not(:disabled) {
             background: #218838;
         }
-        
+
         .btn-ready:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
+
         .extra-task-badge {
             background: #ff3b3b;
             color: white;
@@ -278,7 +278,7 @@
             font-size: 10px;
             margin-left: 8px;
         }
-        
+
         .task-description {
             color: #a0a0a0;
             font-size: 11px;
@@ -288,7 +288,7 @@
             border-radius: 4px;
             border-left: 3px solid #ff3b3b;
         }
-        
+
         .no-tasks {
             text-align: center;
             padding: 40px;
@@ -297,13 +297,13 @@
             color: #a0a0a0;
             border: 1px solid #2a2f38;
         }
-        
+
         .history-indicator {
             font-size: 12px;
             color: #a0a0a0;
             margin-left: 10px;
         }
-        
+
         .warning-message {
             background: #ff3b3b20;
             border: 1px solid #ff3b3b;
@@ -313,7 +313,7 @@
             margin: 8px 0;
             font-size: 11px;
         }
-        
+
         .filter-section {
             display: flex;
             gap: 10px;
@@ -321,7 +321,7 @@
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
-        
+
         .search-box {
             padding: 6px 12px;
             background: #1a1e24;
@@ -330,7 +330,7 @@
             font-size: 12px;
             color: #e0e0e0;
         }
-        
+
         .order-stats {
             display: flex;
             gap: 15px;
@@ -340,7 +340,7 @@
             border-radius: 10px;
             border: 1px solid #2a2f38;
         }
-        
+
         .stat-item {
             flex: 1;
             text-align: center;
@@ -349,7 +349,7 @@
             border-radius: 6px;
             border: 1px solid #2a2f38;
         }
-        
+
         .stat-value {
             font-size: 22px;
             font-weight: 700;
@@ -358,18 +358,18 @@
             -webkit-text-fill-color: transparent;
             margin-bottom: 2px;
         }
-        
+
         .stat-label {
             font-size: 11px;
             color: #a0a0a0;
         }
-        
+
         .loading {
             text-align: center;
             padding: 30px;
             color: #a0a0a0;
         }
-        
+
         .spinner {
             width: 30px;
             height: 30px;
@@ -379,17 +379,17 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
+
         .btn-sm {
             padding: 3px 6px;
             font-size: 10px;
         }
-        
+
         .btn-danger {
             background: #dc3545;
             color: white;
@@ -397,37 +397,37 @@
             padding: 3px 6px;
             font-size: 10px;
         }
-        
+
         .btn-danger:hover {
             background: #c82333;
         }
-        
+
         .btn-success {
             background: #28a745;
             color: white;
             border: none;
         }
-        
+
         .btn-success:hover {
             background: #218838;
         }
-        
+
         .btn-warning {
             background: #ffc107;
             color: #000;
             border: none;
         }
-        
+
         .btn-warning:hover {
             background: #e0a800;
         }
-        
+
         .btn-info {
             background: #17a2b8;
             color: white;
             border: none;
         }
-        
+
         .btn-info:hover {
             background: #138496;
         }
@@ -515,24 +515,24 @@
             // Создаем экземпляр TaskManager для слесарного участка
             const taskManager = new TaskManager('slesarniy', window.TASK_OPERATIONS.slesarniy || {});
             let currentFilter = 'all';
-            
+
             let _historyTimer = null;
             let _loadTimer = null;
-            
+
             window.taskManager = taskManager;
-            
+
             document.addEventListener('DOMContentLoaded', function() {
                 console.log('✅ Страница слесарного участка загружена');
                 updateDateDisplay();
                 loadTasks();
-                
+
                 window.addEventListener('taskStatusChanged', function() {
                     if (_loadTimer) clearTimeout(_loadTimer);
                     _loadTimer = setTimeout(() => {
                         loadTasks();
                     }, 100);
                 });
-                
+
                 window.addEventListener('taskHistoryChanged', function(e) {
                     if (e.detail.siteType === 'slesarniy') {
                         console.log('🔄 Изменение истории для слесарного участка');
@@ -542,7 +542,7 @@
                         }, 200);
                     }
                 });
-                
+
                 window.addEventListener('storage', function(e) {
                     if (e.key === 'masterx_orders' || (e.key && e.key.startsWith('tasks_slesarniy_'))) {
                         console.log('🔄 Изменение в localStorage');
@@ -554,7 +554,7 @@
                     }
                 });
             });
-            
+
             // ============== НАВИГАЦИЯ ПО ДАТАМ ==============
             window.changeDate = function(action) {
                 switch(action) {
@@ -571,38 +571,38 @@
                 updateDateDisplay();
                 loadTasks();
             };
-            
+
             function updateDateDisplay() {
                 const options = { year: 'numeric', month: 'long', day: 'numeric' };
                 const dateStr = taskManager.currentDate.toLocaleDateString('ru-RU', options);
                 const isToday = taskManager.formatDate(taskManager.currentDate) === taskManager.formatDate(new Date());
-                
+
                 document.getElementById('currentDateDisplay').innerHTML = `
                     ${dateStr} ${!isToday ? '<span class="history-indicator">(история)</span>' : ''}
                 `;
             }
-            
+
             // ============== ФИЛЬТРАЦИЯ ==============
             window.applyFilters = function() {
                 currentFilter = document.getElementById('statusFilter').value;
                 loadTasks();
             };
-            
+
             // ============== ЗАГРУЗКА ЗАДАЧ ==============
             function loadTasks() {
                 console.log('loadTasks вызвана');
                 const tasksList = document.getElementById('tasksList');
-                
+
                 taskManager.loadData();
                 let tasks = taskManager.getTasksByStatus(currentFilter);
-                
+
                 const stats = taskManager.getStats();
                 document.getElementById('totalTasks').textContent = stats.total;
                 document.getElementById('tasksInProgress').textContent = stats.inProgress;
                 document.getElementById('tasksCompleted').textContent = stats.completed;
-                
+
                 tasksList.innerHTML = '';
-                
+
                 if (tasks.length === 0) {
                     tasksList.innerHTML = `
                         <div class="no-tasks">
@@ -612,7 +612,7 @@
                     `;
                     return;
                 }
-                
+
                 // Группируем по заказам
                 const byOrder = {};
                 tasks.forEach(task => {
@@ -624,11 +624,12 @@
                     }
                     byOrder[task.orderId].tasks.push(task);
                 });
-                
+
                 Object.values(byOrder).forEach(order => {
                     const orderDiv = document.createElement('div');
+                    orderDiv.className = 'order-card';
                     orderDiv.className = 'order-card collapsed';
-                    
+
                     // Заголовок заказа (кликабельный)
                     const header = document.createElement('div');
                     header.className = 'order-header';
@@ -636,11 +637,11 @@
                         <h3>📦 Заказ №${order.number}</h3>
                         <span class="collapse-icon">▼</span>
                     `;
-                    
+
                     // Контент заказа
                     const content = document.createElement('div');
                     content.className = 'order-content collapsed';
-                    
+
                     // Группируем по изделиям
                     const byProduct = {};
                     order.tasks.forEach(task => {
@@ -655,7 +656,7 @@
                         }
                         byProduct[key].tasks.push(task);
                     });
-                    
+
                     Object.values(byProduct).forEach(product => {
                         const productInfo = document.createElement('div');
                         productInfo.className = 'product-info';
@@ -665,32 +666,32 @@
                             Всего: ${product.totalQuantity} шт
                         `;
                         content.appendChild(productInfo);
-                        
+
                         product.tasks.sort((a, b) => a.index - b.index);
-                        
+
                         product.tasks.forEach(task => {
                             content.appendChild(createTaskCard(task));
                         });
                     });
-                    
+
                     header.addEventListener('click', function(e) {
                         if (e.target.tagName === 'BUTTON') return;
                         content.classList.toggle('collapsed');
                         header.classList.toggle('collapsed');
                     });
-                    
+
                     orderDiv.appendChild(header);
                     orderDiv.appendChild(content);
                     tasksList.appendChild(orderDiv);
                 });
             }
-            
+
             // ============== СОЗДАНИЕ КАРТОЧКИ ЗАДАЧИ ==============
             function createTaskCard(task) {
                 const card = document.createElement('div');
                 card.className = `task-card ${task.status === 'completed' ? 'completed' : ''}`;
                 card.dataset.taskId = task.id;
-                
+
                 // Заголовок операции
                 const header = document.createElement('div');
                 header.className = 'task-header';
@@ -701,7 +702,7 @@
                     </span>
                 `;
                 card.appendChild(header);
-                
+
                 // Описание (для доп. задач)
                 if (task.isExtra && task.description) {
                     const desc = document.createElement('div');
@@ -709,13 +710,13 @@
                     desc.textContent = task.description;
                     card.appendChild(desc);
                 }
-                
+
                 // Прогресс
                 const progress = document.createElement('div');
                 progress.className = 'task-progress';
                 progress.textContent = `Выполнено: ${task.completedQuantity}/${task.totalQuantity} шт`;
                 card.appendChild(progress);
-                
+
                 // Предупреждение, если назначено больше нормы
                 const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
                 if (totalAssigned > task.totalQuantity) {
@@ -724,7 +725,7 @@
                     warning.textContent = `⚠️ Назначено ${totalAssigned} из ${task.totalQuantity}`;
                     card.appendChild(warning);
                 }
-                
+
                 // Заголовки колонок
                 const headers = document.createElement('div');
                 headers.className = 'executor-header';
@@ -735,12 +736,12 @@
                     <span></span>
                 `;
                 card.appendChild(headers);
-                
+
                 // Список исполнителей
                 const executorList = document.createElement('div');
                 executorList.className = 'executor-list';
                 executorList.id = `executors-${task.id}`;
-                
+
                 if (task.executors && task.executors.length > 0) {
                     task.executors.forEach(executor => {
                         executorList.appendChild(createExecutorItem(task, executor));
@@ -752,11 +753,11 @@
                     executorList.appendChild(noExecutors);
                 }
                 card.appendChild(executorList);
-                
+
                 // Контейнер для кнопки добавления и формы
                 const actionContainer = document.createElement('div');
                 actionContainer.className = 'action-container';
-                
+
                 // Кнопка добавления исполнителя
                 if (task.status !== 'completed') {
                     const addBtn = document.createElement('button');
@@ -765,9 +766,9 @@
                     addBtn.onclick = () => showAddExecutorForm(task, actionContainer);
                     actionContainer.appendChild(addBtn);
                 }
-                
+
                 card.appendChild(actionContainer);
-                
+
                 // Кнопка ГОТОВО – всегда в самом низу
                 const readyBtn = document.createElement('button');
                 readyBtn.className = 'btn-ready';
@@ -775,16 +776,16 @@
                 readyBtn.disabled = task.status === 'completed';
                 readyBtn.onclick = () => completeTask(task.id);
                 card.appendChild(readyBtn);
-                
+
                 return card;
             }
-            
+
             // ============== СОЗДАНИЕ ЭЛЕМЕНТА ИСПОЛНИТЕЛЯ ==============
             function createExecutorItem(task, executor) {
                 const div = document.createElement('div');
                 div.className = `executor-item ${executor.status === 'completed' ? 'completed' : ''}`;
                 div.dataset.executorId = executor.id;
-                
+
                 const nameInput = document.createElement('input');
                 nameInput.type = 'text';
                 nameInput.className = 'executor-name';
@@ -795,7 +796,7 @@
                     console.log('Имя изменено на:', e.target.value);
                 };
                 div.appendChild(nameInput);
-                
+
                 const quantityInput = document.createElement('input');
                 quantityInput.type = 'number';
                 quantityInput.className = 'executor-quantity';
@@ -809,7 +810,7 @@
                     setTimeout(() => loadTasks(), 200);
                 };
                 div.appendChild(quantityInput);
-                
+
                 const workBtn = document.createElement('button');
                 workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''}`;
                 workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
@@ -822,7 +823,7 @@
                     setTimeout(() => loadTasks(), 200);
                 };
                 div.appendChild(workBtn);
-                
+
                 const removeBtn = document.createElement('button');
                 removeBtn.className = 'btn btn-danger btn-sm';
                 removeBtn.innerHTML = '✕';
@@ -833,25 +834,25 @@
                     }
                 };
                 div.appendChild(removeBtn);
-                
+
                 return div;
             }
-            
+
             // ============== ФОРМА ДОБАВЛЕНИЯ ИСПОЛНИТЕЛЯ ==============
             function showAddExecutorForm(task, actionContainer) {
                 console.log('showAddExecutorForm вызвана для задачи:', task.id);
-                
+
                 // Удаляем старую форму, если есть
                 const oldForm = actionContainer.querySelector('.new-executor-form');
                 if (oldForm) oldForm.remove();
-                
+
                 const formDiv = document.createElement('div');
                 formDiv.className = 'new-executor-form';
-                
+
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.placeholder = 'ФИО исполнителя';
-                
+
                 const addBtn = document.createElement('button');
                 addBtn.className = 'btn btn-success';
                 addBtn.textContent = 'Добавить';
@@ -861,7 +862,7 @@
                         alert('Введите ФИО исполнителя');
                         return;
                     }
-                    
+
                     const result = taskManager.addExecutor(task.id, name);
                     if (result) {
                         formDiv.remove();
@@ -870,20 +871,20 @@
                         alert('Не удалось добавить исполнителя. Возможно, он уже существует.');
                     }
                 };
-                
+
                 const cancelBtn = document.createElement('button');
                 cancelBtn.className = 'btn btn-danger';
                 cancelBtn.textContent = 'Отмена';
                 cancelBtn.onclick = () => formDiv.remove();
-                
+
                 formDiv.appendChild(input);
                 formDiv.appendChild(addBtn);
                 formDiv.appendChild(cancelBtn);
-                
+
                 // Вставляем форму в контейнер действий
                 actionContainer.appendChild(formDiv);
             }
-            
+
             // ============== ДЕЙСТВИЯ С ЗАДАЧАМИ ==============
             window.toggleWorkStatus = function(taskId, executorId, btn) {
                 const newStatus = btn.classList.contains('active') ? 'pending' : 'in_progress';
@@ -892,33 +893,33 @@
                 btn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
                 setTimeout(() => loadTasks(), 200);
             };
-            
+
             window.removeExecutor = function(taskId, executorId) {
                 if (confirm('Удалить этого исполнителя?')) {
                     taskManager.removeExecutor(taskId, executorId);
                     setTimeout(() => loadTasks(), 200);
                 }
             };
-            
+
             window.completeTask = function(taskId) {
                 const task = taskManager.tasks.find(t => t.id === taskId);
                 if (!task) return;
-                
+
                 const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
-                
+
                 let message = 'Завершить эту задачу?';
                 if (totalAssigned < task.totalQuantity) {
                     message = `Назначено только ${totalAssigned} из ${task.totalQuantity} шт. Продолжить?`;
                 } else if (totalAssigned > task.totalQuantity) {
                     message = `Назначено ${totalAssigned} из ${task.totalQuantity} шт. Продолжить?`;
                 }
-                
+
                 if (confirm(message)) {
                     taskManager.completeTask(taskId);
                     setTimeout(() => loadTasks(), 200);
                 }
             };
-            
+
             // ============== ОЧИСТКА ИСТОРИИ ==============
             window.clearHistory = function() {
                 if (!confirm('Очистить историю задач для текущей даты?')) return;
@@ -927,12 +928,12 @@
                 taskManager.loadData();
                 loadTasks();
             };
-            
+
             // ============== ЭКСПОРТ В EXCEL ==============
             window.exportToExcel = function() {
                 const tasks = taskManager.tasks;
                 const dateStr = taskManager.formatDate(taskManager.currentDate);
-                
+
                 let csv = "Заказ,Изделие,Операция,Исполнитель,Количество,Статус\n";
                 tasks.forEach(task => {
                     if (task.executors.length > 0) {
@@ -943,7 +944,7 @@
                         csv += `${task.orderNumber},${task.product},${task.operation},Нет,0,${task.status}\n`;
                     }
                 });
-                
+
                 const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
