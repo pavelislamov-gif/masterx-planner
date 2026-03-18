@@ -20,7 +20,7 @@ class TaskManager {
         this._isNotifying = false;
         this._lastNotificationTime = 0;
     }
-    
+
     // ============== ЗАГРУЗКА ДАННЫХ ==============
     
     loadData() {
@@ -143,9 +143,8 @@ class TaskManager {
     // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ИЗ ТЕХКАРТ ==============
     
     getOperationsForProduct(productName) {
-        // 1. Сначала ищем в кастомных операциях (переданных при создании)
+        // 1. Сначала ищем в кастомных операциях
         if (this.customOperations[productName]) {
-            console.log(`Найдены кастомные операции для ${productName}`);
             return this.customOperations[productName];
         }
         
@@ -155,21 +154,18 @@ class TaskManager {
             
             // Точное совпадение
             if (siteOps[productName]) {
-                console.log(`Найдены операции из техкарт для ${productName}`);
                 return siteOps[productName];
             }
             
-            // Частичное совпадение (для похожих названий)
+            // Частичное совпадение
             for (const key in siteOps) {
                 if (key !== 'default' && productName && productName.includes(key)) {
-                    console.log(`Найдены операции по частичному совпадению: ${key}`);
                     return siteOps[key];
                 }
             }
             
             // Операции по умолчанию для этого участка
             if (siteOps['default']) {
-                console.log(`Используются операции по умолчанию для ${this.siteType}`);
                 return siteOps['default'];
             }
         }
@@ -268,6 +264,8 @@ class TaskManager {
     // ============== УПРАВЛЕНИЕ ИСПОЛНИТЕЛЯМИ ==============
     
     addExecutor(taskId, executorName) {
+        console.log('addExecutor:', taskId, executorName);
+        
         if (!executorName || !executorName.trim()) return false;
         
         const task = this.tasks.find(t => t.id === taskId);
@@ -293,6 +291,8 @@ class TaskManager {
     }
     
     updateExecutorQuantity(taskId, executorId, quantity) {
+        console.log('updateExecutorQuantity:', taskId, executorId, quantity);
+        
         const task = this.tasks.find(t => t.id === taskId);
         if (!task) return false;
         
@@ -301,10 +301,13 @@ class TaskManager {
         
         quantity = this.safeParseInt(quantity);
         quantity = Math.max(0, Math.min(quantity, task.totalQuantity));
+        
         executor.quantity = quantity;
         
+        // Обновляем общее количество выполненных
         task.completedQuantity = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
         
+        // Обновляем статус задачи в зависимости от прогресса
         if (task.completedQuantity >= task.totalQuantity) {
             task.status = 'completed';
             this.updateOrderStatus(taskId, 'completed');
@@ -317,7 +320,54 @@ class TaskManager {
         return true;
     }
     
+    // ============== НОВЫЙ МЕТОД updateExecutorStatus ==============
+    updateExecutorStatus(taskId, executorId, status) {
+        console.log('updateExecutorStatus вызван:', { taskId, executorId, status });
+        
+        // Находим задачу
+        const task = this.tasks.find(t => t.id === taskId);
+        if (!task) {
+            console.warn('Задача не найдена:', taskId);
+            return false;
+        }
+        
+        // Находим исполнителя
+        const executor = task.executors.find(e => e.id === executorId);
+        if (!executor) {
+            console.warn('Исполнитель не найден:', executorId);
+            return false;
+        }
+        
+        // Обновляем статус исполнителя
+        executor.status = status;
+        console.log('Статус исполнителя обновлен:', executor);
+        
+        // Проверяем, все ли исполнители завершили работу
+        const allCompleted = task.executors.every(e => e.status === 'completed');
+        
+        if (allCompleted) {
+            // Если все завершили - задача выполнена
+            task.status = 'completed';
+            console.log('Все исполнители завершили, задача выполнена');
+        } else if (status === 'in_progress') {
+            // Если хотя бы один в работе - задача в работе
+            task.status = 'in_progress';
+            console.log('Задача в работе');
+        }
+        
+        // Обновляем статус в заказе
+        this.updateOrderStatus(taskId, task.status);
+        
+        // Сохраняем в историю
+        this.saveTasksToHistory(this.formatDate(this.currentDate));
+        
+        return true;
+    }
+    // ============================================================
+    
     removeExecutor(taskId, executorId) {
+        console.log('removeExecutor:', taskId, executorId);
+        
         const task = this.tasks.find(t => t.id === taskId);
         if (!task) return false;
         
@@ -334,6 +384,8 @@ class TaskManager {
     }
     
     completeTask(taskId) {
+        console.log('completeTask:', taskId);
+        
         const task = this.tasks.find(t => t.id === taskId);
         if (!task) return false;
         
