@@ -320,14 +320,14 @@ class TaskManager {
         return true;
     }
     
-    updateExecutorStatus(taskId, executorId, status) {
-        console.log('updateExecutorStatus вызван:', { taskId, executorId, status });
-        
-        const task = this.tasks.find(t => t.id === taskId);
-        if (!task) {
-            console.warn('Задача не найдена:', taskId);
-            return false;
-        }
+updateExecutorStatus(taskId, executorId, status) {
+    console.log('updateExecutorStatus вызван:', { taskId, executorId, status });
+    // status должен быть 'in_progress'
+    
+    // ... код ...
+    
+    this.updateOrderStatus(taskId, task.status); // Здесь task.status должен быть 'in_progress'
+}
         
         const executor = task.executors.find(e => e.id === executorId);
         if (!executor) {
@@ -420,18 +420,14 @@ class TaskManager {
     }
     
     // ============== МЕТОД ДЛЯ УВЕДОМЛЕНИЯ ДРУГИХ ВКЛАДОК ==============
-    notifyOtherTabs(taskId, status) {
-        console.log('📢 notifyOtherTabs:', taskId, status);
-        
-        // Сохраняем в localStorage для других вкладок
-        const data = {
-            taskId: taskId,
-            status: status,
-            timestamp: Date.now()
-        };
-        localStorage.setItem('taskStatusChanged', JSON.stringify(data));
-        console.log('💾 Сохранено в localStorage:', data);
-    }
+notifyOtherTabs(taskId, status) {
+    console.log('📢 notifyOtherTabs:', taskId, status); // status должен быть 'in_progress'
+    localStorage.setItem('taskStatusChanged', JSON.stringify({
+        taskId: taskId,
+        status: status,  // Сохраняется правильный статус?
+        timestamp: Date.now()
+    }));
+}
     
     // ============== НАВИГАЦИЯ ПО ДАТАМ ==============
     
