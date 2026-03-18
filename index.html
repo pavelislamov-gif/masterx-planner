@@ -182,10 +182,30 @@
         </div>
 
         <!-- СПИСОК ЗАКАЗОВ -->
-        <div id="ordersList" class="orders-list">
+<div class="orders-list">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="background: #2a2f38; color: #fff;">
+                <th style="padding: 12px;">ID</th>
+                <th style="padding: 12px;">Заказчик</th>
+                <th style="padding: 12px;">Дата</th>
+                <th style="padding: 12px;">Изделие</th>
+                <th style="padding: 12px;">Размер</th>
+                <th style="padding: 12px;">Кол-во</th>
+                <th style="padding: 12px;">Кронштейн</th>
+                <th style="padding: 12px;">Кол-во</th>
+                <th style="padding: 12px;">Лира</th>
+                <th style="padding: 12px;">Кол-во</th>
+                <th style="padding: 12px;">RAL</th>
+                <th style="padding: 12px;">Текстура</th>
+                <th style="padding: 12px;">Действия</th>
+            </tr>
+        </thead>
+        <tbody id="ordersTableBody">
             <!-- Заказы будут загружаться сюда -->
-        </div>
-    </div>
+        </tbody>
+    </table>
+</div>
 
     <!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ В ПРАВИЛЬНОМ ПОРЯДКЕ -->
     <script src="js/storage.js"></script>
