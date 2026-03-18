@@ -170,53 +170,6 @@ function populateSelects() {
     }
 }
 
-// ============== ЗАГРУЗКА РАЗМЕРОВ ПРОДУКТА ==============
-function loadProductSizes() {
-    console.log('loadProductSizes вызвана');
-    
-    const type = document.getElementById('productType')?.value;
-    const productName = document.getElementById('productSelect')?.value;
-    const bracketName = document.getElementById('bracketSelect')?.value;
-    const lyreName = document.getElementById('lyreSelect')?.value;
-    
-    console.log('Тип:', type);
-    console.log('Продукт:', productName);
-    console.log('Кронштейн:', bracketName);
-    console.log('Лира:', lyreName);
-    
-    let sizes = [];
-    
-    if (type === 'product' && productName) {
-        const product = allProducts.find(p => p.name === productName);
-        console.log('Найден продукт:', product);
-        sizes = product?.sizes || [];
-    } else if (type === 'bracket' && bracketName) {
-        const bracket = allBrackets.find(b => b.name === bracketName);
-        console.log('Найден кронштейн:', bracket);
-        sizes = bracket?.sizes || [];
-    } else if (type === 'lyre' && lyreName) {
-        const lyre = allLyres.find(l => l.name === lyreName);
-        console.log('Найдена лира:', lyre);
-        sizes = lyre?.sizes || [];
-    }
-    
-    console.log('Размеры для загрузки:', sizes);
-    
-    const sizeSelect = document.getElementById('sizeSelect');
-    if (sizeSelect) {
-        if (sizes && sizes.length > 0) {
-            sizeSelect.innerHTML = '<option value="">Выберите размер</option>' +
-                sizes.map(s => `<option value="${s}">${s}</option>`).join('');
-            console.log(`✅ Загружено ${sizes.length} размеров`);
-        } else {
-            sizeSelect.innerHTML = '<option value="">Нет доступных размеров</option>';
-            console.log('⚠️ Нет размеров для выбранного изделия');
-        }
-    } else {
-        console.error('❌ Элемент sizeSelect не найден');
-    }
-}
-
 // ============== ОТКРЫТИЕ МОДАЛЬНОГО ОКНА ЗАКАЗА ==============
 function openOrderModal(orderId = null) {
     console.log('openOrderModal:', orderId);
@@ -311,6 +264,7 @@ function clearOrderForm() {
     }
 }
 
+// ============== ДОБАВЛЕНИЕ ПОЗИЦИИ В ЗАКАЗ ==============
 function addOrderItem(item = null) {
     const container = document.getElementById('orderItems');
     if (!container) return;
@@ -319,19 +273,122 @@ function addOrderItem(item = null) {
     itemDiv.className = 'order-item';
     itemDiv.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: center;';
     
+    // Генерируем уникальный ID для этой позиции
+    const itemId = 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+    
     itemDiv.innerHTML = `
-        <select class="item-type" style="width: 120px; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+        <select class="item-type" id="type_${itemId}" style="width: 120px; padding: 5px; border: 1px solid #ddd; border-radius: 4px;" onchange="window.loadProductNamesForItem('${itemId}')">
             <option value="product" ${item?.type === 'product' ? 'selected' : ''}>Продукт</option>
             <option value="bracket" ${item?.type === 'bracket' ? 'selected' : ''}>Кронштейн</option>
             <option value="lyre" ${item?.type === 'lyre' ? 'selected' : ''}>Лира</option>
         </select>
-        <input type="text" class="item-name" placeholder="Название" value="${item?.product || ''}" style="flex: 2; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
-        <input type="text" class="item-size" placeholder="Размер" value="${item?.size || ''}" style="flex: 1; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+        <select class="item-name" id="name_${itemId}" style="flex: 2; padding: 5px; border: 1px solid #ddd; border-radius: 4px;" onchange="window.loadProductSizesForItem('${itemId}')">
+            <option value="">Выберите изделие</option>
+        </select>
+        <select class="item-size" id="size_${itemId}" style="flex: 1; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="">Размер</option>
+        </select>
         <input type="number" class="item-quantity" placeholder="Кол-во" value="${item?.quantity || 1}" style="width: 80px; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
         <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: #ff3b3b; cursor: pointer; font-size: 18px; width: 30px;">✕</button>
     `;
+    
     container.appendChild(itemDiv);
+    
+    // Заполняем выпадающий список изделий
+    window.loadProductNamesForItem(itemId);
+    
+    // Если есть данные для редактирования, выбираем нужные значения
+    if (item) {
+        setTimeout(() => {
+            const nameSelect = document.getElementById(`name_${itemId}`);
+            if (nameSelect) {
+                nameSelect.value = item.product || '';
+                // Загружаем размеры для этого изделия
+                window.loadProductSizesForItem(itemId);
+                setTimeout(() => {
+                    const sizeSelect = document.getElementById(`size_${itemId}`);
+                    if (sizeSelect && item.size) {
+                        sizeSelect.value = item.size || '';
+                    }
+                }, 200);
+            }
+        }, 200);
+    }
 }
+
+// ============== ЗАГРУЗКА СПИСКА ИЗДЕЛИЙ ==============
+window.loadProductNamesForItem = function(itemId) {
+    console.log('loadProductNamesForItem:', itemId);
+    
+    const typeSelect = document.getElementById(`type_${itemId}`);
+    const nameSelect = document.getElementById(`name_${itemId}`);
+    
+    if (!typeSelect || !nameSelect) return;
+    
+    const type = typeSelect.value;
+    let items = [];
+    
+    if (type === 'product') {
+        items = allProducts;
+    } else if (type === 'bracket') {
+        items = allBrackets;
+    } else if (type === 'lyre') {
+        items = allLyres;
+    }
+    
+    nameSelect.innerHTML = '<option value="">Выберите изделие</option>';
+    
+    items.forEach(product => {
+        nameSelect.innerHTML += `<option value="${product.name}">${product.name}</option>`;
+    });
+    
+    // Очищаем размеры
+    const sizeSelect = document.getElementById(`size_${itemId}`);
+    if (sizeSelect) {
+        sizeSelect.innerHTML = '<option value="">Сначала выберите изделие</option>';
+    }
+};
+
+// ============== ЗАГРУЗКА РАЗМЕРОВ ДЛЯ КОНКРЕТНОЙ ПОЗИЦИИ ==============
+window.loadProductSizesForItem = function(itemId) {
+    console.log('loadProductSizesForItem:', itemId);
+    
+    const typeSelect = document.getElementById(`type_${itemId}`);
+    const nameSelect = document.getElementById(`name_${itemId}`);
+    const sizeSelect = document.getElementById(`size_${itemId}`);
+    
+    if (!typeSelect || !nameSelect || !sizeSelect) return;
+    
+    const type = typeSelect.value;
+    const productName = nameSelect.value;
+    
+    if (!productName) {
+        sizeSelect.innerHTML = '<option value="">Сначала выберите изделие</option>';
+        return;
+    }
+    
+    let sizes = [];
+    
+    if (type === 'product') {
+        const product = allProducts.find(p => p.name === productName);
+        sizes = product?.sizes || [];
+    } else if (type === 'bracket') {
+        const bracket = allBrackets.find(b => b.name === productName);
+        sizes = bracket?.sizes || [];
+    } else if (type === 'lyre') {
+        const lyre = allLyres.find(l => l.name === productName);
+        sizes = lyre?.sizes || [];
+    }
+    
+    console.log('Размеры для', productName, ':', sizes);
+    
+    if (sizes && sizes.length > 0) {
+        sizeSelect.innerHTML = '<option value="">Выберите размер</option>' +
+            sizes.map(s => `<option value="${s}">${s}</option>`).join('');
+    } else {
+        sizeSelect.innerHTML = '<option value="">Нет доступных размеров</option>';
+    }
+};
 
 // ============== СОХРАНЕНИЕ ЗАКАЗА ==============
 function saveOrder() {
@@ -356,10 +413,18 @@ function saveOrder() {
     
     // Собираем позиции
     document.querySelectorAll('.order-item').forEach(itemDiv => {
-        const type = itemDiv.querySelector('.item-type')?.value;
-        const name = itemDiv.querySelector('.item-name')?.value;
-        const size = itemDiv.querySelector('.item-size')?.value;
-        const quantity = parseInt(itemDiv.querySelector('.item-quantity')?.value) || 1;
+        // Находим ID по селектам
+        const typeSelect = itemDiv.querySelector('select[id^="type_"]');
+        const nameSelect = itemDiv.querySelector('select[id^="name_"]');
+        const sizeSelect = itemDiv.querySelector('select[id^="size_"]');
+        const quantityInput = itemDiv.querySelector('.item-quantity');
+        
+        if (!typeSelect || !nameSelect || !quantityInput) return;
+        
+        const type = typeSelect.value;
+        const name = nameSelect.value;
+        const size = sizeSelect ? sizeSelect.value : '';
+        const quantity = parseInt(quantityInput.value) || 1;
         
         if (name) {
             orderData.items.push({
@@ -685,19 +750,20 @@ console.log('==================================================');
 // ============== ЭКСПОРТ ФУНКЦИЙ В ГЛОБАЛЬНУЮ ОБЛАСТЬ ==============
 window.openOrderModal = openOrderModal;
 window.closeOrderModal = closeOrderModal;
-window.loadProductSizes = loadProductSizes;
 window.exportOrders = exportOrders;
 window.showMaterialsReport = showMaterialsReport;
 window.deleteOrder = deleteOrder;
 window.addExtraTask = addExtraTask;
 window.closeMaterialsModal = closeMaterialsModal;
 window.syncTasksFromHistory = syncTasksFromHistory;
+// Функции для работы с размерами уже доступны через window
 
 console.log('📤 Экспорт функций в глобальную область...');
 
 // Проверяем, что функции экспортированы
-const exportedFunctions = ['openOrderModal', 'closeOrderModal', 'loadProductSizes', 'exportOrders', 
-    'showMaterialsReport', 'deleteOrder', 'addExtraTask', 'closeMaterialsModal', 'syncTasksFromHistory'];
+const exportedFunctions = ['openOrderModal', 'closeOrderModal', 'exportOrders', 
+    'showMaterialsReport', 'deleteOrder', 'addExtraTask', 'closeMaterialsModal', 'syncTasksFromHistory',
+    'loadProductNamesForItem', 'loadProductSizesForItem'];
     
 const availableFunctions = exportedFunctions.filter(name => typeof window[name] === 'function');
 console.log('✅ Функции экспортированы:', availableFunctions);
