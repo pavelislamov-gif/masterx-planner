@@ -406,24 +406,18 @@ class TaskManager {
         return true;
     }
     
-updateOrderStatus(taskId, status) {
-    console.log('updateOrderStatus:', taskId, status);
+notifyOtherTabs(taskId, status) {
+    console.log('📢 notifyOtherTabs:', taskId, status);
     
-    const [orderId] = taskId.split('_');
-    
-    if (typeof window.loadOrdersFromStorage === 'function') {
-        const orders = window.loadOrdersFromStorage() || [];
-        const orderIndex = orders.findIndex(o => o.id == orderId);
-        
-        if (orderIndex !== -1) {
-            if (!orders[orderIndex].tasks) orders[orderIndex].tasks = {};
-            orders[orderIndex].tasks[taskId] = this.convertTaskStatus(status);
-            
-            if (typeof window.saveOrdersToStorage === 'function') {
-                window.saveOrdersToStorage(orders);
-            }
-        }
-    }
+    // Сохраняем в localStorage для других вкладок
+    const data = {
+        taskId: taskId,
+        status: status,
+        timestamp: Date.now()
+    };
+    localStorage.setItem('taskStatusChanged', JSON.stringify(data));
+    console.log('💾 Сохранено в localStorage:', data);
+}
     
     // ВАЖНО: вызываем notifyOtherTabs
     this.notifyOtherTabs(taskId, status);
