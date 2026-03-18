@@ -396,7 +396,9 @@ generateTasks() {
     // ============== НАВИГАЦИЯ ПО ДАТАМ ==============
     
 setDate(date) {
-    this.currentDate = new Date(date);  // ПРОБЛЕМА: учитывает часовой пояс
+    // Исправление: создаем дату без учета часового пояса
+    const [year, month, day] = date.split('-');
+    this.currentDate = new Date(year, month - 1, day, 12, 0, 0); // Фиксируем полдень
     this.loadData();
     return this.tasks;
 }
