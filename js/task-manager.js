@@ -50,68 +50,41 @@ class TaskManager {
     }
     
     generateTasks() {
-        console.log('generateTasks начата для участка:', this.siteType);
-        this.tasks = [];
-        const dateStr = this.formatDate(this.currentDate);
-        
-        // Загружаем историю для этой даты
-        let historyTasks = [];
-        try {
-            const historyKey = `tasks_${this.siteType}_${dateStr}`;
-            const history = localStorage.getItem(historyKey);
-            if (history) {
-                historyTasks = JSON.parse(history);
-                console.log(`Загружено ${historyTasks.length} задач из истории`);
-            }
-        } catch (error) {
-            console.error('Ошибка загрузки истории:', error);
+    console.log('generateTasks начата для участка:', this.siteType);
+    this.tasks = [];
+    const dateStr = this.formatDate(this.currentDate);
+    
+    // Загружаем историю для этой даты
+    let historyTasks = [];
+    try {
+        const historyKey = `tasks_${this.siteType}_${dateStr}`;
+        const history = localStorage.getItem(historyKey);
+        if (history) {
+            historyTasks = JSON.parse(history);
+            console.log(`Загружено ${historyTasks.length} задач из истории`);
         }
+    } catch (error) {
+        console.error('Ошибка загрузки истории:', error);
+    }
+    
+    if (!this.orders || this.orders.length === 0) {
+        this.tasks = historyTasks;
+        return;
+    }
+    
+    this.orders.forEach(order => {
+        if (order.status !== 'active') return;
         
-        if (!this.orders || this.orders.length === 0) {
-            this.tasks = historyTasks;
-            return;
-        }
-        
-        this.orders.forEach(order => {
-            if (order.status !== 'active') return;
-            
-            if (order.items && Array.isArray(order.items)) {
-                order.items.forEach((item, idx) => {
-                    const productName = item.product || 'Изделие';
-                    const operations = this.getOperationsForProduct(productName);
-                    
-                    operations.forEach((op, index) => {
-                        const taskId = `${order.id}_${this.siteType}_${idx}_${index}`;
-                        const taskStatus = order.tasks?.[taskId];
-                        
-                        const historyTask = historyTasks.find(t => t.id === taskId);
-                        
-                        const task = {
-                            id: taskId,
-                            orderId: order.id,
-                            orderNumber: order.number || order.id,
-                            product: productName,
-                            size: item.size || 'Стандартный',
-                            totalQuantity: parseInt(item.quantity) || 1,
-                            completedQuantity: historyTask?.completedQuantity || 0,
-                            operation: op,
-                            index: index,
-                            status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
-                            executors: historyTask?.executors || [],
-                            date: dateStr,
-                            isExtra: false
-                        };
-                        
-                        this.tasks.push(task);
-                    });
-                });
-            }
-            
-            if (order.extraTasks && Array.isArray(order.extraTasks)) {
-                order.extraTasks.forEach((extra, index) => {
-                    if (extra.site !== this.siteType) return;
-                    
-                    const taskId = `${order.id}_extra_${index}`;
+        if (order.items && Array.isArray(order.items)) {
+            order.items.forEach((item, idx) => {
+                const productName = item.product || 'Изделие';
+                const operations = this.getOperationsForProduct(productName);
+                
+                // ВАЖНО: если операций нет - пропускаем
+                if (operations.length === 0) return;
+                
+                operations.forEach((op, index) => {
+                    const taskId = `${order.id}_${this.siteType}_${idx}_${index}`;
                     const taskStatus = order.tasks?.[taskId];
                     
                     const historyTask = historyTasks.find(t => t.id === taskId);
@@ -120,25 +93,55 @@ class TaskManager {
                         id: taskId,
                         orderId: order.id,
                         orderNumber: order.number || order.id,
-                        product: extra.title || 'Доп. задача',
-                        description: extra.description || '',
-                        totalQuantity: 1,
+                        product: productName,
+                        size: item.size || 'Стандартный',
+                        totalQuantity: parseInt(item.quantity) || 1,
                         completedQuantity: historyTask?.completedQuantity || 0,
-                        operation: extra.title || 'Доп. операция',
-                        isExtra: true,
+                        operation: op,
+                        index: index,
                         status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
                         executors: historyTask?.executors || [],
-                        date: dateStr
+                        date: dateStr,
+                        isExtra: false
                     };
                     
                     this.tasks.push(task);
                 });
-            }
-        });
+            });
+        }
         
-        console.log(`generateTasks завершена, всего задач: ${this.tasks.length}`);
-        this._saveTasksToHistoryInternal(dateStr);
-    }
+        if (order.extraTasks && Array.isArray(order.extraTasks)) {
+            order.extraTasks.forEach((extra, index) => {
+                if (extra.site !== this.siteType) return;
+                
+                const taskId = `${order.id}_extra_${index}`;
+                const taskStatus = order.tasks?.[taskId];
+                
+                const historyTask = historyTasks.find(t => t.id === taskId);
+                
+                const task = {
+                    id: taskId,
+                    orderId: order.id,
+                    orderNumber: order.number || order.id,
+                    product: extra.title || 'Доп. задача',
+                    description: extra.description || '',
+                    totalQuantity: 1,
+                    completedQuantity: historyTask?.completedQuantity || 0,
+                    operation: extra.title || 'Доп. операция',
+                    isExtra: true,
+                    status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
+                    executors: historyTask?.executors || [],
+                    date: dateStr
+                };
+                
+                this.tasks.push(task);
+            });
+        }
+    });
+    
+    console.log(`generateTasks завершена, всего задач: ${this.tasks.length}`);
+    this._saveTasksToHistoryInternal(dateStr);
+}
     
     // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ИЗ ТЕХКАРТ ==============
     
