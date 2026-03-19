@@ -405,387 +405,13 @@ function getOperationNames(productName, siteKey) {
     return allOperations.filter(op => op && op !== 'х' && op !== 'x');
 }
 
+// ============== ФУНКЦИЯ getOperationCount ==============
 function getOperationCount(productName, siteKey) {
     const siteOps = window.TASK_OPERATIONS?.[siteKey] || {};
     const operations = siteOps[productName] || [];
     
     // Считаем только не-х
     return operations.filter(op => op && op !== 'х' && op !== 'x').length;
-}
-
-// ============== ФУНКЦИЯ getOperationCount (ПОЛНАЯ ВЕРСИЯ) ==============
-function getOperationCount(productName, siteKey) {
-    // Операции для токарного участка
-    const tokarniyOps = {
-    'XRAY 1': 7,
-    'XRAY 3': 7,
-    'XRAY 3-2': 10,
-    'XRAY 3-GRP': 6,
-    'XRAY 6': 7,
-    'XRAY 6 RGBW': 9,
-    'XRAY 6-2 проходной': 9,
-    'XRAY 6-2 оконечный': 9,
-    'XRAY 6-T2 BT 180': 3,
-    'XRAY 6-T2 BT 200': 3,
-    'XRAY 6-T2 BT 220': 3,
-    'XRAY 6-T2 BT 220 Шторка х2': 3,
-    'XRAY 6-T2 BT 240 Шторка': 3,
-    'XRAY 6-T2 BZ 180': 3,
-    'XRAY 6-T2 BZ 200 Шторка': 3,
-    'XRAY 6-T2 BZ 220': 4,
-    'XRAY 6-T2 BZ 220 Шторка х2': 3,
-    'XRAY 6-T2 BZ 240 Шторка': 3,
-    'XRAY 6T Накладной': 6,
-    'XRAY 6T BT 120': 3,
-    'XRAY 6T BT 140 Шторка': 3,
-    'XRAY 6T BZ 120': 4,
-    'XRAY 6T BZ 140 Шторка': 3,
-    'XRAY 6T RGBW BT 150': 3,
-    'XRAY 9': 10,
-    'XRAY 9S': 3,
-    'XRAY 12S': 3,
-    'XRAY 18': 10,
-    'XRAY 18S': 3,
-    'XSLOPE': 6,
-    'XPIXEL BIN v.1': 3,
-    'XPIXEL BIN v.2': 5,
-    'XPIXEL BIN v.3': 5,
-    'XPIXEL OVHD': 3,
-    'XDISK': 12,
-    'XPOINT OVHD': 2,
-    'XSPOT': 6,
-    'ACENTO 3T': 5,
-    'ACENTO 4': 3,
-    'ACENTO 4': 3
-    // Остальные изделия не указываем - они вернут 1 по умолчанию
-};
-
-    // Операции для слесарного участка
-    const slesarniyOps = {
-        'XRAY 1': 4,
-        'XRAY 3': 5,
-        'XRAY 3-2': 4,
-        'XRAY 3-GRP': 3,
-        'XRAY 6': 5,
-        'XRAY 6 RGBW': 5,
-        'XRAY 6-2 проходной': 5,
-        'XRAY 6-2 оконечный': 5,
-        'XRAY 6-T2 BT 180': 7,
-        'XRAY 6-T2 BT 200': 8,
-        'XRAY 6-T2 BT 220': 7,
-        'XRAY 6-T2 BT 220 Шторка х2': 8,
-        'XRAY 6-T2 BT 240 Шторка': 8,
-        'XRAY 6-T2 BZ 180': 7,
-        'XRAY 6-T2 BZ 200 Шторка': 8,
-        'XRAY 6-T2 BZ 220': 7,
-        'XRAY 6-T2 BZ 220 Шторка х2': 8,
-        'XRAY 6-T2 BZ 240 Шторка': 8,
-        'XRAY 6T Накладной': 6,
-        'XRAY 6T BT 120': 8,
-        'XRAY 6T BT 140 Шторка': 9,
-        'XRAY 6T BZ 120': 8,
-        'XRAY 6T BZ 140 Шторка': 9,
-        'XRAY 6T RGBW BT 150': 8,
-        'XRAY 9': 5,
-        'XRAY 9S': 5,
-        'XRAY 12S': 5,
-        'XRAY 18': 5,
-        'XRAY 18S': 5,
-        'XRAY 36': 5,
-        'XRAY 36S': 5,
-        'XSLOPE': 6,
-        'XPIXEL BIN v.1': 3,
-        'XPIXEL BIN v.2': 2,
-        'XPIXEL BIN v.3': 4,
-        'XPIXEL OVHD': 1,
-        'XDISK': 5,
-        'XPOINT OVHD': 1,
-        'XSPOT': 3,
-        'ACENTO 3T': 6,
-        'ACENTO 4': 6,
-        'XROLL-lite P': 8,
-        'XROLL-lite K': 8,
-        'XWHITE': 10,
-        'XEYES 130*90 1': 6,
-        'XEYES 130*90 2': 6,
-        'XEYES 130*90 3': 6,
-        'XEYES 130*90 4': 6,
-        'XEYES 130*120 1': 6,
-        'XEYES 130*120 2': 6,
-        'XEYES 130*120 3': 6,
-        'XEYES 130*120 4': 6,
-        'XEYES mini-1': 8,
-        'XGIRO': 7,
-        'XGLOW': 8,
-        'XGLOW mini': 8,
-        'XGRAY v.1': 10,
-        'XLITE': 9,
-        'XSMART': 9,
-        'XSMART mini': 9,
-        'XSTRONG': 7,
-        'XLUMO': 9,
-        'XLUMO 1-6': 9,
-        'XLUMO Двунаправленный': 8,
-        'XLUMO PROV': 10,
-        'XVISION': 3,
-        'XBAR-SW': 7,
-        'XMODULE-2x2': 2,
-        'XMODULE-6x2': 3,
-        'XFOCUS': 7,
-        'XYELLOW': 8,
-        'XGRAY v.2': 7,
-        'XLINE': 9
-    };
-
-    // Операции для фрезерного участка
-    const frezerniyOps = {
-        'XRAY 1': 1,
-        'XRAY 3': 1,
-        'XRAY 3-2': 1,
-        'XRAY 3-GRP': 0,
-        'XRAY 6': 0,
-        'XRAY 6 RGBW': 0,
-        'XRAY 6-2 проходной': 1,
-        'XRAY 6-2 оконечный': 1,
-        'XRAY 6-T2 BT 180': 0,
-        'XRAY 6-T2 BT 200': 0,
-        'XRAY 6-T2 BT 220': 0,
-        'XRAY 6-T2 BT 220 Шторка х2': 0,
-        'XRAY 6-T2 BT 240 Шторка': 0,
-        'XRAY 6-T2 BZ 180': 0,
-        'XRAY 6-T2 BZ 200 Шторка': 0,
-        'XRAY 6-T2 BZ 220': 0,
-        'XRAY 6-T2 BZ 220 Шторка х2': 0,
-        'XRAY 6-T2 BZ 240 Шторка': 0,
-        'XRAY 6T Накладной': 0,
-        'XRAY 6T BT 120': 0,
-        'XRAY 6T BT 140 Шторка': 0,
-        'XRAY 6T BZ 120': 0,
-        'XRAY 6T BZ 140 Шторка': 0,
-        'XRAY 6T RGBW BT 150': 0,
-        'XRAY 9': 1,
-        'XRAY 9S': 0,
-        'XRAY 12S': 0,
-        'XRAY 18': 1,
-        'XRAY 18S': 0,
-        'XRAY 36': 1,
-        'XRAY 36S': 0,
-        'XSLOPE': 0,
-        'XPIXEL BIN v.1': 1,
-        'XPIXEL BIN v.2': 1,
-        'XPIXEL BIN v.3': 1,
-        'XPIXEL OVHD': 0,
-        'XDISK': 1,
-        'XPOINT OVHD': 0,
-        'XSPOT': 0,
-        'ACENTO 3T': 0,
-        'ACENTO 4': 0,
-        'XROLL-lite P': 1,
-        'XROLL-lite K': 1,
-        'XWHITE': 1,
-        'XEYES 130*90 1': 1,
-        'XEYES 130*90 2': 1,
-        'XEYES 130*90 3': 1,
-        'XEYES 130*90 4': 1,
-        'XEYES 130*120 1': 1,
-        'XEYES 130*120 2': 1,
-        'XEYES 130*120 3': 1,
-        'XEYES 130*120 4': 1,
-        'XEYES mini-1': 0,
-        'XGIRO': 2,
-        'XGLOW': 2,
-        'XGLOW mini': 0,
-        'XGRAY v.1': 2,
-        'XLITE': 2,
-        'XSMART': 2,
-        'XSMART mini': 2,
-        'XSTRONG': 1,
-        'XLUMO': 5,
-        'XLUMO 1-6': 4,
-        'XLUMO Двунаправленный': 3,
-        'XLUMO PROV': 3,
-        'XVISION': 0,
-        'XBAR-SW': 1,
-        'XMODULE-2x2': 0,
-        'XMODULE-6x2': 0,
-        'XFOCUS': 1,
-        'XYELLOW': 1,
-        'XGRAY v.2': 2,
-        'XLINE': 1
-    };
-
-    // Операции для лазерно-гибочного участка
-    const lazernoOps = {
-        'XRAY 1': 2,
-        'XRAY 3': 2,
-        'XRAY 3-2': 2,
-        'XRAY 3-GRP': 2,
-        'XRAY 6': 3,
-        'XRAY 6 RGBW': 3,
-        'XRAY 6-2 проходной': 2,
-        'XRAY 6-2 оконечный': 2,
-        'XRAY 6-T2 BT 180': 4,
-        'XRAY 6-T2 BT 200': 4,
-        'XRAY 6-T2 BT 220': 4,
-        'XRAY 6-T2 BT 220 Шторка х2': 4,
-        'XRAY 6-T2 BT 240 Шторка': 4,
-        'XRAY 6-T2 BZ 180': 4,
-        'XRAY 6-T2 BZ 200 Шторка': 4,
-        'XRAY 6-T2 BZ 220': 4,
-        'XRAY 6-T2 BZ 220 Шторка х2': 4,
-        'XRAY 6-T2 BZ 240 Шторка': 4,
-        'XRAY 6T Накладной': 3,
-        'XRAY 6T BT 120': 5,
-        'XRAY 6T BT 140 Шторка': 5,
-        'XRAY 6T BZ 120': 5,
-        'XRAY 6T BZ 140 Шторка': 5,
-        'XRAY 6T RGBW BT 150': 5,
-        'XRAY 9': 2,
-        'XRAY 9S': 4,
-        'XRAY 12S': 4,
-        'XRAY 18': 3,
-        'XRAY 18S': 4,
-        'XRAY 36': 3,
-        'XRAY 36S': 4,
-        'XSLOPE': 4,
-        'XPIXEL BIN v.3': 2,
-        'XPIXEL OVHD': 1,
-        'XSPOT': 2,
-        'ACENTO 3T': 4,
-        'ACENTO 4': 4,
-        'XROLL-lite K': 2,
-        'XEYES 130*90 1': 3,
-        'XEYES 130*90 2': 3,
-        'XEYES 130*90 3': 3,
-        'XEYES 130*90 4': 3,
-        'XEYES 130*120 1': 3,
-        'XEYES 130*120 2': 3,
-        'XEYES 130*120 3': 3,
-        'XEYES 130*120 4': 3,
-        'XEYES mini-1': 5,
-        'XGIRO': 4,
-        'XGLOW': 2,
-        'XGLOW mini': 2,
-        'XGRAY v.1': 1,
-        'XLITE': 4,
-        'XSMART': 4,
-        'XSMART mini': 5,
-        'XSTRONG': 5,
-        'XLUMO': 5,
-        'XLUMO 1-6': 4,
-        'XLUMO Двунаправленный': 4,
-        'XLUMO PROV': 5,
-        'XVISION': 4,
-        'XBAR-SW': 5,
-        'XMODULE-2x2': 2,
-        'XMODULE-6x2': 1,
-        'XFOCUS': 5,
-        'XYELLOW': 1,
-        'XGRAY v.2': 5,
-        'XLINE': 0
-    };
-
-    // Операции для полимерного участка
-    const polimerniyOps = {
-        'XRAY 1': 2,
-        'XRAY 3': 2,
-        'XRAY 3-2': 2,
-        'XRAY 3-GRP': 2,
-        'XRAY 6': 3,
-        'XRAY 6 RGBW': 3,
-        'XRAY 6-2 проходной': 2,
-        'XRAY 6-2 оконечный': 2,
-        'XRAY 6-T2 BT 180': 2,
-        'XRAY 6-T2 BT 200': 2,
-        'XRAY 6-T2 BT 220': 2,
-        'XRAY 6-T2 BT 220 Шторка х2': 2,
-        'XRAY 6-T2 BT 240 Шторка': 2,
-        'XRAY 6-T2 BZ 180': 2,
-        'XRAY 6-T2 BZ 200 Шторка': 2,
-        'XRAY 6-T2 BZ 220': 2,
-        'XRAY 6-T2 BZ 220 Шторка х2': 2,
-        'XRAY 6-T2 BZ 240 Шторка': 2,
-        'XRAY 6T Накладной': 4,
-        'XRAY 6T BT 120': 4,
-        'XRAY 6T BT 140 Шторка': 4,
-        'XRAY 6T BZ 120': 4,
-        'XRAY 6T BZ 140 Шторка': 4,
-        'XRAY 6T RGBW BT 150': 4,
-        'XRAY 9': 4,
-        'XRAY 9S': 3,
-        'XRAY 12S': 3,
-        'XRAY 18': 5,
-        'XRAY 18S': 3,
-        'XRAY 36': 5,
-        'XRAY 36S': 3,
-        'XSLOPE': 3,
-        'XPIXEL BIN v.1': 2,
-        'XPIXEL BIN v.2': 2,
-        'XPIXEL BIN v.3': 3,
-        'XPIXEL OVHD': 2,
-        'XDISK': 3,
-        'XPOINT OVHD': 1,
-        'XSPOT': 2,
-        'ACENTO 3T': 3,
-        'ACENTO 4': 3,
-        'XROLL-lite P': 2,
-        'XROLL-lite K': 2,
-        'XWHITE': 3,
-        'XEYES 130*90 1': 2,
-        'XEYES 130*90 2': 2,
-        'XEYES 130*90 3': 2,
-        'XEYES 130*90 4': 2,
-        'XEYES 130*120 1': 2,
-        'XEYES 130*120 2': 2,
-        'XEYES 130*120 3': 2,
-        'XEYES 130*120 4': 2,
-        'XEYES mini-1': 4,
-        'XGIRO': 4,
-        'XGLOW': 5,
-        'XGLOW mini': 3,
-        'XGRAY v.1': 4,
-        'XLITE': 4,
-        'XSMART': 5,
-        'XSMART mini': 4,
-        'XSTRONG': 3,
-        'XLUMO': 4,
-        'XLUMO 1-6': 4,
-        'XLUMO Двунаправленный': 4,
-        'XLUMO PROV': 4,
-        'XVISION': 1,
-        'XBAR-SW': 4,
-        'XMODULE-2x2': 1,
-        'XMODULE-6x2': 0,
-        'XFOCUS': 3,
-        'XYELLOW': 3,
-        'XGRAY v.2': 5,
-        'XLINE': 2
-    };
-
-    // Выбираем нужный объект в зависимости от участка
-    let siteOperations;
-    switch(siteKey) {
-        case 'tokarniy':
-            siteOperations = tokarniyOps;
-            break;
-        case 'slesarniy':
-            siteOperations = slesarniyOps;
-            break;
-        case 'frezerniy':
-            siteOperations = frezerniyOps;
-            break;
-        case 'lazerno':
-            siteOperations = lazernoOps;
-            break;
-        case 'polimerniy':
-            siteOperations = polimerniyOps;
-            break;
-        default:
-            return 1;
-    }
-
-    // Возвращаем количество операций или 1 по умолчанию
-    return siteOperations[productName] !== undefined ? siteOperations[productName] : 1;
 }
 
 // ============== ФУНКЦИЯ createSiteRow ==============
@@ -854,6 +480,7 @@ function createSiteRow(name, order, siteKey) {
         </div>
     `;
 }
+
 // ============== ФУНКЦИИ ДЛЯ РАБОТЫ С ЗАКАЗАМИ ==============
 
 async function showMaterialsReport(orderId) {
@@ -1000,40 +627,40 @@ async function loadAllData() {
                 });
         }
 
-window.addEventListener('storage', function(e) {
-    if (e.key === 'taskStatusChanged' && e.newValue) {
-        try {
-            const data = JSON.parse(e.newValue);
-            console.log('🔥 Получено из localStorage:', data);
-            
-            // Игнорируем статус pending (начальное состояние)
-            if (data.status === 'pending') return;
-            
-            // Находим базовый taskId (обрезаем последний индекс)
-            const baseTaskId = data.taskId.substring(0, data.taskId.lastIndexOf('_'));
-            console.log('🔄 Ищем квадратик с taskId:', baseTaskId);
-            
-            const square = document.querySelector(`[data-task="${baseTaskId}"]`);
-            if (square) {
-                // Удаляем старые классы
-                square.classList.remove('orange', 'green');
-                
-                // Добавляем новый класс
-                if (data.status === 'in_progress') {
-                    square.classList.add('orange');
-                    console.log('✅ Квадратик стал оранжевым');
-                } else if (data.status === 'completed') {
-                    square.classList.add('green');
-                    console.log('✅ Квадратик стал зеленым');
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'taskStatusChanged' && e.newValue) {
+                try {
+                    const data = JSON.parse(e.newValue);
+                    console.log('🔥 Получено из localStorage:', data);
+                    
+                    // Игнорируем статус pending (начальное состояние)
+                    if (data.status === 'pending') return;
+                    
+                    // Находим базовый taskId (обрезаем последний индекс)
+                    const baseTaskId = data.taskId.substring(0, data.taskId.lastIndexOf('_'));
+                    console.log('🔄 Ищем квадратик с taskId:', baseTaskId);
+                    
+                    const square = document.querySelector(`[data-task="${baseTaskId}"]`);
+                    if (square) {
+                        // Удаляем старые классы
+                        square.classList.remove('orange', 'green');
+                        
+                        // Добавляем новый класс
+                        if (data.status === 'in_progress') {
+                            square.classList.add('orange');
+                            console.log('✅ Квадратик стал оранжевым');
+                        } else if (data.status === 'completed') {
+                            square.classList.add('green');
+                            console.log('✅ Квадратик стал зеленым');
+                        }
+                    } else {
+                        console.log('❌ Квадратик не найден для taskId:', baseTaskId);
+                    }
+                } catch (error) {
+                    console.error('Ошибка обработки storage:', error);
                 }
-            } else {
-                console.log('❌ Квадратик не найден для taskId:', baseTaskId);
             }
-        } catch (error) {
-            console.error('Ошибка обработки storage:', error);
-        }
-    }
-});
+        });
 
         window.addEventListener('taskStatusChanged', function(e) {
             console.log('🔄 Статус задачи изменён:', e.detail);
