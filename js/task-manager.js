@@ -151,48 +151,37 @@ generateTasks() {
     // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ИЗ ТЕХКАРТ ==============
     
     getOperationsForProduct(productName) {
-        // 1. Сначала ищем в кастомных операциях
-        if (this.customOperations[productName]) {
-            return this.customOperations[productName];
-        }
-        
-        // 2. Потом в TASK_OPERATIONS из task-operations.js
-        if (window.TASK_OPERATIONS && window.TASK_OPERATIONS[this.siteType]) {
-            const siteOps = window.TASK_OPERATIONS[this.siteType];
-            
-            // Точное совпадение
-            if (siteOps[productName]) {
-                return siteOps[productName];
-            }
-            
-            // Частичное совпадение
-            for (const key in siteOps) {
-                if (key !== 'default' && productName && productName.includes(key)) {
-                    return siteOps[key];
-                }
-            }
-            
-            // Операции по умолчанию для этого участка
-            if (siteOps['default']) {
-                return siteOps['default'];
-            }
-        }
-        
-        // 3. Если ничего не нашли
-        console.warn(`Не найдены операции для ${productName} на участке ${this.siteType}`);
-        return [this.getDefaultOperationName()];
+    // 1. Сначала ищем в кастомных операциях
+    if (this.customOperations[productName]) {
+        return this.customOperations[productName];
     }
     
-    getDefaultOperationName() {
-        const names = {
-            'tokarniy': 'Токарная операция',
-            'slesarniy': 'Слесарная операция',
-            'frezerniy': 'Фрезерная операция',
-            'lazerno-gibochniy': 'Лазерно-гибочная операция',
-            'polimerniy': 'Полимерная операция'
-        };
-        return names[this.siteType] || 'Операция';
+    // 2. Потом в TASK_OPERATIONS из task-operations.js
+    if (window.TASK_OPERATIONS && window.TASK_OPERATIONS[this.siteType]) {
+        const siteOps = window.TASK_OPERATIONS[this.siteType];
+        
+        // Точное совпадение
+        if (siteOps[productName]) {
+            return siteOps[productName];
+        }
+        
+        // Частичное совпадение
+        for (const key in siteOps) {
+            if (key !== 'default' && productName && productName.includes(key)) {
+                return siteOps[key];
+            }
+        }
+        
+        // Операции по умолчанию для этого участка
+        if (siteOps['default']) {
+            return siteOps['default'];
+        }
     }
+    
+    // 3. Если ничего не нашли - возвращаем ПУСТОЙ МАССИВ, а не операцию по умолчанию!
+    console.warn(`Не найдены операции для ${productName} на участке ${this.siteType}`);
+    return [];  // ВАЖНО: возвращаем пустой массив, чтобы задача не создавалась
+}
     
     // ============== КОНВЕРТАЦИЯ СТАТУСОВ ==============
     
