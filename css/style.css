@@ -888,3 +888,14 @@ hr {
         height: 28px;
     }
 }
+
+/* ============== СТАТУСЫ КВАДРАТИКОВ ============== */
+.square.orange {
+    background-color: #ff9800 !important;
+    border-color: #e65100 !important;
+}
+
+.square.green {
+    background-color: #4caf50 !important;
+    border-color: #2e7d32 !important;
+}
