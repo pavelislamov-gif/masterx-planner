@@ -517,9 +517,9 @@
             
             // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТОЙ КАРТОЧКИ ==============
             let currentlyOpenOrderId = null;
+            let isLoadingTasks = false;
             
             function saveOpenOrderState() {
-                // Находим открытую карточку (у которой нет класса collapsed у content)
                 const allContents = document.querySelectorAll('.order-content');
                 let foundOpenId = null;
                 
@@ -542,7 +542,6 @@
                 
                 console.log('📂 Восстанавливаем открытую карточку:', currentlyOpenOrderId);
                 
-                // Закрываем все карточки
                 document.querySelectorAll('.order-content').forEach(content => {
                     content.classList.add('collapsed');
                 });
@@ -550,7 +549,6 @@
                     header.classList.add('collapsed');
                 });
                 
-                // Открываем нужную
                 const openCard = document.querySelector(`.order-card[data-order-id="${currentlyOpenOrderId}"]`);
                 if (openCard) {
                     const header = openCard.querySelector('.order-header');
@@ -559,11 +557,7 @@
                         header.classList.remove('collapsed');
                         content.classList.remove('collapsed');
                         console.log('✅ Карточка восстановлена');
-                    } else {
-                        console.log('❌ Не найдены элементы карточки');
                     }
-                } else {
-                    console.log('❌ Карточка не найдена в DOM');
                 }
             }
             
@@ -619,7 +613,6 @@
                         taskManager.today(); 
                         break;
                 }
-                // Сбрасываем открытую карточку при смене даты
                 currentlyOpenOrderId = null;
                 updateDateDisplay();
                 loadTasks();
@@ -643,9 +636,14 @@
             
             // ============== ЗАГРУЗКА ЗАДАЧ ==============
             function loadTasks() {
+                if (isLoadingTasks) {
+                    console.log('loadTasks уже выполняется, пропускаем');
+                    return;
+                }
+                
+                isLoadingTasks = true;
                 console.log('loadTasks вызвана');
                 
-                // СОХРАНЯЕМ ID ОТКРЫТОЙ КАРТОЧКИ ДО ПЕРЕРИСОВКИ
                 saveOpenOrderState();
                 
                 const tasksList = document.getElementById('tasksList');
@@ -667,10 +665,10 @@
                             <p style="color: #666; font-size: 13px;">Выберите другую дату или создайте заказ</p>
                         </div>
                     `;
+                    isLoadingTasks = false;
                     return;
                 }
                 
-                // Группируем по заказам
                 const byOrder = {};
                 tasks.forEach(task => {
                     if (!byOrder[task.orderId]) {
@@ -688,7 +686,6 @@
                     orderDiv.className = 'order-card';
                     orderDiv.dataset.orderId = order.orderId;
                     
-                    // Заголовок заказа - ПО УМОЛЧАНИЮ ЗАКРЫТ
                     const header = document.createElement('div');
                     header.className = 'order-header collapsed';
                     header.innerHTML = `
@@ -696,11 +693,9 @@
                         <span class="collapse-icon">▼</span>
                     `;
                     
-                    // Контент заказа - ПО УМОЛЧАНИЮ ЗАКРЫТ
                     const content = document.createElement('div');
                     content.className = 'order-content collapsed';
                     
-                    // Группируем по изделиям
                     const byProduct = {};
                     order.tasks.forEach(task => {
                         const key = task.product;
@@ -735,11 +730,9 @@
                     header.addEventListener('click', function(e) {
                         if (e.target.tagName === 'BUTTON') return;
                         
-                        // Переключаем текущую карточку
                         content.classList.toggle('collapsed');
                         header.classList.toggle('collapsed');
                         
-                        // СОХРАНЯЕМ ID ОТКРЫТОЙ КАРТОЧКИ
                         if (!content.classList.contains('collapsed')) {
                             currentlyOpenOrderId = order.orderId;
                         } else if (currentlyOpenOrderId === order.orderId) {
@@ -754,8 +747,10 @@
                     tasksList.appendChild(orderDiv);
                 });
                 
-                // ВОССТАНАВЛИВАЕМ ОТКРЫТУЮ КАРТОЧКУ ПОСЛЕ ОТРИСОВКИ
-                setTimeout(() => restoreOpenOrderState(), 50);
+                setTimeout(() => {
+                    restoreOpenOrderState();
+                    isLoadingTasks = false;
+                }, 50);
             }
             
             // ============== СОЗДАНИЕ КАРТОЧКИ ЗАДАЧИ ==============
@@ -764,7 +759,6 @@
                 card.className = `task-card ${task.status === 'completed' ? 'completed' : ''}`;
                 card.dataset.taskId = task.id;
                 
-                // Заголовок операции
                 const header = document.createElement('div');
                 header.className = 'task-header';
                 header.innerHTML = `
@@ -775,7 +769,6 @@
                 `;
                 card.appendChild(header);
                 
-                // Описание (для доп. задач)
                 if (task.isExtra && task.description) {
                     const desc = document.createElement('div');
                     desc.className = 'task-description';
@@ -783,13 +776,11 @@
                     card.appendChild(desc);
                 }
                 
-                // Прогресс
                 const progress = document.createElement('div');
                 progress.className = 'task-progress';
                 progress.textContent = `Выполнено: ${task.completedQuantity}/${task.totalQuantity} шт`;
                 card.appendChild(progress);
                 
-                // Предупреждение, если назначено больше нормы
                 const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
                 if (totalAssigned > task.totalQuantity) {
                     const warning = document.createElement('div');
@@ -798,7 +789,6 @@
                     card.appendChild(warning);
                 }
                 
-                // Заголовки колонок
                 const headers = document.createElement('div');
                 headers.className = 'executor-header';
                 headers.innerHTML = `
@@ -809,7 +799,6 @@
                 `;
                 card.appendChild(headers);
                 
-                // Список исполнителей
                 const executorList = document.createElement('div');
                 executorList.className = 'executor-list';
                 executorList.id = `executors-${task.id}`;
@@ -826,11 +815,9 @@
                 }
                 card.appendChild(executorList);
                 
-                // Контейнер для кнопки добавления и формы
                 const actionContainer = document.createElement('div');
                 actionContainer.className = 'action-container';
                 
-                // Кнопка добавления исполнителя
                 if (task.status !== 'completed') {
                     const addBtn = document.createElement('button');
                     addBtn.className = 'btn-add-executor';
@@ -841,7 +828,6 @@
                 
                 card.appendChild(actionContainer);
                 
-                // Кнопка ГОТОВО – всегда в самом низу
                 const readyBtn = document.createElement('button');
                 readyBtn.className = 'btn-ready';
                 readyBtn.textContent = '✅ ГОТОВО';
@@ -878,10 +864,7 @@
                 quantityInput.disabled = task.status === 'completed';
                 quantityInput.onchange = function(e) {
                     const val = parseInt(e.target.value) || 0;
-                    // СОХРАНЯЕМ СОСТОЯНИЕ ДО ВЫЗОВА LOADTASKS
-                    saveOpenOrderState();
                     taskManager.updateExecutorQuantity(task.id, executor.id, val);
-                    setTimeout(() => loadTasks(), 200);
                 };
                 div.appendChild(quantityInput);
                 
@@ -891,12 +874,9 @@
                 workBtn.disabled = task.status === 'completed';
                 workBtn.onclick = function() {
                     const newStatus = workBtn.classList.contains('active') ? 'pending' : 'in_progress';
-                    // СОХРАНЯЕМ СОСТОЯНИЕ ДО ВЫЗОВА LOADTASKS
-                    saveOpenOrderState();
                     taskManager.updateExecutorStatus(task.id, executor.id, newStatus);
                     workBtn.classList.toggle('active');
                     workBtn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
-                    setTimeout(() => loadTasks(), 200);
                 };
                 div.appendChild(workBtn);
                 
@@ -905,10 +885,7 @@
                 removeBtn.innerHTML = '✕';
                 removeBtn.onclick = function() {
                     if (confirm('Удалить этого исполнителя?')) {
-                        // СОХРАНЯЕМ СОСТОЯНИЕ ДО ВЫЗОВА LOADTASKS
-                        saveOpenOrderState();
                         taskManager.removeExecutor(task.id, executor.id);
-                        setTimeout(() => loadTasks(), 200);
                     }
                 };
                 div.appendChild(removeBtn);
@@ -920,7 +897,6 @@
             function showAddExecutorForm(task, actionContainer) {
                 console.log('showAddExecutorForm вызвана для задачи:', task.id);
                 
-                // Удаляем старую форму, если есть
                 const oldForm = actionContainer.querySelector('.new-executor-form');
                 if (oldForm) oldForm.remove();
                 
@@ -941,12 +917,9 @@
                         return;
                     }
                     
-                    // СОХРАНЯЕМ СОСТОЯНИЕ ДО ВЫЗОВА LOADTASKS
-                    saveOpenOrderState();
                     const result = taskManager.addExecutor(task.id, name);
                     if (result) {
                         formDiv.remove();
-                        setTimeout(() => loadTasks(), 100);
                     } else {
                         alert('Не удалось добавить исполнителя. Возможно, он уже существует.');
                     }
@@ -961,27 +934,20 @@
                 formDiv.appendChild(addBtn);
                 formDiv.appendChild(cancelBtn);
                 
-                // Вставляем форму в контейнер действий
                 actionContainer.appendChild(formDiv);
             }
             
             // ============== ДЕЙСТВИЯ С ЗАДАЧАМИ ==============
             window.toggleWorkStatus = function(taskId, executorId, btn) {
                 const newStatus = btn.classList.contains('active') ? 'pending' : 'in_progress';
-                // СОХРАНЯЕМ СОСТОЯНИЕ ДО ВЫЗОВА LOADTASKS
-                saveOpenOrderState();
                 taskManager.updateExecutorStatus(taskId, executorId, newStatus);
                 btn.classList.toggle('active');
                 btn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
-                setTimeout(() => loadTasks(), 200);
             };
             
             window.removeExecutor = function(taskId, executorId) {
                 if (confirm('Удалить этого исполнителя?')) {
-                    // СОХРАНЯЕМ СОСТОЯНИЕ ДО ВЫЗОВА LOADTASKS
-                    saveOpenOrderState();
                     taskManager.removeExecutor(taskId, executorId);
-                    setTimeout(() => loadTasks(), 200);
                 }
             };
             
@@ -999,10 +965,7 @@
                 }
                 
                 if (confirm(message)) {
-                    // СОХРАНЯЕМ СОСТОЯНИЕ ДО ВЫЗОВА LOADTASKS
-                    saveOpenOrderState();
                     taskManager.completeTask(taskId);
-                    setTimeout(() => loadTasks(), 200);
                 }
             };
             
