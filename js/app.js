@@ -397,17 +397,24 @@ const operationsDB = window.TASK_OPERATIONS || {};
 
 // ============== ФУНКЦИЯ getOperationNames ==============
 function getOperationNames(productName, siteKey) {
-    // Берем данные из task-operations.js
-    const siteOps = window.TASK_OPERATIONS?.[siteKey] || {};
-    const allOperations = siteOps[productName] || [];
-    
-    // Фильтруем "х"
-    return allOperations.filter(op => op && op !== 'х' && op !== 'x');
+    const siteOps = operationsDB[siteKey] || {};
+
+    if (siteOps[productName]) {
+        return siteOps[productName];
+    }
+
+    for (let key in siteOps) {
+        if (productName.includes(key)) {
+            return siteOps[key];
+        }
+    }
+
+    return [];
 }
 
 // ============== ФУНКЦИЯ getOperationCount ==============
 function getOperationCount(productName, siteKey) {
-    const siteOps = window.TASK_OPERATIONS?.[siteKey] || {};
+    const siteOps = operationsDB[siteKey] || {};
     const operations = siteOps[productName] || [];
     
     // Считаем только не-х
@@ -517,6 +524,7 @@ async function showMaterialsReport(orderId) {
     }
 }
 
+// ============== ИСПРАВЛЕННАЯ ФУНКЦИЯ УДАЛЕНИЯ ЗАКАЗА ==============
 function deleteOrder(orderId) {
     console.log('deleteOrder вызвана', orderId);
     
@@ -540,6 +548,64 @@ function deleteOrder(orderId) {
     updateStatistics();
     
     alert('✅ Заказ и связанные задачи удалены');
+}
+
+// ============== УДАЛЕНИЕ ЗАДАЧ ЗАКАЗА СО ВСЕХ УЧАСТКОВ ==============
+function deleteOrderTasksFromAllSites(order) {
+    console.log('🔍 Удаление задач заказа', order.id, 'со всех участков');
+    
+    const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno-gibochniy', 'polimerniy'];
+    const dates = getAllRelevantDates();
+    let totalDeleted = 0;
+    
+    sites.forEach(site => {
+        dates.forEach(date => {
+            const historyKey = `tasks_${site}_${date}`;
+            try {
+                const tasksJson = localStorage.getItem(historyKey);
+                if (tasksJson) {
+                    let tasks = JSON.parse(tasksJson);
+                    const beforeCount = tasks.length;
+                    
+                    // Оставляем только задачи НЕ из этого заказа
+                    const filteredTasks = tasks.filter(task => {
+                        const taskOrderId = task.orderId || (task.id ? task.id.split('_')[0] : null);
+                        return String(taskOrderId) !== String(order.id);
+                    });
+                    
+                    if (filteredTasks.length !== beforeCount) {
+                        const deleted = beforeCount - filteredTasks.length;
+                        totalDeleted += deleted;
+                        localStorage.setItem(historyKey, JSON.stringify(filteredTasks));
+                        console.log(`  ✅ ${site} на ${date}: удалено ${deleted} задач`);
+                    }
+                }
+            } catch (e) {
+                console.error(`❌ Ошибка при очистке ${historyKey}:`, e);
+            }
+        });
+    });
+    
+    console.log(`✅ Всего удалено задач: ${totalDeleted}`);
+}
+
+// ============== ПОЛУЧЕНИЕ ВСЕХ АКТУАЛЬНЫХ ДАТ ==============
+function getAllRelevantDates() {
+    const dates = [];
+    const today = new Date();
+    
+    for (let i = -30; i <= 30; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        
+        dates.push(`${year}-${month}-${day}`);
+    }
+    
+    return dates;
 }
 
 function addExtraTask(orderId, siteKey) {
@@ -643,6 +709,16 @@ async function loadAllData() {
         }
 
         window.addEventListener('storage', function(e) {
+            if (e.key === 'masterx_orders') {
+                console.log('🔄 Изменение в localStorage (orders)');
+                orders = JSON.parse(e.newValue || '[]');
+                loadOrders();
+                updateStatistics();
+            }
+            if (e.key && e.key.startsWith('tasks_')) {
+                console.log('🔄 Изменение в localStorage (tasks)');
+                syncTasksFromHistory();
+            }
             if (e.key === 'taskStatusChanged' && e.newValue) {
                 try {
                     const data = JSON.parse(e.newValue);
