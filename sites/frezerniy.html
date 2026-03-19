@@ -523,6 +523,7 @@
                 orderCards.forEach((card, index) => {
                     const header = card.querySelector('.order-header');
                     if (header) {
+                        // Используем номер заказа как ключ
                         const orderNumber = card.querySelector('h3')?.textContent?.replace('📦 Заказ №', '') || `card_${index}`;
                         collapsedState[orderNumber] = header.classList.contains('collapsed');
                     }
@@ -678,7 +679,7 @@
                     orderDiv.className = 'order-card';
                     orderDiv.dataset.orderId = order.orderId;
                     
-                    // Заголовок заказа (кликабельный) - ПО УМОЛЧАНИЮ НЕ СВЕРНУТО
+                    // Заголовок заказа - ПО УМОЛЧАНИЮ НЕ СВЕРНУТ (убрали класс collapsed)
                     const header = document.createElement('div');
                     header.className = 'order-header';
                     header.innerHTML = `
@@ -686,7 +687,7 @@
                         <span class="collapse-icon">▼</span>
                     `;
                     
-                    // Контент заказа - ПО УМОЛЧАНИЮ РАЗВЕРНУТ
+                    // Контент заказа - ПО УМОЛЧАНИЮ РАЗВЕРНУТ (убрали класс collapsed)
                     const content = document.createElement('div');
                     content.className = 'order-content';
                     
