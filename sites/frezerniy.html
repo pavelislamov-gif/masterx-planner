@@ -515,48 +515,47 @@
             const taskManager = new TaskManager('frezerniy', window.TASK_OPERATIONS.frezerniy || {});
             let currentFilter = 'all';
             
-            // ============== СОХРАНЕНИЕ СОСТОЯНИЯ СВЕРНУТОСТИ КАРТОЧЕК ==============
-            function saveCollapsedState() {
-                const collapsedState = {};
-                const orderCards = document.querySelectorAll('.order-card');
+            // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТОЙ КАРТОЧКИ ==============
+            let currentlyOpenOrderId = null;
+            
+            function saveOpenOrderState() {
+                // Находим открытую карточку (у которой нет класса collapsed у content)
+                const allContents = document.querySelectorAll('.order-content');
+                let foundOpenId = null;
                 
-                orderCards.forEach((card, index) => {
-                    const header = card.querySelector('.order-header');
-                    if (header) {
-                        // Используем номер заказа как ключ
-                        const orderNumber = card.querySelector('h3')?.textContent?.replace('📦 Заказ №', '') || `card_${index}`;
-                        collapsedState[orderNumber] = header.classList.contains('collapsed');
+                allContents.forEach((content, index) => {
+                    const card = content.closest('.order-card');
+                    if (card && !content.classList.contains('collapsed')) {
+                        foundOpenId = card.dataset.orderId;
                     }
                 });
                 
-                const storageKey = `collapsedCards_${taskManager.siteType}_${taskManager.formatDate(taskManager.currentDate)}`;
-                sessionStorage.setItem(storageKey, JSON.stringify(collapsedState));
-                console.log('💾 Состояние сохранено:', collapsedState);
+                currentlyOpenOrderId = foundOpenId;
+                console.log('💾 Открытая карточка:', currentlyOpenOrderId);
             }
-
-            function restoreCollapsedState() {
-                const storageKey = `collapsedCards_${taskManager.siteType}_${taskManager.formatDate(taskManager.currentDate)}`;
-                const saved = sessionStorage.getItem(storageKey);
+            
+            function restoreOpenOrderState() {
+                if (!currentlyOpenOrderId) return;
                 
-                if (saved) {
-                    const collapsedState = JSON.parse(saved);
-                    console.log('📂 Восстанавливаем состояние:', collapsedState);
-                    
-                    document.querySelectorAll('.order-card').forEach(card => {
-                        const header = card.querySelector('.order-header');
-                        const content = card.querySelector('.order-content');
-                        const orderNumber = card.querySelector('h3')?.textContent?.replace('📦 Заказ №', '');
-                        
-                        if (header && content && orderNumber && collapsedState[orderNumber] !== undefined) {
-                            if (collapsedState[orderNumber]) {
-                                header.classList.add('collapsed');
-                                content.classList.add('collapsed');
-                            } else {
-                                header.classList.remove('collapsed');
-                                content.classList.remove('collapsed');
-                            }
-                        }
-                    });
+                console.log('📂 Восстанавливаем открытую карточку:', currentlyOpenOrderId);
+                
+                // Закрываем все карточки
+                document.querySelectorAll('.order-content').forEach(content => {
+                    content.classList.add('collapsed');
+                });
+                document.querySelectorAll('.order-header').forEach(header => {
+                    header.classList.add('collapsed');
+                });
+                
+                // Открываем нужную
+                const openCard = document.querySelector(`.order-card[data-order-id="${currentlyOpenOrderId}"]`);
+                if (openCard) {
+                    const header = openCard.querySelector('.order-header');
+                    const content = openCard.querySelector('.order-content');
+                    if (header && content) {
+                        header.classList.remove('collapsed');
+                        content.classList.remove('collapsed');
+                    }
                 }
             }
             
@@ -612,6 +611,8 @@
                         taskManager.today(); 
                         break;
                 }
+                // Сбрасываем открытую карточку при смене даты
+                currentlyOpenOrderId = null;
                 updateDateDisplay();
                 loadTasks();
             };
@@ -636,8 +637,8 @@
             function loadTasks() {
                 console.log('loadTasks вызвана');
                 
-                // СОХРАНЯЕМ ТЕКУЩЕЕ СОСТОЯНИЕ ДО ПЕРЕРИСОВКИ
-                saveCollapsedState();
+                // СОХРАНЯЕМ ID ОТКРЫТОЙ КАРТОЧКИ ДО ПЕРЕРИСОВКИ
+                saveOpenOrderState();
                 
                 const tasksList = document.getElementById('tasksList');
                 
@@ -679,17 +680,17 @@
                     orderDiv.className = 'order-card';
                     orderDiv.dataset.orderId = order.orderId;
                     
-                    // Заголовок заказа - ПО УМОЛЧАНИЮ НЕ СВЕРНУТ (убрали класс collapsed)
+                    // Заголовок заказа - ПО УМОЛЧАНИЮ ЗАКРЫТ
                     const header = document.createElement('div');
-                    header.className = 'order-header';
+                    header.className = 'order-header collapsed';
                     header.innerHTML = `
                         <h3>📦 Заказ №${order.number}</h3>
                         <span class="collapse-icon">▼</span>
                     `;
                     
-                    // Контент заказа - ПО УМОЛЧАНИЮ РАЗВЕРНУТ (убрали класс collapsed)
+                    // Контент заказа - ПО УМОЛЧАНИЮ ЗАКРЫТ
                     const content = document.createElement('div');
-                    content.className = 'order-content';
+                    content.className = 'order-content collapsed';
                     
                     // Группируем по изделиям
                     const byProduct = {};
@@ -725,11 +726,19 @@
                     
                     header.addEventListener('click', function(e) {
                         if (e.target.tagName === 'BUTTON') return;
+                        
+                        // Переключаем текущую карточку
                         content.classList.toggle('collapsed');
                         header.classList.toggle('collapsed');
                         
-                        // СОХРАНЯЕМ СОСТОЯНИЕ ПОСЛЕ КЛИКА
-                        setTimeout(() => saveCollapsedState(), 10);
+                        // СОХРАНЯЕМ ID ОТКРЫТОЙ КАРТОЧКИ
+                        if (!content.classList.contains('collapsed')) {
+                            currentlyOpenOrderId = order.orderId;
+                        } else if (currentlyOpenOrderId === order.orderId) {
+                            currentlyOpenOrderId = null;
+                        }
+                        
+                        console.log('👆 Открыта карточка:', currentlyOpenOrderId);
                     });
                     
                     orderDiv.appendChild(header);
@@ -737,8 +746,8 @@
                     tasksList.appendChild(orderDiv);
                 });
                 
-                // ВОССТАНАВЛИВАЕМ СОСТОЯНИЕ ПОСЛЕ ОТРИСОВКИ
-                setTimeout(() => restoreCollapsedState(), 50);
+                // ВОССТАНАВЛИВАЕМ ОТКРЫТУЮ КАРТОЧКУ ПОСЛЕ ОТРИСОВКИ
+                setTimeout(() => restoreOpenOrderState(), 50);
             }
             
             // ============== СОЗДАНИЕ КАРТОЧКИ ЗАДАЧИ ==============
