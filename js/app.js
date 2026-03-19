@@ -1104,17 +1104,16 @@ window.addEventListener('taskStatusChanged', function(e) {
     squares.forEach(square => {
         console.log('✅ Найден квадратик, меняем цвет на:', status);
         
+        // Удаляем старые классы цветов
+        square.classList.remove('orange', 'green');
+        
         if (status === 'completed') {
-            square.style.backgroundColor = '#4caf50';
-            square.style.borderColor = '#2e7d32';
+            square.classList.add('green');
             square.title = 'Завершено';
         } else if (status === 'in_progress') {
-            square.style.backgroundColor = '#ff9800';
-            square.style.borderColor = '#e65100';
+            square.classList.add('orange');
             square.title = 'В работе';
         } else {
-            square.style.backgroundColor = '#9e9e9e';
-            square.style.borderColor = '#616161';
             square.title = 'Ожидает';
         }
     });
