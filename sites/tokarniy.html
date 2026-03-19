@@ -29,16 +29,16 @@
         .order-card {
             background: #1a1e24;
             border-radius: 12px;
-            margin-bottom: 15px;  /* уменьшено */
+            margin-bottom: 15px;
             border: 1px solid #2a2f38;
             overflow: hidden;
         }
 
         .order-header {
-            padding: 12px 20px;    /* уменьшено */
+            padding: 12px 20px;
             background: #232830;
             border-bottom: 1px solid #2a2f38;
-            cursor: pointer;        /* добавляем курсор */
+            cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -46,7 +46,7 @@
 
         .order-header h3 {
             color: #fff;
-            font-size: 16px;        /* чуть меньше */
+            font-size: 16px;
             font-weight: 500;
             margin: 0;
         }
@@ -62,7 +62,7 @@
         }
 
         .order-content {
-            padding: 15px 20px;     /* уменьшено */
+            padding: 15px 20px;
             transition: all 0.2s;
         }
 
@@ -71,11 +71,11 @@
         }
 
         .product-info {
-            padding: 10px 15px;     /* уменьшено */
+            padding: 10px 15px;
             background: #15191f;
             border-bottom: 1px solid #2a2f38;
             color: #a0a0a0;
-            font-size: 13px;        /* меньше */
+            font-size: 13px;
         }
 
         .product-info strong {
@@ -83,7 +83,7 @@
         }
 
         .task-card {
-            padding: 12px 15px;     /* уменьшено */
+            padding: 12px 15px;
             border-bottom: 1px solid #2a2f38;
             transition: all 0.3s;
         }
@@ -102,19 +102,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;      /* меньше */
+            margin-bottom: 8px;
         }
 
         .task-title {
-            font-size: 14px;          /* меньше */
+            font-size: 14px;
             font-weight: 600;
             color: #fff;
         }
 
         .task-progress {
-            font-size: 12px;          /* меньше */
+            font-size: 12px;
             color: #4cd964;
-            margin-bottom: 10px;      /* меньше */
+            margin-bottom: 10px;
             padding: 4px 8px;
             background: #1e232b;
             border-radius: 20px;
@@ -126,7 +126,7 @@
             gap: 10px;
             padding: 0 10px;
             margin-bottom: 6px;
-            font-size: 11px;          /* меньше */
+            font-size: 11px;
             color: #a0a0a0;
         }
 
@@ -139,10 +139,10 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 6px 10px;       /* меньше */
+            padding: 6px 10px;
             background: #15191f;
             border-radius: 6px;
-            margin-bottom: 4px;       /* меньше */
+            margin-bottom: 4px;
             border: 1px solid #2a2f38;
         }
 
@@ -153,7 +153,7 @@
             border: 1px solid #2a2f38;
             border-radius: 4px;
             color: #fff;
-            font-size: 12px;          /* меньше */
+            font-size: 12px;
         }
 
         .executor-quantity {
@@ -170,13 +170,13 @@
         .btn-work {
             background: #ffc107;
             color: #000;
-            padding: 4px 8px;         /* меньше */
+            padding: 4px 8px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 11px;          /* меньше */
+            font-size: 11px;
             transition: all 0.3s;
-            width: 70px;              /* чуть уже */
+            width: 70px;
             font-weight: 600;
         }
 
@@ -199,12 +199,12 @@
         .btn-add-executor {
             background: #6c757d;
             color: white;
-            padding: 5px 10px;        /* меньше */
+            padding: 5px 10px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 11px;           /* меньше */
-            margin: 8px 0;             /* меньше */
+            font-size: 11px;
+            margin: 8px 0;
             width: 140px;
         }
 
@@ -213,7 +213,7 @@
         }
 
         .action-container {
-            margin: 8px 0;             /* меньше */
+            margin: 8px 0;
         }
 
         .new-executor-form {
@@ -229,7 +229,7 @@
         }
 
         .new-executor-form input {
-            width: 160px;              /* чуть меньше */
+            width: 160px;
             flex: none;
             padding: 5px 8px;
             background: #1e232b;
@@ -248,7 +248,7 @@
         .btn-ready {
             background: #28a745;
             color: white;
-            padding: 5px 16px;        /* меньше */
+            padding: 5px 16px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -256,7 +256,7 @@
             font-weight: 600;
             margin: 10px 0 0 0;
             width: auto;
-            min-width: 100px;          /* меньше */
+            min-width: 100px;
             display: inline-block;
             transition: all 0.3s;
         }
@@ -435,7 +435,7 @@
 </head>
 <body>
     <div class="container">
-        <!-- ШАПКА (без кнопки "На главную") -->
+        <!-- ШАПКА -->
         <header>
             <div class="logo-container">
                 <img src="../images/logo.png" alt="MasterX Logo" class="logo-img" onerror="this.style.display='none'">
@@ -457,7 +457,7 @@
             </div>
         </div>
 
-        <!-- ФИЛЬТРЫ (без кнопки "Отладка") -->
+        <!-- ФИЛЬТРЫ -->
         <div class="filter-section">
             <select id="statusFilter" class="search-box" style="width: auto; padding: 6px 10px;">
                 <option value="all">Все задачи</option>
@@ -501,7 +501,6 @@
     <script src="../js/task-manager.js"></script>
 
     <script>
-
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         if (typeof TaskManager === 'undefined') {
             console.error('❌ TaskManager не загружен! Проверьте подключение task-manager.js');
@@ -512,6 +511,7 @@
                 </div>
             `;
         } else {
+            // Создаем экземпляр TaskManager для токарного участка
             const taskManager = new TaskManager('tokarniy', window.TASK_OPERATIONS.tokarniy || {});
             let currentFilter = 'all';
 
@@ -534,6 +534,7 @@
 
                 window.addEventListener('taskHistoryChanged', function(e) {
                     if (e.detail.siteType === 'tokarniy') {
+                        console.log('🔄 Изменение истории для токарного участка');
                         if (_historyTimer) clearTimeout(_historyTimer);
                         _historyTimer = setTimeout(() => {
                             loadTasks();
@@ -543,6 +544,7 @@
 
                 window.addEventListener('storage', function(e) {
                     if (e.key === 'masterx_orders' || (e.key && e.key.startsWith('tasks_tokarniy_'))) {
+                        console.log('🔄 Изменение в localStorage');
                         if (_loadTimer) clearTimeout(_loadTimer);
                         _loadTimer = setTimeout(() => {
                             taskManager.loadData();
@@ -610,6 +612,7 @@
                     return;
                 }
 
+                // Группируем по заказам
                 const byOrder = {};
                 tasks.forEach(task => {
                     if (!byOrder[task.orderId]) {
@@ -627,17 +630,17 @@
 
                     // Заголовок заказа (кликабельный)
                     const header = document.createElement('div');
-                    header.className = 'order-header';
+                    header.className = 'order-header collapsed';
                     header.innerHTML = `
                         <h3>📦 Заказ №${order.number}</h3>
                         <span class="collapse-icon">▼</span>
                     `;
 
-                    // Контент заказа (список задач)
+                    // Контент заказа
                     const content = document.createElement('div');
-                    content.className = 'order-content';
+                    content.className = 'order-content collapsed';
 
-                    // Группируем по изделиям внутри этого заказа
+                    // Группируем по изделиям
                     const byProduct = {};
                     order.tasks.forEach(task => {
                         const key = task.product;
@@ -669,9 +672,7 @@
                         });
                     });
 
-                    // Добавляем обработчик клика на заголовок
                     header.addEventListener('click', function(e) {
-                        // Чтобы клик не срабатывал, если нажали на кнопку внутри (если будут)
                         if (e.target.tagName === 'BUTTON') return;
                         content.classList.toggle('collapsed');
                         header.classList.toggle('collapsed');
@@ -916,6 +917,7 @@
                 }
             };
 
+            // ============== ОЧИСТКА ИСТОРИИ ==============
             window.clearHistory = function() {
                 if (!confirm('Очистить историю задач для текущей даты?')) return;
                 const dateStr = taskManager.formatDate(taskManager.currentDate);
@@ -924,6 +926,7 @@
                 loadTasks();
             };
 
+            // ============== ЭКСПОРТ В EXCEL ==============
             window.exportToExcel = function() {
                 const tasks = taskManager.tasks;
                 const dateStr = taskManager.formatDate(taskManager.currentDate);
