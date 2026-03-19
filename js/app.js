@@ -397,19 +397,20 @@ const operationsDB = window.TASK_OPERATIONS || {};
 
 // ============== ФУНКЦИЯ getOperationNames ==============
 function getOperationNames(productName, siteKey) {
-    const siteOps = operationsDB[siteKey] || {};
+    // Берем данные из task-operations.js
+    const siteOps = window.TASK_OPERATIONS?.[siteKey] || {};
+    const allOperations = siteOps[productName] || [];
+    
+    // Фильтруем "х"
+    return allOperations.filter(op => op && op !== 'х' && op !== 'x');
+}
 
-    if (siteOps[productName]) {
-        return siteOps[productName];
-    }
-
-    for (let key in siteOps) {
-        if (productName.includes(key)) {
-            return siteOps[key];
-        }
-    }
-
-    return [];
+function getOperationCount(productName, siteKey) {
+    const siteOps = window.TASK_OPERATIONS?.[siteKey] || {};
+    const operations = siteOps[productName] || [];
+    
+    // Считаем только не-х
+    return operations.filter(op => op && op !== 'х' && op !== 'x').length;
 }
 
 // ============== ФУНКЦИЯ getOperationCount (ПОЛНАЯ ВЕРСИЯ) ==============
@@ -794,22 +795,35 @@ function createSiteRow(name, order, siteKey) {
     }
 
     const item = order.items[0];
-    const operationCount = getOperationCount(item.product, siteKey);
+    
+    // ПОЛУЧАЕМ РЕАЛЬНЫЕ ОПЕРАЦИИ (БЕЗ "х")
     const operations = getOperationNames(item.product, siteKey);
+    
+    // ЕСЛИ НЕТ ОПЕРАЦИЙ - ПОКАЗЫВАЕМ КРАСНЫЙ КВАДРАТИК
+    if (operations.length === 0) {
+        return `
+            <div class="site-item">
+                <span class="site-name">${name}</span>
+                <div class="squares">
+                    <div class="square red" title="Нет операций на этом участке"></div>
+                </div>
+                <span style="color: #a0a0a0; font-size: 12px;">-</span>
+                <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
+            </div>
+        `;
+    }
 
+    // ЕСЛИ ЕСТЬ ОПЕРАЦИИ - ПОКАЗЫВАЕМ КВАДРАТИКИ
     let squares = '';
     let completedCount = 0;
 
-    for (let i = 0; i < operationCount; i++) {
-        // ===== ЭТУ СТРОКУ НУЖНО ИСПРАВИТЬ =====
+    for (let i = 0; i < operations.length; i++) {
         const taskId = `${order.id}_${siteKey}_0_${i}`;
-        // ========================================
-        
         const status = order.tasks && order.tasks[taskId] ? order.tasks[taskId] : '';
 
         if (status === 'green') completedCount++;
 
-        const operationName = (operations && operations[i]) ? operations[i] : `Операция ${i+1}`;
+        const operationName = operations[i];
 
         squares += `<div class="square ${status}" data-task="${taskId}" title="${operationName}"></div>`;
     }
@@ -827,7 +841,7 @@ function createSiteRow(name, order, siteKey) {
         });
     }
 
-    const totalOperations = operationCount + (order.extraTasks?.filter(t => t.site === siteKey).length || 0);
+    const totalOperations = operations.length + (order.extraTasks?.filter(t => t.site === siteKey).length || 0);
 
     return `
         <div class="site-item">
@@ -840,7 +854,6 @@ function createSiteRow(name, order, siteKey) {
         </div>
     `;
 }
-
 // ============== ФУНКЦИИ ДЛЯ РАБОТЫ С ЗАКАЗАМИ ==============
 
 async function showMaterialsReport(orderId) {
