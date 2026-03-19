@@ -432,32 +432,42 @@
         background: #138496;
     }
     
-    /* ========== НОВЫЕ СТИЛИ ДЛЯ КНОПКИ ЗАКРЫТИЯ СМЕНЫ ========== */
-    .btn-end-shift {
-        background: #ff9800;
-        color: white;
-        border: none;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 10px;
-        cursor: pointer;
-        margin-left: 5px;
-        white-space: nowrap;
-        transition: all 0.3s;
-    }
+    /* ========== КНОПКА ЗАКРЫТИЯ СМЕНЫ ========== */
+.btn-end-shift {
+    background: #ff9800;
+    color: white;
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.3s;
+    width: 95px;
+    font-weight: 600;
+    margin-left: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+}
+
+.btn-end-shift:hover:not(:disabled) {
+    background: #f57c00;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.btn-end-shift:disabled {
+    background: #4caf50;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.btn-end-shift.completed {
+    background: #4caf50;
+}
     
-    .btn-end-shift:hover:not(:disabled) {
-        background: #f57c00;
-        transform: translateY(-1px);
-    }
-    
-    .btn-end-shift:disabled {
-        background: #4caf50;
-        cursor: not-allowed;
-        opacity: 0.7;
-    }
-    
-    /* Стиль для заблокированной строки исполнителя (можно добавить затемнение) */
+    /* Стиль для заблокированной строки исполнителя */
     .executor-item .btn-work:disabled,
     .executor-item .btn-end-shift:disabled,
     .executor-item input:disabled {
@@ -543,7 +553,6 @@
                 </div>
             `;
         } else {
-            // Создаем экземпляр TaskManager для фрезерного участка
             const taskManager = new TaskManager('frezerniy', window.TASK_OPERATIONS.frezerniy || {});
             let currentFilter = 'all';
             
@@ -660,7 +669,6 @@
                 `;
             }
             
-            // ============== ФИЛЬТРАЦИЯ ==============
             window.applyFilters = function() {
                 currentFilter = document.getElementById('statusFilter').value;
                 loadTasks();
@@ -806,12 +814,12 @@
                     desc.className = 'task-description';
                     desc.textContent = task.description;
                     card.appendChild(desc);
+                }
                 
                 const progress = document.createElement('div');
                 progress.className = 'task-progress';
                 progress.textContent = `Выполнено: ${task.completedQuantity}/${task.totalQuantity} шт`;
                 card.appendChild(progress);
-                }
                 
                 const headers = document.createElement('div');
                 headers.className = 'executor-header';
@@ -862,81 +870,76 @@
                 return card;
             }
             
-// ============== СОЗДАНИЕ ЭЛЕМЕНТА ИСПОЛНИТЕЛЯ ==============
-function createExecutorItem(task, executor) {
-    const div = document.createElement('div');
-    div.className = `executor-item ${executor.status === 'completed' ? 'completed' : ''}`;
-    div.dataset.executorId = executor.id;
-    
-    // Флаг, что смена закрыта
-    const isShiftEnded = executor.status === 'shift_ended';
-    
-    const nameInput = document.createElement('input');
-    nameInput.type = 'text';
-    nameInput.className = 'executor-name';
-    nameInput.value = executor.name;
-    nameInput.placeholder = 'ФИО';
-    nameInput.disabled = task.status === 'completed' || isShiftEnded; // Блокируем если смена закрыта
-    nameInput.onchange = function(e) {
-        console.log('Имя изменено на:', e.target.value);
-    };
-    div.appendChild(nameInput);
-    
-    const quantityInput = document.createElement('input');
-    quantityInput.type = 'number';
-    quantityInput.className = 'executor-quantity';
-    quantityInput.value = executor.quantity || 0;
-    quantityInput.min = 0;
-    quantityInput.disabled = task.status === 'completed' || isShiftEnded; // Блокируем если смена закрыта
-    quantityInput.onchange = function(e) {
-        const val = parseInt(e.target.value) || 0;
-        taskManager.updateExecutorQuantity(task.id, executor.id, val);
-    };
-    div.appendChild(quantityInput);
-    
-    const workBtn = document.createElement('button');
-    workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''}`;
-    workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : 
-                          isShiftEnded ? 'СМЕНА ЗАКРЫТА' : 'НАЧАТЬ';
-    workBtn.disabled = task.status === 'completed' || isShiftEnded; // Блокируем если смена закрыта
-    workBtn.onclick = function() {
-        if (isShiftEnded) return;
-        const newStatus = workBtn.classList.contains('active') ? 'pending' : 'in_progress';
-        taskManager.updateExecutorStatus(task.id, executor.id, newStatus);
-        workBtn.classList.toggle('active');
-        workBtn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
-    };
-    div.appendChild(workBtn);
-    
-    // КНОПКА ЗАКРЫТИЯ СМЕНЫ
-    const endShiftBtn = document.createElement('button');
-    endShiftBtn.className = 'btn-end-shift';
-    endShiftBtn.textContent = isShiftEnded ? '✅ СМЕНА ЗАКРЫТА' : '⏰ ЗАКРЫТЬ СМЕНУ';
-    endShiftBtn.disabled = task.status === 'completed' || isShiftEnded; // Неактивна если уже закрыта
-    endShiftBtn.onclick = function() {
-        if (confirm(`Закрыть смену для ${executor.name}? После этого он не сможет редактировать количество или менять статус.`)) {
-            // Меняем статус исполнителя на 'shift_ended'
-            taskManager.updateExecutorStatus(task.id, executor.id, 'shift_ended');
-            
-            // Перезагружаем задачи, чтобы обновить отображение
-            setTimeout(() => loadTasks(), 100);
-        }
-    };
-    div.appendChild(endShiftBtn);
-    
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'btn btn-danger btn-sm';
-    removeBtn.innerHTML = '✕';
-    removeBtn.disabled = task.status === 'completed' || isShiftEnded; // Блокируем если смена закрыта
-    removeBtn.onclick = function() {
-        if (confirm('Удалить этого исполнителя?')) {
-            taskManager.removeExecutor(task.id, executor.id);
-        }
-    };
-    div.appendChild(removeBtn);
-    
-    return div;
-}
+            // ============== СОЗДАНИЕ ЭЛЕМЕНТА ИСПОЛНИТЕЛЯ ==============
+            function createExecutorItem(task, executor) {
+                const div = document.createElement('div');
+                div.className = `executor-item ${executor.status === 'completed' ? 'completed' : ''}`;
+                div.dataset.executorId = executor.id;
+                
+                const isShiftEnded = executor.status === 'shift_ended';
+                
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.className = 'executor-name';
+                nameInput.value = executor.name;
+                nameInput.placeholder = 'ФИО';
+                nameInput.disabled = task.status === 'completed' || isShiftEnded;
+                nameInput.onchange = function(e) {
+                    console.log('Имя изменено на:', e.target.value);
+                };
+                div.appendChild(nameInput);
+                
+                const quantityInput = document.createElement('input');
+                quantityInput.type = 'number';
+                quantityInput.className = 'executor-quantity';
+                quantityInput.value = executor.quantity || 0;
+                quantityInput.min = 0;
+                quantityInput.disabled = task.status === 'completed' || isShiftEnded;
+                quantityInput.onchange = function(e) {
+                    const val = parseInt(e.target.value) || 0;
+                    taskManager.updateExecutorQuantity(task.id, executor.id, val);
+                };
+                div.appendChild(quantityInput);
+                
+                const workBtn = document.createElement('button');
+                workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''}`;
+                workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : 
+                                      isShiftEnded ? 'СМЕНА ЗАКРЫТА' : 'НАЧАТЬ';
+                workBtn.disabled = task.status === 'completed' || isShiftEnded;
+                workBtn.onclick = function() {
+                    if (isShiftEnded) return;
+                    const newStatus = workBtn.classList.contains('active') ? 'pending' : 'in_progress';
+                    taskManager.updateExecutorStatus(task.id, executor.id, newStatus);
+                    workBtn.classList.toggle('active');
+                    workBtn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
+                };
+                div.appendChild(workBtn);
+                
+                const endShiftBtn = document.createElement('button');
+                endShiftBtn.className = 'btn-end-shift';
+                endShiftBtn.innerHTML = isShiftEnded ? '✅ СМЕНА ЗАКРЫТА' : '🕒 ЗАКРЫТЬ';
+                endShiftBtn.disabled = task.status === 'completed' || isShiftEnded;
+                endShiftBtn.onclick = function() {
+                    if (confirm(`Закрыть смену для ${executor.name}?`)) {
+                        taskManager.updateExecutorStatus(task.id, executor.id, 'shift_ended');
+                        setTimeout(() => loadTasks(), 100);
+                    }
+                };
+                div.appendChild(endShiftBtn);
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn btn-danger btn-sm';
+                removeBtn.innerHTML = '✕';
+                removeBtn.disabled = task.status === 'completed' || isShiftEnded;
+                removeBtn.onclick = function() {
+                    if (confirm('Удалить этого исполнителя?')) {
+                        taskManager.removeExecutor(task.id, executor.id);
+                    }
+                };
+                div.appendChild(removeBtn);
+                
+                return div;
+            }
             
             // ============== ФОРМА ДОБАВЛЕНИЯ ИСПОЛНИТЕЛЯ ==============
             function showAddExecutorForm(task, actionContainer) {
@@ -1000,21 +1003,13 @@ function createExecutorItem(task, executor) {
                 const task = taskManager.tasks.find(t => t.id === taskId);
                 if (!task) return;
                 
-                const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
-                
                 let message = 'Завершить эту задачу?';
-                if (totalAssigned < task.totalQuantity) {
-                    message = `Назначено только ${totalAssigned} из ${task.totalQuantity} шт. Продолжить?`;
-                } else if (totalAssigned > task.totalQuantity) {
-                    message = `Назначено ${totalAssigned} из ${task.totalQuantity} шт. Продолжить?`;
-                }
                 
                 if (confirm(message)) {
                     taskManager.completeTask(taskId);
                 }
             };
             
-            // ============== ОЧИСТКА ИСТОРИИ ==============
             window.clearHistory = function() {
                 if (!confirm('Очистить историю задач для текущей даты?')) return;
                 const dateStr = taskManager.formatDate(taskManager.currentDate);
@@ -1023,7 +1018,6 @@ function createExecutorItem(task, executor) {
                 loadTasks();
             };
             
-            // ============== ЭКСПОРТ В EXCEL ==============
             window.exportToExcel = function() {
                 const tasks = taskManager.tasks;
                 const dateStr = taskManager.formatDate(taskManager.currentDate);
