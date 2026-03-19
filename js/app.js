@@ -519,12 +519,27 @@ async function showMaterialsReport(orderId) {
 
 function deleteOrder(orderId) {
     console.log('deleteOrder вызвана', orderId);
-    if (confirm('Удалить заказ?')) {
-        orders = orders.filter(o => o.id !== orderId);
-        saveOrdersToStorage(orders);
-        loadOrders();
-        updateStatistics();
+    
+    if (!confirm('Удалить заказ? Все связанные задачи на участках также будут удалены.')) {
+        return;
     }
+
+    // Находим удаляемый заказ
+    const deletedOrder = orders.find(o => o.id === orderId);
+    
+    // Удаляем заказ из списка
+    orders = orders.filter(o => o.id !== orderId);
+    saveOrdersToStorage(orders);
+    
+    // Удаляем задачи этого заказа со всех участков
+    if (deletedOrder) {
+        deleteOrderTasksFromAllSites(deletedOrder);
+    }
+    
+    loadOrders();
+    updateStatistics();
+    
+    alert('✅ Заказ и связанные задачи удалены');
 }
 
 function addExtraTask(orderId, siteKey) {
