@@ -987,12 +987,12 @@ async function loadAllData() {
 window.addEventListener('storage', function(e) {
     if (e.key === 'taskStatusChanged') {
         const data = JSON.parse(e.newValue);
-        // Обновляем цвет квадратика
-        const squares = document.querySelectorAll(`[data-task="${data.taskId}"]`);
-        squares.forEach(square => {
-            square.style.backgroundColor = data.status === 'in_progress' ? '#ff9800' : 
-                                         data.status === 'completed' ? '#4caf50' : '#9e9e9e';
-        });
+        console.log('🔥 Получено из localStorage:', data);
+        
+        // Вызываем наш обработчик
+        window.dispatchEvent(new CustomEvent('taskStatusChanged', {
+            detail: data
+        }));
     }
 });
 
