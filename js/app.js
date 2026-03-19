@@ -985,15 +985,36 @@ async function loadAllData() {
         }
 
 window.addEventListener('storage', function(e) {
-    if (e.key === 'taskStatusChanged') {
-        const data = JSON.parse(e.newValue);
-        console.log('🔥 Получено из localStorage:', data);
-        
-        // Обновляем квадратик
-        const baseTaskId = data.taskId.substring(0, data.taskId.lastIndexOf('_'));
-        const square = document.querySelector(`[data-task="${baseTaskId}"]`);
-        if (square) {
-            square.classList.add('orange');
+    if (e.key === 'taskStatusChanged' && e.newValue) {
+        try {
+            const data = JSON.parse(e.newValue);
+            console.log('🔥 Получено из localStorage:', data);
+            
+            // Игнорируем статус pending (начальное состояние)
+            if (data.status === 'pending') return;
+            
+            // Находим базовый taskId (обрезаем последний индекс)
+            const baseTaskId = data.taskId.substring(0, data.taskId.lastIndexOf('_'));
+            console.log('🔄 Ищем квадратик с taskId:', baseTaskId);
+            
+            const square = document.querySelector(`[data-task="${baseTaskId}"]`);
+            if (square) {
+                // Удаляем старые классы
+                square.classList.remove('orange', 'green');
+                
+                // Добавляем новый класс
+                if (data.status === 'in_progress') {
+                    square.classList.add('orange');
+                    console.log('✅ Квадратик стал оранжевым');
+                } else if (data.status === 'completed') {
+                    square.classList.add('green');
+                    console.log('✅ Квадратик стал зеленым');
+                }
+            } else {
+                console.log('❌ Квадратик не найден для taskId:', baseTaskId);
+            }
+        } catch (error) {
+            console.error('Ошибка обработки storage:', error);
         }
     }
 });
