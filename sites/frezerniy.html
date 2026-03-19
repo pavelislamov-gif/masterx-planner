@@ -780,13 +780,6 @@
                 progress.className = 'task-progress';
                 progress.textContent = `Выполнено: ${task.completedQuantity}/${task.totalQuantity} шт`;
                 card.appendChild(progress);
-                
-                const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
-                if (totalAssigned > task.totalQuantity) {
-                    const warning = document.createElement('div');
-                    warning.className = 'warning-message';
-                    warning.textContent = `⚠️ Назначено ${totalAssigned} из ${task.totalQuantity}`;
-                    card.appendChild(warning);
                 }
                 
                 const headers = document.createElement('div');
