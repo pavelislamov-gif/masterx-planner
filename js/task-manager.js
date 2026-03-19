@@ -258,35 +258,35 @@ generateTasks() {
         }, 10);
     }
     
-    // ============== УПРАВЛЕНИЕ ИСПОЛНИТЕЛЯМИ ==============
+// ============== УПРАВЛЕНИЕ ИСПОЛНИТЕЛЯМИ ==============
+
+addExecutor(taskId, executorName) {
+    console.log('addExecutor:', taskId, executorName);
     
-    addExecutor(taskId, executorName) {
-        console.log('addExecutor:', taskId, executorName);
-        
-        if (!executorName || !executorName.trim()) return false;
-        
-        const task = this.tasks.find(t => t.id === taskId);
-        if (!task) return false;
-        
-        if (!task.executors) task.executors = [];
-        
-        const existing = task.executors.find(e => e.name?.toLowerCase() === executorName.trim().toLowerCase());
-        if (existing) return false;
-        
-        const executorId = `${executorName.trim()}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-        
-        task.executors.push({
-            id: executorId,
-            name: executorName.trim(),
-            displayName: executorName.trim(),
-            quantity: 0,
-            status: 'pending'
-        });
-        
-        this.saveTasksToHistory(this.formatDate(this.currentDate));
-        return true;
-    }
+    if (!executorName || !executorName.trim()) return false;
     
+    const task = this.tasks.find(t => t.id === taskId);
+    if (!task) return false;
+    
+    if (!task.executors) task.executors = [];
+    
+    const existing = task.executors.find(e => e.name?.toLowerCase() === executorName.trim().toLowerCase());
+    if (existing) return false;
+    
+    const executorId = `${executorName.trim()}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    
+    task.executors.push({
+        id: executorId,
+        name: executorName.trim(),
+        displayName: executorName.trim(),
+        quantity: 0,  // Начинает с 0
+        status: 'pending'
+    });
+    
+    this.saveTasksToHistory(this.formatDate(this.currentDate));
+    return true;
+}
+
 updateExecutorQuantity(taskId, executorId, quantity) {
     console.log('updateExecutorQuantity:', taskId, executorId, quantity);
     
@@ -296,131 +296,101 @@ updateExecutorQuantity(taskId, executorId, quantity) {
     const executor = task.executors.find(e => e.id === executorId);
     if (!executor) return false;
     
+    // Разрешаем ЛЮБОЕ количество (хоть 1, хоть 1000)
+    // Не привязываемся к task.totalQuantity
     quantity = this.safeParseInt(quantity);
-    
-    // Разрешаем любое количество (хоть больше нормы)
     executor.quantity = quantity;
     
-    // Обновляем общее количество выполненных
+    // Просто обновляем общее количество для отображения, но не влияем на статус
     task.completedQuantity = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
     
-    // НЕ меняем статус автоматически! Статус меняется только кнопкой
+    // НИКАКОГО изменения статуса!
     
     this.saveTasksToHistory(this.formatDate(this.currentDate));
     return true;
 }
+
+updateExecutorStatus(taskId, executorId, status) {
+    console.log('updateExecutorStatus вызван:', { taskId, executorId, status });
     
-    // ============== ОСНОВНОЙ МЕТОД ИЗМЕНЕНИЯ СТАТУСА ==============
-    updateExecutorStatus(taskId, executorId, status) {
-        console.log('updateExecutorStatus вызван:', { taskId, executorId, status });
-        
-        const task = this.tasks.find(t => t.id === taskId);
-        if (!task) {
-            console.warn('Задача не найдена:', taskId);
-            return false;
-        }
-        
-        const executor = task.executors.find(e => e.id === executorId);
-        if (!executor) {
-            console.warn('Исполнитель не найден:', executorId);
-            return false;
-        }
-        
-        // Обновляем статус исполнителя
-        executor.status = status;
-        console.log('Статус исполнителя обновлен:', executor);
-        
-        // Определяем новый статус задачи на основе всех исполнителей
-        const allCompleted = task.executors.every(e => e.status === 'completed');
-        const anyInProgress = task.executors.some(e => e.status === 'in_progress');
-        
-        let newTaskStatus;
-        if (allCompleted) {
-            newTaskStatus = 'completed';
-            console.log('Все исполнители завершили, задача выполнена');
-        } else if (anyInProgress) {
-            newTaskStatus = 'in_progress';
-            console.log('Задача в работе');
-        } else {
-            newTaskStatus = 'pending';
-            console.log('Задача ожидает');
-        }
-        
-        // Обновляем статус задачи
-        task.status = newTaskStatus;
-        
-        // Обновляем статус в заказе
-        this.updateOrderStatus(taskId, newTaskStatus);
-        
-        // Сохраняем в историю
-        this.saveTasksToHistory(this.formatDate(this.currentDate));
-        
-        return true;
-    }
-    // ============================================================
-    
-    removeExecutor(taskId, executorId) {
-        console.log('removeExecutor:', taskId, executorId);
-        
-        const task = this.tasks.find(t => t.id === taskId);
-        if (!task) return false;
-        
-        task.executors = task.executors.filter(e => e.id !== executorId);
-        task.completedQuantity = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
-        
-        if (task.completedQuantity === 0) {
-            task.status = 'pending';
-            this.updateOrderStatus(taskId, 'pending');
-        }
-        
-        this.saveTasksToHistory(this.formatDate(this.currentDate));
-        return true;
+    const task = this.tasks.find(t => t.id === taskId);
+    if (!task) {
+        console.warn('Задача не найдена:', taskId);
+        return false;
     }
     
-    completeTask(taskId) {
-        console.log('completeTask:', taskId);
-        
-        const task = this.tasks.find(t => t.id === taskId);
-        if (!task) return false;
-        
-        const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
-        const remaining = task.totalQuantity - totalAssigned;
-        
-        if (remaining > 0 && task.executors.length > 0) {
-            const activeExecutor = task.executors.find(e => e.status === 'in_progress') || task.executors[0];
-            activeExecutor.quantity = (activeExecutor.quantity || 0) + remaining;
-        }
-        
-        task.status = 'completed';
-        task.completedQuantity = task.totalQuantity;
-        task.executors.forEach(e => e.status = 'completed');
-        
-        this.updateOrderStatus(taskId, 'completed');
-        this.saveTasksToHistory(this.formatDate(this.currentDate));
-        return true;
+    const executor = task.executors.find(e => e.id === executorId);
+    if (!executor) {
+        console.warn('Исполнитель не найден:', executorId);
+        return false;
     }
     
-    updateOrderStatus(taskId, status) {
-        console.log('updateOrderStatus:', taskId, status);
+    // Обновляем только статус исполнителя
+    executor.status = status;
+    console.log('Статус исполнителя обновлен:', executor);
+    
+    // НЕ меняем статус задачи! Статус задачи только через completeTask
+    
+    this.saveTasksToHistory(this.formatDate(this.currentDate));
+    return true;
+}
+
+removeExecutor(taskId, executorId) {
+    console.log('removeExecutor:', taskId, executorId);
+    
+    const task = this.tasks.find(t => t.id === taskId);
+    if (!task) return false;
+    
+    task.executors = task.executors.filter(e => e.id !== executorId);
+    task.completedQuantity = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
+    
+    // НЕ меняем статус задачи!
+    
+    this.saveTasksToHistory(this.formatDate(this.currentDate));
+    return true;
+}
+
+completeTask(taskId) {
+    console.log('completeTask:', taskId);
+    
+    const task = this.tasks.find(t => t.id === taskId);
+    if (!task) return false;
+    
+    // Просто меняем статус задачи на completed
+    task.status = 'completed';
+    
+    // Можно также отметить всех исполнителей как completed (опционально)
+    task.executors.forEach(e => e.status = 'completed');
+    
+    // НЕ меняем количество! Остается то, что ввели
+    
+    this.updateOrderStatus(taskId, 'completed');
+    this.saveTasksToHistory(this.formatDate(this.currentDate));
+    return true;
+}
+
+updateOrderStatus(taskId, status) {
+    console.log('updateOrderStatus:', taskId, status);
+    
+    const [orderId] = taskId.split('_');
+    
+    if (typeof window.loadOrdersFromStorage === 'function') {
+        const orders = window.loadOrdersFromStorage() || [];
+        const orderIndex = orders.findIndex(o => o.id == orderId);
         
-        const [orderId] = taskId.split('_');
-        
-        if (typeof window.loadOrdersFromStorage === 'function') {
-            const orders = window.loadOrdersFromStorage() || [];
-            const orderIndex = orders.findIndex(o => o.id == orderId);
+        if (orderIndex !== -1) {
+            if (!orders[orderIndex].tasks) orders[orderIndex].tasks = {};
+            // Конвертируем статус для квадратика на главной
+            orders[orderIndex].tasks[taskId] = this.convertTaskStatus(status);
             
-            if (orderIndex !== -1) {
-                if (!orders[orderIndex].tasks) orders[orderIndex].tasks = {};
-                orders[orderIndex].tasks[taskId] = this.convertTaskStatus(status);
-                
-                if (typeof window.saveOrdersToStorage === 'function') {
-                    window.saveOrdersToStorage(orders);
-                }
+            if (typeof window.saveOrdersToStorage === 'function') {
+                window.saveOrdersToStorage(orders);
             }
         }
-        
-        this.notifyOtherTabs(taskId, status);
     }
+    
+    this.notifyOtherTabs(taskId, status);
+}
     
     // ============== МЕТОД ДЛЯ УВЕДОМЛЕНИЯ ДРУГИХ ВКЛАДОК ==============
     notifyOtherTabs(taskId, status) {
