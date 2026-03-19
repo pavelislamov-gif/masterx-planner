@@ -989,10 +989,12 @@ window.addEventListener('storage', function(e) {
         const data = JSON.parse(e.newValue);
         console.log('🔥 Получено из localStorage:', data);
         
-        // Вызываем наш обработчик
-        window.dispatchEvent(new CustomEvent('taskStatusChanged', {
-            detail: data
-        }));
+        // Обновляем квадратик
+        const baseTaskId = data.taskId.substring(0, data.taskId.lastIndexOf('_'));
+        const square = document.querySelector(`[data-task="${baseTaskId}"]`);
+        if (square) {
+            square.classList.add('orange');
+        }
     }
 });
 
