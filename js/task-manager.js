@@ -287,35 +287,28 @@ generateTasks() {
         return true;
     }
     
-    updateExecutorQuantity(taskId, executorId, quantity) {
-        console.log('updateExecutorQuantity:', taskId, executorId, quantity);
-        
-        const task = this.tasks.find(t => t.id === taskId);
-        if (!task) return false;
-        
-        const executor = task.executors.find(e => e.id === executorId);
-        if (!executor) return false;
-        
-        quantity = this.safeParseInt(quantity);
-        quantity = Math.max(0, Math.min(quantity, task.totalQuantity));
-        
-        executor.quantity = quantity;
-        
-        // Обновляем общее количество выполненных
-        task.completedQuantity = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
-        
-        // Обновляем статус задачи в зависимости от прогресса
-        if (task.completedQuantity >= task.totalQuantity) {
-            task.status = 'completed';
-            this.updateOrderStatus(taskId, 'completed');
-        } else if (task.completedQuantity > 0) {
-            task.status = 'in_progress';
-            this.updateOrderStatus(taskId, 'in_progress');
-        }
-        
-        this.saveTasksToHistory(this.formatDate(this.currentDate));
-        return true;
-    }
+updateExecutorQuantity(taskId, executorId, quantity) {
+    console.log('updateExecutorQuantity:', taskId, executorId, quantity);
+    
+    const task = this.tasks.find(t => t.id === taskId);
+    if (!task) return false;
+    
+    const executor = task.executors.find(e => e.id === executorId);
+    if (!executor) return false;
+    
+    quantity = this.safeParseInt(quantity);
+    
+    // Разрешаем любое количество (хоть больше нормы)
+    executor.quantity = quantity;
+    
+    // Обновляем общее количество выполненных
+    task.completedQuantity = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
+    
+    // НЕ меняем статус автоматически! Статус меняется только кнопкой
+    
+    this.saveTasksToHistory(this.formatDate(this.currentDate));
+    return true;
+}
     
     // ============== ОСНОВНОЙ МЕТОД ИЗМЕНЕНИЯ СТАТУСА ==============
     updateExecutorStatus(taskId, executorId, status) {
