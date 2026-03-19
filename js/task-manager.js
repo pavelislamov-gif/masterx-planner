@@ -49,7 +49,7 @@ class TaskManager {
         return this.tasks;
     }
     
-    generateTasks() {
+generateTasks() {
     console.log('generateTasks начата для участка:', this.siteType);
     this.tasks = [];
     const dateStr = this.formatDate(this.currentDate);
@@ -78,10 +78,15 @@ class TaskManager {
         if (order.items && Array.isArray(order.items)) {
             order.items.forEach((item, idx) => {
                 const productName = item.product || 'Изделие';
+                
+                // ПОЛУЧАЕМ ОПЕРАЦИИ ДЛЯ ЭТОГО ИЗДЕЛИЯ
                 const operations = this.getOperationsForProduct(productName);
                 
-                // ВАЖНО: если операций нет - пропускаем
-                if (operations.length === 0) return;
+                // ЕСЛИ ОПЕРАЦИЙ НЕТ - НЕ СОЗДАЕМ ЗАДАЧИ
+                if (!operations || operations.length === 0) {
+                    console.log(`⏭️ Пропускаем ${productName} на ${this.siteType} - нет операций`);
+                    return;
+                }
                 
                 operations.forEach((op, index) => {
                     const taskId = `${order.id}_${this.siteType}_${idx}_${index}`;
