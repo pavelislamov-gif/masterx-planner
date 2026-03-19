@@ -501,7 +501,6 @@
     <script src="../js/task-manager.js"></script>
 
     <script>
-
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         if (typeof TaskManager === 'undefined') {
             console.error('❌ TaskManager не загружен! Проверьте подключение task-manager.js');
@@ -515,6 +514,50 @@
             // Создаем экземпляр TaskManager для фрезерного участка
             const taskManager = new TaskManager('frezerniy', window.TASK_OPERATIONS.frezerniy || {});
             let currentFilter = 'all';
+            
+            // ============== СОХРАНЕНИЕ СОСТОЯНИЯ СВЕРНУТОСТИ КАРТОЧЕК ==============
+            function saveCollapsedState() {
+                const collapsedState = {};
+                const orderCards = document.querySelectorAll('.order-card');
+                
+                orderCards.forEach((card, index) => {
+                    const header = card.querySelector('.order-header');
+                    if (header) {
+                        const orderNumber = card.querySelector('h3')?.textContent?.replace('📦 Заказ №', '') || `card_${index}`;
+                        collapsedState[orderNumber] = header.classList.contains('collapsed');
+                    }
+                });
+                
+                const storageKey = `collapsedCards_${taskManager.siteType}_${taskManager.formatDate(taskManager.currentDate)}`;
+                sessionStorage.setItem(storageKey, JSON.stringify(collapsedState));
+                console.log('💾 Состояние сохранено:', collapsedState);
+            }
+
+            function restoreCollapsedState() {
+                const storageKey = `collapsedCards_${taskManager.siteType}_${taskManager.formatDate(taskManager.currentDate)}`;
+                const saved = sessionStorage.getItem(storageKey);
+                
+                if (saved) {
+                    const collapsedState = JSON.parse(saved);
+                    console.log('📂 Восстанавливаем состояние:', collapsedState);
+                    
+                    document.querySelectorAll('.order-card').forEach(card => {
+                        const header = card.querySelector('.order-header');
+                        const content = card.querySelector('.order-content');
+                        const orderNumber = card.querySelector('h3')?.textContent?.replace('📦 Заказ №', '');
+                        
+                        if (header && content && orderNumber && collapsedState[orderNumber] !== undefined) {
+                            if (collapsedState[orderNumber]) {
+                                header.classList.add('collapsed');
+                                content.classList.add('collapsed');
+                            } else {
+                                header.classList.remove('collapsed');
+                                content.classList.remove('collapsed');
+                            }
+                        }
+                    });
+                }
+            }
             
             let _historyTimer = null;
             let _loadTimer = null;
@@ -591,6 +634,10 @@
             // ============== ЗАГРУЗКА ЗАДАЧ ==============
             function loadTasks() {
                 console.log('loadTasks вызвана');
+                
+                // СОХРАНЯЕМ ТЕКУЩЕЕ СОСТОЯНИЕ ДО ПЕРЕРИСОВКИ
+                saveCollapsedState();
+                
                 const tasksList = document.getElementById('tasksList');
                 
                 taskManager.loadData();
@@ -619,6 +666,7 @@
                     if (!byOrder[task.orderId]) {
                         byOrder[task.orderId] = {
                             number: task.orderNumber,
+                            orderId: task.orderId,
                             tasks: []
                         };
                     }
@@ -628,18 +676,19 @@
                 Object.values(byOrder).forEach(order => {
                     const orderDiv = document.createElement('div');
                     orderDiv.className = 'order-card';
+                    orderDiv.dataset.orderId = order.orderId;
                     
-                    // Заголовок заказа (кликабельный)
+                    // Заголовок заказа (кликабельный) - ПО УМОЛЧАНИЮ НЕ СВЕРНУТО
                     const header = document.createElement('div');
-                    header.className = 'order-header collapsed';
+                    header.className = 'order-header';
                     header.innerHTML = `
                         <h3>📦 Заказ №${order.number}</h3>
                         <span class="collapse-icon">▼</span>
                     `;
                     
-                    // Контент заказа
+                    // Контент заказа - ПО УМОЛЧАНИЮ РАЗВЕРНУТ
                     const content = document.createElement('div');
-                    content.className = 'order-content collapsed';
+                    content.className = 'order-content';
                     
                     // Группируем по изделиям
                     const byProduct = {};
@@ -677,12 +726,18 @@
                         if (e.target.tagName === 'BUTTON') return;
                         content.classList.toggle('collapsed');
                         header.classList.toggle('collapsed');
+                        
+                        // СОХРАНЯЕМ СОСТОЯНИЕ ПОСЛЕ КЛИКА
+                        setTimeout(() => saveCollapsedState(), 10);
                     });
                     
                     orderDiv.appendChild(header);
                     orderDiv.appendChild(content);
                     tasksList.appendChild(orderDiv);
                 });
+                
+                // ВОССТАНАВЛИВАЕМ СОСТОЯНИЕ ПОСЛЕ ОТРИСОВКИ
+                setTimeout(() => restoreCollapsedState(), 50);
             }
             
             // ============== СОЗДАНИЕ КАРТОЧКИ ЗАДАЧИ ==============
