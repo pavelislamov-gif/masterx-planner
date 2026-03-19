@@ -802,7 +802,7 @@ function createSiteRow(name, order, siteKey) {
 
     for (let i = 0; i < operationCount; i++) {
         // ===== ЭТУ СТРОКУ НУЖНО ИСПРАВИТЬ =====
-        const taskId = `${order.id}_${siteKey}_${i}`;
+        const taskId = `${order.id}_${siteKey}_0_${i}`;
         // ========================================
         
         const status = order.tasks && order.tasks[taskId] ? order.tasks[taskId] : '';
