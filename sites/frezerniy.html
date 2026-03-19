@@ -523,7 +523,7 @@
                 const allContents = document.querySelectorAll('.order-content');
                 let foundOpenId = null;
                 
-                allContents.forEach((content, index) => {
+                allContents.forEach((content) => {
                     const card = content.closest('.order-card');
                     if (card && !content.classList.contains('collapsed')) {
                         foundOpenId = card.dataset.orderId;
@@ -535,7 +535,10 @@
             }
             
             function restoreOpenOrderState() {
-                if (!currentlyOpenOrderId) return;
+                if (!currentlyOpenOrderId) {
+                    console.log('📂 Нет открытой карточки для восстановления');
+                    return;
+                }
                 
                 console.log('📂 Восстанавливаем открытую карточку:', currentlyOpenOrderId);
                 
@@ -555,7 +558,12 @@
                     if (header && content) {
                         header.classList.remove('collapsed');
                         content.classList.remove('collapsed');
+                        console.log('✅ Карточка восстановлена');
+                    } else {
+                        console.log('❌ Не найдены элементы карточки');
                     }
+                } else {
+                    console.log('❌ Карточка не найдена в DOM');
                 }
             }
             
@@ -870,6 +878,8 @@
                 quantityInput.disabled = task.status === 'completed';
                 quantityInput.onchange = function(e) {
                     const val = parseInt(e.target.value) || 0;
+                    // СОХРАНЯЕМ СОСТОЯНИЕ ДО ВЫЗОВА LOADTASKS
+                    saveOpenOrderState();
                     taskManager.updateExecutorQuantity(task.id, executor.id, val);
                     setTimeout(() => loadTasks(), 200);
                 };
@@ -881,6 +891,8 @@
                 workBtn.disabled = task.status === 'completed';
                 workBtn.onclick = function() {
                     const newStatus = workBtn.classList.contains('active') ? 'pending' : 'in_progress';
+                    // СОХРАНЯЕМ СОСТОЯНИЕ ДО ВЫЗОВА LOADTASKS
+                    saveOpenOrderState();
                     taskManager.updateExecutorStatus(task.id, executor.id, newStatus);
                     workBtn.classList.toggle('active');
                     workBtn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
@@ -893,6 +905,8 @@
                 removeBtn.innerHTML = '✕';
                 removeBtn.onclick = function() {
                     if (confirm('Удалить этого исполнителя?')) {
+                        // СОХРАНЯЕМ СОСТОЯНИЕ ДО ВЫЗОВА LOADTASKS
+                        saveOpenOrderState();
                         taskManager.removeExecutor(task.id, executor.id);
                         setTimeout(() => loadTasks(), 200);
                     }
@@ -927,6 +941,8 @@
                         return;
                     }
                     
+                    // СОХРАНЯЕМ СОСТОЯНИЕ ДО ВЫЗОВА LOADTASKS
+                    saveOpenOrderState();
                     const result = taskManager.addExecutor(task.id, name);
                     if (result) {
                         formDiv.remove();
@@ -952,6 +968,8 @@
             // ============== ДЕЙСТВИЯ С ЗАДАЧАМИ ==============
             window.toggleWorkStatus = function(taskId, executorId, btn) {
                 const newStatus = btn.classList.contains('active') ? 'pending' : 'in_progress';
+                // СОХРАНЯЕМ СОСТОЯНИЕ ДО ВЫЗОВА LOADTASKS
+                saveOpenOrderState();
                 taskManager.updateExecutorStatus(taskId, executorId, newStatus);
                 btn.classList.toggle('active');
                 btn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
@@ -960,6 +978,8 @@
             
             window.removeExecutor = function(taskId, executorId) {
                 if (confirm('Удалить этого исполнителя?')) {
+                    // СОХРАНЯЕМ СОСТОЯНИЕ ДО ВЫЗОВА LOADTASKS
+                    saveOpenOrderState();
                     taskManager.removeExecutor(taskId, executorId);
                     setTimeout(() => loadTasks(), 200);
                 }
@@ -979,6 +999,8 @@
                 }
                 
                 if (confirm(message)) {
+                    // СОХРАНЯЕМ СОСТОЯНИЕ ДО ВЫЗОВА LOADTASKS
+                    saveOpenOrderState();
                     taskManager.completeTask(taskId);
                     setTimeout(() => loadTasks(), 200);
                 }
