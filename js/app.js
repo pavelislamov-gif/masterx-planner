@@ -306,6 +306,9 @@ function closeOrderModal() {
         modal.style.display = 'none';
         const form = document.getElementById('orderForm');
         if (form) form.reset();
+        // Очищаем контейнер комплектующих
+        const componentsContainer = document.getElementById('componentsContainer');
+        if (componentsContainer) componentsContainer.innerHTML = '';
     }
 }
 
@@ -324,6 +327,9 @@ function populateSelects() {
             option.textContent = product.name;
             productSelect.appendChild(option);
         });
+        
+        // ДОБАВЛЯЕМ СЛУШАТЕЛЬ НА ВЫБОР ИЗДЕЛИЯ
+        productSelect.addEventListener('change', updateComponentsList);
     }
 
     const bracketSelect = document.getElementById('bracketSelect');
@@ -433,18 +439,18 @@ function createSiteRow(name, order, siteKey) {
     const operations = getOperationNames(item.product, siteKey);
     
     // ЕСЛИ НЕТ ОПЕРАЦИЙ - ПОКАЗЫВАЕМ КРАСНЫЙ КВАДРАТИК
-if (operations.length === 0) {
-    return `
-        <div class="site-item">
-            <span class="site-name">${name}</span>
-            <div class="squares">
-                <div class="square red" title="Нет операций на этом участке"></div>
+    if (operations.length === 0) {
+        return `
+            <div class="site-item">
+                <span class="site-name">${name}</span>
+                <div class="squares">
+                    <div class="square red" title="Нет операций на этом участке"></div>
+                </div>
+                <span style="color: #a0a0a0; font-size: 12px; margin: 0 10px;">0/0</span>
+                <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
             </div>
-            <span style="color: #a0a0a0; font-size: 12px; margin: 0 10px;">0/0</span>
-            <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
-        </div>
-    `;
-}
+        `;
+    }
 
     // ЕСЛИ ЕСТЬ ОПЕРАЦИИ - ПОКАЗЫВАЕМ КВАДРАТИКИ
     let squares = '';
@@ -453,7 +459,7 @@ if (operations.length === 0) {
     for (let i = 0; i < operations.length; i++) {
         const taskId = `${order.id}_${siteKey}_0_${i}`;
         
-        // ПОЛУЧАЕМ СТАТУС ИЗ ЗАКАЗА - ЭТО КЛЮЧЕВОЙ МОМЕНТ!
+        // ПОЛУЧАЕМ СТАТУС ИЗ ЗАКАЗА
         let status = '';
         if (order.tasks && order.tasks[taskId]) {
             status = order.tasks[taskId];
@@ -463,7 +469,7 @@ if (operations.length === 0) {
         }
 
         const operationName = operations[i];
-        console.log(`Квадратик ${taskId}: статус "${status}"`); // Отладка
+        console.log(`Квадратик ${taskId}: статус "${status}"`);
 
         squares += `<div class="square ${status}" data-task="${taskId}" title="${operationName}"></div>`;
     }
@@ -473,7 +479,6 @@ if (operations.length === 0) {
             if (task.site === siteKey) {
                 const taskId = `${order.id}_extra_${index}`;
                 
-                // ПОЛУЧАЕМ СТАТУС ДЛЯ ДОПОЛНИТЕЛЬНОЙ ЗАДАЧИ
                 let status = '';
                 if (order.tasks && order.tasks[taskId]) {
                     status = order.tasks[taskId];
@@ -693,10 +698,12 @@ async function loadAllData() {
         brackets = await loadBrackets() || [];
         lyres = await loadLyres() || [];
         orders = loadOrdersFromStorage() || [];
+        await loadComponents();
 
         console.log('✅ Продукты загружены:', products.length);
         console.log('✅ Кронштейны загружены:', brackets.length);
         console.log('✅ Лиры загружены:', lyres.length);
+        console.log('✅ Комплектующие загружены:', Object.keys(window.componentsData).length);
         console.log('✅ Заказы загружены:', orders.length);
 
         syncTasksFromHistory();
@@ -797,6 +804,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
+            // СБОР КОМПЛЕКТУЮЩИХ
+            const components = collectComponents();
+
             const order = {
                 id: Date.now(),
                 date: document.getElementById('orderDate').value,
@@ -817,6 +827,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     texture: document.getElementById('textureSelect').value || '',
                     additional: document.getElementById('additionalDetails').value || ''
                 }],
+                components: components,
                 status: 'active',
                 tasks: {},
                 extraTasks: []
@@ -955,3 +966,5 @@ function collectComponents() {
 // Экспортируем функции в глобальную область
 window.updateComponentsList = updateComponentsList;
 window.collectComponents = collectComponents;
+
+console.log('✅ Функции комплектующих загружены');
