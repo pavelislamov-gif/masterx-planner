@@ -77,8 +77,8 @@ class MaterialsReport {
             
             const allSheets = [
                 ...this.materialsDB.aluminum.map(m => ({ ...m, materialType: 'Алюминий' })),
-                ...this.materialsDB.steel.map(m => ({ ...m, materialType: 'Сталь' })),
-                ...this.materialsDB.stainless.map(m => ({ ...m, materialType: 'Нержавейка (AISI 430)' })),
+                ...this.materialsDB.steel.map(m => ({ ...m, materialType: 'Сталь (AISI 430)' })),
+                ...this.materialsDB.stainless.map(m => ({ ...m, materialType: 'Сталь (AISI 430)' })),
                 ...this.materialsDB.pvc.map(m => ({ ...m, materialType: 'ПВХ' })),
                 ...this.materialsDB.polycarbonate.map(m => ({ ...m, materialType: 'Поликарбонат' })),
                 ...this.materialsDB.other.map(m => ({ ...m, materialType: m.material || 'Прочее' }))
@@ -103,13 +103,13 @@ class MaterialsReport {
                 groupedSheets[key].products.push(productName);
             });
             
-            // ============== КРОНШТЕЙНЫ (Нержавейка AISI 430) ==============
+            // ============== КРОНШТЕЙНЫ (Сталь AISI 430) ==============
             if (item.bracket && item.bracket.type && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
                 const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
                 if (bracket) {
-                    const totalQty = item.bracket.quantity * productQty;
+                    const totalBracketQty = item.bracket.quantity;
                     const area = bracket.area || 0;
-                    const materialType = 'Нержавейка (AISI 430)';
+                    const materialType = 'Сталь (AISI 430)';
                     const thickness = bracket.thickness || '2мм';
                     const key = `${materialType}_${thickness}`;
                     
@@ -123,19 +123,19 @@ class MaterialsReport {
                             products: []
                         };
                     }
-                    groupedSheets[key].quantity += totalQty;
-                    groupedSheets[key].totalArea += area * totalQty;
+                    groupedSheets[key].quantity += totalBracketQty;
+                    groupedSheets[key].totalArea += area * totalBracketQty;
                     groupedSheets[key].products.push(`Кронштейн ${item.bracket.type}`);
                 }
             }
             
-            // ============== ЛИРЫ (Нержавейка AISI 430) ==============
+            // ============== ЛИРЫ (Сталь AISI 430) ==============
             if (item.lyre && item.lyre.type && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
                 const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
                 if (lyre) {
-                    const totalQty = item.lyre.quantity * productQty;
+                    const totalLyreQty = item.lyre.quantity;
                     const area = lyre.area || 0;
-                    const materialType = 'Нержавейка (AISI 430)';
+                    const materialType = 'Сталь (AISI 430)';
                     const thickness = lyre.thickness || '2мм';
                     const key = `${materialType}_${thickness}`;
                     
@@ -149,8 +149,8 @@ class MaterialsReport {
                             products: []
                         };
                     }
-                    groupedSheets[key].quantity += totalQty;
-                    groupedSheets[key].totalArea += area * totalQty;
+                    groupedSheets[key].quantity += totalLyreQty;
+                    groupedSheets[key].totalArea += area * totalLyreQty;
                     groupedSheets[key].products.push(`Лира ${item.lyre.type}`);
                 }
             }
@@ -257,8 +257,8 @@ class MaterialsReport {
         
         const allSheets = [
             ...this.materialsDB.aluminum.map(m => ({ ...m, materialType: 'Алюминий' })),
-            ...this.materialsDB.steel.map(m => ({ ...m, materialType: 'Сталь' })),
-            ...this.materialsDB.stainless.map(m => ({ ...m, materialType: 'Нержавейка (AISI 430)' })),
+            ...this.materialsDB.steel.map(m => ({ ...m, materialType: 'Сталь (AISI 430)' })),
+            ...this.materialsDB.stainless.map(m => ({ ...m, materialType: 'Сталь (AISI 430)' })),
             ...this.materialsDB.pvc.map(m => ({ ...m, materialType: 'ПВХ' })),
             ...this.materialsDB.polycarbonate.map(m => ({ ...m, materialType: 'Поликарбонат' })),
             ...this.materialsDB.other.map(m => ({ ...m, materialType: m.material || 'Прочее' }))
@@ -349,10 +349,10 @@ class MaterialsReport {
                                 <td>${item.lyre.type} (${item.lyre.quantity} шт)</td>
                                 <td>${item.ral || '-'}</td>
                                 <td>${item.texture || '-'}</td>
-                              </tr>
+                             </tr>
                         `).join('')}
                     </tbody>
-                 </table>
+                </table>
             `;
             
             if (sheetMaterials.length > 0) {
@@ -370,17 +370,17 @@ class MaterialsReport {
                              </thead>
                         <tbody>
                             ${sheetMaterials.map(item => `
-                                 <tr>
+                                <tr>
                                     <td><strong>${item.name}</strong></td>
                                     <td>${item.thickness}</td>
                                     <td style="text-align: right;">${fmt(item.areaPerUnit)}</td>
                                     <td style="text-align: right;">${item.quantity}</td>
                                     <td style="text-align: right; color: #4cd964; font-weight: 600;">${fmt(item.totalArea)}</td>
                                     <td style="font-size: 11px; color: #a0a0a0;">${item.products.join(', ')}</td>
-                                 </tr>
+                                </tr>
                             `).join('')}
                         </tbody>
-                     </table>
+                    </table>
                 `;
             }
             
@@ -389,7 +389,7 @@ class MaterialsReport {
                     <h4 style="margin-top: 30px;">🔧 КОМПЛЕКТУЮЩИЕ ДЕТАЛИ</h4>
                     <table class="materials-table">
                         <thead>
-                             <tr>
+                            <tr>
                                 <th>Деталь</th>
                                 <th>Материал</th>
                                 <th>Толщина</th>
@@ -397,11 +397,10 @@ class MaterialsReport {
                                 <th>Кол-во на 1 изд</th>
                                 <th>Кол-во изделий</th>
                                 <th>Общий расход (м²)</th>
-                             </tr>
-                        </thead>
+                             </thead>
                         <tbody>
                             ${components.map(comp => `
-                                 <tr>
+                                <tr>
                                     <td>${comp.name}</td>
                                     <td>${comp.materialType}</td>
                                     <td>${comp.thickness}</td>
@@ -409,10 +408,10 @@ class MaterialsReport {
                                     <td style="text-align: right;">${comp.quantityPerProduct}</td>
                                     <td style="text-align: right;">${comp.productQty}</td>
                                     <td style="text-align: right;">${comp.totalArea.toFixed(4)}</td>
-                                 </tr>
+                                </tr>
                             `).join('')}
                         </tbody>
-                     </table>
+                    </table>
                 `;
             }
             
@@ -421,26 +420,25 @@ class MaterialsReport {
                     <h4 style="margin-top: 30px;">📏 ПРОФИЛИ (расход в мм и метрах)</h4>
                     <table class="materials-table">
                         <thead>
-                             <tr>
+                            <tr>
                                 <th>Профиль</th>
                                 <th>Расход на 1 шт (мм)</th>
                                 <th>Кол-во</th>
                                 <th>Общий расход (мм)</th>
                                 <th>Общий расход (м)</th>
-                             </tr>
-                        </thead>
+                             </thead>
                         <tbody>
                             ${profiles.map(profile => `
-                                 <tr>
+                                <tr>
                                     <td><strong>${profile.name}</strong></td>
                                     <td style="text-align: right;">${profile.lengthPerUnit.toFixed(0)}</td>
                                     <td style="text-align: right;">${profile.quantity}</td>
                                     <td style="text-align: right;">${fmt(profile.totalLength, 0)}</td>
                                     <td style="text-align: right; color: #4cd964;">${(profile.totalLength / 1000).toFixed(2)} м</td>
-                                 </tr>
+                                </tr>
                             `).join('')}
                         </tbody>
-                     </table>
+                    </table>
                 `;
             }
             
@@ -449,26 +447,25 @@ class MaterialsReport {
                     <h4 style="margin-top: 30px;">🥢 ПРУТКИ (расход в мм и метрах)</h4>
                     <table class="materials-table">
                         <thead>
-                             <tr>
+                            <tr>
                                 <th>Тип прутка</th>
                                 <th>Расход на 1 шт (мм)</th>
                                 <th>Кол-во</th>
                                 <th>Общий расход (мм)</th>
                                 <th>Общий расход (м)</th>
-                             </tr>
-                        </thead>
+                             </thead>
                         <tbody>
                             ${rods.map(rod => `
-                                 <tr>
+                                <tr>
                                     <td>${rod.rodType}</td>
                                     <td style="text-align: right;">${rod.valuePerUnit}</td>
                                     <td style="text-align: right;">${rod.quantity}</td>
                                     <td style="text-align: right;">${fmt(rod.totalValue, 0)}</td>
                                     <td style="text-align: right; color: #4cd964;">${(rod.totalValue / 1000).toFixed(2)} м</td>
-                                 </tr>
+                                </tr>
                             `).join('')}
                         </tbody>
-                     </table>
+                    </table>
                 `;
             }
             
