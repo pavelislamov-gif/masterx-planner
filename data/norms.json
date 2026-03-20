@@ -84,7 +84,6 @@
     { "product": "XRAY 6T BT 140 Шторка", "thickness": "0.5мм", "area": 0.0033 },
     { "product": "XRAY 6T RGBW BT 150", "thickness": "0.5мм", "area": 0.0033 },
     { "product": "XRAY 9S", "thickness": "0.5мм", "area": 0.0083 }
-    { "product": "Заглушки Сталь 1мм", "thickness": "1мм", "area": 0.0002 }
   ],
   "stainless": [
     { "product": "XGRAY v.1", "thickness": "1мм", "area": 0.0002 },
