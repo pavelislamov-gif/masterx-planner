@@ -615,7 +615,6 @@
                 window.addEventListener('taskStatusChanged', function() {
                     if (_loadTimer) clearTimeout(_loadTimer);
                     _loadTimer = setTimeout(() => {
-                        loadTasks();
                     }, 100);
                 });
                 
@@ -625,7 +624,6 @@
                         if (_historyTimer) clearTimeout(_historyTimer);
                         _historyTimer = setTimeout(() => {
                             loadTasks();
-                        }, 200);
                     }
                 });
                 
@@ -635,7 +633,6 @@
                         if (_loadTimer) clearTimeout(_loadTimer);
                         _loadTimer = setTimeout(() => {
                             taskManager.loadData();
-                            loadTasks();
                         }, 100);
                     }
                 });
