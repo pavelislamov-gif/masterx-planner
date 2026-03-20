@@ -433,18 +433,18 @@ function createSiteRow(name, order, siteKey) {
     const operations = getOperationNames(item.product, siteKey);
     
     // ЕСЛИ НЕТ ОПЕРАЦИЙ - ПОКАЗЫВАЕМ КРАСНЫЙ КВАДРАТИК
-    if (operations.length === 0) {
-        return `
-            <div class="site-item">
-                <span class="site-name">${name}</span>
-                <div class="squares">
-                    <div class="square red" title="Нет операций на этом участке"></div>
-                </div>
-                <span style="color: #a0a0a0; font-size: 12px;">-</span>
-                <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
+if (operations.length === 0) {
+    return `
+        <div class="site-item">
+            <span class="site-name">${name}</span>
+            <div class="squares">
+                <div class="square red" title="Нет операций на этом участке"></div>
             </div>
-        `;
-    }
+            <span style="color: #a0a0a0; font-size: 12px; margin: 0 10px;">0/0</span>
+            <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
+        </div>
+    `;
+}
 
     // ЕСЛИ ЕСТЬ ОПЕРАЦИИ - ПОКАЗЫВАЕМ КВАДРАТИКИ
     let squares = '';
