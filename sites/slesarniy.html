@@ -921,14 +921,26 @@ function createTaskCard(task) {
                 div.appendChild(workBtn);
                 
                 const endShiftBtn = document.createElement('button');
-                endShiftBtn.className = 'btn-end-shift';
-                endShiftBtn.innerHTML = isShiftEnded ? '✅ СМЕНА ЗАКРЫТА' : '🕒 ЗАКРЫТЬ';
-                endShiftBtn.disabled = task.status === 'completed' || isShiftEnded;
-                endShiftBtn.onclick = function() {
-                    if (confirm(`Закрыть смену для ${executor.name}?`)) {
-                        taskManager.updateExecutorStatus(task.id, executor.id, 'shift_ended');
-                    }
-                };
+endShiftBtn.className = 'btn-end-shift';
+endShiftBtn.innerHTML = isShiftEnded ? '✅ СМЕНА ЗАКРЫТА' : '🕒 ЗАКРЫТЬ';
+endShiftBtn.disabled = task.status === 'completed' || isShiftEnded;
+endShiftBtn.onclick = function() {
+    if (confirm(`Закрыть смену для ${executor.name}?`)) {
+        taskManager.updateExecutorStatus(task.id, executor.id, 'shift_ended');
+        
+        // Обновляем список исполнителей для этой задачи
+        const executorList = document.getElementById(`executors-${task.id}`);
+        if (executorList) {
+            executorList.innerHTML = '';
+            const updatedTask = taskManager.tasks.find(t => t.id === task.id);
+            if (updatedTask && updatedTask.executors.length > 0) {
+                updatedTask.executors.forEach(executor => {
+                    executorList.appendChild(createExecutorItem(updatedTask, executor));
+                });
+            }
+        }
+    }
+};
                 div.appendChild(endShiftBtn);
                 
                 const removeBtn = document.createElement('button');
