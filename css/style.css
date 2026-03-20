@@ -418,17 +418,20 @@ header {
 }
 
 .square.orange {
-    background: #ff9f1c;
-    border-color: #ffb347;
-    color: #000;
-    box-shadow: 0 0 15px rgba(255,159,28,0.3);
+    background-color: #ff9800 !important;
+    border-color: #e65100 !important;
 }
 
 .square.green {
-    background: #2ecc71;
-    border-color: #4cd964;
-    color: #fff;
-    box-shadow: 0 0 15px rgba(46,204,113,0.3);
+    background-color: #4caf50 !important;
+    border-color: #2e7d32 !important;
+}
+
+.square.red {
+    background-color: #ff3b3b !important;
+    border-color: #cc2e2e !important;
+    color: white !important;
+    box-shadow: 0 0 15px rgba(255,59,59,0.3) !important;
 }
 
 .square.extra-square {
