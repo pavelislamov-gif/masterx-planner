@@ -89,7 +89,10 @@
     { "product": "XGRAY v.1", "thickness": "1мм", "area": 0.0002 },
     { "product": "XGRAY v.2", "thickness": "1мм", "area": 0.0002 },
     { "product": "XSLOPE", "thickness": "1мм", "area": 0.0002 },
-    { "product": "XYELLOW", "thickness": "1мм", "area": 0.0002 }
+    { "product": "XYELLOW", "thickness": "1мм", "area": 0.0002 },
+    { "product": "XGRAY v.1", "thickness": "1мм", "area": 0.0002 },
+    { "product": "XGRAY v.2", "thickness": "1мм", "area": 0.0002 }
+]
   ],
   "pvc": [
     { "product": "XDISK", "thickness": "10мм", "area": 0.0003 },
