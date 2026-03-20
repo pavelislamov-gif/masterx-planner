@@ -373,22 +373,35 @@ updateOrderStatus(taskId, status) {
     console.log('updateOrderStatus:', taskId, status);
     
     const [orderId] = taskId.split('_');
+    console.log('orderId:', orderId);
     
     if (typeof window.loadOrdersFromStorage === 'function') {
         const orders = window.loadOrdersFromStorage() || [];
+        console.log('Загружено заказов:', orders.length);
+        
         const orderIndex = orders.findIndex(o => o.id == orderId);
+        console.log('orderIndex:', orderIndex);
         
         if (orderIndex !== -1) {
-            if (!orders[orderIndex].tasks) orders[orderIndex].tasks = {};
+            if (!orders[orderIndex].tasks) {
+                orders[orderIndex].tasks = {};
+                console.log('Создан объект tasks для заказа');
+            }
+            
             // Конвертируем статус для квадратика на главной
-            orders[orderIndex].tasks[taskId] = this.convertTaskStatus(status);
+            const squareColor = this.convertTaskStatus(status);
+            orders[orderIndex].tasks[taskId] = squareColor;
+            console.log(`Установлен статус для задачи ${taskId}: ${squareColor}`);
             
             if (typeof window.saveOrdersToStorage === 'function') {
                 window.saveOrdersToStorage(orders);
+                console.log('✅ Заказ сохранен в localStorage');
             }
+        } else {
+            console.log('❌ Заказ не найден, orderId:', orderId);
         }
     }
-    
+
     this.notifyOtherTabs(taskId, status);
 }
     
