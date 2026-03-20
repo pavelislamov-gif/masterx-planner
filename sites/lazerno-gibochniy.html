@@ -942,11 +942,6 @@ content.appendChild(productInfoDiv);
                     card.appendChild(desc);
                 }
                 
-                const progress = document.createElement('div');
-                progress.className = 'task-progress';
-                progress.textContent = `Выполнено: ${task.completedQuantity}/${task.totalQuantity} шт`;
-                card.appendChild(progress);
-                
                 const headers = document.createElement('div');
                 headers.className = 'executor-header';
                 headers.innerHTML = `
