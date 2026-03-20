@@ -752,14 +752,20 @@
                     });
                     
                     Object.values(byProduct).forEach(product => {
-                        const productInfo = document.createElement('div');
-                        productInfo.className = 'product-info';
-                        productInfo.innerHTML = `
-                            <strong>${product.product}</strong> | 
-                            Размер: ${product.size || 'Стандартный'} | 
-                            Всего: ${product.totalQuantity} шт
-                        `;
-                        content.appendChild(productInfo);
+                        // Проверяем, есть ли среди задач этого продукта обычные (не дополнительные)
+                        const hasNonExtraTasks = product.tasks.some(task => !task.isExtra);
+                        
+                        // Показываем product-info только если есть обычные задачи
+                        if (hasNonExtraTasks) {
+                            const productInfo = document.createElement('div');
+                            productInfo.className = 'product-info';
+                            productInfo.innerHTML = `
+                                <strong>${product.product}</strong> | 
+                                Размер: ${product.size || 'Стандартный'} | 
+                                Всего: ${product.totalQuantity} шт
+                            `;
+                            content.appendChild(productInfo);
+                        }
                         
                         product.tasks.sort((a, b) => a.index - b.index);
                         
@@ -810,6 +816,7 @@
                 `;
                 card.appendChild(header);
                 
+                // Только описание для дополнительных задач, без лишней информации
                 if (task.isExtra && task.description) {
                     const desc = document.createElement('div');
                     desc.className = 'task-description';
@@ -1003,7 +1010,40 @@
             window.completeTask = function(taskId) {
                 taskManager.completeTask(taskId);
             };
-            
+
+            // ============== ДОБАВЛЕНИЕ ДОПОЛНИТЕЛЬНОЙ ЗАДАЧИ ==============
+            window.addExtraTask = function(orderId, siteKey) {
+                console.log('addExtraTask вызвана', orderId, siteKey);
+                
+                const taskDescription = prompt('Введите описание дополнительной задачи:');
+                if (!taskDescription) return;
+
+                let orders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
+                const order = orders.find(o => o.id == orderId);
+                
+                if (!order) {
+                    alert('Заказ не найден');
+                    return;
+                }
+
+                if (!order.extraTasks) order.extraTasks = [];
+
+                order.extraTasks.push({
+                    title: taskDescription,
+                    description: taskDescription,
+                    site: siteKey,
+                    createdAt: new Date().toISOString()
+                });
+
+                localStorage.setItem('masterx_orders', JSON.stringify(orders));
+                
+                taskManager.loadData();
+                loadTasks();
+                
+                alert('✅ Дополнительная задача добавлена');
+            };
+
+            // ============== ОЧИСТКА ИСТОРИИ ==============
             window.clearHistory = function() {
                 if (!confirm('Очистить историю задач для текущей даты?')) return;
                 const dateStr = taskManager.formatDate(taskManager.currentDate);
@@ -1011,7 +1051,8 @@
                 taskManager.loadData();
                 loadTasks();
             };
-            
+
+            // ============== ЭКСПОРТ В EXCEL ==============
             window.exportToExcel = function() {
                 const tasks = taskManager.tasks;
                 const dateStr = taskManager.formatDate(taskManager.currentDate);
