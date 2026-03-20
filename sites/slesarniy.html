@@ -811,11 +811,11 @@
                 card.appendChild(header);
                 
                 if (task.isExtra && task.description) {
-                    const desc = document.createElement('div');
-                    desc.className = 'task-description';
-                    desc.textContent = task.description;
-                    card.appendChild(desc);
-                }
+    const desc = document.createElement('div');
+    desc.className = 'task-description';
+    desc.textContent = task.description; // Только описание, без "Размер: Стандартный | Всего: 1 шт"
+    card.appendChild(desc);
+}
                 
                 const progress = document.createElement('div');
                 progress.className = 'task-progress';
