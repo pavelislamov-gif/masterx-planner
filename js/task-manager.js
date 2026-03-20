@@ -194,6 +194,7 @@ generateTasks() {
     convertTaskStatus(taskStatus) {
         if (taskStatus === 'completed') return 'green';
         if (taskStatus === 'in_progress') return 'orange';
+        if (taskStatus === 'shift_ended') return 'orange';
         return '';
     }
     
