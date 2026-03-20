@@ -871,11 +871,6 @@
                     card.appendChild(desc);
                 }
                 
-                var progress = document.createElement('div');
-                progress.className = 'task-progress';
-                progress.textContent = 'Выполнено: ' + task.completedQuantity + '/' + task.totalQuantity + ' шт';
-                card.appendChild(progress);
-                
                 var headers = document.createElement('div');
                 headers.className = 'executor-header';
                 headers.innerHTML = '<span>ФИО</span><span>Кол-во</span><span>Статус</span><span></span>';
