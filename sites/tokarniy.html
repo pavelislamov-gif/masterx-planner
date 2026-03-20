@@ -615,7 +615,6 @@
                 window.addEventListener('taskStatusChanged', function() {
                     if (_loadTimer) clearTimeout(_loadTimer);
                     _loadTimer = setTimeout(() => {
-                        loadTasks();
                     }, 100);
                 });
                 
@@ -624,7 +623,6 @@
                         console.log('🔄 Изменение истории для токарного участка');
                         if (_historyTimer) clearTimeout(_historyTimer);
                         _historyTimer = setTimeout(() => {
-                            loadTasks();
                         }, 200);
                     }
                 });
@@ -635,7 +633,6 @@
                         if (_loadTimer) clearTimeout(_loadTimer);
                         _loadTimer = setTimeout(() => {
                             taskManager.loadData();
-                            loadTasks();
                         }, 100);
                     }
                 });
@@ -930,7 +927,18 @@
                 endShiftBtn.onclick = function() {
                     if (confirm(`Закрыть смену для ${executor.name}?`)) {
                         taskManager.updateExecutorStatus(task.id, executor.id, 'shift_ended');
-                        setTimeout(() => loadTasks(), 100);
+                        
+                        // Обновляем список исполнителей для этой задачи
+                        const executorList = document.getElementById(`executors-${task.id}`);
+                        if (executorList) {
+                            executorList.innerHTML = '';
+                            const updatedTask = taskManager.tasks.find(t => t.id === task.id);
+                            if (updatedTask && updatedTask.executors.length > 0) {
+                                updatedTask.executors.forEach(executor => {
+                                    executorList.appendChild(createExecutorItem(updatedTask, executor));
+                                });
+                            }
+                        }
                     }
                 };
                 div.appendChild(endShiftBtn);
@@ -964,6 +972,7 @@
                 input.placeholder = 'ФИО исполнителя';
                 
                 const addBtn = document.createElement('button');
+                addBtn.type = 'button';
                 addBtn.className = 'btn btn-success';
                 addBtn.textContent = 'Добавить';
                 addBtn.onclick = () => {
@@ -976,12 +985,32 @@
                     const result = taskManager.addExecutor(task.id, name);
                     if (result) {
                         formDiv.remove();
+                        
+                        // Находим контейнер с исполнителями и обновляем его
+                        const executorList = document.getElementById(`executors-${task.id}`);
+                        if (executorList) {
+                            executorList.innerHTML = '';
+                            
+                            const updatedTask = taskManager.tasks.find(t => t.id === task.id);
+                            
+                            if (updatedTask && updatedTask.executors.length > 0) {
+                                updatedTask.executors.forEach(executor => {
+                                    executorList.appendChild(createExecutorItem(updatedTask, executor));
+                                });
+                            } else {
+                                const noExecutors = document.createElement('p');
+                                noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 12px;';
+                                noExecutors.textContent = 'Нет исполнителей';
+                                executorList.appendChild(noExecutors);
+                            }
+                        }
                     } else {
                         alert('Не удалось добавить исполнителя. Возможно, он уже существует.');
                     }
                 };
                 
                 const cancelBtn = document.createElement('button');
+                cancelBtn.type = 'button';
                 cancelBtn.className = 'btn btn-danger';
                 cancelBtn.textContent = 'Отмена';
                 cancelBtn.onclick = () => formDiv.remove();
@@ -1008,7 +1037,37 @@
             };
             
             window.completeTask = function(taskId) {
-                taskManager.completeTask(taskId);
+                // Находим задачу для получения информации
+                const task = taskManager.tasks.find(t => t.id === taskId);
+                if (!task) return;
+                
+                // Формируем сообщение с информацией о задаче
+                let message = `Завершить задачу?\n\n`;
+                message += `📌 Операция: ${task.operation}\n`;
+                message += `📦 Заказ: ${task.orderNumber}\n`;
+                
+                // Добавляем информацию о количестве
+                const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
+                message += `🔢 Выполнено: ${totalAssigned} шт`;
+                
+                // Показываем подтверждение
+                if (confirm(message)) {
+                    // Вызываем метод completeTask из taskManager
+                    taskManager.completeTask(taskId);
+                    
+                    // Находим карточку задачи и обновляем её
+                    const taskCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+                    if (taskCard) {
+                        // Находим обновленную задачу в taskManager
+                        const updatedTask = taskManager.tasks.find(t => t.id === taskId);
+                        if (updatedTask) {
+                            // Создаем новую карточку с актуальными данными
+                            const newCard = createTaskCard(updatedTask);
+                            // Заменяем старую карточку новой
+                            taskCard.parentNode.replaceChild(newCard, taskCard);
+                        }
+                    }
+                }
             };
 
             // ============== ДОБАВЛЕНИЕ ДОПОЛНИТЕЛЬНОЙ ЗАДАЧИ ==============
@@ -1038,7 +1097,6 @@
                 localStorage.setItem('masterx_orders', JSON.stringify(orders));
                 
                 taskManager.loadData();
-                loadTasks();
                 
                 alert('✅ Дополнительная задача добавлена');
             };
