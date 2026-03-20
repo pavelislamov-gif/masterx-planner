@@ -488,3 +488,23 @@ async function loadLyres() {
         { name: 'Лира П-5.5 спец. XSMART-2', thickness: '2мм', area: 0.0033 }
     ];
 }
+
+// ============== КОМПЛЕКТУЮЩИЕ ==============
+window.componentsData = {};
+
+async function loadComponents() {
+    console.log('Загрузка комплектующих...');
+    try {
+        const response = await fetch('data/components.json');
+        if (!response.ok) throw new Error('Не удалось загрузить components.json');
+        const data = await response.json();
+        window.componentsData = data.components || {};
+        console.log('✅ Комплектующие загружены:', Object.keys(window.componentsData).length);
+    } catch (error) {
+        console.error('❌ Ошибка загрузки комплектующих:', error);
+        window.componentsData = {};
+    }
+    return window.componentsData;
+}
+
+window.loadComponents = loadComponents;
