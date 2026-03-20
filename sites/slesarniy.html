@@ -1028,9 +1028,23 @@ function showAddExecutorForm(task, actionContainer) {
                 }
             };
             
-            window.completeTask = function(taskId) {
-                taskManager.completeTask(taskId);
-            };
+           window.completeTask = function(taskId) {
+    // Вызываем метод completeTask из taskManager
+    taskManager.completeTask(taskId);
+    
+    // Находим карточку задачи и обновляем её
+    const taskCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+    if (taskCard) {
+        // Находим обновленную задачу в taskManager
+        const updatedTask = taskManager.tasks.find(t => t.id === taskId);
+        if (updatedTask) {
+            // Создаем новую карточку с актуальными данными
+            const newCard = createTaskCard(updatedTask);
+            // Заменяем старую карточку новой
+            taskCard.parentNode.replaceChild(newCard, taskCard);
+        }
+    }
+};
 
             // ============== ДОБАВЛЕНИЕ ДОПОЛНИТЕЛЬНОЙ ЗАДАЧИ ==============
 window.addExtraTask = function(orderId, siteKey) {
