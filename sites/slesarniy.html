@@ -1003,37 +1003,67 @@
             window.completeTask = function(taskId) {
                 taskManager.completeTask(taskId);
             };
-            
-            window.clearHistory = function() {
-                if (!confirm('Очистить историю задач для текущей даты?')) return;
-                const dateStr = taskManager.formatDate(taskManager.currentDate);
-                localStorage.removeItem(`tasks_slesarniy_${dateStr}`);
-                taskManager.loadData();
-                loadTasks();
-            };
-            
-            window.exportToExcel = function() {
-                const tasks = taskManager.tasks;
-                const dateStr = taskManager.formatDate(taskManager.currentDate);
-                
-                let csv = "Заказ,Изделие,Операция,Исполнитель,Количество,Статус\n";
-                tasks.forEach(task => {
-                    if (task.executors.length > 0) {
-                        task.executors.forEach(executor => {
-                            csv += `${task.orderNumber},${task.product},${task.operation},${executor.name},${executor.quantity},${executor.status}\n`;
-                        });
-                    } else {
-                        csv += `${task.orderNumber},${task.product},${task.operation},Нет,0,${task.status}\n`;
-                    }
-                });
-                
-                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `slesarniy_${dateStr}.csv`;
-                link.click();
-            };
+
+            // ============== ДОБАВЛЕНИЕ ДОПОЛНИТЕЛЬНОЙ ЗАДАЧИ ==============
+window.addExtraTask = function(orderId, siteKey) {
+    console.log('addExtraTask вызвана', orderId, siteKey);
+    
+    const taskDescription = prompt('Введите описание дополнительной задачи:');
+    if (!taskDescription) return;
+
+    let orders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
+    const order = orders.find(o => o.id == orderId);
+    
+    if (!order) {
+        alert('Заказ не найден');
+        return;
+    }
+
+    if (!order.extraTasks) order.extraTasks = [];
+
+    order.extraTasks.push({
+        title: taskDescription,
+        description: taskDescription,
+        site: siteKey,
+        createdAt: new Date().toISOString()
+    });
+
+    localStorage.setItem('masterx_orders', JSON.stringify(orders));
+    
+    taskManager.loadData();
+    loadTasks();
+    
+    alert('✅ Дополнительная задача добавлена');
+};
+
+// ============== ОЧИСТКА ИСТОРИИ ==============
+window.clearHistory = function() {
+    if (!confirm('Очистить историю задач для текущей даты?')) return;
+    const dateStr = taskManager.formatDate(taskManager.currentDate);
+    localStorage.removeItem(`tasks_slesarniy_${dateStr}`);
+    taskManager.loadData();
+    loadTasks();
+};
+
+// ============== ЭКСПОРТ В EXCEL ==============
+window.exportToExcel = function() {
+    const tasks = taskManager.tasks;
+    const dateStr = taskManager.formatDate(taskManager.currentDate);
+    
+    let csv = "Заказ,Изделие,Операция,Исполнитель,Количество,Статус\n";
+    tasks.forEach(task => {
+        if (task.executors.length > 0) {
+            task.executors.forEach(executor => {
+                csv += `${task.orderNumber},${task.product},${task.operation},${executor.name},${executor.quantity},${executor.status}\n`;
+            });
+        } else {
+            csv += `${task.orderNumber},${task.product},${task.operation},Нет,0,${task.status}\n`;
         }
-    </script>
-</body>
-</html>
+    });
+    
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `slesarniy_${dateStr}.csv`;
+    link.click();
+};
