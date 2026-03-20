@@ -125,19 +125,20 @@ function loadOrders() {
                         <th>Лира</th>
                         <th>RAL</th>
                         <th>Текстура</th>
-                     </thead>
+                    </tr>
+                </thead>
                 <tbody>
                     <tr>
-                        <td><strong>${item.product}</strong>\\
-                        <td>${item.size}\\
-                        <td>${item.quantity} шт\\
-                        <td>${item.bracket.type} (${item.bracket.quantity} шт)\\
-                        <td>${item.lyre.type} (${item.lyre.quantity} шт)\\
-                        <td>${item.ral || '-'}\\
-                        <td>${item.texture || '-'}\\
-                     \\
+                        <td><strong>${item.product}</strong></td>
+                        <td>${item.size}</td>
+                        <td>${item.quantity} шт</td>
+                        <td>${item.bracket.type} (${item.bracket.quantity} шт)</td>
+                        <td>${item.lyre.type} (${item.lyre.quantity} шт)</td>
+                        <td>${item.ral || '-'}</td>
+                        <td>${item.texture || '-'}</td>
+                    </tr>
                 </tbody>
-             </table>
+            </table>
             
             <div class="sites-section">
                 <h4 style="margin-bottom: 15px;">🏭 Производственные участки</h4>
@@ -305,8 +306,6 @@ function closeOrderModal() {
         modal.style.display = 'none';
         const form = document.getElementById('orderForm');
         if (form) form.reset();
-        const componentsContainer = document.getElementById('componentsContainer');
-        if (componentsContainer) componentsContainer.innerHTML = '';
     }
 }
 
@@ -325,16 +324,17 @@ function populateSelects() {
             option.textContent = product.name;
             productSelect.appendChild(option);
         });
-        productSelect.addEventListener('change', updateComponentsList);
     }
 
     const bracketSelect = document.getElementById('bracketSelect');
     if (bracketSelect) {
         bracketSelect.innerHTML = '<option value="">Выберите кронштейн</option>';
+
         const absentOption = document.createElement('option');
         absentOption.value = "отсутствует";
         absentOption.textContent = "🚫 отсутствует";
         bracketSelect.appendChild(absentOption);
+
         brackets.forEach(bracket => {
             const option = document.createElement('option');
             option.value = bracket.name;
@@ -346,10 +346,12 @@ function populateSelects() {
     const lyreSelect = document.getElementById('lyreSelect');
     if (lyreSelect) {
         lyreSelect.innerHTML = '<option value="">Выберите лиру</option>';
+
         const absentOption = document.createElement('option');
         absentOption.value = "отсутствует";
         absentOption.textContent = "🚫 отсутствует";
         lyreSelect.appendChild(absentOption);
+
         lyres.forEach(lyre => {
             const option = document.createElement('option');
             option.value = lyre.name;
@@ -373,6 +375,7 @@ async function loadProductSizes() {
 
     setTimeout(() => {
         sizeSelect.innerHTML = '<option value="">Выберите размер</option>';
+
         if (product && product.sizes) {
             product.sizes.forEach(size => {
                 const option = document.createElement('option');
@@ -383,24 +386,29 @@ async function loadProductSizes() {
         } else {
             sizeSelect.innerHTML = '<option value="">Нет доступных размеров</option>';
         }
+
         sizeSelect.disabled = false;
     }, 100);
 }
 
 // ============== БАЗА ДАННЫХ ОПЕРАЦИЙ ==============
+// Загружается из отдельного файла task-operations.js
 const operationsDB = window.TASK_OPERATIONS || {};
 
 // ============== ФУНКЦИЯ getOperationNames ==============
 function getOperationNames(productName, siteKey) {
     const siteOps = operationsDB[siteKey] || {};
+
     if (siteOps[productName]) {
         return siteOps[productName];
     }
+
     for (let key in siteOps) {
         if (productName.includes(key)) {
             return siteOps[key];
         }
     }
+
     return [];
 }
 
@@ -408,6 +416,8 @@ function getOperationNames(productName, siteKey) {
 function getOperationCount(productName, siteKey) {
     const siteOps = operationsDB[siteKey] || {};
     const operations = siteOps[productName] || [];
+    
+    // Считаем только не-х
     return operations.filter(op => op && op !== 'х' && op !== 'x').length;
 }
 
@@ -418,96 +428,73 @@ function createSiteRow(name, order, siteKey) {
     }
 
     const item = order.items[0];
-    const productQty = parseInt(item.quantity) || 1;
-    const productName = item.product;
     
-    const operations = getOperationNames(productName, siteKey);
-    const components = (order.components || []).filter(comp => comp.site === siteKey);
+    // ПОЛУЧАЕМ РЕАЛЬНЫЕ ОПЕРАЦИИ (БЕЗ "х")
+    const operations = getOperationNames(item.product, siteKey);
     
-    const totalTasks = operations.length;
+    // ЕСЛИ НЕТ ОПЕРАЦИЙ - ПОКАЗЫВАЕМ КРАСНЫЙ КВАДРАТИК
+if (operations.length === 0) {
+    return `
+        <div class="site-item">
+            <span class="site-name">${name}</span>
+            <div class="squares">
+                <div class="square red" title="Нет операций на этом участке"></div>
+            </div>
+            <span style="color: #a0a0a0; font-size: 12px; margin: 0 10px;">0/0</span>
+            <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
+        </div>
+    `;
+}
+
+    // ЕСЛИ ЕСТЬ ОПЕРАЦИИ - ПОКАЗЫВАЕМ КВАДРАТИКИ
+    let squares = '';
     let completedCount = 0;
-    
-    let squaresHtml = '';
+
     for (let i = 0; i < operations.length; i++) {
         const taskId = `${order.id}_${siteKey}_0_${i}`;
+        
+        // ПОЛУЧАЕМ СТАТУС ИЗ ЗАКАЗА - ЭТО КЛЮЧЕВОЙ МОМЕНТ!
         let status = '';
         if (order.tasks && order.tasks[taskId]) {
             status = order.tasks[taskId];
-            if (status === 'green') completedCount++;
+            if (status === 'orange' || status === 'green') {
+                if (status === 'green') completedCount++;
+            }
         }
-        squaresHtml += `<div class="square ${status}" data-task="${taskId}" title="${operations[i]}"></div>`;
+
+        const operationName = operations[i];
+        console.log(`Квадратик ${taskId}: статус "${status}"`); // Отладка
+
+        squares += `<div class="square ${status}" data-task="${taskId}" title="${operationName}"></div>`;
     }
-    
+
     if (order.extraTasks) {
         order.extraTasks.forEach((task, index) => {
             if (task.site === siteKey) {
                 const taskId = `${order.id}_extra_${index}`;
+                
+                // ПОЛУЧАЕМ СТАТУС ДЛЯ ДОПОЛНИТЕЛЬНОЙ ЗАДАЧИ
                 let status = '';
                 if (order.tasks && order.tasks[taskId]) {
                     status = order.tasks[taskId];
                     if (status === 'green') completedCount++;
                 }
-                squaresHtml += `<div class="square ${status} extra-square" data-task="${taskId}" title="${task.title} (доп.)"></div>`;
+
+                squares += `<div class="square ${status} extra-square" data-task="${taskId}" title="${task.title} (доп.)"></div>`;
             }
         });
     }
-    
-    let componentsHtml = '';
-    if (components.length > 0) {
-        componentsHtml = `
-            <div style="margin: 10px 0 10px 0; padding: 8px 10px; background: #15191f; border-radius: 6px;">
-                <div style="color: #ff9f1c; font-size: 12px; margin-bottom: 8px;">🔧 КОМПЛЕКТУЮЩИЕ (для информации):</div>
-                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-        `;
-        components.forEach(comp => {
-            componentsHtml += `
-                <div style="background: #1e232b; padding: 4px 10px; border-radius: 4px; font-size: 12px;">
-                    ${comp.name}: <span style="color: #4cd964; font-weight: 600;">${comp.quantityPerProduct} шт/изд</span>
-                </div>
-            `;
-        });
-        componentsHtml += `</div></div>`;
-    }
-    
-    const quantityInfo = `
-        <div style="margin-bottom: 5px; padding: 5px 0;">
-            <span style="color: #a0a0a0; font-size: 12px;">Кол-во изделий:</span>
-            <span style="color: #ff9f1c; font-weight: 600; margin-left: 5px;">${productQty} шт</span>
-        </div>
-    `;
-    
-    if (operations.length === 0 && components.length === 0) {
-        return `
-            <div class="site-item">
-                <span class="site-name">${name}</span>
-                <div class="squares">
-                    <div class="square red" title="Нет задач на этом участке"></div>
-                </div>
-                <span style="color: #a0a0a0; font-size: 12px; margin: 0 10px;">0/0</span>
-                <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
-            </div>
-        `;
-    }
-    
+
+    const totalOperations = operations.length + (order.extraTasks?.filter(t => t.site === siteKey).length || 0);
+
     return `
         <div class="site-item">
-            <div style="width: 100%;">
-                <div class="product-info" style="margin-bottom: 5px;">
-                    <strong>📦 ${productName}</strong>
-                </div>
-                ${quantityInfo}
-                ${componentsHtml}
-                <div style="margin: 10px 0 5px 0;">
-                    <div style="color: #ff9f1c; font-size: 12px; margin-bottom: 8px;">⚙️ ЗАДАЧИ:</div>
-                    <div class="squares" style="display: flex; flex-wrap: wrap; gap: 6px;">
-                        ${squaresHtml}
-                    </div>
-                </div>
-                <div style="margin-top: 10px; text-align: right; font-size: 11px; color: #a0a0a0;">
-                    Прогресс: ${completedCount}/${totalTasks}
-                </div>
-                <button class="btn btn-sm btn-primary" style="margin-top: 10px;" onclick="addExtraTask(${order.id}, '${siteKey}')">➕ Добавить задачу</button>
+            <span class="site-name">${name}</span>
+            <div class="squares">
+                ${squares}
             </div>
+            <span style="color: #a0a0a0; font-size: 12px; margin: 0 10px;">${completedCount}/${totalOperations}</span>
+            <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
         </div>
     `;
 }
@@ -548,7 +535,7 @@ async function showMaterialsReport(orderId) {
     }
 }
 
-// ============== УДАЛЕНИЕ ЗАКАЗА ==============
+// ============== ИСПРАВЛЕННАЯ ФУНКЦИЯ УДАЛЕНИЯ ЗАКАЗА ==============
 function deleteOrder(orderId) {
     console.log('deleteOrder вызвана', orderId);
     
@@ -556,16 +543,21 @@ function deleteOrder(orderId) {
         return;
     }
 
+    // Находим удаляемый заказ
     const deletedOrder = orders.find(o => o.id === orderId);
+    
+    // Удаляем заказ из списка
     orders = orders.filter(o => o.id !== orderId);
     saveOrdersToStorage(orders);
     
+    // Удаляем задачи этого заказа со всех участков
     if (deletedOrder) {
         deleteOrderTasksFromAllSites(deletedOrder);
     }
     
     loadOrders();
     updateStatistics();
+    
     alert('✅ Заказ и связанные задачи удалены');
 }
 
@@ -585,10 +577,13 @@ function deleteOrderTasksFromAllSites(order) {
                 if (tasksJson) {
                     let tasks = JSON.parse(tasksJson);
                     const beforeCount = tasks.length;
+                    
+                    // Оставляем только задачи НЕ из этого заказа
                     const filteredTasks = tasks.filter(task => {
                         const taskOrderId = task.orderId || (task.id ? task.id.split('_')[0] : null);
                         return String(taskOrderId) !== String(order.id);
                     });
+                    
                     if (filteredTasks.length !== beforeCount) {
                         const deleted = beforeCount - filteredTasks.length;
                         totalDeleted += deleted;
@@ -601,6 +596,7 @@ function deleteOrderTasksFromAllSites(order) {
             }
         });
     });
+    
     console.log(`✅ Всего удалено задач: ${totalDeleted}`);
 }
 
@@ -608,14 +604,18 @@ function deleteOrderTasksFromAllSites(order) {
 function getAllRelevantDates() {
     const dates = [];
     const today = new Date();
+    
     for (let i = -30; i <= 30; i++) {
         const date = new Date(today);
         date.setDate(today.getDate() + i);
+        
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
+        
         dates.push(`${year}-${month}-${day}`);
     }
+    
     return dates;
 }
 
@@ -644,6 +644,7 @@ function exportOrders() {
 
     try {
         const ordersToExport = orders || [];
+
         if (ordersToExport.length === 0) {
             alert('Нет заказов для экспорта');
             return;
@@ -692,15 +693,14 @@ async function loadAllData() {
         brackets = await loadBrackets() || [];
         lyres = await loadLyres() || [];
         orders = loadOrdersFromStorage() || [];
-        await loadComponents();
 
         console.log('✅ Продукты загружены:', products.length);
         console.log('✅ Кронштейны загружены:', brackets.length);
         console.log('✅ Лиры загружены:', lyres.length);
-        console.log('✅ Комплектующие загружены:', Object.keys(window.componentsData).length);
         console.log('✅ Заказы загружены:', orders.length);
 
         syncTasksFromHistory();
+
         populateSelects();
         loadOrders();
         updateStatistics();
@@ -734,12 +734,20 @@ async function loadAllData() {
                 try {
                     const data = JSON.parse(e.newValue);
                     console.log('🔥 Получено из localStorage:', data);
+                    
+                    // Игнорируем статус pending (начальное состояние)
                     if (data.status === 'pending') return;
+                    
+                    // Находим базовый taskId (обрезаем последний индекс)
                     const baseTaskId = data.taskId.substring(0, data.taskId.lastIndexOf('_'));
                     console.log('🔄 Ищем квадратик с taskId:', baseTaskId);
+                    
                     const square = document.querySelector(`[data-task="${baseTaskId}"]`);
                     if (square) {
+                        // Удаляем старые классы
                         square.classList.remove('orange', 'green');
+                        
+                        // Добавляем новый класс
                         if (data.status === 'in_progress') {
                             square.classList.add('orange');
                             console.log('✅ Квадратик стал оранжевым');
@@ -789,8 +797,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            const components = collectComponents();
-
             const order = {
                 id: Date.now(),
                 date: document.getElementById('orderDate').value,
@@ -811,7 +817,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     texture: document.getElementById('textureSelect').value || '',
                     additional: document.getElementById('additionalDetails').value || ''
                 }],
-                components: components,
                 status: 'active',
                 tasks: {},
                 extraTasks: []
@@ -851,9 +856,13 @@ window.addEventListener('taskStatusChanged', function(e) {
     const { taskId, status } = e.detail;
     console.log('🔄 Статус задачи изменен:', taskId, status);
     
+    // 1. Обновляем статус в заказе
     updateTaskStatus(taskId, status);
     
+    // 2. Ищем и обновляем цвет квадратика
     let squares = document.querySelectorAll(`[data-task="${taskId}"]`);
+    
+    // Если не нашли, пробуем обрезать последний индекс
     if (squares.length === 0) {
         const baseTaskId = taskId.substring(0, taskId.lastIndexOf('_'));
         console.log('🔄 Пробуем базовый taskId:', baseTaskId);
@@ -862,7 +871,10 @@ window.addEventListener('taskStatusChanged', function(e) {
     
     squares.forEach(square => {
         console.log('✅ Найден квадратик, меняем цвет на:', status);
+        
+        // Удаляем старые классы цветов
         square.classList.remove('orange', 'green');
+        
         if (status === 'completed') {
             square.classList.add('green');
             square.title = 'Завершено';
@@ -874,70 +886,3 @@ window.addEventListener('taskStatusChanged', function(e) {
         }
     });
 });
-
-// ============== КОМПЛЕКТУЮЩИЕ ==============
-
-// Обновление списка комплектующих при выборе изделия
-function updateComponentsList() {
-    const productName = document.getElementById('productSelect').value;
-    const container = document.getElementById('componentsContainer');
-    
-    if (!container) return;
-    container.innerHTML = '';
-    if (!productName) return;
-    
-    const components = window.componentsData[productName] || [];
-    if (components.length === 0) return;
-    
-    const title = document.createElement('div');
-    title.style.cssText = 'margin-bottom: 12px; color: #ff3b3b; font-size: 14px; font-weight: 600; border-left: 3px solid #ff3b3b; padding-left: 10px;';
-    title.innerHTML = '🔧 КОМПЛЕКТУЮЩИЕ ДЕТАЛИ:';
-    container.appendChild(title);
-    
-    const desc = document.createElement('div');
-    desc.style.cssText = 'margin-bottom: 12px; color: #a0a0a0; font-size: 12px; padding-left: 10px;';
-    desc.innerHTML = 'Введите количество на 1 изделие:';
-    container.appendChild(desc);
-    
-    components.forEach(comp => {
-        const row = document.createElement('div');
-        row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #15191f; border-radius: 6px; border: 1px solid #2a2f38; margin-bottom: 8px;';
-        row.innerHTML = `
-            <span style="font-size: 13px; font-weight: 500;">${comp.name}</span>
-            <div>
-                <input type="number" 
-                       class="component-qty"
-                       data-name="${comp.name}"
-                       data-material="${comp.material}"
-                       value="0" 
-                       min="0" 
-                       style="width: 80px; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
-                <span style="color: #a0a0a0; margin-left: 5px;">шт/изд</span>
-            </div>
-        `;
-        container.appendChild(row);
-    });
-}
-
-// Сбор комплектующих из формы
-function collectComponents() {
-    const components = [];
-    document.querySelectorAll('.component-qty').forEach(input => {
-        const qty = parseInt(input.value) || 0;
-        if (qty > 0) {
-            components.push({
-                name: input.dataset.name,
-                material: input.dataset.material,
-                quantityPerProduct: qty,
-                site: input.dataset.site
-            });
-        }
-    });
-    return components;
-}
-
-// Экспортируем функции в глобальную область
-window.updateComponentsList = updateComponentsList;
-window.collectComponents = collectComponents;
-
-console.log('✅ Функции комплектующих загружены');
