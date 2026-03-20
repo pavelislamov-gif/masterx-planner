@@ -1037,7 +1037,6 @@ window.addExtraTask = function(orderId, siteKey) {
     localStorage.setItem('masterx_orders', JSON.stringify(orders));
     
     taskManager.loadData();
-    loadTasks();
     
     alert('✅ Дополнительная задача добавлена');
 };
