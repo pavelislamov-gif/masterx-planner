@@ -930,7 +930,6 @@
                 endShiftBtn.onclick = function() {
                     if (confirm(`Закрыть смену для ${executor.name}?`)) {
                         taskManager.updateExecutorStatus(task.id, executor.id, 'shift_ended');
-                        setTimeout(() => loadTasks(), 100);
                     }
                 };
                 div.appendChild(endShiftBtn);
