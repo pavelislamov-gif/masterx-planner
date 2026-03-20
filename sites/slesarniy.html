@@ -619,13 +619,14 @@
                 });
                 
                 window.addEventListener('taskHistoryChanged', function(e) {
-                    if (e.detail.siteType === 'slesarniy') {
-                        console.log('🔄 Изменение истории для слесарного участка');
-                        if (_historyTimer) clearTimeout(_historyTimer);
-                        _historyTimer = setTimeout(() => {
-                            loadTasks();
-                    }
-                });
+    if (e.detail.siteType === 'slesarniy') {
+        console.log('🔄 Изменение истории для слесарного участка');
+        if (_historyTimer) clearTimeout(_historyTimer);
+        _historyTimer = setTimeout(() => {
+            loadTasks();
+        }, 200);  // <- ДОБАВЛЕНА ЗАПЯТАЯ И ЗАКРЫВАЮЩАЯ СКОБКА
+    }
+});
                 
                 window.addEventListener('storage', function(e) {
                     if (e.key === 'masterx_orders' || (e.key && e.key.startsWith('tasks_slesarniy_'))) {
