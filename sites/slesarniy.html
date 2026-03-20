@@ -743,7 +743,6 @@
                         byProduct[key].tasks.push(task);
                     });
                     
-                    // ПОЛУЧАЕМ ПОЛНЫЙ ЗАКАЗ ИЗ localStorage
                     let fullOrder = null;
                     try {
                         const allOrders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
@@ -757,28 +756,26 @@
 
                     const components = (fullOrder?.components || []).filter(comp => comp.site === taskManager.siteType);
 
-                    const productInfo = document.createElement('div');
-                    productInfo.className = 'product-info';
-                    productInfo.innerHTML = `
-                        <strong>📦 ${productName}</strong><br>
-                        <span style="font-size: 12px; color: #a0a0a0;">Кол-во изделий: ${productQty} шт</span>
-                    `;
-                    content.appendChild(productInfo);
-
                     if (components.length > 0) {
                         const compDiv = document.createElement('div');
-                        compDiv.style.cssText = 'margin: 10px 0 10px 0; padding: 8px 10px; background: #15191f; border-radius: 6px;';
+                        compDiv.className = 'product-info';
                         compDiv.innerHTML = `
-                            <div style="color: #ff9f1c; font-size: 12px; margin-bottom: 8px;">🔧 КОМПЛЕКТУЮЩИЕ (для информации):</div>
-                            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                                ${components.map(comp => `
-                                    <div style="background: #1e232b; padding: 4px 10px; border-radius: 4px; font-size: 12px;">
-                                        ${comp.name}: <span style="color: #4cd964; font-weight: 600;">${comp.quantityPerProduct} шт/изд</span>
-                                    </div>
-                                `).join('')}
-                            </div>
+                            <strong>🔧 КОМПЛЕКТУЮЩИЕ:</strong><br>
+                            ${components.map(comp => `
+                                <div style="margin-top: 5px;">
+                                    ${comp.name}: <span style="color: #4cd964; font-weight: 600;">${comp.quantityPerProduct} шт/изд</span>
+                                </div>
+                            `).join('')}
                         `;
                         content.appendChild(compDiv);
+                    } else {
+                        const productInfo = document.createElement('div');
+                        productInfo.className = 'product-info';
+                        productInfo.innerHTML = `
+                            <strong>📦 ${productName}</strong><br>
+                            <span style="font-size: 12px; color: #a0a0a0;">Кол-во изделий: ${productQty} шт</span>
+                        `;
+                        content.appendChild(productInfo);
                     }
 
                     Object.values(byProduct).forEach(product => {
