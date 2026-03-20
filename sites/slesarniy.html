@@ -623,7 +623,6 @@
         console.log('🔄 Изменение истории для слесарного участка');
         if (_historyTimer) clearTimeout(_historyTimer);
         _historyTimer = setTimeout(() => {
-            loadTasks();
         }, 200);  // <- ДОБАВЛЕНА ЗАПЯТАЯ И ЗАКРЫВАЮЩАЯ СКОБКА
     }
 });
@@ -961,6 +960,7 @@ function createTaskCard(task) {
                 input.placeholder = 'ФИО исполнителя';
                 
                 const addBtn = document.createElement('button');
+                addBtn.type = 'button';
                 addBtn.className = 'btn btn-success';
                 addBtn.textContent = 'Добавить';
                 addBtn.onclick = () => {
@@ -979,6 +979,7 @@ function createTaskCard(task) {
                 };
                 
                 const cancelBtn = document.createElement('button');
+                cancelBtn.type = 'button';
                 cancelBtn.className = 'btn btn-danger';
                 cancelBtn.textContent = 'Отмена';
                 cancelBtn.onclick = () => formDiv.remove();
