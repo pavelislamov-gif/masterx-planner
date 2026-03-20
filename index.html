@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MasterX - Планировщик производства</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Дополнительные стили для анимации */
+        .order-content {
+            transition: opacity 0.2s ease;
+        }
+        
+        .order-content.loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -185,6 +196,49 @@
                 console.log('Проверьте, что в app.js есть строка: window.openOrderModal = openOrderModal;');
             }
         });
+    </script>
+
+    <!-- ДОБАВЛЯЕМ СОХРАНЕНИЕ СОСТОЯНИЯ КАРТОЧЕК -->
+    <script>
+        // Переопределяем функцию loadOrders из app.js с сохранением состояния
+        const originalLoadOrders = window.loadOrders;
+        
+        window.loadOrders = function() {
+            console.log('loadOrders вызвана (с сохранением состояния)');
+            const ordersList = document.getElementById('ordersList');
+            if (!ordersList) return;
+
+            // Сохраняем состояние развернутости карточек перед обновлением
+            const expandedStates = {};
+            document.querySelectorAll('.order-card').forEach(card => {
+                const orderId = card.dataset.orderId;
+                const content = card.querySelector('.order-content');
+                if (orderId && content) {
+                    expandedStates[orderId] = content.style.display === 'block';
+                    console.log(`💾 Сохранено состояние карточки ${orderId}: ${expandedStates[orderId] ? 'развернута' : 'свернута'}`);
+                }
+            });
+
+            // Вызываем оригинальную функцию loadOrders из app.js
+            if (originalLoadOrders) {
+                originalLoadOrders();
+            }
+
+            // Восстанавливаем состояние после загрузки
+            setTimeout(() => {
+                document.querySelectorAll('.order-card').forEach(card => {
+                    const orderId = card.dataset.orderId;
+                    const content = card.querySelector('.order-content');
+                    if (orderId && content && expandedStates[orderId] !== undefined) {
+                        content.style.display = expandedStates[orderId] ? 'block' : 'none';
+                        console.log(`🔄 Восстановлено состояние карточки ${orderId}: ${expandedStates[orderId] ? 'развернута' : 'свернута'}`);
+                    }
+                });
+            }, 50);
+        };
+
+        // Сохраняем оригинальную функцию addExtraTask если нужно
+        console.log('✅ Добавлено сохранение состояния карточек в планировщике');
     </script>
 </body>
 </html>
