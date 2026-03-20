@@ -542,6 +542,17 @@
     <script src="../js/task-manager.js"></script>
 
     <script>
+        // ============== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ БЕЗОПАСНОГО ВЫВОДА ==============
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         if (typeof TaskManager === 'undefined') {
             console.error('❌ TaskManager не загружен! Проверьте подключение task-manager.js');
@@ -722,7 +733,7 @@
                     const header = document.createElement('div');
                     header.className = 'order-header collapsed';
                     header.innerHTML = `
-                        <h3>📦 Заказ №${order.number}</h3>
+                        <h3>📦 Заказ №${escapeHtml(order.number)}</h3>
                         <span class="collapse-icon">▼</span>
                     `;
                     
@@ -743,43 +754,114 @@
                         byProduct[key].tasks.push(task);
                     });
                     
+                    // ============== ПОЛНАЯ ИНФОРМАЦИЯ О ЗАКАЗЕ ==============
                     // ПОЛУЧАЕМ ПОЛНЫЙ ЗАКАЗ ИЗ localStorage
-let fullOrder = null;
-try {
-    const allOrders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
-    fullOrder = allOrders.find(o => o.id == order.orderId);
-} catch (e) {
-    console.error('Ошибка получения заказа:', e);
-}
+                    let fullOrder = null;
+                    try {
+                        const allOrders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
+                        fullOrder = allOrders.find(o => o.id == order.orderId);
+                    } catch (e) {
+                        console.error('Ошибка получения заказа:', e);
+                    }
 
-const productQty = fullOrder?.items[0]?.quantity || 1;
-const productName = fullOrder?.items[0]?.product || '';
+                    // Данные из заказа
+                    const productQty = fullOrder?.items[0]?.quantity || 1;
+                    const productName = fullOrder?.items[0]?.product || '';
+                    const productSize = fullOrder?.items[0]?.size || '';
+                    const bracket = fullOrder?.items[0]?.bracket || { type: 'отсутствует', quantity: 0 };
+                    const lyre = fullOrder?.items[0]?.lyre || { type: 'отсутствует', quantity: 0 };
+                    const ral = fullOrder?.items[0]?.ral || '';
+                    const texture = fullOrder?.items[0]?.texture || '';
+                    const additional = fullOrder?.items[0]?.additional || '';
+                    const components = fullOrder?.components || [];
 
-// УБИРАЕМ ФИЛЬТРАЦИЮ ПО SITE
-const components = fullOrder?.components || [];
+                    // Создаём блок с полной информацией
+                    const productInfoDiv = document.createElement('div');
+                    productInfoDiv.className = 'product-info';
+                    productInfoDiv.style.marginBottom = '15px';
+                    productInfoDiv.style.padding = '12px 15px';
+                    productInfoDiv.style.background = '#15191f';
+                    productInfoDiv.style.borderRadius = '8px';
+                    productInfoDiv.style.borderLeft = '3px solid #ff3b3b';
 
-if (components.length > 0) {
-    const compDiv = document.createElement('div');
-    compDiv.className = 'product-info';
-    compDiv.innerHTML = `
-        <strong>🔧 КОМПЛЕКТУЮЩИЕ:</strong><br>
-        ${components.map(comp => `
-            <div style="margin-top: 5px;">
-                ${comp.name}: <span style="color: #4cd964; font-weight: 600;">${comp.quantityPerProduct} шт/изд</span>
-            </div>
-        `).join('')}
-    `;
-    content.appendChild(compDiv);
-} else {
-    const productInfo = document.createElement('div');
-    productInfo.className = 'product-info';
-    productInfo.innerHTML = `
-        <strong>📦 ${productName}</strong><br>
-        <span style="font-size: 12px; color: #a0a0a0;">Кол-во изделий: ${productQty} шт</span>
-    `;
-    content.appendChild(productInfo);
-}
+                    let infoHtml = `
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                            <!-- Левая колонка: изделие и размер -->
+                            <div>
+                                <div style="margin-bottom: 8px;">
+                                    <strong style="color: #ff3b3b;">📦 ИЗДЕЛИЕ:</strong>
+                                    <span style="color: #fff; margin-left: 8px;">${escapeHtml(productName)}</span>
+                                </div>
+                                <div style="margin-bottom: 8px;">
+                                    <strong>📏 РАЗМЕР:</strong>
+                                    <span style="color: #fff; margin-left: 8px;">${escapeHtml(productSize) || 'Стандартный'}</span>
+                                </div>
+                                <div>
+                                    <strong>🔢 КОЛИЧЕСТВО:</strong>
+                                    <span style="color: #4cd964; margin-left: 8px; font-weight: 600;">${productQty} шт</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Средняя колонка: кронштейн и лира -->
+                            <div>
+                                <div style="margin-bottom: 8px;">
+                                    <strong>🔧 КРОНШТЕЙН:</strong>
+                                    <span style="color: #fff; margin-left: 8px;">${escapeHtml(bracket.type)}</span>
+                                    <span style="color: #ff9800; margin-left: 5px;">(${bracket.quantity} шт)</span>
+                                </div>
+                                <div>
+                                    <strong>🎸 ЛИРА:</strong>
+                                    <span style="color: #fff; margin-left: 8px;">${escapeHtml(lyre.type)}</span>
+                                    <span style="color: #ff9800; margin-left: 5px;">(${lyre.quantity} шт)</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Правая колонка: RAL и текстура -->
+                            <div>
+                                <div style="margin-bottom: 8px;">
+                                    <strong>🎨 RAL:</strong>
+                                    <span style="color: #fff; margin-left: 8px;">${escapeHtml(ral) || '-'}</span>
+                                </div>
+                                <div>
+                                    <strong>🧵 ТЕКСТУРА:</strong>
+                                    <span style="color: #fff; margin-left: 8px;">${escapeHtml(texture) || '-'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
 
+                    // Добавляем комплектующие, если есть
+                    if (components && components.length > 0) {
+                        infoHtml += `
+                            <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #2a2f38;">
+                                <strong style="color: #ff3b3b;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>
+                                <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;">
+                                    ${components.map(comp => `
+                                        <span style="background: #1e232b; padding: 4px 12px; border-radius: 20px; font-size: 12px; border: 1px solid #2a2f38;">
+                                            ${escapeHtml(comp.name)}: <strong style="color: #4cd964;">${comp.quantityPerProduct}</strong> шт/изд
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    // Добавляем дополнительные детали, если есть
+                    if (additional) {
+                        infoHtml += `
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #2a2f38;">
+                                <strong>📝 ДОПОЛНИТЕЛЬНО:</strong>
+                                <div style="margin-top: 6px; padding: 8px 12px; background: #1e232b; border-radius: 6px; color: #a0a0a0; font-size: 12px; border-left: 2px solid #ff3b3b;">
+                                    ${escapeHtml(additional)}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    productInfoDiv.innerHTML = infoHtml;
+                    content.appendChild(productInfoDiv);
+                    
+                    // Добавляем задачи
                     Object.values(byProduct).forEach(product => {
                         product.tasks.sort((a, b) => a.index - b.index);
                         product.tasks.forEach(task => {
@@ -822,7 +904,7 @@ if (components.length > 0) {
                 header.className = 'task-header';
                 header.innerHTML = `
                     <span class="task-title">
-                        ${task.operation}
+                        ${escapeHtml(task.operation)}
                         ${task.isExtra ? '<span class="extra-task-badge">Доп.</span>' : ''}
                     </span>
                 `;
@@ -831,7 +913,7 @@ if (components.length > 0) {
                 if (task.isExtra && task.description) {
                     const desc = document.createElement('div');
                     desc.className = 'task-description';
-                    desc.textContent = task.description;
+                    desc.textContent = escapeHtml(task.description);
                     card.appendChild(desc);
                 }
                 
@@ -899,7 +981,7 @@ if (components.length > 0) {
                 const nameInput = document.createElement('input');
                 nameInput.type = 'text';
                 nameInput.className = 'executor-name';
-                nameInput.value = executor.name;
+                nameInput.value = escapeHtml(executor.name);
                 nameInput.placeholder = 'ФИО';
                 nameInput.disabled = task.status === 'completed' || isShiftEnded;
                 nameInput.onchange = function(e) {
