@@ -902,3 +902,47 @@ hr {
     background-color: #4caf50 !important;
     border-color: #2e7d32 !important;
 }
+
+/* Стили для комплектующих */
+.component-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: #15191f;
+    border-radius: 6px;
+    border: 1px solid #2a2f38;
+    margin-bottom: 8px;
+}
+
+.component-row .component-name {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.component-row .component-input {
+    width: 80px;
+    padding: 6px;
+    background: #1e232b;
+    border: 1px solid #2a2f38;
+    border-radius: 4px;
+    color: #fff;
+    text-align: center;
+}
+
+.components-title {
+    margin-top: 20px;
+    margin-bottom: 12px;
+    color: #ff3b3b;
+    font-size: 14px;
+    font-weight: 600;
+    border-left: 3px solid #ff3b3b;
+    padding-left: 10px;
+}
+
+.components-desc {
+    margin-bottom: 12px;
+    color: #a0a0a0;
+    font-size: 12px;
+    padding-left: 10px;
+}
