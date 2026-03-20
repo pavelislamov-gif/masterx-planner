@@ -330,42 +330,27 @@ updateExecutorStatus(taskId, executorId, status) {
     executor.status = status;
     console.log('Статус исполнителя обновлен:', executor);
     
-    // НЕ меняем статус задачи! Статус задачи только через completeTask
+    // Определяем общий статус задачи на основе всех исполнителей
+    let taskStatus = 'pending';
+    const anyInProgress = task.executors.some(e => e.status === 'in_progress');
+    const anyShiftEnded = task.executors.some(e => e.status === 'shift_ended');
+    const allCompleted = task.executors.every(e => e.status === 'completed');
     
-    this.saveTasksToHistory(this.formatDate(this.currentDate));
-    return true;
-}
-
-removeExecutor(taskId, executorId) {
-    console.log('removeExecutor:', taskId, executorId);
+    if (allCompleted) {
+        taskStatus = 'completed';
+    } else if (anyInProgress || anyShiftEnded) {
+        taskStatus = 'in_progress';
+    } else {
+        taskStatus = 'pending';
+    }
     
-    const task = this.tasks.find(t => t.id === taskId);
-    if (!task) return false;
+    // Обновляем статус задачи
+    task.status = taskStatus;
+    console.log('Статус задачи обновлен:', taskStatus);
     
-    task.executors = task.executors.filter(e => e.id !== executorId);
-    task.completedQuantity = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
+    // ВАЖНО: вызываем updateOrderStatus для синхронизации с планировщиком
+    this.updateOrderStatus(taskId, taskStatus);
     
-    // НЕ меняем статус задачи!
-    
-    this.saveTasksToHistory(this.formatDate(this.currentDate));
-    return true;
-}
-
-completeTask(taskId) {
-    console.log('completeTask:', taskId);
-    
-    const task = this.tasks.find(t => t.id === taskId);
-    if (!task) return false;
-    
-    // Просто меняем статус задачи на completed
-    task.status = 'completed';
-    
-    // Можно также отметить всех исполнителей как completed (опционально)
-    task.executors.forEach(e => e.status = 'completed');
-    
-    // НЕ меняем количество! Остается то, что ввели
-    
-    this.updateOrderStatus(taskId, 'completed');
     this.saveTasksToHistory(this.formatDate(this.currentDate));
     return true;
 }
