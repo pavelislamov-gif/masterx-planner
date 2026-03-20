@@ -390,20 +390,43 @@ updateOrderStatus(taskId, status) {
 
     this.notifyOtherTabs(taskId, status);
 }
+
+// ============== ЗАВЕРШЕНИЕ ЗАДАЧИ ==============
+completeTask(taskId) {
+    console.log('completeTask:', taskId);
     
-    // ============== МЕТОД ДЛЯ УВЕДОМЛЕНИЯ ДРУГИХ ВКЛАДОК ==============
-    notifyOtherTabs(taskId, status) {
-        console.log('📢 notifyOtherTabs:', taskId, status);
-        
-        // Сохраняем в localStorage для других вкладок
-        const data = {
-            taskId: taskId,
-            status: status,
-            timestamp: Date.now()
-        };
-        localStorage.setItem('taskStatusChanged', JSON.stringify(data));
-        console.log('💾 Сохранено в localStorage:', data);
+    const task = this.tasks.find(t => t.id === taskId);
+    if (!task) {
+        console.warn('Задача не найдена:', taskId);
+        return false;
     }
+    
+    // Меняем статус задачи на completed
+    task.status = 'completed';
+    
+    // Отмечаем всех исполнителей как completed
+    task.executors.forEach(e => e.status = 'completed');
+    
+    // Вызываем updateOrderStatus для синхронизации с планировщиком
+    this.updateOrderStatus(taskId, 'completed');
+    
+    this.saveTasksToHistory(this.formatDate(this.currentDate));
+    return true;
+}
+
+// ============== МЕТОД ДЛЯ УВЕДОМЛЕНИЯ ДРУГИХ ВКЛАДОК ==============
+notifyOtherTabs(taskId, status) {
+    console.log('📢 notifyOtherTabs:', taskId, status);
+    
+    // Сохраняем в localStorage для других вкладок
+    const data = {
+        taskId: taskId,
+        status: status,
+        timestamp: Date.now()
+    };
+    localStorage.setItem('taskStatusChanged', JSON.stringify(data));
+    console.log('💾 Сохранено в localStorage:', data);
+}
     
     // ============== НАВИГАЦИЯ ПО ДАТАМ ==============
     
