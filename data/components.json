@@ -49,12 +49,12 @@
     "XGRAY v.1": [
       { "name": "Заглушки Алюминиевые Левые", "material": "aluminum", "site": "slesarniy" },
       { "name": "Заглушки Алюминиевые Правые", "material": "aluminum", "site": "slesarniy" },
-      { "name": "Заглушки Сталь 1", "material": "steel", "site": "slesarniy" }
+      { "name": "Заглушки Сталь 1", "material": "stainless", "site": "slesarniy" }
     ],
     "XGRAY v.2": [
       { "name": "Заглушки Алюминиевые Левые", "material": "aluminum", "site": "slesarniy" },
       { "name": "Заглушки Алюминиевые Правые", "material": "aluminum", "site": "slesarniy" },
-      { "name": "Заглушки Сталь 1", "material": "steel", "site": "slesarniy" }
+      { "name": "Заглушки Сталь 1", "material": "stainless", "site": "slesarniy" }
     ],
     "XLUMO": [
       { "name": "Заглушки Алюминиевые", "material": "aluminum", "site": "slesarniy" },
