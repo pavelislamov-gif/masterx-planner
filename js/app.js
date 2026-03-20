@@ -886,3 +886,72 @@ window.addEventListener('taskStatusChanged', function(e) {
         }
     });
 });
+
+
+// ============== КОМПЛЕКТУЮЩИЕ ==============
+
+// Обновление списка комплектующих при выборе изделия
+function updateComponentsList() {
+    const productName = document.getElementById('productSelect').value;
+    const container = document.getElementById('componentsContainer');
+    
+    if (!container) return;
+    container.innerHTML = '';
+    
+    if (!productName) return;
+    
+    const components = window.componentsData[productName] || [];
+    if (components.length === 0) return;
+    
+    // Заголовок
+    const title = document.createElement('div');
+    title.style.cssText = 'margin-bottom: 12px; color: #ff3b3b; font-size: 14px; font-weight: 600; border-left: 3px solid #ff3b3b; padding-left: 10px;';
+    title.innerHTML = '🔧 КОМПЛЕКТУЮЩИЕ ДЕТАЛИ:';
+    container.appendChild(title);
+    
+    // Описание
+    const desc = document.createElement('div');
+    desc.style.cssText = 'margin-bottom: 12px; color: #a0a0a0; font-size: 12px; padding-left: 10px;';
+    desc.innerHTML = 'Введите количество на 1 изделие:';
+    container.appendChild(desc);
+    
+    // Список деталей
+    components.forEach(comp => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #15191f; border-radius: 6px; border: 1px solid #2a2f38; margin-bottom: 8px;';
+        row.innerHTML = `
+            <span style="font-size: 13px; font-weight: 500;">${comp.name}</span>
+            <div>
+                <input type="number" 
+                       class="component-qty"
+                       data-name="${comp.name}"
+                       data-material="${comp.material}"
+                       value="0" 
+                       min="0" 
+                       style="width: 80px; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                <span style="color: #a0a0a0; margin-left: 5px;">шт/изд</span>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+}
+
+// Сбор комплектующих из формы
+function collectComponents() {
+    const components = [];
+    document.querySelectorAll('.component-qty').forEach(input => {
+        const qty = parseInt(input.value) || 0;
+        if (qty > 0) {
+            components.push({
+                name: input.dataset.name,
+                material: input.dataset.material,
+                quantityPerProduct: qty
+            });
+        }
+    });
+    return components;
+}
+
+// Экспортируем функции в глобальную область
+window.updateComponentsList = updateComponentsList;
+window.collectComponents = collectComponents;
