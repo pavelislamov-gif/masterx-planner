@@ -306,6 +306,9 @@ function closeOrderModal() {
         modal.style.display = 'none';
         const form = document.getElementById('orderForm');
         if (form) form.reset();
+        // Очищаем контейнер комплектующих
+        const componentsContainer = document.getElementById('componentsContainer');
+        if (componentsContainer) componentsContainer.innerHTML = '';
     }
 }
 
@@ -324,6 +327,9 @@ function populateSelects() {
             option.textContent = product.name;
             productSelect.appendChild(option);
         });
+        
+        // ДОБАВЛЯЕМ СЛУШАТЕЛЬ НА ВЫБОР ИЗДЕЛИЯ
+        productSelect.addEventListener('change', updateComponentsList);
     }
 
     const bracketSelect = document.getElementById('bracketSelect');
@@ -433,18 +439,18 @@ function createSiteRow(name, order, siteKey) {
     const operations = getOperationNames(item.product, siteKey);
     
     // ЕСЛИ НЕТ ОПЕРАЦИЙ - ПОКАЗЫВАЕМ КРАСНЫЙ КВАДРАТИК
-if (operations.length === 0) {
-    return `
-        <div class="site-item">
-            <span class="site-name">${name}</span>
-            <div class="squares">
-                <div class="square red" title="Нет операций на этом участке"></div>
+    if (operations.length === 0) {
+        return `
+            <div class="site-item">
+                <span class="site-name">${name}</span>
+                <div class="squares">
+                    <div class="square red" title="Нет операций на этом участке"></div>
+                </div>
+                <span style="color: #a0a0a0; font-size: 12px; margin: 0 10px;">0/0</span>
+                <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
             </div>
-            <span style="color: #a0a0a0; font-size: 12px; margin: 0 10px;">0/0</span>
-            <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
-        </div>
-    `;
-}
+        `;
+    }
 
     // ЕСЛИ ЕСТЬ ОПЕРАЦИИ - ПОКАЗЫВАЕМ КВАДРАТИКИ
     let squares = '';
@@ -453,7 +459,7 @@ if (operations.length === 0) {
     for (let i = 0; i < operations.length; i++) {
         const taskId = `${order.id}_${siteKey}_0_${i}`;
         
-        // ПОЛУЧАЕМ СТАТУС ИЗ ЗАКАЗА - ЭТО КЛЮЧЕВОЙ МОМЕНТ!
+        // ПОЛУЧАЕМ СТАТУС ИЗ ЗАКАЗА
         let status = '';
         if (order.tasks && order.tasks[taskId]) {
             status = order.tasks[taskId];
@@ -463,7 +469,7 @@ if (operations.length === 0) {
         }
 
         const operationName = operations[i];
-        console.log(`Квадратик ${taskId}: статус "${status}"`); // Отладка
+        console.log(`Квадратик ${taskId}: статус "${status}"`);
 
         squares += `<div class="square ${status}" data-task="${taskId}" title="${operationName}"></div>`;
     }
@@ -473,7 +479,6 @@ if (operations.length === 0) {
             if (task.site === siteKey) {
                 const taskId = `${order.id}_extra_${index}`;
                 
-                // ПОЛУЧАЕМ СТАТУС ДЛЯ ДОПОЛНИТЕЛЬНОЙ ЗАДАЧИ
                 let status = '';
                 if (order.tasks && order.tasks[taskId]) {
                     status = order.tasks[taskId];
@@ -693,10 +698,12 @@ async function loadAllData() {
         brackets = await loadBrackets() || [];
         lyres = await loadLyres() || [];
         orders = loadOrdersFromStorage() || [];
+        await loadComponents();
 
         console.log('✅ Продукты загружены:', products.length);
         console.log('✅ Кронштейны загружены:', brackets.length);
         console.log('✅ Лиры загружены:', lyres.length);
+        console.log('✅ Комплектующие загружены:', Object.keys(window.componentsData).length);
         console.log('✅ Заказы загружены:', orders.length);
 
         syncTasksFromHistory();
@@ -797,6 +804,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
+            // СБОР КОМПЛЕКТУЮЩИХ
+            const components = collectComponents();
+
             const order = {
                 id: Date.now(),
                 date: document.getElementById('orderDate').value,
@@ -817,6 +827,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     texture: document.getElementById('textureSelect').value || '',
                     additional: document.getElementById('additionalDetails').value || ''
                 }],
+                components: components,
                 status: 'active',
                 tasks: {},
                 extraTasks: []
@@ -886,3 +897,74 @@ window.addEventListener('taskStatusChanged', function(e) {
         }
     });
 });
+
+
+// ============== КОМПЛЕКТУЮЩИЕ ==============
+
+// Обновление списка комплектующих при выборе изделия
+function updateComponentsList() {
+    const productName = document.getElementById('productSelect').value;
+    const container = document.getElementById('componentsContainer');
+    
+    if (!container) return;
+    container.innerHTML = '';
+    
+    if (!productName) return;
+    
+    const components = window.componentsData[productName] || [];
+    if (components.length === 0) return;
+    
+    // Заголовок
+    const title = document.createElement('div');
+    title.style.cssText = 'margin-bottom: 12px; color: #ff3b3b; font-size: 14px; font-weight: 600; border-left: 3px solid #ff3b3b; padding-left: 10px;';
+    title.innerHTML = '🔧 КОМПЛЕКТУЮЩИЕ ДЕТАЛИ:';
+    container.appendChild(title);
+    
+    // Описание
+    const desc = document.createElement('div');
+    desc.style.cssText = 'margin-bottom: 12px; color: #a0a0a0; font-size: 12px; padding-left: 10px;';
+    desc.innerHTML = 'Введите количество на 1 изделие:';
+    container.appendChild(desc);
+    
+    // Список деталей
+    components.forEach(comp => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #15191f; border-radius: 6px; border: 1px solid #2a2f38; margin-bottom: 8px;';
+        row.innerHTML = `
+            <span style="font-size: 13px; font-weight: 500;">${comp.name}</span>
+            <div>
+                <input type="number" 
+                       class="component-qty"
+                       data-name="${comp.name}"
+                       data-material="${comp.material}"
+                       value="0" 
+                       min="0" 
+                       style="width: 80px; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                <span style="color: #a0a0a0; margin-left: 5px;">шт/изд</span>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+}
+
+// Сбор комплектующих из формы
+function collectComponents() {
+    const components = [];
+    document.querySelectorAll('.component-qty').forEach(input => {
+        const qty = parseInt(input.value) || 0;
+        if (qty > 0) {
+            components.push({
+                name: input.dataset.name,
+                material: input.dataset.material,
+                quantityPerProduct: qty
+            });
+        }
+    });
+    return components;
+}
+
+// Экспортируем функции в глобальную область
+window.updateComponentsList = updateComponentsList;
+window.collectComponents = collectComponents;
+
+console.log('✅ Функции комплектующих загружены');
