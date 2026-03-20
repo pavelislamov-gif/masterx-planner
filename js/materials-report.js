@@ -1,4 +1,4 @@
-// js/materials-report.js - ОТЧЕТ ПО МАТЕРИАЛАМ (с поддержкой размеров и комплектующих)
+// js/materials-report.js - ОТЧЕТ ПО МАТЕРИАЛАМ (с группировкой одинаковых материалов, без лишних итогов)
 
 class MaterialsReport {
     constructor() {
@@ -64,7 +64,9 @@ class MaterialsReport {
             };
         }
         
-        const sheetMaterials = [];
+        // Используем объект для группировки по материалу + толщине
+        const groupedSheets = {};
+        
         const profiles = [];
         const rods = [];
         const productSpecs = [];
@@ -78,21 +80,19 @@ class MaterialsReport {
             
             console.log(`📦 Обработка изделия: ${productName}, размер: ${productSize}, кол-во: ${productQty}`);
             
-            // ============== 1. ЛИСТОВЫЕ МАТЕРИАЛЫ ==============
+            // ============== 1. ЛИСТОВЫЕ МАТЕРИАЛЫ ДЛЯ ИЗДЕЛИЯ ==============
             const allSheets = [
                 ...this.materialsDB.aluminum.map(m => ({ ...m, materialType: 'Алюминий' })),
-                ...this.materialsDB.steel.map(m => ({ ...m, materialType: 'Сталь' })),
+                ...this.materialsDB.steel.map(m => ({ ...m, materialType: 'Сталь (AISI 430)' })),
                 ...this.materialsDB.stainless.map(m => ({ ...m, materialType: 'Нержавейка' })),
                 ...this.materialsDB.pvc.map(m => ({ ...m, materialType: 'ПВХ' })),
                 ...this.materialsDB.polycarbonate.map(m => ({ ...m, materialType: 'Поликарбонат' })),
                 ...this.materialsDB.other.map(m => ({ ...m, materialType: m.material || 'Прочее' }))
             ];
             
-            // Ищем материалы для этого продукта (не зависят от размера)
+            // Ищем материалы для этого продукта
             const sheetMatches = allSheets.filter(m => m.product === productName);
             
-            // Группируем по материалу и толщине
-            const groupedSheets = {};
             sheetMatches.forEach(m => {
                 const key = `${m.materialType}_${m.thickness}`;
                 if (!groupedSheets[key]) {
@@ -110,43 +110,55 @@ class MaterialsReport {
                 groupedSheets[key].products.push(productName);
             });
             
-            Object.values(groupedSheets).forEach(item => {
-                sheetMaterials.push(item);
-            });
-            
-            // ============== 2. КРОНШТЕЙНЫ ==============
+            // ============== 2. КРОНШТЕЙНЫ (группируем по материалу) ==============
             if (item.bracket && item.bracket.type && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
                 const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
                 if (bracket) {
-                    const area = bracket.area || 0;
                     const totalQty = item.bracket.quantity * productQty;
+                    const area = bracket.area || 0;
+                    const materialType = 'Сталь (AISI 430)';
+                    const thickness = bracket.thickness || '2мм';
+                    const key = `${materialType}_${thickness}`;
                     
-                    sheetMaterials.push({
-                        name: `Кронштейн ${item.bracket.type}`,
-                        thickness: bracket.thickness || '2мм',
-                        areaPerUnit: area,
-                        quantity: totalQty,
-                        totalArea: area * totalQty,
-                        products: [productName]
-                    });
+                    if (!groupedSheets[key]) {
+                        groupedSheets[key] = {
+                            name: materialType,
+                            thickness: thickness,
+                            areaPerUnit: area,
+                            quantity: 0,
+                            totalArea: 0,
+                            products: []
+                        };
+                    }
+                    groupedSheets[key].quantity += totalQty;
+                    groupedSheets[key].totalArea += area * totalQty;
+                    groupedSheets[key].products.push(`Кронштейн ${item.bracket.type}`);
                 }
             }
             
-            // ============== 3. ЛИРЫ ==============
+            // ============== 3. ЛИРЫ (группируем по материалу) ==============
             if (item.lyre && item.lyre.type && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
                 const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
                 if (lyre) {
-                    const area = lyre.area || 0;
                     const totalQty = item.lyre.quantity * productQty;
+                    const area = lyre.area || 0;
+                    const materialType = 'Сталь (AISI 430)';
+                    const thickness = lyre.thickness || '2мм';
+                    const key = `${materialType}_${thickness}`;
                     
-                    sheetMaterials.push({
-                        name: `Лира ${item.lyre.type}`,
-                        thickness: lyre.thickness || '1.5мм',
-                        areaPerUnit: area,
-                        quantity: totalQty,
-                        totalArea: area * totalQty,
-                        products: [productName]
-                    });
+                    if (!groupedSheets[key]) {
+                        groupedSheets[key] = {
+                            name: materialType,
+                            thickness: thickness,
+                            areaPerUnit: area,
+                            quantity: 0,
+                            totalArea: 0,
+                            products: []
+                        };
+                    }
+                    groupedSheets[key].quantity += totalQty;
+                    groupedSheets[key].totalArea += area * totalQty;
+                    groupedSheets[key].products.push(`Лира ${item.lyre.type}`);
                 }
             }
             
@@ -168,38 +180,31 @@ class MaterialsReport {
                 }
             });
             
-            // ============== 5. СПЕЦИФИКАЦИИ ПРОДУКТА (ПРОФИЛИ) - ЗАВИСЯТ ОТ РАЗМЕРА ==============
+            // ============== 5. ПРОФИЛИ ==============
             const productSpec = this.materialsDB.productSpecs[productName];
             
             if (productSpec) {
-                console.log(`📋 Найдены спецификации для ${productName}`);
-                
                 let sizeSpec = null;
                 let matchedSize = null;
                 
                 if (productSpec[productSize]) {
                     sizeSpec = productSpec[productSize];
                     matchedSize = productSize;
-                    console.log(`✅ Точное совпадение размера: ${productSize}`);
                 } else {
                     const normalizedSize = productSize.replace(/\s+/g, ' ').trim();
-                    
                     for (let size in productSpec) {
                         const normalizedKey = size.replace(/\s+/g, ' ').trim();
                         if (normalizedKey === normalizedSize) {
                             sizeSpec = productSpec[size];
                             matchedSize = size;
-                            console.log(`✅ Найдено совпадение после нормализации: ${size}`);
                             break;
                         }
                     }
-                    
                     if (!sizeSpec) {
                         for (let size in productSpec) {
                             if (productSize.includes(size) || size.includes(productSize)) {
                                 sizeSpec = productSpec[size];
                                 matchedSize = size;
-                                console.log(`✅ Частичное совпадение: ${size}`);
                                 break;
                             }
                         }
@@ -207,8 +212,6 @@ class MaterialsReport {
                 }
                 
                 if (sizeSpec) {
-                    console.log(`📊 Спецификация для размера ${matchedSize}:`, sizeSpec);
-                    
                     Object.entries(sizeSpec).forEach(([profileName, profileData]) => {
                         const value = profileData.value || profileData;
                         const unit = profileData.unit || 'мм';
@@ -234,15 +237,14 @@ class MaterialsReport {
                         matchedSize: matchedSize,
                         specs: sizeSpec
                     });
-                } else {
-                    console.warn(`⚠️ Размер ${productSize} не найден в спецификациях для ${productName}`);
                 }
-            } else {
-                console.warn(`⚠️ Нет спецификаций для продукта ${productName}`);
             }
         });
         
-        const finalSheetMaterials = this.groupSheetMaterials(sheetMaterials);
+        // Преобразуем groupedSheets в массив и сортируем
+        const finalSheetMaterials = Object.values(groupedSheets).sort((a, b) => {
+            return a.name.localeCompare(b.name);
+        });
         
         return { 
             sheetMaterials: finalSheetMaterials, 
@@ -264,7 +266,7 @@ class MaterialsReport {
         
         const allSheets = [
             ...this.materialsDB.aluminum.map(m => ({ ...m, materialType: 'Алюминий' })),
-            ...this.materialsDB.steel.map(m => ({ ...m, materialType: 'Сталь' })),
+            ...this.materialsDB.steel.map(m => ({ ...m, materialType: 'Сталь (AISI 430)' })),
             ...this.materialsDB.stainless.map(m => ({ ...m, materialType: 'Нержавейка' })),
             ...this.materialsDB.pvc.map(m => ({ ...m, materialType: 'ПВХ' })),
             ...this.materialsDB.polycarbonate.map(m => ({ ...m, materialType: 'Поликарбонат' })),
@@ -292,24 +294,6 @@ class MaterialsReport {
         });
         
         return componentsList;
-    }
-    
-    // Группировка листовых материалов
-    groupSheetMaterials(materials) {
-        const grouped = {};
-        
-        materials.forEach(item => {
-            const key = `${item.name}_${item.thickness}`;
-            if (grouped[key]) {
-                grouped[key].quantity += item.quantity;
-                grouped[key].totalArea += item.totalArea;
-                grouped[key].products = [...new Set([...grouped[key].products, ...item.products])];
-            } else {
-                grouped[key] = { ...item };
-            }
-        });
-        
-        return Object.values(grouped);
     }
     
     // Формирование HTML отчета
@@ -375,13 +359,13 @@ class MaterialsReport {
                                 <td>${item.lyre.type} (${item.lyre.quantity} шт)</td>
                                 <td>${item.ral || '-'}</td>
                                 <td>${item.texture || '-'}</td>
-                            </tr>
+                             </tr>
                         `).join('')}
                     </tbody>
                  </table>
             `;
             
-            // Листовые материалы
+            // ============== ЛИСТОВЫЕ МАТЕРИАЛЫ (СГРУППИРОВАННЫЕ, БЕЗ ИТОГОВ) ==============
             if (sheetMaterials.length > 0) {
                 html += `
                     <h4 style="margin-top: 30px;">📋 Листовые материалы (расход в м²)</h4>
@@ -393,16 +377,17 @@ class MaterialsReport {
                                 <th>Расход на 1 шт (м²)</th>
                                 <th>Кол-во</th>
                                 <th>Общий расход (м²)</th>
-                            </tr>
-                        </thead>
+                                <th>Применение</th>
+                             </thead>
                         <tbody>
                             ${sheetMaterials.map(item => `
                                 <tr>
-                                    <td>${item.name}</td>
+                                    <td><strong>${item.name}</strong></td>
                                     <td>${item.thickness}</td>
                                     <td style="text-align: right;">${fmt(item.areaPerUnit)}</td>
                                     <td style="text-align: right;">${item.quantity}</td>
-                                    <td style="text-align: right;">${fmt(item.totalArea)}</td>
+                                    <td style="text-align: right; color: #4cd964; font-weight: 600;">${fmt(item.totalArea)}</td>
+                                    <td style="font-size: 11px; color: #a0a0a0;">${item.products.join(', ')}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -410,7 +395,7 @@ class MaterialsReport {
                 `;
             }
             
-            // КОМПЛЕКТУЮЩИЕ ДЕТАЛИ
+            // ============== КОМПЛЕКТУЮЩИЕ ДЕТАЛИ ==============
             if (components.length > 0) {
                 html += `
                     <h4 style="margin-top: 30px;">🔧 КОМПЛЕКТУЮЩИЕ ДЕТАЛИ</h4>
@@ -424,8 +409,7 @@ class MaterialsReport {
                                 <th>Кол-во на 1 изд</th>
                                 <th>Кол-во изделий</th>
                                 <th>Общий расход (м²)</th>
-                            </tr>
-                        </thead>
+                             </thead>
                         <tbody>
                             ${components.map(comp => `
                                 <tr>
@@ -443,10 +427,10 @@ class MaterialsReport {
                 `;
             }
             
-            // Профили
+            // ============== ПРОФИЛИ (без итогов) ==============
             if (profiles.length > 0) {
                 html += `
-                    <h4 style="margin-top: 30px;">📏 Профили (расход в мм)</h4>
+                    <h4 style="margin-top: 30px;">📏 ПРОФИЛИ (расход в мм и метрах)</h4>
                     <table class="materials-table">
                         <thead>
                             <tr>
@@ -455,16 +439,15 @@ class MaterialsReport {
                                 <th>Кол-во</th>
                                 <th>Общий расход (мм)</th>
                                 <th>Общий расход (м)</th>
-                            </tr>
-                        </thead>
+                             </thead>
                         <tbody>
                             ${profiles.map(profile => `
                                 <tr>
-                                    <td>${profile.name}</td>
-                                    <td style="text-align: right;">${profile.lengthPerUnit}</td>
+                                    <td><strong>${profile.name}</strong></td>
+                                    <td style="text-align: right;">${profile.lengthPerUnit.toFixed(0)}</td>
                                     <td style="text-align: right;">${profile.quantity}</td>
                                     <td style="text-align: right;">${fmt(profile.totalLength, 0)}</td>
-                                    <td style="text-align: right;">${(profile.totalLength / 1000).toFixed(3)}</td>
+                                    <td style="text-align: right; color: #4cd964;">${(profile.totalLength / 1000).toFixed(2)} м</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -472,10 +455,10 @@ class MaterialsReport {
                 `;
             }
             
-            // Прутки
+            // ============== ПРУТКИ (без итогов) ==============
             if (rods.length > 0) {
                 html += `
-                    <h4 style="margin-top: 30px;">🥢 Прутки (расход в мм)</h4>
+                    <h4 style="margin-top: 30px;">🥢 ПРУТКИ (расход в мм и метрах)</h4>
                     <table class="materials-table">
                         <thead>
                             <tr>
@@ -484,8 +467,7 @@ class MaterialsReport {
                                 <th>Кол-во</th>
                                 <th>Общий расход (мм)</th>
                                 <th>Общий расход (м)</th>
-                            </tr>
-                        </thead>
+                             </thead>
                         <tbody>
                             ${rods.map(rod => `
                                 <tr>
@@ -493,7 +475,7 @@ class MaterialsReport {
                                     <td style="text-align: right;">${rod.valuePerUnit}</td>
                                     <td style="text-align: right;">${rod.quantity}</td>
                                     <td style="text-align: right;">${fmt(rod.totalValue, 0)}</td>
-                                    <td style="text-align: right;">${(rod.totalValue / 1000).toFixed(3)}</td>
+                                    <td style="text-align: right; color: #4cd964;">${(rod.totalValue / 1000).toFixed(2)} м</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -501,7 +483,7 @@ class MaterialsReport {
                 `;
             }
             
-            // Информация о подобранных размерах (отладка)
+            // Информация о подобранных размерах
             if (productSpecs.length > 0 && productSpecs.some(ps => ps.matchedSize)) {
                 html += `
                     <div style="margin-top: 20px; padding: 10px; background: #1e232b; border-radius: 5px; font-size: 12px; color: #a0a0a0;">
