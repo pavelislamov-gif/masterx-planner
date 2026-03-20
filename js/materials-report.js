@@ -439,198 +439,203 @@ class MaterialsReport {
     }
     
     async generateReportHTML(order) {
-        const { sheetMaterials, profiles, rods, productSpecs } = this.calculateMaterials(order);
-        const components = this.calculateComponents(order);
-        
-        const fmt = (val, dec = 4) => {
-            if (val === undefined || val === null) return '0';
-            return Number(val).toFixed(dec);
-        };
-        
-        let html = `
-            <div class="materials-report">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3>📊 Отчет по материалам для заказа №${order.number}</h3>
-                    <div style="display: flex; gap: 10px;">
-                        <button onclick="window.print()" class="btn btn-primary" style="padding: 8px 15px;">
-                            🖨️ Печать
-                        </button>
-                        <button onclick="closeMaterialsModal()" class="btn btn-secondary" style="padding: 8px 15px;">
-                            ✖ Закрыть
-                        </button>
-                    </div>
+    const { sheetMaterials, profiles, rods, productSpecs } = this.calculateMaterials(order);
+    const components = this.calculateComponents(order);
+    
+    const fmt = (val, dec = 4) => {
+        if (val === undefined || val === null) return '0';
+        return Number(val).toFixed(dec);
+    };
+    
+    let html = `
+        <div class="materials-report">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>📊 Отчет по материалам для заказа №${order.number}</h3>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="window.print()" class="btn btn-primary" style="padding: 8px 15px;">
+                        🖨️ Печать
+                    </button>
+                    <button onclick="closeMaterialsModal()" class="btn btn-secondary" style="padding: 8px 15px;">
+                        ✖ Закрыть
+                    </button>
                 </div>
-                
-                <p style="color: #a0a0a0; margin-bottom: 20px;">
-                    Дата: ${order.date ? new Date(order.date).toLocaleDateString('ru-RU') : 'Не указана'}
-                </p>
+            </div>
+            
+            <p style="color: #a0a0a0; margin-bottom: 20px;">
+                Дата: ${order.date ? new Date(order.date).toLocaleDateString('ru-RU') : 'Не указана'}
+            </p>
+    `;
+    
+    if (sheetMaterials.length === 0 && profiles.length === 0 && rods.length === 0 && components.length === 0) {
+        html += `
+            <p style="color: #a0a0a0; text-align: center; padding: 20px;">
+                Нет данных о материалах для данного заказа
+            </p>
+        `;
+    } else {
+        html += `
+            <h4>📦 Состав заказа:</h4>
+            <table class="items-table" style="margin-bottom: 20px;">
+                <thead>
+                    <tr>
+                        <th>Изделие</th>
+                        <th>Размер</th>
+                        <th>Кол-во</th>
+                        <th>Кронштейн</th>
+                        <th>Лира</th>
+                        <th>RAL</th>
+                        <th>Текстура</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${order.items.map(item => `
+                        <tr>
+                            <td>${item.product}</td>
+                            <td>${item.size}</td>
+                            <td>${item.quantity}</td>
+                            <td>${item.bracket.type} (${item.bracket.quantity} шт)</td>
+                            <td>${item.lyre.type} (${item.lyre.quantity} шт)</td>
+                            <td>${item.ral || '-'}</td>
+                            <td>${item.texture || '-'}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
         `;
         
-        if (sheetMaterials.length === 0 && profiles.length === 0 && rods.length === 0 && components.length === 0) {
+        // Листовые материалы
+        if (sheetMaterials.length > 0) {
             html += `
-                <p style="color: #a0a0a0; text-align: center; padding: 20px;">
-                    Нет данных о материалах для данного заказа
-                </p>
-            `;
-        } else {
-            html += `
-                <h4>📦 Состав заказа:</h4>
-                <table class="items-table" style="margin-bottom: 20px;">
+                <h4 style="margin-top: 30px;">📋 Листовые материалы (расход в м²)</h4>
+                <table class="materials-table">
                     <thead>
                         <tr>
-                            <th>Изделие</th>
-                            <th>Размер</th>
+                            <th>Материал</th>
+                            <th>Толщина</th>
+                            <th>Расход на 1 шт (м²)</th>
                             <th>Кол-во</th>
-                            <th>Кронштейн</th>
-                            <th>Лира</th>
-                            <th>RAL</th>
-                            <th>Текстура</th>
-                         </thead>
+                            <th>Общий расход (м²)</th>
+                            <th>Применение</th>
+                        </tr>
+                    </thead>
                     <tbody>
-                        ${order.items.map(item => `
+                        ${sheetMaterials.map(item => `
                             <tr>
-                                <td>${item.product}${item.product}
-                                <td>${item.size}${item.size}
-                                <td>${item.quantity}${item.quantity}
-                                <td>${item.bracket.type} (${item.bracket.quantity} шт)${item.bracket.type}
-                                <td>${item.lyre.type} (${item.lyre.quantity} шт)${item.lyre.type}
-                                <td>${item.ral || '-'}${item.ral}
-                                <td>${item.texture || '-'}${item.texture}
-                               </tr>
+                                <td><strong>${item.name}</strong></td>
+                                <td>${item.thickness}</td>
+                                <td style="text-align: right;">${fmt(item.areaPerUnit)}</td>
+                                <td style="text-align: right;">${item.quantity}</td>
+                                <td style="text-align: right; color: #4cd964; font-weight: 600;">${fmt(item.totalArea)}</td>
+                                <td style="font-size: 11px; color: #a0a0a0;">${item.products.join(', ')}</td>
+                            </tr>
                         `).join('')}
                     </tbody>
-                 </table>
+                </table>
             `;
-            
-            if (sheetMaterials.length > 0) {
-                html += `
-                    <h4 style="margin-top: 30px;">📋 Листовые материалы (расход в м²)</h4>
-                    <table class="materials-table">
-                        <thead>
-                             <tr>
-                                <th>Материал</th>
-                                <th>Толщина</th>
-                                <th>Расход на 1 шт (м²)</th>
-                                <th>Кол-во</th>
-                                <th>Общий расход (м²)</th>
-                                <th>Применение</th>
-                             </tr>
-                        </thead>
-                        <tbody>
-                            ${sheetMaterials.map(item => `
-                                 <tr>
-                                     <td><strong>${item.name}</strong></td>
-                                     <td>${item.thickness}</td>
-                                    <td style="text-align: right;">${fmt(item.areaPerUnit)}</td>
-                                    <td style="text-align: right;">${item.quantity}</td>
-                                    <td style="text-align: right; color: #4cd964; font-weight: 600;">${fmt(item.totalArea)}</td>
-                                    <td style="font-size: 11px; color: #a0a0a0;">${item.products.join(', ')}</td>
-                                 </tr>
-                            `).join('')}
-                        </tbody>
-                     </table>
-                `;
-            }
-            
-            if (components.length > 0) {
-                html += `
-                    <h4 style="margin-top: 30px;">🔧 КОМПЛЕКТУЮЩИЕ ДЕТАЛИ</h4>
-                    <table class="materials-table">
-                        <thead>
-                             <tr>
-                                <th>Деталь</th>
-                                <th>Материал</th>
-                                <th>Толщина</th>
-                                <th>Норма (м²/шт)</th>
-                                <th>Кол-во на 1 изд</th>
-                                <th>Кол-во изделий</th>
-                                <th>Общий расход (м²)</th>
-                             </tr>
-                        </thead>
-                        <tbody>
-                            ${components.map(comp => `
-                                 <tr>
-                                     <td>${comp.name}</td>
-                                     <td>${comp.materialType}</td>
-                                     <td>${comp.thickness}</td>
-                                    <td style="text-align: right;">${comp.areaPerUnit.toFixed(4)}</td>
-                                    <td style="text-align: right;">${comp.quantityPerProduct}</td>
-                                    <td style="text-align: right;">${comp.productQty}</td>
-                                    <td style="text-align: right;">${comp.totalArea.toFixed(4)}</td>
-                                 </tr>
-                            `).join('')}
-                        </tbody>
-                     </table>
-                `;
-            }
-            
-            if (profiles.length > 0) {
-                html += `
-                    <h4 style="margin-top: 30px;">📏 ПРОФИЛИ (расход в мм и метрах)</h4>
-                    <table class="materials-table">
-                        <thead>
-                             <tr>
-                                <th>Профиль</th>
-                                <th>Расход на 1 шт (мм)</th>
-                                <th>Кол-во</th>
-                                <th>Общий расход (мм)</th>
-                                <th>Общий расход (м)</th>
-                             </tr>
-                        </thead>
-                        <tbody>
-                            ${profiles.map(profile => `
-                                 <tr>
-                                     <td><strong>${profile.name}</strong></td>
-                                    <td style="text-align: right;">${profile.lengthPerUnit.toFixed(0)}</td>
-                                    <td style="text-align: right;">${profile.quantity}</td>
-                                    <td style="text-align: right;">${fmt(profile.totalLength, 0)}</td>
-                                    <td style="text-align: right; color: #4cd964;">${(profile.totalLength / 1000).toFixed(2)} м</td>
-                                 </tr>
-                            `).join('')}
-                        </tbody>
-                     </table>
-                `;
-            }
-            
-            if (rods.length > 0) {
-                html += `
-                    <h4 style="margin-top: 30px;">🥢 ПРУТКИ (расход в мм и метрах)</h4>
-                    <table class="materials-table">
-                        <thead>
-                             <tr>
-                                <th>Тип прутка</th>
-                                <th>Расход на 1 шт (мм)</th>
-                                <th>Кол-во</th>
-                                <th>Общий расход (мм)</th>
-                                <th>Общий расход (м)</th>
-                             </tr>
-                        </thead>
-                        <tbody>
-                            ${rods.map(rod => `
-                                 <tr>
-                                     <td>${rod.rodType}</td>
-                                    <td style="text-align: right;">${rod.valuePerUnit}</td>
-                                    <td style="text-align: right;">${rod.quantity}</td>
-                                    <td style="text-align: right;">${fmt(rod.totalValue, 0)}</td>
-                                    <td style="text-align: right; color: #4cd964;">${(rod.totalValue / 1000).toFixed(2)} м</td>
-                                 </tr>
-                            `).join('')}
-                        </tbody>
-                     </table>
-                `;
-            }
-            
-            if (productSpecs.length > 0 && productSpecs.some(ps => ps.matchedSize)) {
-                html += `
-                    <div style="margin-top: 20px; padding: 10px; background: #1e232b; border-radius: 5px; font-size: 12px; color: #a0a0a0;">
-                        <p><small>✓ Подобраны профили для размеров: ${productSpecs.map(ps => `${ps.product} (${ps.size})`).join(', ')}</small></p>
-                    </div>
-                `;
-            }
         }
         
-        html += `</div>`;
-        return html;
+        // Комплектующие
+        if (components.length > 0) {
+            html += `
+                <h4 style="margin-top: 30px;">🔧 КОМПЛЕКТУЮЩИЕ ДЕТАЛИ</h4>
+                <table class="materials-table">
+                    <thead>
+                        <tr>
+                            <th>Деталь</th>
+                            <th>Материал</th>
+                            <th>Толщина</th>
+                            <th>Норма (м²/шт)</th>
+                            <th>Кол-во на 1 изд</th>
+                            <th>Кол-во изделий</th>
+                            <th>Общий расход (м²)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${components.map(comp => `
+                            <tr>
+                                <td>${comp.name}</td>
+                                <td>${comp.materialType}</td>
+                                <td>${comp.thickness}</td>
+                                <td style="text-align: right;">${comp.areaPerUnit.toFixed(4)}</td>
+                                <td style="text-align: right;">${comp.quantityPerProduct}</td>
+                                <td style="text-align: right;">${comp.productQty}</td>
+                                <td style="text-align: right;">${comp.totalArea.toFixed(4)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        // Профили
+        if (profiles.length > 0) {
+            html += `
+                <h4 style="margin-top: 30px;">📏 ПРОФИЛИ (расход в мм и метрах)</h4>
+                <table class="materials-table">
+                    <thead>
+                        <tr>
+                            <th>Профиль</th>
+                            <th>Расход на 1 шт (мм)</th>
+                            <th>Кол-во</th>
+                            <th>Общий расход (мм)</th>
+                            <th>Общий расход (м)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${profiles.map(profile => `
+                            <tr>
+                                <td><strong>${profile.name}</strong></td>
+                                <td style="text-align: right;">${profile.lengthPerUnit.toFixed(0)}</td>
+                                <td style="text-align: right;">${profile.quantity}</td>
+                                <td style="text-align: right;">${fmt(profile.totalLength, 0)}</td>
+                                <td style="text-align: right; color: #4cd964;">${(profile.totalLength / 1000).toFixed(2)} м</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        // Прутки
+        if (rods.length > 0) {
+            html += `
+                <h4 style="margin-top: 30px;">🥢 ПРУТКИ (расход в мм и метрах)</h4>
+                <table class="materials-table">
+                    <thead>
+                        <tr>
+                            <th>Тип прутка</th>
+                            <th>Расход на 1 шт (мм)</th>
+                            <th>Кол-во</th>
+                            <th>Общий расход (мм)</th>
+                            <th>Общий расход (м)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rods.map(rod => `
+                            <tr>
+                                <td>${rod.rodType}</td>
+                                <td style="text-align: right;">${rod.valuePerUnit}</td>
+                                <td style="text-align: right;">${rod.quantity}</td>
+                                <td style="text-align: right;">${fmt(rod.totalValue, 0)}</td>
+                                <td style="text-align: right; color: #4cd964;">${(rod.totalValue / 1000).toFixed(2)} м</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        if (productSpecs.length > 0 && productSpecs.some(ps => ps.matchedSize)) {
+            html += `
+                <div style="margin-top: 20px; padding: 10px; background: #1e232b; border-radius: 5px; font-size: 12px; color: #a0a0a0;">
+                    <p><small>✓ Подобраны профили для размеров: ${productSpecs.map(ps => `${ps.product} (${ps.size})`).join(', ')}</small></p>
+                </div>
+            `;
+        }
+    }
+    
+    html += `</div>`;
+    return html;
     }
 }
 
