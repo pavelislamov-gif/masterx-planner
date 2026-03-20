@@ -1,4 +1,4 @@
-// js/materials-report.js - ОТЧЕТ ПО МАТЕРИАЛАМ (с группировкой одинаковых материалов)
+// js/materials-report.js - ОТЧЕТ ПО МАТЕРИАЛАМ (с разделением стали и нержавейки)
 
 class MaterialsReport {
     constructor() {
@@ -75,41 +75,134 @@ class MaterialsReport {
             const productName = item.product || '';
             const productSize = item.size || 'Стандартный';
             
-            const allSheets = [
-                ...this.materialsDB.aluminum.map(m => ({ ...m, materialType: 'Алюминий' })),
-                ...this.materialsDB.steel.map(m => ({ ...m, materialType: 'Сталь (AISI 430)' })),
-                ...this.materialsDB.stainless.map(m => ({ ...m, materialType: 'Сталь (AISI 430)' })),
-                ...this.materialsDB.pvc.map(m => ({ ...m, materialType: 'ПВХ' })),
-                ...this.materialsDB.polycarbonate.map(m => ({ ...m, materialType: 'Поликарбонат' })),
-                ...this.materialsDB.other.map(m => ({ ...m, materialType: m.material || 'Прочее' }))
-            ];
-            
-            const sheetMatches = allSheets.filter(m => m.product === productName);
-            
-            sheetMatches.forEach(m => {
-                const key = `${m.materialType}_${m.thickness}`;
-                if (!groupedSheets[key]) {
-                    groupedSheets[key] = {
-                        name: m.materialType,
-                        thickness: m.thickness || '—',
-                        areaPerUnit: m.area || 0,
-                        quantity: 0,
-                        totalArea: 0,
-                        products: []
-                    };
+            // ============== ЛИСТОВЫЕ МАТЕРИАЛЫ ==============
+            // Алюминий
+            this.materialsDB.aluminum.forEach(m => {
+                if (m.product === productName) {
+                    const key = `Алюминий_${m.thickness}`;
+                    if (!groupedSheets[key]) {
+                        groupedSheets[key] = {
+                            name: 'Алюминий',
+                            thickness: m.thickness || '—',
+                            areaPerUnit: m.area || 0,
+                            quantity: 0,
+                            totalArea: 0,
+                            products: []
+                        };
+                    }
+                    groupedSheets[key].quantity += productQty;
+                    groupedSheets[key].totalArea += (m.area || 0) * productQty;
+                    groupedSheets[key].products.push(productName);
                 }
-                groupedSheets[key].quantity += productQty;
-                groupedSheets[key].totalArea += (m.area || 0) * productQty;
-                groupedSheets[key].products.push(productName);
             });
             
-            // ============== КРОНШТЕЙНЫ (Сталь AISI 430) ==============
+            // Обычная сталь (steel)
+            this.materialsDB.steel.forEach(m => {
+                if (m.product === productName) {
+                    const key = `Сталь_${m.thickness}`;
+                    if (!groupedSheets[key]) {
+                        groupedSheets[key] = {
+                            name: 'Сталь',
+                            thickness: m.thickness || '—',
+                            areaPerUnit: m.area || 0,
+                            quantity: 0,
+                            totalArea: 0,
+                            products: []
+                        };
+                    }
+                    groupedSheets[key].quantity += productQty;
+                    groupedSheets[key].totalArea += (m.area || 0) * productQty;
+                    groupedSheets[key].products.push(productName);
+                }
+            });
+            
+            // Нержавеющая сталь AISI 430 (stainless)
+            this.materialsDB.stainless.forEach(m => {
+                if (m.product === productName) {
+                    const key = `Нержавеющая сталь AISI 430_${m.thickness}`;
+                    if (!groupedSheets[key]) {
+                        groupedSheets[key] = {
+                            name: 'Нержавеющая сталь AISI 430',
+                            thickness: m.thickness || '—',
+                            areaPerUnit: m.area || 0,
+                            quantity: 0,
+                            totalArea: 0,
+                            products: []
+                        };
+                    }
+                    groupedSheets[key].quantity += productQty;
+                    groupedSheets[key].totalArea += (m.area || 0) * productQty;
+                    groupedSheets[key].products.push(productName);
+                }
+            });
+            
+            // ПВХ
+            this.materialsDB.pvc.forEach(m => {
+                if (m.product === productName) {
+                    const key = `ПВХ_${m.thickness}`;
+                    if (!groupedSheets[key]) {
+                        groupedSheets[key] = {
+                            name: 'ПВХ',
+                            thickness: m.thickness || '—',
+                            areaPerUnit: m.area || 0,
+                            quantity: 0,
+                            totalArea: 0,
+                            products: []
+                        };
+                    }
+                    groupedSheets[key].quantity += productQty;
+                    groupedSheets[key].totalArea += (m.area || 0) * productQty;
+                    groupedSheets[key].products.push(productName);
+                }
+            });
+            
+            // Поликарбонат
+            this.materialsDB.polycarbonate.forEach(m => {
+                if (m.product === productName) {
+                    const key = `Поликарбонат_${m.thickness}`;
+                    if (!groupedSheets[key]) {
+                        groupedSheets[key] = {
+                            name: 'Поликарбонат',
+                            thickness: m.thickness || '—',
+                            areaPerUnit: m.area || 0,
+                            quantity: 0,
+                            totalArea: 0,
+                            products: []
+                        };
+                    }
+                    groupedSheets[key].quantity += productQty;
+                    groupedSheets[key].totalArea += (m.area || 0) * productQty;
+                    groupedSheets[key].products.push(productName);
+                }
+            });
+            
+            // Прочие материалы (other)
+            this.materialsDB.other.forEach(m => {
+                if (m.product === productName) {
+                    const key = `${m.material || 'Прочее'}_${m.thickness}`;
+                    if (!groupedSheets[key]) {
+                        groupedSheets[key] = {
+                            name: m.material || 'Прочее',
+                            thickness: m.thickness || '—',
+                            areaPerUnit: m.area || 0,
+                            quantity: 0,
+                            totalArea: 0,
+                            products: []
+                        };
+                    }
+                    groupedSheets[key].quantity += productQty;
+                    groupedSheets[key].totalArea += (m.area || 0) * productQty;
+                    groupedSheets[key].products.push(productName);
+                }
+            });
+            
+            // ============== КРОНШТЕЙНЫ (нержавеющая сталь AISI 430) ==============
             if (item.bracket && item.bracket.type && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
                 const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
                 if (bracket) {
                     const totalBracketQty = item.bracket.quantity;
                     const area = bracket.area || 0;
-                    const materialType = 'Сталь (AISI 430)';
+                    const materialType = 'Нержавеющая сталь AISI 430';
                     const thickness = bracket.thickness || '2мм';
                     const key = `${materialType}_${thickness}`;
                     
@@ -129,13 +222,13 @@ class MaterialsReport {
                 }
             }
             
-            // ============== ЛИРЫ (Сталь AISI 430) ==============
+            // ============== ЛИРЫ (нержавеющая сталь AISI 430) ==============
             if (item.lyre && item.lyre.type && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
                 const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
                 if (lyre) {
                     const totalLyreQty = item.lyre.quantity;
                     const area = lyre.area || 0;
-                    const materialType = 'Сталь (AISI 430)';
+                    const materialType = 'Нержавеющая сталь AISI 430';
                     const thickness = lyre.thickness || '2мм';
                     const key = `${materialType}_${thickness}`;
                     
@@ -255,33 +348,87 @@ class MaterialsReport {
         
         const productQty = order.items[0]?.quantity || 1;
         
-        const allSheets = [
-            ...this.materialsDB.aluminum.map(m => ({ ...m, materialType: 'Алюминий' })),
-            ...this.materialsDB.steel.map(m => ({ ...m, materialType: 'Сталь (AISI 430)' })),
-            ...this.materialsDB.stainless.map(m => ({ ...m, materialType: 'Сталь (AISI 430)' })),
-            ...this.materialsDB.pvc.map(m => ({ ...m, materialType: 'ПВХ' })),
-            ...this.materialsDB.polycarbonate.map(m => ({ ...m, materialType: 'Поликарбонат' })),
-            ...this.materialsDB.other.map(m => ({ ...m, materialType: m.material || 'Прочее' }))
-        ];
-        
         order.components.forEach(comp => {
-            const norm = allSheets.find(m => m.product === comp.name);
+            // Ищем норму в разных разделах
+            let norm = null;
             
+            // Ищем в алюминии
+            norm = this.materialsDB.aluminum.find(m => m.product === comp.name);
             if (norm) {
-                const totalArea = (comp.quantityPerProduct || 0) * (norm.area || 0) * productQty;
-                
                 componentsList.push({
                     name: comp.name,
-                    materialType: norm.materialType,
+                    materialType: 'Алюминий',
                     thickness: norm.thickness || '—',
                     areaPerUnit: norm.area || 0,
                     quantityPerProduct: comp.quantityPerProduct,
                     productQty: productQty,
-                    totalArea: totalArea
+                    totalArea: (comp.quantityPerProduct || 0) * (norm.area || 0) * productQty
                 });
-            } else {
-                console.warn(`⚠️ Не найдена норма для комплектующей: ${comp.name}`);
+                return;
             }
+            
+            // Ищем в стали
+            norm = this.materialsDB.steel.find(m => m.product === comp.name);
+            if (norm) {
+                componentsList.push({
+                    name: comp.name,
+                    materialType: 'Сталь',
+                    thickness: norm.thickness || '—',
+                    areaPerUnit: norm.area || 0,
+                    quantityPerProduct: comp.quantityPerProduct,
+                    productQty: productQty,
+                    totalArea: (comp.quantityPerProduct || 0) * (norm.area || 0) * productQty
+                });
+                return;
+            }
+            
+            // Ищем в нержавейке
+            norm = this.materialsDB.stainless.find(m => m.product === comp.name);
+            if (norm) {
+                componentsList.push({
+                    name: comp.name,
+                    materialType: 'Нержавеющая сталь AISI 430',
+                    thickness: norm.thickness || '—',
+                    areaPerUnit: norm.area || 0,
+                    quantityPerProduct: comp.quantityPerProduct,
+                    productQty: productQty,
+                    totalArea: (comp.quantityPerProduct || 0) * (norm.area || 0) * productQty
+                });
+                return;
+            }
+            
+            // Ищем в ПВХ
+            norm = this.materialsDB.pvc.find(m => m.product === comp.name);
+            if (norm) {
+                componentsList.push({
+                    name: comp.name,
+                    materialType: 'ПВХ',
+                    thickness: norm.thickness || '—',
+                    areaPerUnit: norm.area || 0,
+                    quantityPerProduct: comp.quantityPerProduct,
+                    productQty: productQty,
+                    totalArea: (comp.quantityPerProduct || 0) * (norm.area || 0) * productQty
+                });
+                return;
+            }
+            
+            // Ищем в поликарбонате
+            norm = this.materialsDB.polycarbonate.find(m => m.product === comp.name);
+            if (norm) {
+                componentsList.push({
+                    name: comp.name,
+                    materialType: 'Поликарбонат',
+                    thickness: norm.thickness || '—',
+                    areaPerUnit: norm.area || 0,
+                    quantityPerProduct: comp.quantityPerProduct,
+                    productQty: productQty,
+                    totalArea: (comp.quantityPerProduct || 0) * (norm.area || 0) * productQty
+                });
+                return;
+            }
+            
+            // Если не найдено
+            console.warn(`⚠️ Не найдена норма для комплектующей: ${comp.name}`);
         });
         
         return componentsList;
@@ -342,17 +489,17 @@ class MaterialsReport {
                     <tbody>
                         ${order.items.map(item => `
                             <tr>
-                                <td>${item.product}</td>
-                                <td>${item.size}</td>
-                                <td>${item.quantity}</td>
-                                <td>${item.bracket.type} (${item.bracket.quantity} шт)</td>
-                                <td>${item.lyre.type} (${item.lyre.quantity} шт)</td>
-                                <td>${item.ral || '-'}</td>
-                                <td>${item.texture || '-'}</td>
-                             </tr>
+                                <td>${item.product}${item.product}
+                                <td>${item.size}${item.size}
+                                <td>${item.quantity}${item.quantity}
+                                <td>${item.bracket.type} (${item.bracket.quantity} шт)${item.bracket.type}
+                                <td>${item.lyre.type} (${item.lyre.quantity} шт)${item.lyre.type}
+                                <td>${item.ral || '-'}${item.ral}
+                                <td>${item.texture || '-'}${item.texture}
+                               </tr>
                         `).join('')}
                     </tbody>
-                </table>
+                 </table>
             `;
             
             if (sheetMaterials.length > 0) {
@@ -360,27 +507,28 @@ class MaterialsReport {
                     <h4 style="margin-top: 30px;">📋 Листовые материалы (расход в м²)</h4>
                     <table class="materials-table">
                         <thead>
-                            <tr>
+                             <tr>
                                 <th>Материал</th>
                                 <th>Толщина</th>
                                 <th>Расход на 1 шт (м²)</th>
                                 <th>Кол-во</th>
                                 <th>Общий расход (м²)</th>
                                 <th>Применение</th>
-                             </thead>
+                             </tr>
+                        </thead>
                         <tbody>
                             ${sheetMaterials.map(item => `
-                                <tr>
-                                    <td><strong>${item.name}</strong></td>
-                                    <td>${item.thickness}</td>
+                                 <tr>
+                                     <td><strong>${item.name}</strong></td>
+                                     <td>${item.thickness}</td>
                                     <td style="text-align: right;">${fmt(item.areaPerUnit)}</td>
                                     <td style="text-align: right;">${item.quantity}</td>
                                     <td style="text-align: right; color: #4cd964; font-weight: 600;">${fmt(item.totalArea)}</td>
                                     <td style="font-size: 11px; color: #a0a0a0;">${item.products.join(', ')}</td>
-                                </tr>
+                                 </tr>
                             `).join('')}
                         </tbody>
-                    </table>
+                     </table>
                 `;
             }
             
@@ -389,7 +537,7 @@ class MaterialsReport {
                     <h4 style="margin-top: 30px;">🔧 КОМПЛЕКТУЮЩИЕ ДЕТАЛИ</h4>
                     <table class="materials-table">
                         <thead>
-                            <tr>
+                             <tr>
                                 <th>Деталь</th>
                                 <th>Материал</th>
                                 <th>Толщина</th>
@@ -397,21 +545,22 @@ class MaterialsReport {
                                 <th>Кол-во на 1 изд</th>
                                 <th>Кол-во изделий</th>
                                 <th>Общий расход (м²)</th>
-                             </thead>
+                             </tr>
+                        </thead>
                         <tbody>
                             ${components.map(comp => `
-                                <tr>
-                                    <td>${comp.name}</td>
-                                    <td>${comp.materialType}</td>
-                                    <td>${comp.thickness}</td>
+                                 <tr>
+                                     <td>${comp.name}</td>
+                                     <td>${comp.materialType}</td>
+                                     <td>${comp.thickness}</td>
                                     <td style="text-align: right;">${comp.areaPerUnit.toFixed(4)}</td>
                                     <td style="text-align: right;">${comp.quantityPerProduct}</td>
                                     <td style="text-align: right;">${comp.productQty}</td>
                                     <td style="text-align: right;">${comp.totalArea.toFixed(4)}</td>
-                                </tr>
+                                 </tr>
                             `).join('')}
                         </tbody>
-                    </table>
+                     </table>
                 `;
             }
             
@@ -420,25 +569,26 @@ class MaterialsReport {
                     <h4 style="margin-top: 30px;">📏 ПРОФИЛИ (расход в мм и метрах)</h4>
                     <table class="materials-table">
                         <thead>
-                            <tr>
+                             <tr>
                                 <th>Профиль</th>
                                 <th>Расход на 1 шт (мм)</th>
                                 <th>Кол-во</th>
                                 <th>Общий расход (мм)</th>
                                 <th>Общий расход (м)</th>
-                             </thead>
+                             </tr>
+                        </thead>
                         <tbody>
                             ${profiles.map(profile => `
-                                <tr>
-                                    <td><strong>${profile.name}</strong></td>
+                                 <tr>
+                                     <td><strong>${profile.name}</strong></td>
                                     <td style="text-align: right;">${profile.lengthPerUnit.toFixed(0)}</td>
                                     <td style="text-align: right;">${profile.quantity}</td>
                                     <td style="text-align: right;">${fmt(profile.totalLength, 0)}</td>
                                     <td style="text-align: right; color: #4cd964;">${(profile.totalLength / 1000).toFixed(2)} м</td>
-                                </tr>
+                                 </tr>
                             `).join('')}
                         </tbody>
-                    </table>
+                     </table>
                 `;
             }
             
@@ -447,25 +597,26 @@ class MaterialsReport {
                     <h4 style="margin-top: 30px;">🥢 ПРУТКИ (расход в мм и метрах)</h4>
                     <table class="materials-table">
                         <thead>
-                            <tr>
+                             <tr>
                                 <th>Тип прутка</th>
                                 <th>Расход на 1 шт (мм)</th>
                                 <th>Кол-во</th>
                                 <th>Общий расход (мм)</th>
                                 <th>Общий расход (м)</th>
-                             </thead>
+                             </tr>
+                        </thead>
                         <tbody>
                             ${rods.map(rod => `
-                                <tr>
-                                    <td>${rod.rodType}</td>
+                                 <tr>
+                                     <td>${rod.rodType}</td>
                                     <td style="text-align: right;">${rod.valuePerUnit}</td>
                                     <td style="text-align: right;">${rod.quantity}</td>
                                     <td style="text-align: right;">${fmt(rod.totalValue, 0)}</td>
                                     <td style="text-align: right; color: #4cd964;">${(rod.totalValue / 1000).toFixed(2)} м</td>
-                                </tr>
+                                 </tr>
                             `).join('')}
                         </tbody>
-                    </table>
+                     </table>
                 `;
             }
             
