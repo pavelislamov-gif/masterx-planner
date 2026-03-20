@@ -452,11 +452,18 @@ function createSiteRow(name, order, siteKey) {
 
     for (let i = 0; i < operations.length; i++) {
         const taskId = `${order.id}_${siteKey}_0_${i}`;
-        const status = order.tasks && order.tasks[taskId] ? order.tasks[taskId] : '';
-
-        if (status === 'green') completedCount++;
+        
+        // ПОЛУЧАЕМ СТАТУС ИЗ ЗАКАЗА - ЭТО КЛЮЧЕВОЙ МОМЕНТ!
+        let status = '';
+        if (order.tasks && order.tasks[taskId]) {
+            status = order.tasks[taskId];
+            if (status === 'orange' || status === 'green') {
+                if (status === 'green') completedCount++;
+            }
+        }
 
         const operationName = operations[i];
+        console.log(`Квадратик ${taskId}: статус "${status}"`); // Отладка
 
         squares += `<div class="square ${status}" data-task="${taskId}" title="${operationName}"></div>`;
     }
@@ -465,9 +472,13 @@ function createSiteRow(name, order, siteKey) {
         order.extraTasks.forEach((task, index) => {
             if (task.site === siteKey) {
                 const taskId = `${order.id}_extra_${index}`;
-                const status = order.tasks && order.tasks[taskId] ? order.tasks[taskId] : '';
-
-                if (status === 'green') completedCount++;
+                
+                // ПОЛУЧАЕМ СТАТУС ДЛЯ ДОПОЛНИТЕЛЬНОЙ ЗАДАЧИ
+                let status = '';
+                if (order.tasks && order.tasks[taskId]) {
+                    status = order.tasks[taskId];
+                    if (status === 'green') completedCount++;
+                }
 
                 squares += `<div class="square ${status} extra-square" data-task="${taskId}" title="${task.title} (доп.)"></div>`;
             }
