@@ -1038,9 +1038,9 @@ function showAddExecutorForm(task, actionContainer) {
     message += `📌 Операция: ${task.operation}\n`;
     message += `📦 Заказ: ${task.orderNumber}\n`;
     
-    // Добавляем информацию о количестве
+    // Добавляем информацию о количестве (без сравнения)
     const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
-    message += `🔢 Выполнено: ${totalAssigned} из ${task.totalQuantity}`;
+    message += `🔢 Выполнено: ${totalAssigned} шт`;
     
     // Показываем подтверждение
     if (confirm(message)) {
