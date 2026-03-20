@@ -758,7 +758,130 @@
                     // ПОЛУЧАЕМ ПОЛНЫЙ ЗАКАЗ ИЗ localStorage
                     let fullOrder = null;
                     try {
-                        const allOrders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
+                        con// ============== ПОЛНАЯ ИНФОРМАЦИЯ О ЗАКАЗЕ ==============
+// ПОЛУЧАЕМ ПОЛНЫЙ ЗАКАЗ ИЗ localStorage
+let fullOrder = null;
+try {
+    const allOrders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
+    fullOrder = allOrders.find(o => o.id == order.orderId);
+} catch (e) {
+    console.error('Ошибка получения заказа:', e);
+}
+
+// Данные из заказа
+const productQty = fullOrder?.items[0]?.quantity || 1;
+const productName = fullOrder?.items[0]?.product || '';
+const productSize = fullOrder?.items[0]?.size || '';
+const bracket = fullOrder?.items[0]?.bracket || { type: 'отсутствует', quantity: 0 };
+const lyre = fullOrder?.items[0]?.lyre || { type: 'отсутствует', quantity: 0 };
+const ral = fullOrder?.items[0]?.ral || '';
+const texture = fullOrder?.items[0]?.texture || '';
+const additional = fullOrder?.items[0]?.additional || '';
+const components = fullOrder?.components || [];
+
+// Формируем отображение кронштейна (всегда показываем количество)
+let bracketDisplay = '';
+if (bracket.type === 'отсутствует' || bracket.quantity === 0) {
+    bracketDisplay = `<span style="color: #fff; margin-left: 8px;">отсутствует</span>
+                      <span style="color: #ff9800; margin-left: 5px;">(0 шт)</span>`;
+} else {
+    bracketDisplay = `<span style="color: #fff; margin-left: 8px;">${escapeHtml(bracket.type)}</span>
+                      <span style="color: #ff9800; margin-left: 5px;">(${bracket.quantity} шт)</span>`;
+}
+
+// Формируем отображение лиры (всегда показываем количество)
+let lyreDisplay = '';
+if (lyre.type === 'отсутствует' || lyre.quantity === 0) {
+    lyreDisplay = `<span style="color: #fff; margin-left: 8px;">отсутствует</span>
+                   <span style="color: #ff9800; margin-left: 5px;">(0 шт)</span>`;
+} else {
+    lyreDisplay = `<span style="color: #fff; margin-left: 8px;">${escapeHtml(lyre.type)}</span>
+                   <span style="color: #ff9800; margin-left: 5px;">(${lyre.quantity} шт)</span>`;
+}
+
+// Создаём блок с полной информацией
+const productInfoDiv = document.createElement('div');
+productInfoDiv.className = 'product-info';
+productInfoDiv.style.marginBottom = '15px';
+productInfoDiv.style.padding = '12px 15px';
+productInfoDiv.style.background = '#15191f';
+productInfoDiv.style.borderRadius = '8px';
+productInfoDiv.style.borderLeft = '3px solid #ff3b3b';
+
+let infoHtml = `
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+        <!-- Левая колонка: изделие и размер -->
+        <div>
+            <div style="margin-bottom: 8px;">
+                <strong style="color: #ff3b3b;">📦 ИЗДЕЛИЕ:</strong>
+                <span style="color: #fff; margin-left: 8px;">${escapeHtml(productName)}</span>
+            </div>
+            <div style="margin-bottom: 8px;">
+                <strong> РАЗМЕР:</strong>
+                <span style="color: #fff; margin-left: 8px;">${escapeHtml(productSize) || 'Стандартный'}</span>
+            </div>
+            <div>
+                <strong> КОЛИЧЕСТВО:</strong>
+                <span style="color: #4cd964; margin-left: 8px; font-weight: 600;">${productQty} шт</span>
+            </div>
+        </div>
+        
+        <!-- Средняя колонка: кронштейн и лира -->
+        <div>
+            <div style="margin-bottom: 8px;">
+                <strong> КРОНШТЕЙН:</strong>
+                ${bracketDisplay}
+            </div>
+            <div>
+                <strong> ЛИРА:</strong>
+                ${lyreDisplay}
+            </div>
+        </div>
+        
+        <!-- Правая колонка: RAL и текстура -->
+        <div>
+            <div style="margin-bottom: 8px;">
+                <strong> RAL:</strong>
+                <span style="color: #fff; margin-left: 8px;">${escapeHtml(ral) || '-'}</span>
+            </div>
+            <div>
+                <strong> ТЕКСТУРА:</strong>
+                <span style="color: #fff; margin-left: 8px;">${escapeHtml(texture) || '-'}</span>
+            </div>
+        </div>
+    </div>
+`;
+
+// Добавляем комплектующие, если есть
+if (components && components.length > 0) {
+    infoHtml += `
+        <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #2a2f38;">
+            <strong style="color: #ff3b3b;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>
+            <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;">
+                ${components.map(comp => `
+                    <span style="background: #1e232b; padding: 4px 12px; border-radius: 20px; font-size: 12px; border: 1px solid #2a2f38;">
+                        ${escapeHtml(comp.name)}: <strong style="color: #4cd964;">${comp.quantityPerProduct}</strong> шт/изд
+                    </span>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+// Добавляем дополнительные детали, если есть
+if (additional) {
+    infoHtml += `
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #2a2f38;">
+            <strong>📝 ДОПОЛНИТЕЛЬНО:</strong>
+            <div style="margin-top: 6px; padding: 8px 12px; background: #1e232b; border-radius: 6px; color: #a0a0a0; font-size: 12px; border-left: 2px solid #ff3b3b;">
+                ${escapeHtml(additional)}
+            </div>
+        </div>
+    `;
+}
+
+productInfoDiv.innerHTML = infoHtml;
+content.appendChild(productInfoDiv);st allOrders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
                         fullOrder = allOrders.find(o => o.id == order.orderId);
                     } catch (e) {
                         console.error('Ошибка получения заказа:', e);
