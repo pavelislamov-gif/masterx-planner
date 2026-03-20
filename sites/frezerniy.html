@@ -752,14 +752,42 @@
                         // Проверяем, есть ли среди задач этого продукта обычные (не дополнительные)
                         const hasNonExtraTasks = product.tasks.some(task => !task.isExtra);
                         
-                        // Показываем product-info только если есть обычные задачи
-                        if (hasNonExtraTasks) {
+                        // ПОЛУЧАЕМ ПОЛНЫЙ ЗАКАЗ ИЗ localStorage
+                        let fullOrder = null;
+                        try {
+                            const allOrders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
+                            fullOrder = allOrders.find(o => o.id == order.orderId);
+                        } catch (e) {
+                            console.error('Ошибка получения заказа:', e);
+                        }
+                    
+                        const productQty = fullOrder?.items[0]?.quantity || 1;
+                        const productName = fullOrder?.items[0]?.product || '';
+                    
+                        // ПОЛУЧАЕМ КОМПЛЕКТУЮЩИЕ (без фильтрации по участку)
+                        const components = fullOrder?.components || [];
+                    
+                        // Показываем комплектующие вместо информации об изделии
+                        if (components.length > 0) {
+                            const compDiv = document.createElement('div');
+                            compDiv.className = 'product-info';
+                            compDiv.innerHTML = `
+                                <strong>🔧 КОМПЛЕКТУЮЩИЕ:</strong><br>
+                                ${components.map(comp => `
+                                    <div style="margin-top: 5px;">
+                                        ${comp.name}: <span style="color: #4cd964; font-weight: 600;">${comp.quantityPerProduct} шт/изд</span>
+                                    </div>
+                                `).join('')}
+                            `;
+                            content.appendChild(compDiv);
+                        } else if (hasNonExtraTasks) {
+                            // Если нет комплектующих, показываем обычную информацию
                             const productInfo = document.createElement('div');
                             productInfo.className = 'product-info';
                             productInfo.innerHTML = `
-                                <strong>${product.product}</strong> | 
-                                Размер: ${product.size || 'Стандартный'} | 
-                                Всего: ${product.totalQuantity} шт
+                                <strong>📦 ${productName}</strong><br>
+                                <span style="font-size: 12px; color: #a0a0a0;">Кол-во изделий: ${productQty} шт</span>
+                                ${product.size ? `<span style="font-size: 12px; color: #a0a0a0;"> | Размер: ${product.size}</span>` : ''}
                             `;
                             content.appendChild(productInfo);
                         }
