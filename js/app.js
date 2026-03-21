@@ -229,23 +229,23 @@ function loadOrders() {
         // Формируем строку с краткой информацией для шапки
         const shortInfo = [];
         shortInfo.push(`📦 ${item.product}`);
-        shortInfo.push(`📏 ${item.size}`);
-        shortInfo.push(`🔢 ${item.quantity} шт`);
+        shortInfo.push(` ${item.size}`);
+        shortInfo.push(` ${item.quantity} шт`);
         
         if (item.bracket.type !== 'отсутствует') {
-            shortInfo.push(`🔧 ${item.bracket.type} (${item.bracket.quantity} шт)`);
+            shortInfo.push(` ${item.bracket.type} (${item.bracket.quantity} шт)`);
         }
         
         if (item.lyre.type !== 'отсутствует') {
-            shortInfo.push(`🎸 ${item.lyre.type} (${item.lyre.quantity} шт)`);
+            shortInfo.push(` ${item.lyre.type} (${item.lyre.quantity} шт)`);
         }
         
         if (item.ral) {
-            shortInfo.push(`🎨 ${item.ral}`);
+            shortInfo.push(` ${item.ral}`);
         }
         
         if (item.texture) {
-            shortInfo.push(`🧵 ${item.texture}`);
+            shortInfo.push(` ${item.texture}`);
         }
         
         header.innerHTML = `
@@ -320,7 +320,7 @@ function loadOrders() {
                         <span style="color: #fff; margin-left: 8px;">${escapeHtml(item.size) || 'Стандартный'}</span>
                     </div>
                     <div>
-                        <strong>🔢 КОЛИЧЕСТВО:</strong>
+                        <strong> КОЛИЧЕСТВО:</strong>
                         <span style="color: #4cd964; margin-left: 8px; font-weight: 600;">${item.quantity} шт</span>
                     </div>
                 </div>
@@ -328,11 +328,11 @@ function loadOrders() {
                 <!-- Средняя колонка: кронштейн и лира -->
                 <div>
                     <div style="margin-bottom: 8px;">
-                        <strong>🔧 КРОНШТЕЙН:</strong>
+                        <strong> КРОНШТЕЙН:</strong>
                         ${bracketDisplay}
                     </div>
                     <div>
-                        <strong>🎸 ЛИРА:</strong>
+                        <strong> ЛИРА:</strong>
                         ${lyreDisplay}
                     </div>
                 </div>
@@ -340,11 +340,11 @@ function loadOrders() {
                 <!-- Правая колонка: RAL и текстура -->
                 <div>
                     <div style="margin-bottom: 8px;">
-                        <strong>🎨 RAL:</strong>
+                        <strong> RAL:</strong>
                         <span style="color: #fff; margin-left: 8px;">${escapeHtml(item.ral) || '-'}</span>
                     </div>
                     <div>
-                        <strong>🧵 ТЕКСТУРА:</strong>
+                        <strong> ТЕКСТУРА:</strong>
                         <span style="color: #fff; margin-left: 8px;">${escapeHtml(item.texture) || '-'}</span>
                     </div>
                 </div>
