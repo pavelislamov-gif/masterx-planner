@@ -6,15 +6,15 @@ let orders = [];
 let materialsReport = null;
 
 // ============== ФИЛЬТРАЦИЯ ЗАКАЗОВ ПО ДАТЕ ==============
-// Проверяем, не объявлена ли уже переменная
-if (typeof currentFilterDate === 'undefined') {
-    var currentFilterDate = new Date().toISOString().split('T')[0]; // сегодня по умолчанию
+// Используем window для хранения текущей даты фильтра, чтобы избежать конфликта
+if (typeof window.currentFilterDate === 'undefined') {
+    window.currentFilterDate = new Date().toISOString().split('T')[0];
 }
 
 // Функция фильтрации заказов по дате
 function filterOrdersByDate(action) {
     const today = new Date();
-    let newDate = new Date(currentFilterDate);
+    let newDate = new Date(window.currentFilterDate);
     
     switch(action) {
         case 'prev':
@@ -30,7 +30,7 @@ function filterOrdersByDate(action) {
             return;
     }
     
-    currentFilterDate = newDate.toISOString().split('T')[0];
+    window.currentFilterDate = newDate.toISOString().split('T')[0];
     updateFilterDateDisplay();
     loadOrders();
     updateStatistics();
@@ -40,9 +40,9 @@ function filterOrdersByDate(action) {
 function updateFilterDateDisplay() {
     const displaySpan = document.getElementById('currentFilterDate');
     if (displaySpan) {
-        const date = new Date(currentFilterDate);
+        const date = new Date(window.currentFilterDate);
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        const isToday = currentFilterDate === new Date().toISOString().split('T')[0];
+        const isToday = window.currentFilterDate === new Date().toISOString().split('T')[0];
         const prefix = isToday ? '📅 Сегодня, ' : '📅 ';
         displaySpan.textContent = `${prefix}${date.toLocaleDateString('ru-RU', options)}`;
     }
@@ -173,32 +173,6 @@ function createTasksForOrder(order) {
             }
         });
         
-        // Добавляем дополнительные задачи, если есть
-        if (order.extraTasks && order.extraTasks.length > 0) {
-            order.extraTasks.forEach((extra, idx) => {
-                if (extra.site !== siteKey) return;
-                
-                const taskId = `${order.id}_extra_${idx}`;
-                const exists = existingTasks.some(t => t.id === taskId);
-                if (!exists) {
-                    newTasks.push({
-                        id: taskId,
-                        orderId: order.id,
-                        orderNumber: order.number,
-                        product: extra.title || 'Доп. задача',
-                        description: extra.description || '',
-                        totalQuantity: 1,
-                        completedQuantity: 0,
-                        operation: extra.title || 'Доп. операция',
-                        isExtra: true,
-                        status: 'pending',
-                        executors: [],
-                        date: orderDate
-                    });
-                }
-            });
-        }
-        
         if (newTasks.length > 0) {
             const updatedTasks = [...existingTasks, ...newTasks];
             localStorage.setItem(storageKey, JSON.stringify(updatedTasks));
@@ -213,19 +187,19 @@ function createTasksForOrder(order) {
 
 // Загрузка и отображение заказов с фильтрацией по дате
 function loadOrders() {
-    console.log('loadOrders вызвана, фильтр даты:', currentFilterDate);
+    console.log('loadOrders вызвана, фильтр даты:', window.currentFilterDate);
     const ordersList = document.getElementById('ordersList');
     if (!ordersList) return;
 
     // Фильтруем заказы по выбранной дате
-    const filteredOrders = orders.filter(order => order.date === currentFilterDate);
+    const filteredOrders = orders.filter(order => order.date === window.currentFilterDate);
     
-    console.log(`📅 Заказов на ${currentFilterDate}: ${filteredOrders.length} из ${orders.length} всего`);
+    console.log(`📅 Заказов на ${window.currentFilterDate}: ${filteredOrders.length} из ${orders.length} всего`);
 
     ordersList.innerHTML = '';
 
     if (filteredOrders.length === 0) {
-        ordersList.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">Нет заказов на ${formatDateForDisplay(currentFilterDate)}</div></div>`;
+        ordersList.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">Нет заказов на ${formatDateForDisplay(window.currentFilterDate)}</div></div>`;
         return;
     }
 
@@ -275,7 +249,7 @@ function loadOrders() {
                     </thead>
                 <tbody>
                     <tr>
-                        <td><strong>${item.product}</strong></td>
+                        <td><strong>${item.product}</strong>${item.product}
                         <td>${item.size}${item.size}
                         <td>${item.quantity} шт${item.quantity}
                         <td>${item.bracket.type} (${item.bracket.quantity} шт)${item.bracket.type}
@@ -284,7 +258,7 @@ function loadOrders() {
                         <td>${item.texture || '-'}${item.texture}
                     </tr>
                 </tbody>
-            </table>
+            }</table>
             
             <div class="sites-section">
                 <h4 style="margin-bottom: 15px;">🏭 Производственные участки</h4>
@@ -321,7 +295,7 @@ function updateStatistics() {
     const completedTasksEl = document.getElementById('completedTasks');
 
     // Фильтруем заказы по текущей дате
-    const filteredOrders = orders.filter(order => order.date === currentFilterDate);
+    const filteredOrders = orders.filter(order => order.date === window.currentFilterDate);
     
     if (totalOrdersEl) totalOrdersEl.textContent = filteredOrders.length;
 
@@ -455,7 +429,6 @@ function closeOrderModal() {
         modal.style.display = 'none';
         const form = document.getElementById('orderForm');
         if (form) form.reset();
-        // Очищаем контейнер комплектующих
         const componentsContainer = document.getElementById('componentsContainer');
         if (componentsContainer) componentsContainer.innerHTML = '';
     }
@@ -476,20 +449,16 @@ function populateSelects() {
             option.textContent = product.name;
             productSelect.appendChild(option);
         });
-        
-        // ДОБАВЛЯЕМ СЛУШАТЕЛЬ НА ВЫБОР ИЗДЕЛИЯ
         productSelect.addEventListener('change', updateComponentsList);
     }
 
     const bracketSelect = document.getElementById('bracketSelect');
     if (bracketSelect) {
         bracketSelect.innerHTML = '<option value="">Выберите кронштейн</option>';
-
         const absentOption = document.createElement('option');
         absentOption.value = "отсутствует";
         absentOption.textContent = "🚫 отсутствует";
         bracketSelect.appendChild(absentOption);
-
         brackets.forEach(bracket => {
             const option = document.createElement('option');
             option.value = bracket.name;
@@ -501,12 +470,10 @@ function populateSelects() {
     const lyreSelect = document.getElementById('lyreSelect');
     if (lyreSelect) {
         lyreSelect.innerHTML = '<option value="">Выберите лиру</option>';
-
         const absentOption = document.createElement('option');
         absentOption.value = "отсутствует";
         absentOption.textContent = "🚫 отсутствует";
         lyreSelect.appendChild(absentOption);
-
         lyres.forEach(lyre => {
             const option = document.createElement('option');
             option.value = lyre.name;
@@ -530,7 +497,6 @@ async function loadProductSizes() {
 
     setTimeout(() => {
         sizeSelect.innerHTML = '<option value="">Выберите размер</option>';
-
         if (product && product.sizes) {
             product.sizes.forEach(size => {
                 const option = document.createElement('option');
@@ -541,53 +507,30 @@ async function loadProductSizes() {
         } else {
             sizeSelect.innerHTML = '<option value="">Нет доступных размеров</option>';
         }
-
         sizeSelect.disabled = false;
     }, 100);
 }
 
 // ============== БАЗА ДАННЫХ ОПЕРАЦИЙ ==============
-// Загружается из отдельного файла task-operations.js
 const operationsDB = window.TASK_OPERATIONS || {};
 
 // ============== ФУНКЦИЯ getOperationNames ==============
 function getOperationNames(productName, siteKey) {
     const siteOps = operationsDB[siteKey] || {};
-
-    if (siteOps[productName]) {
-        return siteOps[productName];
-    }
-
+    if (siteOps[productName]) return siteOps[productName];
     for (let key in siteOps) {
-        if (productName.includes(key)) {
-            return siteOps[key];
-        }
+        if (productName.includes(key)) return siteOps[key];
     }
-
     return [];
-}
-
-// ============== ФУНКЦИЯ getOperationCount ==============
-function getOperationCount(productName, siteKey) {
-    const siteOps = operationsDB[siteKey] || {};
-    const operations = siteOps[productName] || [];
-    
-    // Считаем только не-х
-    return operations.filter(op => op && op !== 'х' && op !== 'x').length;
 }
 
 // ============== ФУНКЦИЯ createSiteRow ==============
 function createSiteRow(name, order, siteKey) {
-    if (!order.items || order.items.length === 0) {
-        return '<div>Нет изделий</div>';
-    }
+    if (!order.items || order.items.length === 0) return '<div>Нет изделий</div>';
 
     const item = order.items[0];
-    
-    // ПОЛУЧАЕМ РЕАЛЬНЫЕ ОПЕРАЦИИ (БЕЗ "х")
     const operations = getOperationNames(item.product, siteKey);
     
-    // ЕСЛИ НЕТ ОПЕРАЦИЙ - ПОКАЗЫВАЕМ КРАСНЫЙ КВАДРАТИК
     if (operations.length === 0) {
         return `
             <div class="site-item">
@@ -601,39 +544,28 @@ function createSiteRow(name, order, siteKey) {
         `;
     }
 
-    // ЕСЛИ ЕСТЬ ОПЕРАЦИИ - ПОКАЗЫВАЕМ КВАДРАТИКИ
     let squares = '';
     let completedCount = 0;
 
     for (let i = 0; i < operations.length; i++) {
         const taskId = `${order.id}_${siteKey}_0_${i}`;
-        
-        // ПОЛУЧАЕМ СТАТУС ИЗ ЗАКАЗА
         let status = '';
         if (order.tasks && order.tasks[taskId]) {
             status = order.tasks[taskId];
-            if (status === 'orange' || status === 'green') {
-                if (status === 'green') completedCount++;
-            }
+            if (status === 'green') completedCount++;
         }
-
-        const operationName = operations[i];
-        console.log(`Квадратик ${taskId}: статус "${status}"`);
-
-        squares += `<div class="square ${status}" data-task="${taskId}" title="${operationName}"></div>`;
+        squares += `<div class="square ${status}" data-task="${taskId}" title="${operations[i]}"></div>`;
     }
 
     if (order.extraTasks) {
         order.extraTasks.forEach((task, index) => {
             if (task.site === siteKey) {
                 const taskId = `${order.id}_extra_${index}`;
-                
                 let status = '';
                 if (order.tasks && order.tasks[taskId]) {
                     status = order.tasks[taskId];
                     if (status === 'green') completedCount++;
                 }
-
                 squares += `<div class="square ${status} extra-square" data-task="${taskId}" title="${task.title} (доп.)"></div>`;
             }
         });
@@ -644,9 +576,7 @@ function createSiteRow(name, order, siteKey) {
     return `
         <div class="site-item">
             <span class="site-name">${name}</span>
-            <div class="squares">
-                ${squares}
-            </div>
+            <div class="squares">${squares}</div>
             <span style="color: #a0a0a0; font-size: 12px; margin: 0 10px;">${completedCount}/${totalOperations}</span>
             <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
         </div>
@@ -656,73 +586,46 @@ function createSiteRow(name, order, siteKey) {
 // ============== ФУНКЦИИ ДЛЯ РАБОТЫ С ЗАКАЗАМИ ==============
 
 async function showMaterialsReport(orderId) {
-    console.log('showMaterialsReport вызвана', orderId);
     const order = orders.find(o => o.id === orderId);
     if (!order) {
         alert('Заказ не найден');
         return;
     }
-
     if (!window.materialsReport) {
         alert('Отчет по материалам не доступен');
         return;
     }
-
     try {
         const modal = document.getElementById('materialsModal');
         const reportDiv = document.getElementById('materialsReport');
-
         if (!modal || !reportDiv) {
             alert('Модальное окно не найдено');
             return;
         }
-
         reportDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Загрузка отчета...</p></div>';
         modal.style.display = 'block';
-
         const reportHTML = await window.materialsReport.generateReport(order);
         reportDiv.innerHTML = reportHTML;
-
     } catch (error) {
         console.error('Ошибка генерации отчета:', error);
         alert('Ошибка при загрузке отчета по материалам');
     }
 }
 
-// ============== ИСПРАВЛЕННАЯ ФУНКЦИЯ УДАЛЕНИЯ ЗАКАЗА ==============
 function deleteOrder(orderId) {
-    console.log('deleteOrder вызвана', orderId);
-    
-    if (!confirm('Удалить заказ? Все связанные задачи на участках также будут удалены.')) {
-        return;
-    }
-
-    // Находим удаляемый заказ
+    if (!confirm('Удалить заказ? Все связанные задачи на участках также будут удалены.')) return;
     const deletedOrder = orders.find(o => o.id === orderId);
-    
-    // Удаляем заказ из списка
     orders = orders.filter(o => o.id !== orderId);
     saveOrdersToStorage(orders);
-    
-    // Удаляем задачи этого заказа со всех участков
-    if (deletedOrder) {
-        deleteOrderTasksFromAllSites(deletedOrder);
-    }
-    
+    if (deletedOrder) deleteOrderTasksFromAllSites(deletedOrder);
     loadOrders();
     updateStatistics();
-    
     alert('✅ Заказ и связанные задачи удалены');
 }
 
-// ============== УДАЛЕНИЕ ЗАДАЧ ЗАКАЗА СО ВСЕХ УЧАСТКОВ ==============
 function deleteOrderTasksFromAllSites(order) {
-    console.log('🔍 Удаление задач заказа', order.id, 'со всех участков');
-    
     const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
     const dates = getAllRelevantDates();
-    let totalDeleted = 0;
-    
     sites.forEach(site => {
         dates.forEach(date => {
             const historyKey = `tasks_${site}_${date}`;
@@ -730,100 +633,57 @@ function deleteOrderTasksFromAllSites(order) {
                 const tasksJson = localStorage.getItem(historyKey);
                 if (tasksJson) {
                     let tasks = JSON.parse(tasksJson);
-                    const beforeCount = tasks.length;
-                    
-                    // Оставляем только задачи НЕ из этого заказа
                     const filteredTasks = tasks.filter(task => {
                         const taskOrderId = task.orderId || (task.id ? task.id.split('_')[0] : null);
                         return String(taskOrderId) !== String(order.id);
                     });
-                    
-                    if (filteredTasks.length !== beforeCount) {
-                        const deleted = beforeCount - filteredTasks.length;
-                        totalDeleted += deleted;
+                    if (filteredTasks.length !== tasks.length) {
                         localStorage.setItem(historyKey, JSON.stringify(filteredTasks));
-                        console.log(`  ✅ ${site} на ${date}: удалено ${deleted} задач`);
                     }
                 }
-            } catch (e) {
-                console.error(`❌ Ошибка при очистке ${historyKey}:`, e);
-            }
+            } catch (e) {}
         });
     });
-    
-    console.log(`✅ Всего удалено задач: ${totalDeleted}`);
 }
 
-// ============== ПОЛУЧЕНИЕ ВСЕХ АКТУАЛЬНЫХ ДАТ ==============
 function getAllRelevantDates() {
     const dates = [];
     const today = new Date();
-    
     for (let i = -30; i <= 30; i++) {
         const date = new Date(today);
         date.setDate(today.getDate() + i);
-        
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        
-        dates.push(`${year}-${month}-${day}`);
+        dates.push(date.toISOString().split('T')[0]);
     }
-    
     return dates;
 }
 
 function addExtraTask(orderId, siteKey) {
-    console.log('addExtraTask вызвана', orderId, siteKey);
     const taskName = prompt('Введите название дополнительной задачи:');
     if (!taskName) return;
-
     const order = orders.find(o => o.id === orderId);
     if (!order) return;
-
     if (!order.extraTasks) order.extraTasks = [];
-
-    order.extraTasks.push({
-        title: taskName,
-        site: siteKey,
-        createdAt: new Date().toISOString()
-    });
-
+    order.extraTasks.push({ title: taskName, site: siteKey, createdAt: new Date().toISOString() });
     saveOrdersToStorage(orders);
     loadOrders();
 }
 
 function exportOrders() {
-    console.log('exportOrders вызвана');
-
     try {
-        const ordersToExport = orders || [];
-
-        if (ordersToExport.length === 0) {
+        if (orders.length === 0) {
             alert('Нет заказов для экспорта');
             return;
         }
-
-        const exportData = {
-            exportDate: new Date().toISOString(),
-            version: '1.0',
-            orders: ordersToExport
-        };
-
+        const exportData = { exportDate: new Date().toISOString(), version: '1.0', orders: orders };
         const dataStr = JSON.stringify(exportData, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-
         const date = new Date();
         const fileName = `masterx_orders_${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')}.json`;
-
         const linkElement = document.createElement('a');
         linkElement.setAttribute('href', dataUri);
         linkElement.setAttribute('download', fileName);
         linkElement.click();
-
-        console.log(`✅ Экспортировано ${ordersToExport.length} заказов`);
-        alert(`✅ Экспортировано ${ordersToExport.length} заказов`);
-
+        alert(`✅ Экспортировано ${orders.length} заказов`);
     } catch (error) {
         console.error('❌ Ошибка экспорта:', error);
         alert('Ошибка при экспорте заказов');
@@ -831,32 +691,20 @@ function exportOrders() {
 }
 
 function closeMaterialsModal() {
-    console.log('closeMaterialsModal вызвана');
     const modal = document.getElementById('materialsModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    if (modal) modal.style.display = 'none';
 }
 
 // ============== ОСНОВНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==============
 async function loadAllData() {
     try {
-        console.log('loadAllData: начало загрузки');
-
         products = await loadProducts() || [];
         brackets = await loadBrackets() || [];
         lyres = await loadLyres() || [];
         orders = loadOrdersFromStorage() || [];
         await loadComponents();
 
-        console.log('✅ Продукты загружены:', products.length);
-        console.log('✅ Кронштейны загружены:', brackets.length);
-        console.log('✅ Лиры загружены:', lyres.length);
-        console.log('✅ Комплектующие загружены:', Object.keys(window.componentsData).length);
-        console.log('✅ Заказы загружены:', orders.length);
-
         syncTasksFromHistory();
-
         populateSelects();
         updateFilterDateDisplay();
         loadOrders();
@@ -866,67 +714,21 @@ async function loadAllData() {
             window.materialsReport = new MaterialsReport();
             window.materialsReport.materialsDB.brackets = brackets;
             window.materialsReport.materialsDB.lyres = lyres;
-
-            window.materialsReport.loadMaterialsData()
-                .then(() => {
-                    console.log('✅ Отчет по материалам инициализирован');
-                })
-                .catch(err => {
-                    console.error('❌ Ошибка инициализации отчета:', err);
-                });
+            window.materialsReport.loadMaterialsData().catch(err => console.error('❌ Ошибка инициализации отчета:', err));
         }
 
         window.addEventListener('storage', function(e) {
             if (e.key === 'masterx_orders') {
-                console.log('🔄 Изменение в localStorage (orders)');
                 orders = JSON.parse(e.newValue || '[]');
                 loadOrders();
                 updateStatistics();
             }
-            if (e.key && e.key.startsWith('tasks_')) {
-                console.log('🔄 Изменение в localStorage (tasks)');
-                syncTasksFromHistory();
-            }
-            if (e.key === 'taskStatusChanged' && e.newValue) {
-                try {
-                    const data = JSON.parse(e.newValue);
-                    console.log('🔥 Получено из localStorage:', data);
-                    
-                    // Игнорируем статус pending (начальное состояние)
-                    if (data.status === 'pending') return;
-                    
-                    // Находим базовый taskId (обрезаем последний индекс)
-                    const baseTaskId = data.taskId.substring(0, data.taskId.lastIndexOf('_'));
-                    console.log('🔄 Ищем квадратик с taskId:', baseTaskId);
-                    
-                    const square = document.querySelector(`[data-task="${baseTaskId}"]`);
-                    if (square) {
-                        // Удаляем старые классы
-                        square.classList.remove('orange', 'green');
-                        
-                        // Добавляем новый класс
-                        if (data.status === 'in_progress') {
-                            square.classList.add('orange');
-                            console.log('✅ Квадратик стал оранжевым');
-                        } else if (data.status === 'completed') {
-                            square.classList.add('green');
-                            console.log('✅ Квадратик стал зеленым');
-                        }
-                    } else {
-                        console.log('❌ Квадратик не найден для taskId:', baseTaskId);
-                    }
-                } catch (error) {
-                    console.error('Ошибка обработки storage:', error);
-                }
-            }
+            if (e.key && e.key.startsWith('tasks_')) syncTasksFromHistory();
         });
 
         window.addEventListener('taskStatusChanged', function(e) {
-            console.log('🔄 Статус задачи изменён:', e.detail);
             updateTaskStatus(e.detail.taskId, e.detail.status);
         });
-
-        console.log('✅ loadAllData завершена');
 
     } catch (error) {
         console.error('❌ Ошибка загрузки:', error);
@@ -935,7 +737,6 @@ async function loadAllData() {
 
 // ============== ИНИЦИАЛИЗАЦИЯ ==============
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('📅 DOM загружен, начинаем инициализацию...');
     await loadAllData();
 });
 
@@ -945,18 +746,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (orderForm) {
         orderForm.addEventListener('submit', function(e) {
             e.preventDefault();
-
             const product = document.getElementById('productSelect').value;
             const size = document.getElementById('sizeSelect').value;
-
             if (!product || !size) {
                 alert('Выберите изделие и размер!');
                 return;
             }
-
-            // СБОР КОМПЛЕКТУЮЩИХ
             const components = collectComponents();
-
             const order = {
                 id: Date.now(),
                 date: document.getElementById('orderDate').value,
@@ -982,23 +778,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 tasks: {},
                 extraTasks: []
             };
-
             orders.push(order);
             saveOrdersToStorage(orders);
-            
-            // ✅ СОЗДАЁМ ЗАДАЧИ НА ВСЕХ УЧАСТКАХ НА ВЫБРАННУЮ ДАТУ
             createTasksForOrder(order);
-            
-            // Обновляем фильтр даты на дату созданного заказа
-            currentFilterDate = order.date;
+            window.currentFilterDate = order.date;
             updateFilterDateDisplay();
-            
             loadOrders();
             updateStatistics();
             closeOrderModal();
-            
-            const formattedDate = new Date(order.date).toLocaleDateString('ru-RU');
-            alert(`✅ Заказ №${order.number} успешно создан на ${formattedDate}!`);
+            alert(`✅ Заказ №${order.number} успешно создан на ${formatDateForDisplay(order.date)}!`);
         });
     }
 });
@@ -1017,93 +805,31 @@ window.createTasksForOrder = createTasksForOrder;
 window.filterOrdersByDate = filterOrdersByDate;
 window.updateFilterDateDisplay = updateFilterDateDisplay;
 
-console.log('📤 Экспорт функций в глобальную область...');
-console.log('✅ Функции экспортированы:', Object.keys(window).filter(key => 
-    typeof window[key] === 'function' && 
-    ['openOrderModal', 'closeOrderModal', 'loadProductSizes', 'exportOrders', 
-     'showMaterialsReport', 'deleteOrder', 'addExtraTask', 'closeMaterialsModal', 
-     'syncTasksFromHistory', 'createTasksForOrder', 'filterOrdersByDate', 'updateFilterDateDisplay'].includes(key)
-));
-console.log('✅ app.js полностью загружен');
-
-/// ============== СИНХРОНИЗАЦИЯ ЦВЕТОВ КВАДРАТИКОВ ==============
-window.addEventListener('taskStatusChanged', function(e) {
-    const { taskId, status } = e.detail;
-    console.log('🔄 Статус задачи изменен:', taskId, status);
-    
-    // 1. Обновляем статус в заказе
-    updateTaskStatus(taskId, status);
-    
-    // 2. Ищем и обновляем цвет квадратика
-    let squares = document.querySelectorAll(`[data-task="${taskId}"]`);
-    
-    // Если не нашли, пробуем обрезать последний индекс
-    if (squares.length === 0) {
-        const baseTaskId = taskId.substring(0, taskId.lastIndexOf('_'));
-        console.log('🔄 Пробуем базовый taskId:', baseTaskId);
-        squares = document.querySelectorAll(`[data-task="${baseTaskId}"]`);
-    }
-    
-    squares.forEach(square => {
-        console.log('✅ Найден квадратик, меняем цвет на:', status);
-        
-        // Удаляем старые классы цветов
-        square.classList.remove('orange', 'green');
-        
-        if (status === 'completed') {
-            square.classList.add('green');
-            square.title = 'Завершено';
-        } else if (status === 'in_progress') {
-            square.classList.add('orange');
-            square.title = 'В работе';
-        } else {
-            square.title = 'Ожидает';
-        }
-    });
-});
-
-
 // ============== КОМПЛЕКТУЮЩИЕ ==============
 
-// Обновление списка комплектующих при выборе изделия
 function updateComponentsList() {
     const productName = document.getElementById('productSelect').value;
     const container = document.getElementById('componentsContainer');
-    
     if (!container) return;
     container.innerHTML = '';
-    
     if (!productName) return;
-    
     const components = window.componentsData[productName] || [];
     if (components.length === 0) return;
-    
-    // Заголовок
     const title = document.createElement('div');
     title.style.cssText = 'margin-bottom: 12px; color: #ff3b3b; font-size: 14px; font-weight: 600; border-left: 3px solid #ff3b3b; padding-left: 10px;';
     title.innerHTML = '🔧 КОМПЛЕКТУЮЩИЕ ДЕТАЛИ:';
     container.appendChild(title);
-    
-    // Описание
     const desc = document.createElement('div');
     desc.style.cssText = 'margin-bottom: 12px; color: #a0a0a0; font-size: 12px; padding-left: 10px;';
     desc.innerHTML = 'Введите количество на 1 изделие:';
     container.appendChild(desc);
-    
-    // Список деталей
     components.forEach(comp => {
         const row = document.createElement('div');
         row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #15191f; border-radius: 6px; border: 1px solid #2a2f38; margin-bottom: 8px;';
         row.innerHTML = `
             <span style="font-size: 13px; font-weight: 500;">${comp.name}</span>
             <div>
-                <input type="number" 
-                       class="component-qty"
-                       data-name="${comp.name}"
-                       data-material="${comp.material}"
-                       value="0" 
-                       min="0" 
-                       style="width: 80px; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                <input type="number" class="component-qty" data-name="${comp.name}" data-material="${comp.material}" value="0" min="0" style="width: 80px; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
                 <span style="color: #a0a0a0; margin-left: 5px;">шт/изд</span>
             </div>
         `;
@@ -1111,7 +837,6 @@ function updateComponentsList() {
     });
 }
 
-// Сбор комплектующих из формы
 function collectComponents() {
     const components = [];
     document.querySelectorAll('.component-qty').forEach(input => {
@@ -1127,8 +852,7 @@ function collectComponents() {
     return components;
 }
 
-// Экспортируем функции в глобальную область
 window.updateComponentsList = updateComponentsList;
 window.collectComponents = collectComponents;
 
-console.log('✅ Функции комплектующих загружены');
+console.log('✅ app.js полностью загружен');
