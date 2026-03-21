@@ -41,10 +41,15 @@ function updateFilterDateDisplay() {
     const displaySpan = document.getElementById('currentFilterDate');
     if (displaySpan) {
         const date = new Date(window.currentFilterDate);
+        // Проверка на валидную дату
+        if (isNaN(date.getTime())) {
+            window.currentFilterDate = new Date().toISOString().split('T')[0];
+        }
+        const validDate = new Date(window.currentFilterDate);
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         const isToday = window.currentFilterDate === new Date().toISOString().split('T')[0];
         const prefix = isToday ? '📅 Сегодня, ' : '📅 ';
-        displaySpan.textContent = `${prefix}${date.toLocaleDateString('ru-RU', options)}`;
+        displaySpan.textContent = `${prefix}${validDate.toLocaleDateString('ru-RU', options)}`;
     }
 }
 
@@ -52,6 +57,7 @@ function updateFilterDateDisplay() {
 function formatDateForDisplay(dateString) {
     if (!dateString) return 'Дата не указана';
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Дата не указана';
     return date.toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
@@ -253,7 +259,7 @@ function loadOrders() {
                 <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                         <h3 style="margin: 0;">📦 Заказ №${order.number}</h3>
-                        <span style="background: #ffba3b; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px;">В работе</span>
+                        <span style="background: #ff3b3b; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px;">В работе</span>
                         <span style="background: #2a2f38; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #fff;">
                             Деталей: ${item.quantity} шт
                         </span>
@@ -276,9 +282,9 @@ function loadOrders() {
         content.className = 'order-content';
         content.style.display = 'none';
 
-        // ============== ПОЛНАЯ ИНФОРМАЦИЯ О ЗАКАЗЕ (как на участках) ==============
+        // ============== ПОЛНАЯ ИНФОРМАЦИЯ О ЗАКАЗЕ ==============
         
-        // Формируем отображение кронштейна (всегда показываем количество)
+        // Формируем отображение кронштейна
         let bracketDisplay = '';
         if (item.bracket.type === 'отсутствует' || item.bracket.quantity === 0) {
             bracketDisplay = `<span style="color: #fff; margin-left: 8px;">отсутствует</span>
@@ -288,7 +294,7 @@ function loadOrders() {
                               <span style="color: #ff9800; margin-left: 5px;">(${item.bracket.quantity} шт)</span>`;
         }
 
-        // Формируем отображение лиры (всегда показываем количество)
+        // Формируем отображение лиры
         let lyreDisplay = '';
         if (item.lyre.type === 'отсутствует' || item.lyre.quantity === 0) {
             lyreDisplay = `<span style="color: #fff; margin-left: 8px;">отсутствует</span>
@@ -305,14 +311,14 @@ function loadOrders() {
         productInfoDiv.style.padding = '12px 15px';
         productInfoDiv.style.background = '#15191f';
         productInfoDiv.style.borderRadius = '8px';
-        productInfoDiv.style.borderLeft = '3px solid #ffba3b';
+        productInfoDiv.style.borderLeft = '3px solid #ff3b3b';
+        productInfoDiv.style.fontSize = '15px';
 
         let infoHtml = `
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-                <!-- Левая колонка: изделие и размер -->
                 <div>
                     <div style="margin-bottom: 8px;">
-                        <strong style="color: #ffba3b;">📦 ИЗДЕЛИЕ:</strong>
+                        <strong style="color: #ff3b3b;">📦 ИЗДЕЛИЕ:</strong>
                         <span style="color: #fff; margin-left: 8px;">${escapeHtml(item.product)}</span>
                     </div>
                     <div style="margin-bottom: 8px;">
@@ -320,38 +326,34 @@ function loadOrders() {
                         <span style="color: #fff; margin-left: 8px;">${escapeHtml(item.size) || 'Стандартный'}</span>
                     </div>
                     <div>
-                        <strong> КОЛИЧЕСТВО:</strong>
+                        <strong>🔢 КОЛИЧЕСТВО:</strong>
                         <span style="color: #4cd964; margin-left: 8px; font-weight: 600;">${item.quantity} шт</span>
                     </div>
                 </div>
-                
-                <!-- Средняя колонка: кронштейн и лира -->
                 <div>
                     <div style="margin-bottom: 8px;">
-                        <strong> КРОНШТЕЙН:</strong>
+                        <strong>🔧 КРОНШТЕЙН:</strong>
                         ${bracketDisplay}
                     </div>
                     <div>
-                        <strong> ЛИРА:</strong>
+                        <strong>🎸 ЛИРА:</strong>
                         ${lyreDisplay}
                     </div>
                 </div>
-                
-                <!-- Правая колонка: RAL и текстура -->
                 <div>
                     <div style="margin-bottom: 8px;">
-                        <strong> RAL:</strong>
+                        <strong>🎨 RAL:</strong>
                         <span style="color: #fff; margin-left: 8px;">${escapeHtml(item.ral) || '-'}</span>
                     </div>
                     <div>
-                        <strong> ТЕКСТУРА:</strong>
+                        <strong>🧵 ТЕКСТУРА:</strong>
                         <span style="color: #fff; margin-left: 8px;">${escapeHtml(item.texture) || '-'}</span>
                     </div>
                 </div>
             </div>
         `;
 
-        // Добавляем комплектующие, если есть
+        // Добавляем комплектующие
         const components = order.components || [];
         if (components && components.length > 0) {
             let compsHtml = '';
@@ -363,7 +365,7 @@ function loadOrders() {
             }
             infoHtml += `
                 <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #2a2f38;">
-                    <strong style="color: #ffba3b; font-size: 14px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>
+                    <strong style="color: #ff3b3b; font-size: 14px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>
                     <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 10px;">
                         ${compsHtml}
                     </div>
@@ -371,12 +373,12 @@ function loadOrders() {
             `;
         }
 
-        // Добавляем дополнительные детали, если есть
+        // Добавляем дополнительные детали
         if (order.additional) {
             infoHtml += `
                 <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #2a2f38;">
                     <strong>📝 ДОПОЛНИТЕЛЬНО:</strong>
-                    <div style="margin-top: 6px; padding: 8px 12px; background: #1e232b; border-radius: 6px; color: #a0a0a0; font-size: 12px; border-left: 2px solid #ffba3b;">
+                    <div style="margin-top: 6px; padding: 8px 12px; background: #1e232b; border-radius: 6px; color: #a0a0a0; font-size: 12px; border-left: 2px solid #ff3b3b;">
                         ${escapeHtml(order.additional)}
                     </div>
                 </div>
@@ -392,11 +394,11 @@ function loadOrders() {
         sitesDiv.innerHTML = `
             <h4 style="margin-bottom: 15px;">🏭 Производственные участки</h4>
             <div class="sites-grid">
-                ${createSiteRow(' Токарный', order, 'tokarniy')}
-                ${createSiteRow(' Слесарный', order, 'slesarniy')}
-                ${createSiteRow(' Фрезерный', order, 'frezerniy')}
-                ${createSiteRow(' Лазерно-гибочный', order, 'lazerno')}
-                ${createSiteRow(' Полимерный', order, 'polimerniy')}
+                ${createSiteRow('🔧 Токарный', order, 'tokarniy')}
+                ${createSiteRow('🔨 Слесарный', order, 'slesarniy')}
+                ${createSiteRow('⚙️ Фрезерный', order, 'frezerniy')}
+                ${createSiteRow('✨ Лазерно-гибочный', order, 'lazerno')}
+                ${createSiteRow('🧪 Полимерный', order, 'polimerniy')}
             </div>
         `;
         content.appendChild(sitesDiv);
@@ -413,7 +415,7 @@ function loadOrders() {
     });
 }
 
-// Обновление статистики только для заказов на текущую дату фильтра
+// Обновление статистики
 function updateStatistics() {
     console.log('updateStatistics вызвана');
     const totalOrdersEl = document.getElementById('totalOrders');
@@ -421,7 +423,6 @@ function updateStatistics() {
     const activeTasksEl = document.getElementById('activeTasks');
     const completedTasksEl = document.getElementById('completedTasks');
 
-    // Фильтруем заказы по текущей дате
     const filteredOrders = orders.filter(order => order.date === window.currentFilterDate);
     
     if (totalOrdersEl) totalOrdersEl.textContent = filteredOrders.length;
@@ -528,7 +529,6 @@ function syncTasksFromHistory() {
 
 // ============== ФУНКЦИИ ДЛЯ МОДАЛЬНОГО ОКНА ==============
 
-// Открытие модального окна
 function openOrderModal() {
     console.log('📝 Открытие модального окна создания заказа');
     const modal = document.getElementById('orderModal');
@@ -548,7 +548,6 @@ function openOrderModal() {
     }
 }
 
-// Закрытие модального окна
 function closeOrderModal() {
     console.log('📝 Закрытие модального окна');
     const modal = document.getElementById('orderModal');
@@ -563,7 +562,6 @@ function closeOrderModal() {
 
 // ============== ФУНКЦИИ ДЛЯ РАБОТЫ С ПРОДУКТАМИ ==============
 
-// Заполнение выпадающих списков
 function populateSelects() {
     console.log('Заполнение select-ов...');
 
@@ -610,7 +608,6 @@ function populateSelects() {
     }
 }
 
-// Загрузка размеров для выбранного изделия
 async function loadProductSizes() {
     console.log('loadProductSizes вызвана');
     const productName = document.getElementById('productSelect').value;
@@ -641,7 +638,6 @@ async function loadProductSizes() {
 // ============== БАЗА ДАННЫХ ОПЕРАЦИЙ ==============
 const operationsDB = window.TASK_OPERATIONS || {};
 
-// ============== ФУНКЦИЯ getOperationNames ==============
 function getOperationNames(productName, siteKey) {
     const siteOps = operationsDB[siteKey] || {};
     if (siteOps[productName]) return siteOps[productName];
@@ -651,7 +647,6 @@ function getOperationNames(productName, siteKey) {
     return [];
 }
 
-// ============== ФУНКЦИЯ createSiteRow ==============
 function createSiteRow(name, order, siteKey) {
     if (!order.items || order.items.length === 0) return '<div>Нет изделий</div>';
 
@@ -833,6 +828,11 @@ async function loadAllData() {
 
         syncTasksFromHistory();
         populateSelects();
+        
+        // Инициализация currentFilterDate
+        if (typeof window.currentFilterDate === 'undefined') {
+            window.currentFilterDate = new Date().toISOString().split('T')[0];
+        }
         updateFilterDateDisplay();
         loadOrders();
         updateStatistics();
@@ -841,11 +841,12 @@ async function loadAllData() {
             window.materialsReport = new MaterialsReport();
             window.materialsReport.materialsDB.brackets = brackets;
             window.materialsReport.materialsDB.lyres = lyres;
-            window.materialsReport.loadMaterialsData().catch(err => console.error('❌ Ошибка инициализации отчета:', err));
+            console.log('✅ Отчет по материалам инициализирован');
         }
 
         window.addEventListener('storage', function(e) {
             if (e.key === 'masterx_orders') {
+                console.log('🔄 Изменение в localStorage (orders)');
                 orders = JSON.parse(e.newValue || '[]');
                 loadOrders();
                 updateStatistics();
