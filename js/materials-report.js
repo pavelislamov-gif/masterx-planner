@@ -149,7 +149,6 @@ class MaterialsReport {
         const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
         if (bracket) {
             const area = bracket.area * item.bracket.quantity * productQty;
-            // Определяем материал кронштейна по названию
             let materialName = 'Сталь';
             if (bracket.name.includes('B(T)') || bracket.name.includes('BZ') || bracket.name.includes('AISI')) {
                 materialName = 'Нержавеющая сталь AISI 430';
@@ -163,12 +162,11 @@ class MaterialsReport {
         const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
         if (lyre) {
             const area = lyre.area * item.lyre.quantity * productQty;
-            // Лиры обычно из стали
             addMaterial('Сталь', lyre.thickness, area);
         }
     }
     
-    // 4. КОМПЛЕКТУЮЩИЕ (если нужно добавлять в листовые)
+    // 4. КОМПЛЕКТУЮЩИЕ (всегда добавляем в листовые материалы)
     const components = order.components || [];
     const componentNorms = this.materialsNorm[productName]?.components || {};
     
