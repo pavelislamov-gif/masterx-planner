@@ -186,6 +186,7 @@ function createTasksForOrder(order) {
 // ============== ФУНКЦИИ ДЛЯ РАБОТЫ С ЗАКАЗАМИ ==============
 
 // Загрузка и отображение заказов с фильтрацией по дате
+// Загрузка и отображение заказов с фильтрацией по дате
 function loadOrders() {
     console.log('loadOrders вызвана, фильтр даты:', window.currentFilterDate);
     const ordersList = document.getElementById('ordersList');
@@ -214,20 +215,54 @@ function loadOrders() {
         header.className = 'order-header';
 
         const item = order.items[0];
+        
+        // Формируем строку с краткой информацией для шапки
+        const shortInfo = [];
+        shortInfo.push(`📦 ${item.product}`);
+        shortInfo.push(`📏 ${item.size}`);
+        shortInfo.push(` ${item.quantity} шт`);
+        
+        // Добавляем кронштейн если не отсутствует
+        if (item.bracket.type !== 'отсутствует') {
+            shortInfo.push(` ${item.bracket.type} (${item.bracket.quantity} шт)`);
+        }
+        
+        // Добавляем лиру если не отсутствует
+        if (item.lyre.type !== 'отсутствует') {
+            shortInfo.push(` ${item.lyre.type} (${item.lyre.quantity} шт)`);
+        }
+        
+        // Добавляем RAL если есть
+        if (item.ral) {
+            shortInfo.push(` ${item.ral}`);
+        }
+        
+        // Добавляем текстуру если есть
+        if (item.texture) {
+            shortInfo.push(` ${item.texture}`);
+        }
+        
         header.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-                <h3>📦 Заказ №${order.number}</h3>
-                <span style="background: #ff3b3b; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px;">В работе</span>
-                <span style="background: #2a2f38; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #fff;">
-                    Деталей: ${item.quantity} шт
-                </span>
-                <span style="background: #1e232b; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #ff9800;">
-                    📅 ${formatDateForDisplay(order.date)}
-                </span>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-info" onclick="event.stopPropagation(); showMaterialsReport(${order.id})">📊 Материалы</button>
-                <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
+            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <h3 style="margin: 0;">📦 Заказ №${order.number}</h3>
+                        <span style="background: #ff3b3b; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px;">В работе</span>
+                        <span style="background: #2a2f38; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #fff;">
+                            Деталей: ${item.quantity} шт
+                        </span>
+                        <span style="background: #1e232b; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #ff9800;">
+                            📅 ${formatDateForDisplay(order.date)}
+                        </span>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-info" onclick="event.stopPropagation(); showMaterialsReport(${order.id})">📊 Материалы</button>
+                        <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
+                    </div>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; font-size: 12px; color: #a0a0a0; padding-top: 5px; border-top: 1px solid #2a2f38;">
+                    ${shortInfo.map(info => `<span>${info}</span>`).join('')}
+                </div>
             </div>
         `;
 
@@ -235,7 +270,7 @@ function loadOrders() {
         content.className = 'order-content';
         content.style.display = 'none';
 
-        // ИСПРАВЛЕНО: убраны дублирования ${item.product}${item.product} и т.д.
+        // Полная информация в развёрнутом виде
         content.innerHTML = `
             <table class="items-table">
                 <thead>
@@ -247,20 +282,19 @@ function loadOrders() {
                         <th>Лира</th>
                         <th>RAL</th>
                         <th>Текстура</th>
-                    </tr>
-                </thead>
+                    </thead>
                 <tbody>
                     <tr>
-                        <td><strong>${item.product}</strong></td>
-                        <td>${item.size}</td>
-                        <td>${item.quantity} шт</td>
-                        <td>${item.bracket.type} (${item.bracket.quantity} шт)</td>
-                        <td>${item.lyre.type} (${item.lyre.quantity} шт)</td>
-                        <td>${item.ral || '-'}</td>
-                        <td>${item.texture || '-'}</td>
+                        <td><strong>${item.product}</strong>${item.product}
+                        <td>${item.size}${item.size}
+                        <td>${item.quantity} шт${item.quantity}
+                        <td>${item.bracket.type} (${item.bracket.quantity} шт)${item.bracket.type}
+                        <td>${item.lyre.type} (${item.lyre.quantity} шт)${item.lyre.type}
+                        <td>${item.ral || '-'}${item.ral}
+                        <td>${item.texture || '-'}${item.texture}
                     </tr>
                 </tbody>
-            </table>
+            }</table>
             
             <div class="sites-section">
                 <h4 style="margin-bottom: 15px;">🏭 Производственные участки</h4>
