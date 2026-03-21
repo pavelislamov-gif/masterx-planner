@@ -134,7 +134,7 @@ class MaterialsReport {
         }
     };
     
-    // ТОЛЬКО КОРПУС (body) — в листовые материалы
+    // 1. КОРПУС (body)
     const bodyNorm = this.materialsNorm[productName]?.body;
     if (bodyNorm) {
         bodyNorm.forEach(material => {
@@ -143,8 +143,42 @@ class MaterialsReport {
         });
     }
     
-    // КОМПЛЕКТУЮЩИЕ (components) — НЕ ДОБАВЛЯЕМ в листовые материалы
-    // Они будут только в краске
+    // 2. КРОНШТЕЙНЫ
+    const item = order.items[0];
+    if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
+        const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
+        if (bracket) {
+            const area = bracket.area * item.bracket.quantity * productQty;
+            // Определяем материал кронштейна по названию
+            let materialName = 'Сталь';
+            if (bracket.name.includes('B(T)') || bracket.name.includes('BZ') || bracket.name.includes('AISI')) {
+                materialName = 'Нержавеющая сталь AISI 430';
+            }
+            addMaterial(materialName, bracket.thickness, area);
+        }
+    }
+    
+    // 3. ЛИРЫ
+    if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
+        const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
+        if (lyre) {
+            const area = lyre.area * item.lyre.quantity * productQty;
+            // Лиры обычно из стали
+            addMaterial('Сталь', lyre.thickness, area);
+        }
+    }
+    
+    // 4. КОМПЛЕКТУЮЩИЕ (если нужно добавлять в листовые)
+    const components = order.components || [];
+    const componentNorms = this.materialsNorm[productName]?.components || {};
+    
+    components.forEach(comp => {
+        const norm = componentNorms[comp.name];
+        if (norm) {
+            const area = norm.area * comp.quantityPerProduct * productQty;
+            addMaterial(norm.material, norm.thickness, area);
+        }
+    });
     
     return materials;
 }
