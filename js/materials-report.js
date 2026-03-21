@@ -134,7 +134,7 @@ class MaterialsReport {
         }
     };
     
-    // 1. КОРПУС (body)
+    // 1. КОРПУС (body) — умножаем на количество изделий
     const bodyNorm = this.materialsNorm[productName]?.body;
     if (bodyNorm) {
         bodyNorm.forEach(material => {
@@ -143,12 +143,12 @@ class MaterialsReport {
         });
     }
     
-    // 2. КРОНШТЕЙНЫ
+    // 2. КРОНШТЕЙНЫ — НЕ умножаем на productQty (количество уже общее на заказ)
     const item = order.items[0];
     if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
         const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
         if (bracket) {
-            const area = bracket.area * item.bracket.quantity * productQty;
+            const area = bracket.area * item.bracket.quantity;
             let materialName = 'Сталь';
             if (bracket.name.includes('B(T)') || bracket.name.includes('BZ') || bracket.name.includes('AISI')) {
                 materialName = 'Нержавеющая сталь AISI 430';
@@ -157,16 +157,16 @@ class MaterialsReport {
         }
     }
     
-    // 3. ЛИРЫ
+    // 3. ЛИРЫ — НЕ умножаем на productQty (количество уже общее на заказ)
     if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
         const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
         if (lyre) {
-            const area = lyre.area * item.lyre.quantity * productQty;
+            const area = lyre.area * item.lyre.quantity;
             addMaterial('Сталь', lyre.thickness, area);
         }
     }
     
-    // 4. КОМПЛЕКТУЮЩИЕ (всегда добавляем в листовые материалы)
+    // 4. КОМПЛЕКТУЮЩИЕ — умножаем на productQty (количество на 1 изделие)
     const components = order.components || [];
     const componentNorms = this.materialsNorm[productName]?.components || {};
     
