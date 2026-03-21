@@ -116,58 +116,38 @@ class MaterialsReport {
     }
     
     calculateSheetMaterials(order) {
-        const productName = order.items[0]?.product || '';
-        const productQty = order.items[0]?.quantity || 1;
-        const materials = [];
-        
-        const addMaterial = (detailName, materialName, thickness, area) => {
+    const productName = order.items[0]?.product || '';
+    const productQty = order.items[0]?.quantity || 1;
+    const materials = [];
+    
+    const addMaterial = (materialName, thickness, area) => {
+        const existing = materials.find(m => m.material === materialName && m.thickness === thickness);
+        if (existing) {
+            existing.area += area;
+        } else {
             materials.push({
-                detail: detailName,
                 material: materialName,
                 thickness: thickness,
                 area: area,
                 unit: 'м²'
             });
-        };
-        
-        const bodyNorm = this.materialsNorm[productName]?.body;
-        if (bodyNorm) {
-            bodyNorm.forEach(material => {
-                const area = material.area * productQty;
-                addMaterial('Корпус', material.material, material.thickness, area);
-            });
         }
-        
-        const components = order.components || [];
-        const componentNorms = this.materialsNorm[productName]?.components || {};
-        
-        components.forEach(comp => {
-            const norm = componentNorms[comp.name];
-            if (norm) {
-                const area = norm.area * comp.quantityPerProduct * productQty;
-                addMaterial(comp.name, norm.material, norm.thickness, area);
-            }
+    };
+    
+    // ТОЛЬКО КОРПУС (body) — добавляем в листовые материалы
+    const bodyNorm = this.materialsNorm[productName]?.body;
+    if (bodyNorm) {
+        bodyNorm.forEach(material => {
+            const area = material.area * productQty;
+            addMaterial(material.material, material.thickness, area);
         });
-        
-        const item = order.items[0];
-        if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
-            const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
-            if (bracket) {
-                const area = bracket.area * item.bracket.quantity * productQty;
-                addMaterial(`Кронштейн ${item.bracket.type}`, 'Сталь', bracket.thickness, area);
-            }
-        }
-        
-        if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
-            const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
-            if (lyre) {
-                const area = lyre.area * item.lyre.quantity * productQty;
-                addMaterial(`Лира ${item.lyre.type}`, 'Сталь', lyre.thickness, area);
-            }
-        }
-        
-        return materials;
     }
+    
+    // КОМПЛЕКТУЮЩИЕ, КРОНШТЕЙНЫ, ЛИРЫ — НЕ ДОБАВЛЯЕМ В ЛИСТОВЫЕ МАТЕРИАЛЫ
+    // Они будут в отдельных блоках (профили, прутки, краска)
+    
+    return materials;
+}
     
     calculateProfiles(order) {
         const productName = order.items[0]?.product || '';
