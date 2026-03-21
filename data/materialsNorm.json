@@ -37,7 +37,8 @@
     "XLUMO": {
   "body": [
     { "material": "Алюминий", "thickness": "3мм", "area": 0.006 },
-    { "material": "Нержавеющая сталь AISI 430", "thickness": "2мм", "area": 0.017 }
+    { "material": "Нержавеющая сталь AISI 430", "thickness": "2мм", "area": 0.017 },
+    { "material": "ПВХ", "thickness": "3мм", "area": 0.003 }
   ],
   "components": {
     "Заглушки Алюминиевые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 },
