@@ -15,6 +15,43 @@
             opacity: 0.6;
             pointer-events: none;
         }
+
+        /* Стили для фильтра даты */
+        .date-filter-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #1a1e24, #0f1217);
+            border-radius: 12px;
+            border: 1px solid #2a2f38;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .date-filter-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .current-date-display {
+            color: #ff3b3b;
+            font-weight: 500;
+            background: #1a1e24;
+            padding: 8px 18px;
+            border-radius: 25px;
+            border: 1px solid #2a2f38;
+            font-size: 14px;
+        }
+
+        .filter-label {
+            color: #fff;
+            font-weight: 500;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -42,6 +79,19 @@
                 <a href="sites/lazerno-gibochniy.html" class="site-link">Лазерно-гибочный</a>
                 <a href="sites/polimerniy.html" class="site-link">Полимерный</a>
             </div>
+        </div>
+
+        <!-- ФИЛЬТР ПО ДАТЕ -->
+        <div class="date-filter-section">
+            <div class="date-filter-buttons">
+                <span class="filter-label">📅 Показать заказы на:</span>
+                <button class="btn btn-primary" onclick="filterOrdersByDate('prev')" style="padding: 6px 12px;">← Вчера</button>
+                <button class="btn btn-success" onclick="filterOrdersByDate('today')" style="padding: 6px 12px;">Сегодня</button>
+                <button class="btn btn-primary" onclick="filterOrdersByDate('next')" style="padding: 6px 12px;">Завтра →</button>
+            </div>
+            <span id="currentFilterDate" class="current-date-display">
+                Загрузка...
+            </span>
         </div>
 
         <!-- СТАТИСТИКА -->
@@ -144,7 +194,7 @@
                     </div>
 
                     <!-- КОМПЛЕКТУЮЩИЕ ДЕТАЛИ (появляются при выборе изделия) -->
-<div id="componentsContainer" class="form-group" style="margin-top: 20px;"></div>
+                    <div id="componentsContainer" class="form-group" style="margin-top: 20px;"></div>
 
                     <div class="form-group">
                         <label>📝 Дополнительные детали:</label>
