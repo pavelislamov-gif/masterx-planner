@@ -235,6 +235,7 @@ function loadOrders() {
         content.className = 'order-content';
         content.style.display = 'none';
 
+        // ИСПРАВЛЕНО: убраны дублирования ${item.product}${item.product} и т.д.
         content.innerHTML = `
             <table class="items-table">
                 <thead>
@@ -246,28 +247,29 @@ function loadOrders() {
                         <th>Лира</th>
                         <th>RAL</th>
                         <th>Текстура</th>
-                    </thead>
+                    </tr>
+                </thead>
                 <tbody>
                     <tr>
-                        <td><strong>${item.product}</strong>${item.product}
-                        <td>${item.size}${item.size}
-                        <td>${item.quantity} шт${item.quantity}
-                        <td>${item.bracket.type} (${item.bracket.quantity} шт)${item.bracket.type}
-                        <td>${item.lyre.type} (${item.lyre.quantity} шт)${item.lyre.type}
-                        <td>${item.ral || '-'}${item.ral}
-                        <td>${item.texture || '-'}${item.texture}
+                        <td><strong>${item.product}</strong></td>
+                        <td>${item.size}</td>
+                        <td>${item.quantity} шт</td>
+                        <td>${item.bracket.type} (${item.bracket.quantity} шт)</td>
+                        <td>${item.lyre.type} (${item.lyre.quantity} шт)</td>
+                        <td>${item.ral || '-'}</td>
+                        <td>${item.texture || '-'}</td>
                     </tr>
                 </tbody>
-            }</table>
+            </table>
             
             <div class="sites-section">
                 <h4 style="margin-bottom: 15px;">🏭 Производственные участки</h4>
                 <div class="sites-grid">
-                    ${createSiteRow('🔧 Токарный', order, 'tokarniy')}
-                    ${createSiteRow('🔨 Слесарный', order, 'slesarniy')}
-                    ${createSiteRow('⚙️ Фрезерный', order, 'frezerniy')}
-                    ${createSiteRow('✨ Лазерно-гибочный', order, 'lazerno')}
-                    ${createSiteRow('🧪 Полимерный', order, 'polimerniy')}
+                    ${createSiteRow(' Токарный', order, 'tokarniy')}
+                    ${createSiteRow(' Слесарный', order, 'slesarniy')}
+                    ${createSiteRow(' Фрезерный', order, 'frezerniy')}
+                    ${createSiteRow(' Лазерно-гибочный', order, 'lazerno')}
+                    ${createSiteRow(' Полимерный', order, 'polimerniy')}
                 </div>
             </div>
             
