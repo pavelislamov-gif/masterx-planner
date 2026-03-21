@@ -491,32 +491,39 @@ calculateSheetMaterials(order) {
     }
     
     // БЛОК КРАСКИ
-    if (paint && paint.items.length > 0) {
-        html += `
-            <h4 style="margin-top: 30px;">🎨 ПОРОШКОВАЯ КРАСКА (${paint.ral})</h4>
-            <div style="margin-top: 15px; padding: 12px; background: #1e232b; border-radius: 8px;">
-                <p style="margin: 0 0 8px 0;"><strong>📌 С учетом технологических потерь:</strong></p>
-                <ul style="margin: 0; padding-left: 20px; color: #a0a0a0;">
-                    <li>Плоские детали: +${Math.round((paint.lossCoefficients.flat - 1) * 100)}%</li>
-                    <li>Профили: +${Math.round((paint.lossCoefficients.profile - 1) * 100)}%</li>
-                    <li>Трубы: +${Math.round((paint.lossCoefficients.pipe - 1) * 100)}%</li>
-                </ul>
-                <p style="margin: 10px 0 0 0; font-weight: 600; color: #ff9800;">
-                    💰 Рекомендуемый заказ краски: <strong>${paint.recommendedOrder} кг</strong>
-                </p>
-            </div>
-        `;
-    }
-    
-    if (Object.keys(groupedMaterials).length === 0 && profiles.length === 0 && (!paint || paint.items.length === 0)) {
-        html += `
-            <div style="text-align: center; padding: 40px; color: #a0a0a0;">
-                <p>📭 Нет данных по материалам для этого заказа</p>
-            </div>
-        `;
-    }
-    
-    html += `</div>`;
+if (paint && paint.items.length > 0) {
+    html += `
+        <h4 style="margin-top: 30px;">🎨 ПОРОШКОВАЯ КРАСКА (${paint.ral})</h4>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+            <thead>
+                <tr style="background: #2a2f38;">
+                    <th style="padding: 10px; text-align: left;">Показатель</th>
+                    <th style="padding: 10px; text-align: right;">Значение</th>
+                  </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #2a2f38;">
+                    <td style="padding: 8px;">Площадь окраски</td>
+                    <td style="padding: 8px; text-align: right; color: #4cd964;">${fmt(paint.totalArea, 4)} м²</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #2a2f38;">
+                    <td style="padding: 8px;">Чистый расход краски</td>
+                    <td style="padding: 8px; text-align: right; color: #4cd964;">${fmt(paint.pureConsumption, 3)} кг</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div style="margin-top: 15px; padding: 12px; background: #1e232b; border-radius: 8px;">
+            <p style="margin: 0 0 8px 0;"><strong>📌 С учетом технологических потерь:</strong></p>
+            <ul style="margin: 0; padding-left: 20px; color: #a0a0a0;">
+                <li>Плоские детали: +${Math.round((paint.lossCoefficients.flat - 1) * 100)}%</li>
+                <li>Профили: +${Math.round((paint.lossCoefficients.profile - 1) * 100)}%</li>
+                <li>Трубы: +${Math.round((paint.lossCoefficients.pipe - 1) * 100)}%</li>
+            </ul>
+            <p style="margin: 10px 0 0 0; font-weight: 600; color: #ff9800;">
+                💰 Рекомендуемый заказ краски: <strong>${paint.recommendedOrder} кг</strong>
+            </p>
+        </div>`;
     return html;
 }
 }
