@@ -253,7 +253,7 @@ function loadOrders() {
                 <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                         <h3 style="margin: 0;">📦 Заказ №${order.number}</h3>
-                        <span style="background: #ff3b3b; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px;">В работе</span>
+                        <span style="background: #ffba3b; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px;">В работе</span>
                         <span style="background: #2a2f38; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #fff;">
                             Деталей: ${item.quantity} шт
                         </span>
@@ -305,14 +305,14 @@ function loadOrders() {
         productInfoDiv.style.padding = '12px 15px';
         productInfoDiv.style.background = '#15191f';
         productInfoDiv.style.borderRadius = '8px';
-        productInfoDiv.style.borderLeft = '3px solid #ff3b3b';
+        productInfoDiv.style.borderLeft = '3px solid #ffba3b';
 
         let infoHtml = `
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
                 <!-- Левая колонка: изделие и размер -->
                 <div>
                     <div style="margin-bottom: 8px;">
-                        <strong style="color: #ff3b3b;">📦 ИЗДЕЛИЕ:</strong>
+                        <strong style="color: #ffba3b;">📦 ИЗДЕЛИЕ:</strong>
                         <span style="color: #fff; margin-left: 8px;">${escapeHtml(item.product)}</span>
                     </div>
                     <div style="margin-bottom: 8px;">
@@ -363,7 +363,7 @@ function loadOrders() {
             }
             infoHtml += `
                 <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #2a2f38;">
-                    <strong style="color: #ff3b3b; font-size: 14px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>
+                    <strong style="color: #ffba3b; font-size: 14px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>
                     <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 10px;">
                         ${compsHtml}
                     </div>
@@ -376,7 +376,7 @@ function loadOrders() {
             infoHtml += `
                 <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #2a2f38;">
                     <strong>📝 ДОПОЛНИТЕЛЬНО:</strong>
-                    <div style="margin-top: 6px; padding: 8px 12px; background: #1e232b; border-radius: 6px; color: #a0a0a0; font-size: 12px; border-left: 2px solid #ff3b3b;">
+                    <div style="margin-top: 6px; padding: 8px 12px; background: #1e232b; border-radius: 6px; color: #a0a0a0; font-size: 12px; border-left: 2px solid #ffba3b;">
                         ${escapeHtml(order.additional)}
                     </div>
                 </div>
