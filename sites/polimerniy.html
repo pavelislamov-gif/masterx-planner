@@ -860,7 +860,7 @@ if (components && components.length > 0) {
             <strong style="color: #ff3b3b;"> КОМПЛЕКТУЮЩИЕ:</strong>
             <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;">
                 ${components.map(comp => `
-                    <span style="background: #1e232b; padding: 4px 12px; border-radius: 20px; font-size: 15px; border: 1px solid #2a2f38;">
+                    <span style="background: #1e232b; padding: 4px 12px; border-radius: 20px; font-size: 20px; border: 1px solid #2a2f38;">
                         ${escapeHtml(comp.name)}: <strong style="color: #4cd964;">${comp.quantityPerProduct}</strong> шт/изд
                     </span>
                 `).join('')}
@@ -874,7 +874,7 @@ if (additional) {
     infoHtml += `
         <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #2a2f38;">
             <strong>📝 ДОПОЛНИТЕЛЬНО:</strong>
-            <div style="margin-top: 6px; padding: 8px 12px; background: #1e232b; border-radius: 6px; color: #a0a0a0; font-size: 12px; border-left: 2px solid #ff3b3b;">
+            <div style="margin-top: 6px; padding: 8px 12px; background: #1e232b; border-radius: 6px; color: #a0a0a0; font-size: 20px; border-left: 2px solid #ff3b3b;">
                 ${escapeHtml(additional)}
             </div>
         </div>
