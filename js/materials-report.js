@@ -122,67 +122,67 @@ class MaterialsReport {
     }
     
     // ============== РАСЧЁТ ЛИСТОВЫХ МАТЕРИАЛОВ ==============
-    calculateSheetMaterials(order) {
-        const productName = order.items[0]?.product || '';
-        const productQty = order.items[0]?.quantity || 1;
-        const materials = [];
-        
-        const addMaterial = (materialName, thickness, area) => {
-            const existing = materials.find(m => m.material === materialName && m.thickness === thickness);
-            if (existing) {
-                existing.area += area;
-            } else {
-                materials.push({
-                    material: materialName,
-                    thickness: thickness,
-                    area: area,
-                    unit: 'м²'
-                });
-            }
-        };
-        
-        // 1. Корпус (body) из materialsNorm
-        const bodyNorm = this.materialsNorm[productName]?.body;
-        if (bodyNorm) {
-            bodyNorm.forEach(material => {
-                const area = material.area * productQty * 2;
-                addMaterial(material.material, material.thickness, area);
+calculateSheetMaterials(order) {
+    const productName = order.items[0]?.product || '';
+    const productQty = order.items[0]?.quantity || 1;
+    const materials = [];
+    
+    const addMaterial = (materialName, thickness, area) => {
+        const existing = materials.find(m => m.material === materialName && m.thickness === thickness);
+        if (existing) {
+            existing.area += area;
+        } else {
+            materials.push({
+                material: materialName,
+                thickness: thickness,
+                area: area,
+                unit: 'м²'
             });
         }
-        
-        // 2. Комплектующие из materialsNorm
-        const components = order.components || [];
-        const componentNorms = this.materialsNorm[productName]?.components || {};
-        
-        components.forEach(comp => {
-            const norm = componentNorms[comp.name];
-            if (norm) {
-                const area = norm.area * comp.quantityPerProduct * productQty * 2;
-                addMaterial(norm.material, norm.thickness, area);
-            }
+    };
+    
+    // 1. Корпус (body) из materialsNorm
+    const bodyNorm = this.materialsNorm[productName]?.body;
+    if (bodyNorm) {
+        bodyNorm.forEach(material => {
+            const area = material.area * productQty;  // убрано * 2
+            addMaterial(material.material, material.thickness, area);
         });
-        
-        // 3. Кронштейны
-        const item = order.items[0];
-        if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
-            const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
-            if (bracket) {
-                const area = bracket.area * item.bracket.quantity * productQty * 2;
-                addMaterial('Сталь', bracket.thickness, area);
-            }
-        }
-        
-        // 4. Лиры
-        if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
-            const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
-            if (lyre) {
-                const area = lyre.area * item.lyre.quantity * productQty * 2;
-                addMaterial('Сталь', lyre.thickness, area);
-            }
-        }
-        
-        return materials;
     }
+    
+    // 2. Комплектующие из materialsNorm
+    const components = order.components || [];
+    const componentNorms = this.materialsNorm[productName]?.components || {};
+    
+    components.forEach(comp => {
+        const norm = componentNorms[comp.name];
+        if (norm) {
+            const area = norm.area * comp.quantityPerProduct * productQty;  // убрано * 2
+            addMaterial(norm.material, norm.thickness, area);
+        }
+    });
+    
+    // 3. Кронштейны
+    const item = order.items[0];
+    if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
+        const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
+        if (bracket) {
+            const area = bracket.area * item.bracket.quantity * productQty;  // убрано * 2
+            addMaterial('Сталь', bracket.thickness, area);
+        }
+    }
+    
+    // 4. Лиры
+    if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
+        const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
+        if (lyre) {
+            const area = lyre.area * item.lyre.quantity * productQty;  // убрано * 2
+            addMaterial('Сталь', lyre.thickness, area);
+        }
+    }
+    
+    return materials;
+}
     
     // ============== РАСЧЁТ ПРОФИЛЕЙ (длина в мм) ==============
     calculateProfiles(order) {
