@@ -893,7 +893,36 @@
       "1 490": {
         "Профиль НПС 2997": { "value": 1480, "unit": "мм" },
         "Профиль НПС 2994": { "value": 60, "unit": "мм" }
-      }
+      },
+{
+  "aluminum": [...],
+  "steel": [...],
+  "stainless": [...],
+  "pvc": [...],
+  "polycarbonate": [...],
+  "other": [...],
+  "rods": [...],
+  "brackets": [...],
+  "lyres": [...],
+  "productSpecs": {...},
+  "paint": {
+    "defaultConsumptionPerM2": 0.165,
+    "unit": "кг",
+    "roundTo": 0.5,
+    "lossCoefficients": {
+      "flat": 1.10,
+      "pipe": 1.30,
+      "profile": 1.20
+    },
+    "ralConsumption": {
+      "RAL 9006": 0.165,
+      "RAL 9016": 0.165,
+      "RAL 9003": 0.165,
+      "RAL 7016": 0.170,
+      "RAL 1016": 0.180,
+      "RAL 9005": 0.160,
+      "RAL 3005": 0.190,
+      "RAL 5005": 0.180
     }
   }
 }
