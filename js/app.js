@@ -953,12 +953,19 @@ function updateComponentsList() {
     desc.innerHTML = 'Введите количество на 1 изделие:';
     container.appendChild(desc);
     components.forEach(comp => {
+        // Определяем значение по умолчанию
+        let defaultValue = 0;
+        // Для заглушек ставим 1 по умолчанию
+        if (comp.name.includes('Заглушка') || comp.name.includes('заглушка')) {
+            defaultValue = 1;
+        }
+        
         const row = document.createElement('div');
         row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #15191f; border-radius: 6px; border: 1px solid #2a2f38; margin-bottom: 8px;';
         row.innerHTML = `
             <span style="font-size: 13px; font-weight: 500;">${comp.name}</span>
             <div>
-                <input type="number" class="component-qty" data-name="${comp.name}" data-material="${comp.material}" value="0" min="0" style="width: 80px; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                <input type="number" class="component-qty" data-name="${comp.name}" data-material="${comp.material}" value="${defaultValue}" min="0" style="width: 80px; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
                 <span style="color: #a0a0a0; margin-left: 5px;">шт/изд</span>
             </div>
         `;
