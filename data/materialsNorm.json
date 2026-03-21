@@ -35,16 +35,17 @@
       }
     },
     "XLUMO": {
-      "body": [
-        { "material": "Алюминий", "thickness": "3мм", "area": 0.006 }
-      ],
-      "components": {
-        "Заглушки Алюминиевые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 },
-        "Вставка ПВХ нижняя": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 },
-        "Вставка ПВХ нижняя с выемкой": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 },
-        "Вставка ПВХ верхняя": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 },
-        "Вставка ПВХ верхняя с выемкой": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 }
-      }
+  "body": [
+    { "material": "Алюминий", "thickness": "3мм", "area": 0.006 },
+    { "material": "Нержавеющая сталь AISI 430", "thickness": "2мм", "area": 0.017 }
+  ],
+  "components": {
+    "Заглушки Алюминиевые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 },
+    "Вставка ПВХ нижняя": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 },
+    "Вставка ПВХ нижняя с выемкой": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 },
+    "Вставка ПВХ верхняя": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 },
+    "Вставка ПВХ верхняя с выемкой": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 }
+  }
     },
     "XLUMO 1-6": {
       "body": [
