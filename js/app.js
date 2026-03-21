@@ -6,7 +6,10 @@ let orders = [];
 let materialsReport = null;
 
 // ============== ФИЛЬТРАЦИЯ ЗАКАЗОВ ПО ДАТЕ ==============
-let currentFilterDate = new Date().toISOString().split('T')[0]; // сегодня по умолчанию
+// Проверяем, не объявлена ли уже переменная
+if (typeof currentFilterDate === 'undefined') {
+    var currentFilterDate = new Date().toISOString().split('T')[0]; // сегодня по умолчанию
+}
 
 // Функция фильтрации заказов по дате
 function filterOrdersByDate(action) {
@@ -273,15 +276,15 @@ function loadOrders() {
                 <tbody>
                     <tr>
                         <td><strong>${item.product}</strong></td>
-                        <td>${item.size}</td>
-                        <td>${item.quantity} шт</td>
-                        <td>${item.bracket.type} (${item.bracket.quantity} шт)</td>
-                        <td>${item.lyre.type} (${item.lyre.quantity} шт)</td>
-                        <td>${item.ral || '-'}</td>
-                        <td>${item.texture || '-'}</td>
+                        <td>${item.size}${item.size}
+                        <td>${item.quantity} шт${item.quantity}
+                        <td>${item.bracket.type} (${item.bracket.quantity} шт)${item.bracket.type}
+                        <td>${item.lyre.type} (${item.lyre.quantity} шт)${item.lyre.type}
+                        <td>${item.ral || '-'}${item.ral}
+                        <td>${item.texture || '-'}${item.texture}
                     </tr>
                 </tbody>
-            }</table>
+            </table>
             
             <div class="sites-section">
                 <h4 style="margin-bottom: 15px;">🏭 Производственные участки</h4>
