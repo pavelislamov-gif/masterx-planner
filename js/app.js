@@ -5,6 +5,53 @@ let lyres = [];
 let orders = [];
 let materialsReport = null;
 
+// ============== ФИЛЬТРАЦИЯ ЗАКАЗОВ ПО ДАТЕ ==============
+let currentFilterDate = new Date().toISOString().split('T')[0]; // сегодня по умолчанию
+
+// Функция фильтрации заказов по дате
+function filterOrdersByDate(action) {
+    const today = new Date();
+    let newDate = new Date(currentFilterDate);
+    
+    switch(action) {
+        case 'prev':
+            newDate.setDate(newDate.getDate() - 1);
+            break;
+        case 'next':
+            newDate.setDate(newDate.getDate() + 1);
+            break;
+        case 'today':
+            newDate = new Date();
+            break;
+        default:
+            return;
+    }
+    
+    currentFilterDate = newDate.toISOString().split('T')[0];
+    updateFilterDateDisplay();
+    loadOrders();
+    updateStatistics();
+}
+
+// Обновление отображения текущей даты фильтра
+function updateFilterDateDisplay() {
+    const displaySpan = document.getElementById('currentFilterDate');
+    if (displaySpan) {
+        const date = new Date(currentFilterDate);
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        const isToday = currentFilterDate === new Date().toISOString().split('T')[0];
+        const prefix = isToday ? '📅 Сегодня, ' : '📅 ';
+        displaySpan.textContent = `${prefix}${date.toLocaleDateString('ru-RU', options)}`;
+    }
+}
+
+// Форматирование даты для отображения
+function formatDateForDisplay(dateString) {
+    if (!dateString) return 'Дата не указана';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
 // ============== ПРОВЕРКА ЗАВИСИМОСТЕЙ ==============
 console.log('🔍 ПРОВЕРКА ЗАВИСИМОСТЕЙ app.js:');
 console.log('='.repeat(50));
@@ -161,22 +208,27 @@ function createTasksForOrder(order) {
 
 // ============== ФУНКЦИИ ДЛЯ РАБОТЫ С ЗАКАЗАМИ ==============
 
-// Загрузка и отображение заказов
+// Загрузка и отображение заказов с фильтрацией по дате
 function loadOrders() {
-    console.log('loadOrders вызвана');
+    console.log('loadOrders вызвана, фильтр даты:', currentFilterDate);
     const ordersList = document.getElementById('ordersList');
     if (!ordersList) return;
 
+    // Фильтруем заказы по выбранной дате
+    const filteredOrders = orders.filter(order => order.date === currentFilterDate);
+    
+    console.log(`📅 Заказов на ${currentFilterDate}: ${filteredOrders.length} из ${orders.length} всего`);
+
     ordersList.innerHTML = '';
 
-    if (orders.length === 0) {
-        ordersList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">Нет заказов</div></div>';
+    if (filteredOrders.length === 0) {
+        ordersList.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">Нет заказов на ${formatDateForDisplay(currentFilterDate)}</div></div>`;
         return;
     }
 
-    orders.sort((a, b) => new Date(b.date) - new Date(a.date));
+    filteredOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    orders.forEach(order => {
+    filteredOrders.forEach(order => {
         const card = document.createElement('div');
         card.className = 'order-card';
         card.dataset.orderId = order.id;
@@ -187,10 +239,13 @@ function loadOrders() {
         const item = order.items[0];
         header.innerHTML = `
             <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-                <h3>📦 Заказ №${order.number} от ${formatDate(order.date)}</h3>
+                <h3>📦 Заказ №${order.number}</h3>
                 <span style="background: #ff3b3b; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px;">В работе</span>
                 <span style="background: #2a2f38; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #fff;">
                     Деталей: ${item.quantity} шт
+                </span>
+                <span style="background: #1e232b; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #ff9800;">
+                    📅 ${formatDateForDisplay(order.date)}
                 </span>
             </div>
             <div style="display: flex; gap: 10px;">
@@ -226,7 +281,7 @@ function loadOrders() {
                         <td>${item.texture || '-'}</td>
                     </tr>
                 </tbody>
-             </table>
+            }</table>
             
             <div class="sites-section">
                 <h4 style="margin-bottom: 15px;">🏭 Производственные участки</h4>
@@ -254,7 +309,7 @@ function loadOrders() {
     });
 }
 
-// Обновление статистики
+// Обновление статистики только для заказов на текущую дату фильтра
 function updateStatistics() {
     console.log('updateStatistics вызвана');
     const totalOrdersEl = document.getElementById('totalOrders');
@@ -262,15 +317,18 @@ function updateStatistics() {
     const activeTasksEl = document.getElementById('activeTasks');
     const completedTasksEl = document.getElementById('completedTasks');
 
-    if (totalOrdersEl) totalOrdersEl.textContent = orders.length;
+    // Фильтруем заказы по текущей дате
+    const filteredOrders = orders.filter(order => order.date === currentFilterDate);
+    
+    if (totalOrdersEl) totalOrdersEl.textContent = filteredOrders.length;
 
-    const totalItems = orders.reduce((sum, order) => sum + (order.items[0]?.quantity || 0), 0);
+    const totalItems = filteredOrders.reduce((sum, order) => sum + (order.items[0]?.quantity || 0), 0);
     if (totalItemsEl) totalItemsEl.textContent = totalItems;
 
     let activeTasks = 0;
     let completedTasks = 0;
 
-    orders.forEach(order => {
+    filteredOrders.forEach(order => {
         if (order.tasks) {
             Object.values(order.tasks).forEach(status => {
                 if (status === 'orange') activeTasks++;
@@ -797,6 +855,7 @@ async function loadAllData() {
         syncTasksFromHistory();
 
         populateSelects();
+        updateFilterDateDisplay();
         loadOrders();
         updateStatistics();
 
@@ -927,6 +986,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // ✅ СОЗДАЁМ ЗАДАЧИ НА ВСЕХ УЧАСТКАХ НА ВЫБРАННУЮ ДАТУ
             createTasksForOrder(order);
             
+            // Обновляем фильтр даты на дату созданного заказа
+            currentFilterDate = order.date;
+            updateFilterDateDisplay();
+            
             loadOrders();
             updateStatistics();
             closeOrderModal();
@@ -947,14 +1010,16 @@ window.deleteOrder = deleteOrder;
 window.addExtraTask = addExtraTask;
 window.closeMaterialsModal = closeMaterialsModal;
 window.syncTasksFromHistory = syncTasksFromHistory;
-window.createTasksForOrder = createTasksForOrder; // Экспортируем новую функцию
+window.createTasksForOrder = createTasksForOrder;
+window.filterOrdersByDate = filterOrdersByDate;
+window.updateFilterDateDisplay = updateFilterDateDisplay;
 
 console.log('📤 Экспорт функций в глобальную область...');
 console.log('✅ Функции экспортированы:', Object.keys(window).filter(key => 
     typeof window[key] === 'function' && 
     ['openOrderModal', 'closeOrderModal', 'loadProductSizes', 'exportOrders', 
      'showMaterialsReport', 'deleteOrder', 'addExtraTask', 'closeMaterialsModal', 
-     'syncTasksFromHistory', 'createTasksForOrder'].includes(key)
+     'syncTasksFromHistory', 'createTasksForOrder', 'filterOrdersByDate', 'updateFilterDateDisplay'].includes(key)
 ));
 console.log('✅ app.js полностью загружен');
 
