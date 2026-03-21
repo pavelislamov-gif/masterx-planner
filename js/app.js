@@ -184,8 +184,6 @@ function createTasksForOrder(order) {
 }
 
 // ============== ФУНКЦИИ ДЛЯ РАБОТЫ С ЗАКАЗАМИ ==============
-
-// Загрузка и отображение заказов с фильтрацией по дате
 // Загрузка и отображение заказов с фильтрацией по дате
 function loadOrders() {
     console.log('loadOrders вызвана, фильтр даты:', window.currentFilterDate);
@@ -220,26 +218,26 @@ function loadOrders() {
         const shortInfo = [];
         shortInfo.push(`📦 ${item.product}`);
         shortInfo.push(`📏 ${item.size}`);
-        shortInfo.push(` ${item.quantity} шт`);
+        shortInfo.push(`🔢 ${item.quantity} шт`);
         
         // Добавляем кронштейн если не отсутствует
         if (item.bracket.type !== 'отсутствует') {
-            shortInfo.push(` ${item.bracket.type} (${item.bracket.quantity} шт)`);
+            shortInfo.push(`🔧 ${item.bracket.type} (${item.bracket.quantity} шт)`);
         }
         
         // Добавляем лиру если не отсутствует
         if (item.lyre.type !== 'отсутствует') {
-            shortInfo.push(` ${item.lyre.type} (${item.lyre.quantity} шт)`);
+            shortInfo.push(`🎸 ${item.lyre.type} (${item.lyre.quantity} шт)`);
         }
         
         // Добавляем RAL если есть
         if (item.ral) {
-            shortInfo.push(` ${item.ral}`);
+            shortInfo.push(`🎨 ${item.ral}`);
         }
         
         // Добавляем текстуру если есть
         if (item.texture) {
-            shortInfo.push(` ${item.texture}`);
+            shortInfo.push(`🧵 ${item.texture}`);
         }
         
         header.innerHTML = `
@@ -270,7 +268,7 @@ function loadOrders() {
         content.className = 'order-content';
         content.style.display = 'none';
 
-        // Полная информация в развёрнутом виде
+        // ИСПРАВЛЕНО: убраны все дублирования в таблице
         content.innerHTML = `
             <table class="items-table">
                 <thead>
