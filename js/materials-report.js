@@ -1,4 +1,4 @@
-// js/materials-report.js - ОТЧЕТ ПО МАТЕРИАЛАМ (с разделением стали и нержавейки + расчёт краски)
+// js/materials-report.js - ПОЛНЫЙ ОТЧЕТ ПО МАТЕРИАЛАМ С РАСЧЁТОМ КРАСКИ
 
 class MaterialsReport {
     constructor() {
@@ -13,31 +13,24 @@ class MaterialsReport {
             lyres: [],
             rods: [],
             productSpecs: {},
-            paint: {
-                defaultConsumptionPerM2: 0.165,
-                unit: "кг",
-                roundTo: 0.5,
-                lossCoefficients: {
-                    flat: 1.10,
-                    pipe: 1.30,
-                    profile: 1.20
-                },
-                ralConsumption: {}
-            }
+            paint: {}
         };
+        this.profilesArea = {};
+        this.rodsByProduct = {};
+        this.materialsNorm = {};
+        this.paintingRules = {};
+        this.paintConfig = {};
         this.normsLoaded = false;
     }
     
-    async loadMaterialsData() {
-        console.log('Загрузка данных о материалах...');
+    // ============== ЗАГРУЗКА ВСЕХ ДАННЫХ ==============
+    async loadAllData() {
+        console.log('📦 Загрузка всех данных...');
         
         try {
-            const response = await fetch('data/norms.json');
-            if (!response.ok) {
-                throw new Error('Не удалось загрузить norms.json');
-            }
-            const norms = await response.json();
-            
+            // 1. Загрузка norms.json
+            const normsRes = await fetch('data/norms.json');
+            const norms = await normsRes.json();
             this.materialsDB = {
                 aluminum: norms.aluminum || [],
                 steel: norms.steel || [],
@@ -49,655 +42,247 @@ class MaterialsReport {
                 lyres: norms.lyres || [],
                 rods: norms.rods || [],
                 productSpecs: norms.productSpecs || {},
-                paint: {
-                    defaultConsumptionPerM2: norms.paint?.defaultConsumptionPerM2 || 0.165,
-                    unit: norms.paint?.unit || "кг",
-                    roundTo: norms.paint?.roundTo || 0.5,
-                    lossCoefficients: {
-                        flat: norms.paint?.lossCoefficients?.flat || 1.10,
-                        pipe: norms.paint?.lossCoefficients?.pipe || 1.30,
-                        profile: norms.paint?.lossCoefficients?.profile || 1.20
-                    },
-                    ralConsumption: norms.paint?.ralConsumption || {}
-                }
+                paint: norms.paint || {}
             };
             
+            // 2. Загрузка profilesArea.json
+            const profilesRes = await fetch('data/profilesArea.json');
+            if (profilesRes.ok) {
+                const profilesData = await profilesRes.json();
+                this.profilesArea = profilesData.products || {};
+                console.log('✅ Загружены площади профилей');
+            }
+            
+            // 3. Загрузка rodsByProduct.json
+            const rodsRes = await fetch('data/rodsByProduct.json');
+            if (rodsRes.ok) {
+                const rodsData = await rodsRes.json();
+                this.rodsByProduct = rodsData.products || {};
+                console.log('✅ Загружены прутки');
+            }
+            
+            // 4. Загрузка materialsNorm.json
+            const normsNormRes = await fetch('data/materialsNorm.json');
+            if (normsNormRes.ok) {
+                const normsNormData = await normsNormRes.json();
+                this.materialsNorm = normsNormData.products || {};
+                console.log('✅ Загружены нормы материалов');
+            }
+            
+            // 5. Загрузка paintingRules.json
+            const rulesRes = await fetch('data/paintingRules.json');
+            if (rulesRes.ok) {
+                const rulesData = await rulesRes.json();
+                this.paintingRules = rulesData.products || {};
+                console.log('✅ Загружены правила покраски');
+            }
+            
+            // 6. Загрузка paintCalculation.json
+            const paintRes = await fetch('data/paintCalculation.json');
+            if (paintRes.ok) {
+                this.paintConfig = await paintRes.json();
+                console.log('✅ Загружены настройки краски');
+            } else {
+                this.paintConfig = {
+                    lossCoefficients: { flat: 1.10, pipe: 1.30, profile: 1.20 },
+                    paintConsumption: { default: 0.165, RAL: {} },
+                    roundTo: 0.5
+                };
+            }
+            
             this.normsLoaded = true;
-            console.log('✅ Нормы загружены из JSON');
+            console.log('✅ Все данные загружены');
+            
         } catch (error) {
-            console.error('❌ Ошибка загрузки norms.json:', error);
+            console.error('❌ Ошибка загрузки:', error);
             this.loadFallbackData();
         }
     }
     
     loadFallbackData() {
         console.warn('⚠️ Используются резервные данные');
-    }
-    
-    // ============== ПОЛУЧЕНИЕ НОРМЫ РАСХОДА КРАСКИ ПО RAL ==============
-    getPaintConsumption(ral) {
-        if (!ral) return this.materialsDB.paint.defaultConsumptionPerM2;
-        const normalizedRal = ral.trim().toUpperCase();
-        return this.materialsDB.paint.ralConsumption[normalizedRal] || this.materialsDB.paint.defaultConsumptionPerM2;
-    }
-    
-    // ============== ОПРЕДЕЛЕНИЕ ТИПА ДЕТАЛИ ==============
-    getDetailType(detailName, isRod = false, isProfile = false) {
-        if (isRod) return 'pipe';
-        if (isProfile) return 'profile';
-        return 'flat';
-    }
-    
-    // ============== ПРОВЕРКА, КРАСИТСЯ ЛИ ДЕТАЛЬ (по техкарте) ==============
-    shouldPaintComponent(componentName, productName) {
-        // XGRAY v.1: заглушки красятся
-        if (productName === 'XGRAY v.1') {
-            if (componentName.includes('Заглушки Алюминиевые')) return true;
-        }
-        return false;
-    }
-    
-    shouldPaintProfile(profileName, productName) {
-        // XGRAY v.1: профили МП 1928 и СЧ 4446 красятся
-        if (productName === 'XGRAY v.1') {
-            if (profileName.includes('МП 1928') || profileName.includes('СЧ 4446')) return true;
-        }
-        return false;
-    }
-    
-    shouldPaintRod(rodName, productName) {
-        // Трубы СЧ 4435 красятся
-        if (rodName.includes('СЧ 4435') || rodName.includes('труба')) return true;
-        return false;
-    }
-    
-    shouldPaintBody(productName) {
-        // XRAY серии не красятся
-        if (productName && productName.toUpperCase().includes('XRAY')) return false;
-        return true;
-    }
-    
-    // ============== РАСЧЁТ ПЛОЩАДИ ПРУТКА ==============
-    calculateRodArea(rod, totalLength) {
-        // Определяем диаметр из названия прутка
-        let diameter = 25; // по умолчанию 25мм
-        
-        const diameterMatch = rod.rodType.match(/(\d+)/);
-        if (diameterMatch) {
-            diameter = parseInt(diameterMatch[1]);
-        }
-        
-        const diameterM = diameter / 1000;
-        const lengthM = totalLength / 1000;
-        
-        const area = Math.PI * diameterM * lengthM;
-        
-        return {
-            area: area,
-            diameter: diameter,
-            length: lengthM
+        this.paintConfig = {
+            lossCoefficients: { flat: 1.10, pipe: 1.30, profile: 1.20 },
+            paintConsumption: { default: 0.165, RAL: {} },
+            roundTo: 0.5
         };
     }
     
-    // ============== РАСЧЁТ КРАСКИ ==============
-    calculatePaint(order, sheetMaterials, profiles, rods) {
-        let flatArea = 0;
-        let pipeArea = 0;
-        let profileArea = 0;
+    // ============== ПОЛУЧЕНИЕ НОРМЫ РАСХОДА ПО RAL ==============
+    getPaintConsumption(ral) {
+        if (!ral) return this.paintConfig.paintConsumption?.default || 0.165;
+        const normalizedRal = ral.trim().toUpperCase();
+        return this.paintConfig.paintConsumption?.RAL?.[normalizedRal] || 
+               this.paintConfig.paintConsumption?.default || 0.165;
+    }
+    
+    // ============== ПРОВЕРКА, КРАСИТСЯ ЛИ ДЕТАЛЬ ==============
+    shouldPaint(productName, detailType, detailName) {
+        const productRules = this.paintingRules[productName];
+        if (!productRules) return false;
         
-        const paintItems = [];
+        if (detailType === 'body') return productRules.body === true;
+        if (detailType === 'component') return productRules.components?.[detailName] === true;
+        if (detailType === 'profile') return productRules.profiles?.[detailName] === true;
+        if (detailType === 'rod') return productRules.rods?.[detailName] === true;
+        
+        return false;
+    }
+    
+    // ============== РАСЧЁТ КРАСКИ ==============
+    calculatePaint(order) {
         const productName = order.items[0]?.product || '';
+        const productSize = order.items[0]?.size || '';
         const productQty = order.items[0]?.quantity || 1;
         const ral = order.items[0]?.ral || '';
-        const consumptionPerM2 = this.getPaintConsumption(ral);
         
-        // 1. Комплектующие (заглушки и т.д.)
-        if (order.components && order.components.length > 0) {
-            order.components.forEach(comp => {
-                if (this.shouldPaintComponent(comp.name, productName)) {
-                    const materialArea = comp.quantityPerProduct * (comp.areaPerUnit || 0.0032) * productQty;
-                    const paintArea = materialArea * 2; // две стороны
-                    flatArea += paintArea;
+        const consumptionPerM2 = this.getPaintConsumption(ral);
+        const lossCoeff = this.paintConfig.lossCoefficients || { flat: 1.10, pipe: 1.30, profile: 1.20 };
+        
+        let flatArea = 0;
+        let profileArea = 0;
+        let pipeArea = 0;
+        const paintItems = [];
+        
+        // 1. КОРПУС
+        const bodyNorm = this.materialsNorm[productName]?.body;
+        if (bodyNorm) {
+            bodyNorm.forEach(material => {
+                if (this.shouldPaint(productName, 'body', material.material)) {
+                    const area = material.area * productQty * 2;
+                    flatArea += area;
                     paintItems.push({
-                        name: comp.name,
-                        area: paintArea,
+                        name: `Корпус (${material.material})`,
                         type: 'flat',
-                        consumption: paintArea * consumptionPerM2
+                        area: area,
+                        consumption: area * consumptionPerM2
                     });
                 }
             });
         }
         
-        // 2. Кронштейны и лиры (плоские детали)
-        const bracketArea = this.calculateBracketArea(order, productQty);
-        if (bracketArea > 0) {
-            flatArea += bracketArea;
-            paintItems.push({
-                name: 'Кронштейны и лиры',
-                area: bracketArea,
-                type: 'flat',
-                consumption: bracketArea * consumptionPerM2
-            });
-        }
+        // 2. КОМПЛЕКТУЮЩИЕ
+        const components = order.components || [];
+        const componentNorms = this.materialsNorm[productName]?.components || {};
         
-        // 3. Корпус (если красится)
-        if (this.shouldPaintBody(productName)) {
-            // Ищем площадь корпуса в листовых материалах
-            let bodyArea = 0;
-            sheetMaterials.forEach(sheet => {
-                if (sheet.name === 'Алюминий' && sheet.products.includes(productName)) {
-                    bodyArea = sheet.totalArea;
-                }
-            });
-            if (bodyArea > 0) {
-                const paintArea = bodyArea * 2; // две стороны
-                flatArea += paintArea;
+        components.forEach(comp => {
+            const norm = componentNorms[comp.name];
+            if (norm && this.shouldPaint(productName, 'component', comp.name)) {
+                const area = norm.area * comp.quantityPerProduct * productQty * 2;
+                flatArea += area;
                 paintItems.push({
-                    name: 'Корпус',
-                    area: paintArea,
+                    name: comp.name,
                     type: 'flat',
-                    consumption: paintArea * consumptionPerM2
+                    area: area,
+                    consumption: area * consumptionPerM2
+                });
+            }
+        });
+        
+        // 3. КРОНШТЕЙНЫ И ЛИРЫ
+        const item = order.items[0];
+        
+        if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
+            const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
+            if (bracket && this.shouldPaint(productName, 'component', `Кронштейн ${item.bracket.type}`)) {
+                const area = bracket.area * item.bracket.quantity * productQty * 2;
+                flatArea += area;
+                paintItems.push({
+                    name: `Кронштейн ${item.bracket.type}`,
+                    type: 'flat',
+                    area: area,
+                    consumption: area * consumptionPerM2
                 });
             }
         }
         
-        // 4. Профили
-        if (profiles && profiles.length > 0) {
-            profiles.forEach(profile => {
-                if (this.shouldPaintProfile(profile.name, productName)) {
-                    const perimeter = 0.2; // 200 мм (сечение 50×50)
-                    const lengthM = profile.totalLength / 1000;
-                    const paintArea = lengthM * perimeter;
-                    profileArea += paintArea;
+        if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
+            const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
+            if (lyre && this.shouldPaint(productName, 'component', `Лира ${item.lyre.type}`)) {
+                const area = lyre.area * item.lyre.quantity * productQty * 2;
+                flatArea += area;
+                paintItems.push({
+                    name: `Лира ${item.lyre.type}`,
+                    type: 'flat',
+                    area: area,
+                    consumption: area * consumptionPerM2
+                });
+            }
+        }
+        
+        // 4. ПРОФИЛИ
+        const profileData = this.profilesArea[productName]?.sizes?.[productSize];
+        if (profileData) {
+            for (const [profileName, areaPerUnit] of Object.entries(profileData)) {
+                if (this.shouldPaint(productName, 'profile', profileName)) {
+                    const area = areaPerUnit * productQty;
+                    profileArea += area;
                     paintItems.push({
-                        name: profile.name,
-                        area: paintArea,
+                        name: profileName,
                         type: 'profile',
-                        consumption: paintArea * consumptionPerM2
+                        area: area,
+                        consumption: area * consumptionPerM2
                     });
                 }
-            });
+            }
         }
         
-        // 5. Прутки (трубы)
-        if (rods && rods.length > 0) {
-            rods.forEach(rod => {
-                if (this.shouldPaintRod(rod.rodType, productName)) {
-                    const surface = this.calculateRodArea(rod, rod.totalValue);
-                    pipeArea += surface.area;
-                    paintItems.push({
-                        name: rod.rodType,
-                        area: surface.area,
-                        type: 'pipe',
-                        diameter: surface.diameter,
-                        length: surface.length,
-                        consumption: surface.area * consumptionPerM2
-                    });
-                }
-            });
-        }
+        // 5. ПРУТКИ
+        const rodsData = this.rodsByProduct[productName]?.rods || [];
+        rodsData.forEach(rod => {
+            if (this.shouldPaint(productName, 'rod', rod.name)) {
+                const area = rod.area * productQty;
+                pipeArea += area;
+                paintItems.push({
+                    name: rod.name,
+                    type: 'pipe',
+                    area: area,
+                    diameter: rod.diameter,
+                    length: rod.length,
+                    consumption: area * consumptionPerM2
+                });
+            }
+        });
         
-        // Расчёт с учётом коэффициентов потерь
-        const flatLoss = this.materialsDB.paint.lossCoefficients.flat;
-        const pipeLoss = this.materialsDB.paint.lossCoefficients.pipe;
-        const profileLoss = this.materialsDB.paint.lossCoefficients.profile;
+        // РАСЧЁТ С УЧЁТОМ ПОТЕРЬ
+        const flatPure = flatArea * consumptionPerM2;
+        const profilePure = profileArea * consumptionPerM2;
+        const pipePure = pipeArea * consumptionPerM2;
         
-        const flatPureConsumption = flatArea * consumptionPerM2;
-        const pipePureConsumption = pipeArea * consumptionPerM2;
-        const profilePureConsumption = profileArea * consumptionPerM2;
+        const flatWithLoss = flatPure * lossCoeff.flat;
+        const profileWithLoss = profilePure * lossCoeff.profile;
+        const pipeWithLoss = pipePure * lossCoeff.pipe;
         
-        const flatConsumption = flatPureConsumption * flatLoss;
-        const pipeConsumption = pipePureConsumption * pipeLoss;
-        const profileConsumption = profilePureConsumption * profileLoss;
+        const totalArea = flatArea + profileArea + pipeArea;
+        const totalPureConsumption = flatPure + profilePure + pipePure;
+        const totalWithLoss = flatWithLoss + profileWithLoss + pipeWithLoss;
         
-        const totalArea = flatArea + pipeArea + profileArea;
-        const totalPureConsumption = flatPureConsumption + pipePureConsumption + profilePureConsumption;
-        const totalWithLoss = flatConsumption + pipeConsumption + profileConsumption;
-        
-        const roundTo = this.materialsDB.paint.roundTo;
+        const roundTo = this.paintConfig.roundTo || 0.5;
         const recommendedOrder = Math.ceil(totalWithLoss / roundTo) * roundTo;
         
         return {
             items: paintItems,
             flatArea: flatArea,
-            pipeArea: pipeArea,
             profileArea: profileArea,
+            pipeArea: pipeArea,
             totalArea: totalArea,
-            flatPureConsumption: flatPureConsumption,
-            pipePureConsumption: pipePureConsumption,
-            profilePureConsumption: profilePureConsumption,
             pureConsumption: totalPureConsumption,
             consumptionWithLoss: totalWithLoss,
             recommendedOrder: recommendedOrder,
             consumptionPerM2: consumptionPerM2,
             ral: ral || 'Не указан',
-            unit: this.materialsDB.paint.unit,
-            flatLoss: flatLoss,
-            pipeLoss: pipeLoss,
-            profileLoss: profileLoss
+            lossCoefficients: lossCoeff
         };
     }
     
-    calculateBracketArea(order, productQty) {
-        let totalArea = 0;
-        const item = order.items[0];
-        
-        if (item.bracket && item.bracket.type && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
-            const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
-            if (bracket) {
-                const totalQty = item.bracket.quantity;
-                const area = bracket.area || 0;
-                totalArea += area * totalQty * 2; // две стороны
-            }
-        }
-        
-        if (item.lyre && item.lyre.type && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
-            const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
-            if (lyre) {
-                const totalQty = item.lyre.quantity;
-                const area = lyre.area || 0;
-                totalArea += area * totalQty * 2; // две стороны
-            }
-        }
-        
-        return totalArea;
-    }
-    
-    calculateMaterials(order) {
-        if (!order || !order.items || !Array.isArray(order.items)) {
-            console.warn('Некорректный заказ:', order);
-            return { 
-                sheetMaterials: [], 
-                profiles: [], 
-                rods: [],
-                productSpecs: [],
-                paint: null
-            };
-        }
-        
-        const groupedSheets = {};
-        const profiles = [];
-        const rods = [];
-        const productSpecs = [];
-        
-        order.items.forEach(item => {
-            if (!item) return;
-            
-            const productQty = parseInt(item.quantity) || 1;
-            const productName = item.product || '';
-            const productSize = item.size || 'Стандартный';
-            
-            // ============== ЛИСТОВЫЕ МАТЕРИАЛЫ ==============
-            // Алюминий
-            this.materialsDB.aluminum.forEach(m => {
-                if (m.product === productName) {
-                    const key = `Алюминий_${m.thickness}`;
-                    if (!groupedSheets[key]) {
-                        groupedSheets[key] = {
-                            name: 'Алюминий',
-                            thickness: m.thickness || '—',
-                            areaPerUnit: m.area || 0,
-                            quantity: 0,
-                            totalArea: 0,
-                            products: []
-                        };
-                    }
-                    groupedSheets[key].quantity += productQty;
-                    groupedSheets[key].totalArea += (m.area || 0) * productQty;
-                    groupedSheets[key].products.push(productName);
-                }
-            });
-            
-            // Обычная сталь (steel)
-            this.materialsDB.steel.forEach(m => {
-                if (m.product === productName) {
-                    const key = `Сталь_${m.thickness}`;
-                    if (!groupedSheets[key]) {
-                        groupedSheets[key] = {
-                            name: 'Сталь',
-                            thickness: m.thickness || '—',
-                            areaPerUnit: m.area || 0,
-                            quantity: 0,
-                            totalArea: 0,
-                            products: []
-                        };
-                    }
-                    groupedSheets[key].quantity += productQty;
-                    groupedSheets[key].totalArea += (m.area || 0) * productQty;
-                    groupedSheets[key].products.push(productName);
-                }
-            });
-            
-            // Нержавеющая сталь AISI 430 (stainless)
-            this.materialsDB.stainless.forEach(m => {
-                if (m.product === productName) {
-                    const key = `Нержавеющая сталь AISI 430_${m.thickness}`;
-                    if (!groupedSheets[key]) {
-                        groupedSheets[key] = {
-                            name: 'Нержавеющая сталь AISI 430',
-                            thickness: m.thickness || '—',
-                            areaPerUnit: m.area || 0,
-                            quantity: 0,
-                            totalArea: 0,
-                            products: []
-                        };
-                    }
-                    groupedSheets[key].quantity += productQty;
-                    groupedSheets[key].totalArea += (m.area || 0) * productQty;
-                    groupedSheets[key].products.push(productName);
-                }
-            });
-            
-            // ПВХ
-            this.materialsDB.pvc.forEach(m => {
-                if (m.product === productName) {
-                    const key = `ПВХ_${m.thickness}`;
-                    if (!groupedSheets[key]) {
-                        groupedSheets[key] = {
-                            name: 'ПВХ',
-                            thickness: m.thickness || '—',
-                            areaPerUnit: m.area || 0,
-                            quantity: 0,
-                            totalArea: 0,
-                            products: []
-                        };
-                    }
-                    groupedSheets[key].quantity += productQty;
-                    groupedSheets[key].totalArea += (m.area || 0) * productQty;
-                    groupedSheets[key].products.push(productName);
-                }
-            });
-            
-            // Поликарбонат
-            this.materialsDB.polycarbonate.forEach(m => {
-                if (m.product === productName) {
-                    const key = `Поликарбонат_${m.thickness}`;
-                    if (!groupedSheets[key]) {
-                        groupedSheets[key] = {
-                            name: 'Поликарбонат',
-                            thickness: m.thickness || '—',
-                            areaPerUnit: m.area || 0,
-                            quantity: 0,
-                            totalArea: 0,
-                            products: []
-                        };
-                    }
-                    groupedSheets[key].quantity += productQty;
-                    groupedSheets[key].totalArea += (m.area || 0) * productQty;
-                    groupedSheets[key].products.push(productName);
-                }
-            });
-            
-            // Прочие материалы (other)
-            this.materialsDB.other.forEach(m => {
-                if (m.product === productName) {
-                    const key = `${m.material || 'Прочее'}_${m.thickness}`;
-                    if (!groupedSheets[key]) {
-                        groupedSheets[key] = {
-                            name: m.material || 'Прочее',
-                            thickness: m.thickness || '—',
-                            areaPerUnit: m.area || 0,
-                            quantity: 0,
-                            totalArea: 0,
-                            products: []
-                        };
-                    }
-                    groupedSheets[key].quantity += productQty;
-                    groupedSheets[key].totalArea += (m.area || 0) * productQty;
-                    groupedSheets[key].products.push(productName);
-                }
-            });
-            
-            // ============== КРОНШТЕЙНЫ ==============
-            if (item.bracket && item.bracket.type && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
-                const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
-                if (bracket) {
-                    const totalQty = item.bracket.quantity;
-                    const area = bracket.area || 0;
-                    const materialType = 'Нержавеющая сталь AISI 430';
-                    const thickness = bracket.thickness || '2мм';
-                    const key = `${materialType}_${thickness}`;
-                    
-                    if (!groupedSheets[key]) {
-                        groupedSheets[key] = {
-                            name: materialType,
-                            thickness: thickness,
-                            areaPerUnit: area,
-                            quantity: 0,
-                            totalArea: 0,
-                            products: []
-                        };
-                    }
-                    groupedSheets[key].quantity += totalQty;
-                    groupedSheets[key].totalArea += area * totalQty;
-                    groupedSheets[key].products.push(`Кронштейн ${item.bracket.type}`);
-                }
-            }
-            
-            // ============== ЛИРЫ ==============
-            if (item.lyre && item.lyre.type && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
-                const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
-                if (lyre) {
-                    const totalQty = item.lyre.quantity;
-                    const area = lyre.area || 0;
-                    const materialType = 'Нержавеющая сталь AISI 430';
-                    const thickness = lyre.thickness || '2мм';
-                    const key = `${materialType}_${thickness}`;
-                    
-                    if (!groupedSheets[key]) {
-                        groupedSheets[key] = {
-                            name: materialType,
-                            thickness: thickness,
-                            areaPerUnit: area,
-                            quantity: 0,
-                            totalArea: 0,
-                            products: []
-                        };
-                    }
-                    groupedSheets[key].quantity += totalQty;
-                    groupedSheets[key].totalArea += area * totalQty;
-                    groupedSheets[key].products.push(`Лира ${item.lyre.type}`);
-                }
-            }
-            
-            // ============== ПРУТКИ ==============
-            const rodMatches = this.materialsDB.rods.filter(r => r.product === productName);
-            rodMatches.forEach(rod => {
-                const existingRod = rods.find(r => r.rodType === rod.rodType);
-                const totalValue = (rod.value || 0) * productQty;
-                
-                if (existingRod) {
-                    existingRod.totalValue += totalValue;
-                    existingRod.quantity += productQty;
-                } else {
-                    rods.push({
-                        rodType: rod.rodType || 'Пруток',
-                        valuePerUnit: rod.value || 0,
-                        unit: rod.unit || 'мм',
-                        quantity: productQty,
-                        totalValue: totalValue
-                    });
-                }
-            });
-            
-            // ============== ПРОФИЛИ ==============
-            const productSpec = this.materialsDB.productSpecs[productName];
-            
-            if (productSpec) {
-                let sizeSpec = null;
-                let matchedSize = null;
-                
-                if (productSpec[productSize]) {
-                    sizeSpec = productSpec[productSize];
-                    matchedSize = productSize;
-                } else {
-                    const normalizedSize = productSize.replace(/\s+/g, ' ').trim();
-                    for (let size in productSpec) {
-                        const normalizedKey = size.replace(/\s+/g, ' ').trim();
-                        if (normalizedKey === normalizedSize) {
-                            sizeSpec = productSpec[size];
-                            matchedSize = size;
-                            break;
-                        }
-                    }
-                    if (!sizeSpec) {
-                        for (let size in productSpec) {
-                            if (productSize.includes(size) || size.includes(productSize)) {
-                                sizeSpec = productSpec[size];
-                                matchedSize = size;
-                                break;
-                            }
-                        }
-                    }
-                }
-                
-                if (sizeSpec) {
-                    Object.entries(sizeSpec).forEach(([profileName, profileData]) => {
-                        const value = profileData.value || profileData;
-                        const unit = profileData.unit || 'мм';
-                        const totalLength = (value || 0) * productQty;
-                        
-                        const existingProfile = profiles.find(p => p.name === profileName);
-                        if (existingProfile) {
-                            existingProfile.totalLength += totalLength;
-                            existingProfile.quantity += productQty;
-                        } else {
-                            profiles.push({
-                                name: profileName,
-                                lengthPerUnit: value || 0,
-                                unit: unit,
-                                quantity: productQty,
-                                totalLength: totalLength
-                            });
-                        }
-                    });
-                    
-                    productSpecs.push({
-                        product: productName,
-                        size: productSize,
-                        matchedSize: matchedSize,
-                        specs: sizeSpec
-                    });
-                }
-            }
-        });
-        
-        const finalSheetMaterials = Object.values(groupedSheets).sort((a, b) => {
-            return a.name.localeCompare(b.name);
-        });
-        
-        // Расчёт краски
-        const paint = this.calculatePaint(order, finalSheetMaterials, profiles, rods);
-        
-        return { 
-            sheetMaterials: finalSheetMaterials, 
-            profiles, 
-            rods,
-            productSpecs,
-            paint: paint
-        };
-    }
-    
-    calculateComponents(order) {
-        const componentsList = [];
-        
-        if (!order.components || order.components.length === 0) {
-            return componentsList;
-        }
-        
-        const productQty = order.items[0]?.quantity || 1;
-        
-        order.components.forEach(comp => {
-            let norm = null;
-            
-            norm = this.materialsDB.aluminum.find(m => m.product === comp.name);
-            if (norm) {
-                componentsList.push({
-                    name: comp.name,
-                    materialType: 'Алюминий',
-                    thickness: norm.thickness || '—',
-                    areaPerUnit: norm.area || 0,
-                    quantityPerProduct: comp.quantityPerProduct,
-                    productQty: productQty,
-                    totalArea: (comp.quantityPerProduct || 0) * (norm.area || 0) * productQty,
-                    areaPerUnitPaint: norm.area || 0
-                });
-                return;
-            }
-            
-            norm = this.materialsDB.steel.find(m => m.product === comp.name);
-            if (norm) {
-                componentsList.push({
-                    name: comp.name,
-                    materialType: 'Сталь',
-                    thickness: norm.thickness || '—',
-                    areaPerUnit: norm.area || 0,
-                    quantityPerProduct: comp.quantityPerProduct,
-                    productQty: productQty,
-                    totalArea: (comp.quantityPerProduct || 0) * (norm.area || 0) * productQty,
-                    areaPerUnitPaint: norm.area || 0
-                });
-                return;
-            }
-            
-            norm = this.materialsDB.stainless.find(m => m.product === comp.name);
-            if (norm) {
-                componentsList.push({
-                    name: comp.name,
-                    materialType: 'Нержавеющая сталь AISI 430',
-                    thickness: norm.thickness || '—',
-                    areaPerUnit: norm.area || 0,
-                    quantityPerProduct: comp.quantityPerProduct,
-                    productQty: productQty,
-                    totalArea: (comp.quantityPerProduct || 0) * (norm.area || 0) * productQty,
-                    areaPerUnitPaint: norm.area || 0
-                });
-                return;
-            }
-            
-            norm = this.materialsDB.pvc.find(m => m.product === comp.name);
-            if (norm) {
-                componentsList.push({
-                    name: comp.name,
-                    materialType: 'ПВХ',
-                    thickness: norm.thickness || '—',
-                    areaPerUnit: norm.area || 0,
-                    quantityPerProduct: comp.quantityPerProduct,
-                    productQty: productQty,
-                    totalArea: (comp.quantityPerProduct || 0) * (norm.area || 0) * productQty,
-                    areaPerUnitPaint: norm.area || 0
-                });
-                return;
-            }
-            
-            norm = this.materialsDB.polycarbonate.find(m => m.product === comp.name);
-            if (norm) {
-                componentsList.push({
-                    name: comp.name,
-                    materialType: 'Поликарбонат',
-                    thickness: norm.thickness || '—',
-                    areaPerUnit: norm.area || 0,
-                    quantityPerProduct: comp.quantityPerProduct,
-                    productQty: productQty,
-                    totalArea: (comp.quantityPerProduct || 0) * (norm.area || 0) * productQty,
-                    areaPerUnitPaint: norm.area || 0
-                });
-                return;
-            }
-            
-            console.warn(`⚠️ Не найдена норма для комплектующей: ${comp.name}`);
-        });
-        
-        return componentsList;
-    }
-    
+    // ============== ОСНОВНОЙ МЕТОД ==============
     async generateReport(order) {
+        await this.loadAllData();
         return this.generateReportHTML(order);
     }
     
     async generateReportHTML(order) {
-        const { sheetMaterials, profiles, rods, productSpecs, paint } = this.calculateMaterials(order);
-        const components = this.calculateComponents(order);
+        const paint = this.calculatePaint(order);
         
         const fmt = (val, dec = 4) => {
             if (val === undefined || val === null) return '0';
@@ -709,30 +294,17 @@ class MaterialsReport {
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h3>📊 Отчет по материалам для заказа №${order.number}</h3>
                     <div style="display: flex; gap: 10px;">
-                        <button onclick="window.print()" class="btn btn-primary" style="padding: 8px 15px;">
-                            🖨️ Печать
-                        </button>
-                        <button onclick="closeMaterialsModal()" class="btn btn-secondary" style="padding: 8px 15px;">
-                            ✖ Закрыть
-                        </button>
+                        <button onclick="window.print()" class="btn btn-primary">🖨️ Печать</button>
+                        <button onclick="closeMaterialsModal()" class="btn btn-secondary">✖ Закрыть</button>
                     </div>
                 </div>
                 
                 <p style="color: #a0a0a0; margin-bottom: 20px;">
                     Дата: ${order.date ? new Date(order.date).toLocaleDateString('ru-RU') : 'Не указана'}
                 </p>
-        `;
-        
-        if (sheetMaterials.length === 0 && profiles.length === 0 && rods.length === 0 && components.length === 0) {
-            html += `
-                <p style="color: #a0a0a0; text-align: center; padding: 20px;">
-                    Нет данных о материалах для данного заказа
-                </p>
-            `;
-        } else {
-            html += `
+                
                 <h4>📦 Состав заказа:</h4>
-                <table class="items-table" style="margin-bottom: 20px;">
+                <table class="items-table">
                     <thead>
                          <tr
                             <th>Изделие</th>
@@ -758,151 +330,27 @@ class MaterialsReport {
                         `).join('')}
                     </tbody>
                  </table
-            `;
-            
-            // Листовые материалы
-            if (sheetMaterials.length > 0) {
-                html += `
-                    <h4 style="margin-top: 30px;">📋 Листовые материалы (расход в м²)</h4>
-                    <table class="materials-table">
-                        <thead>
-                             <tr
-                                <th>Материал</th>
-                                <th>Толщина</th>
-                                <th>Расход на 1 шт (м²)</th>
-                                <th>Кол-во</th>
-                                <th>Общий расход (м²)</th>
-                                <th>Применение</th>
-                             </tr
-                        </thead>
-                        <tbody>
-                            ${sheetMaterials.map(item => `
-                                 <tr
-                                     <td<strong>${item.name}</strong></td
-                                     <td${item.thickness}</td
-                                    <td style="text-align: right;">${fmt(item.areaPerUnit)}</td
-                                    <td style="text-align: right;">${item.quantity}</td
-                                    <td style="text-align: right; color: #4cd964; font-weight: 600;">${fmt(item.totalArea)}</td
-                                    <td style="font-size: 11px; color: #a0a0a0;">${item.products.join(', ')}</td
-                                 </tr
-                            `).join('')}
-                        </tbody>
-                    </table
-                `;
-            }
-            
-            // Комплектующие
-            if (components.length > 0) {
-                html += `
-                    <h4 style="margin-top: 30px;">🔧 КОМПЛЕКТУЮЩИЕ ДЕТАЛИ</h4>
-                    <table class="materials-table">
-                        <thead>
-                             <tr
-                                <th>Деталь</th>
-                                <th>Материал</th>
-                                <th>Толщина</th>
-                                <th>Норма (м²/шт)</th>
-                                <th>Кол-во на 1 изд</th>
-                                <th>Кол-во изделий</th>
-                                <th>Общий расход (м²)</th>
-                             </tr
-                        </thead>
-                        <tbody>
-                            ${components.map(comp => `
-                                 <tr
-                                     <td${comp.name}</td
-                                     <td${comp.materialType}</td
-                                     <td${comp.thickness}</td
-                                    <td style="text-align: right;">${comp.areaPerUnit.toFixed(4)}</td
-                                    <td style="text-align: right;">${comp.quantityPerProduct}</td
-                                    <td style="text-align: right;">${comp.productQty}</td
-                                    <td style="text-align: right;">${comp.totalArea.toFixed(4)}</td
-                                 </tr
-                            `).join('')}
-                        </tbody>
-                    </table
-                `;
-            }
-            
-            // Профили
-            if (profiles.length > 0) {
-                html += `
-                    <h4 style="margin-top: 30px;">📏 ПРОФИЛИ (расход в мм и метрах)</h4>
-                    <table class="materials-table">
-                        <thead>
-                             <tr
-                                <th>Профиль</th>
-                                <th>Расход на 1 шт (мм)</th>
-                                <th>Кол-во</th>
-                                <th>Общий расход (мм)</th>
-                                <th>Общий расход (м)</th>
-                             </tr
-                        </thead>
-                        <tbody>
-                            ${profiles.map(profile => `
-                                 <tr
-                                     <td<strong>${profile.name}</strong></td
-                                    <td style="text-align: right;">${profile.lengthPerUnit.toFixed(0)}</td
-                                    <td style="text-align: right;">${profile.quantity}</td
-                                    <td style="text-align: right;">${fmt(profile.totalLength, 0)}</td
-                                    <td style="text-align: right; color: #4cd964;">${(profile.totalLength / 1000).toFixed(2)} м</td
-                                 </tr
-                            `).join('')}
-                        </tbody>
-                    </table
-                `;
-            }
-            
-            // Прутки
-            if (rods.length > 0) {
-                html += `
-                    <h4 style="margin-top: 30px;">🥢 ПРУТКИ (расход в мм и метрах)</h4>
-                    <table class="materials-table">
-                        <thead>
-                             <tr
-                                <th>Тип прутка</th>
-                                <th>Расход на 1 шт (мм)</th>
-                                <th>Кол-во</th>
-                                <th>Общий расход (мм)</th>
-                                <th>Общий расход (м)</th>
-                             </tr
-                        </thead>
-                        <tbody>
-                            ${rods.map(rod => `
-                                 <tr
-                                     <td${rod.rodType}</td
-                                    <td style="text-align: right;">${rod.valuePerUnit}</td
-                                    <td style="text-align: right;">${rod.quantity}</td
-                                    <td style="text-align: right;">${fmt(rod.totalValue, 0)}</td
-                                    <td style="text-align: right; color: #4cd964;">${(rod.totalValue / 1000).toFixed(2)} м</td
-                                 </tr
-                            `).join('')}
-                        </tbody>
-                    </table
-                `;
-            }
-            
-            // ============== ПОРОШКОВАЯ КРАСКА ==============
-            if (paint && paint.items && paint.items.length > 0) {
-                html += `
-                    <h4 style="margin-top: 30px;">🎨 ПОРОШКОВАЯ КРАСКА (${paint.ral})</h4>
-                    <table class="materials-table">
-                        <thead>
-                             <tr
-                                <th>Деталь</th>
-                                <th>Тип</th>
-                                <th>Площадь (м²)</th>
-                                <th>Норма (кг/м²)</th>
-                                <th>Расход (кг)</th>
-                             </tr
-                        </thead>
-                        <tbody>
-                            ${paint.items.map(item => {
-                                let typeIcon = '';
-                                if (item.type === 'pipe') typeIcon = '🔴 Труба';
-                                else if (item.type === 'profile') typeIcon = '📐 Профиль';
-                                else typeIcon = '⬜ Плоская';
-                                return `
+        `;
+        
+        // БЛОК КРАСКИ
+        if (paint && paint.items.length > 0) {
+            html += `
+                <h4 style="margin-top: 30px;">🎨 ПОРОШКОВАЯ КРАСКА (${paint.ral})</h4>
+                <table class="materials-table">
+                    <thead>
+                         <tr
+                            <th>Деталь</th>
+                            <th>Тип</th>
+                            <th>Площадь (м²)</th>
+                            <th>Норма (кг/м²)</th>
+                            <th>Расход (кг)</th>
+                         </tr
+                    </thead>
+                    <tbody>
+                        ${paint.items.map(item => {
+                            const typeIcon = item.type === 'pipe' ? '🔴 Труба' : 
+                                            (item.type === 'profile' ? '📐 Профиль' : '⬜ Плоская');
+                            return `
                                  <tr
                                      <td${item.name}</td
                                     <td${typeIcon}</td
@@ -910,41 +358,31 @@ class MaterialsReport {
                                     <td style="text-align: right;">${paint.consumptionPerM2}</td
                                     <td style="text-align: right; color: #4cd964;">${fmt(item.consumption, 3)}</td
                                  </tr
-                                `;
-                            }).join('')}
-                        </tbody>
-                        <tfoot>
-                            <tr style="background: #1e232b;">
-                                <td colspan="2" style="text-align: right;"><strong>ИТОГО:</strong></td
-                                <td style="text-align: right;"><strong>${fmt(paint.totalArea, 4)}</strong> м²</td
-                                <td style="text-align: right;"><strong>${paint.consumptionPerM2}</strong> кг/м²</td
-                                <td style="text-align: right; color: #4cd964;"><strong>${fmt(paint.pureConsumption, 3)}</strong> кг</td
-                             </tr
-                        </tfoot>
-                     </table
-                     
-                     <div style="margin-top: 15px; padding: 12px; background: #1e232b; border-radius: 8px;">
-                        <p style="margin: 0 0 8px 0;"><strong>📌 С учетом технологических потерь:</strong></p>
-                        <ul style="margin: 0; padding-left: 20px; color: #a0a0a0;">
-                            ${paint.flatArea > 0 ? `<li>Плоские детали: +${Math.round((paint.flatLoss - 1) * 100)}% (${fmt(paint.flatPureConsumption * (paint.flatLoss - 1), 3)} кг)</li>` : ''}
-                            ${paint.profileArea > 0 ? `<li>Профили: +${Math.round((paint.profileLoss - 1) * 100)}% (${fmt(paint.profilePureConsumption * (paint.profileLoss - 1), 3)} кг)</li>` : ''}
-                            ${paint.pipeArea > 0 ? `<li>Трубы: +${Math.round((paint.pipeLoss - 1) * 100)}% (${fmt(paint.pipePureConsumption * (paint.pipeLoss - 1), 3)} кг)</li>` : ''}
-                        </ul>
-                        <p style="margin: 10px 0 0 0; font-weight: 600; color: #ff9800;">
-                            💰 Рекомендуемый заказ краски: <strong>${paint.recommendedOrder} ${paint.unit}</strong>
-                            ${paint.recommendedOrder > paint.consumptionWithLoss ? `(с запасом ${Math.round((paint.recommendedOrder / paint.consumptionWithLoss - 1) * 100)}%)` : ''}
-                        </p>
-                     </div>
-                `;
-            }
-            
-            if (productSpecs.length > 0 && productSpecs.some(ps => ps.matchedSize)) {
-                html += `
-                    <div style="margin-top: 20px; padding: 10px; background: #1e232b; border-radius: 5px; font-size: 12px; color: #a0a0a0;">
-                        <p><small>✓ Подобраны профили для размеров: ${productSpecs.map(ps => `${ps.product} (${ps.size})`).join(', ')}</small></p>
-                    </div>
-                `;
-            }
+                            `;
+                        }).join('')}
+                    </tbody>
+                    <tfoot>
+                        <tr style="background: #1e232b;">
+                            <td colspan="2" style="text-align: right;"><strong>ИТОГО:</strong></td
+                            <td style="text-align: right;"><strong>${fmt(paint.totalArea, 4)}</strong> м²</td
+                            <td style="text-align: right;"><strong>${paint.consumptionPerM2}</strong> кг/м²</td
+                            <td style="text-align: right; color: #4cd964;"><strong>${fmt(paint.pureConsumption, 3)}</strong> кг</td
+                         </tr
+                    </tfoot>
+                 </table
+                 
+                 <div style="margin-top: 15px; padding: 12px; background: #1e232b; border-radius: 8px;">
+                    <p style="margin: 0 0 8px 0;"><strong>📌 С учетом технологических потерь:</strong></p>
+                    <ul style="margin: 0; padding-left: 20px; color: #a0a0a0;">
+                        <li>Плоские детали: +${Math.round((paint.lossCoefficients.flat - 1) * 100)}%</li>
+                        <li>Профили: +${Math.round((paint.lossCoefficients.profile - 1) * 100)}%</li>
+                        <li>Трубы: +${Math.round((paint.lossCoefficients.pipe - 1) * 100)}%</li>
+                    </ul>
+                    <p style="margin: 10px 0 0 0; font-weight: 600; color: #ff9800;">
+                        💰 Рекомендуемый заказ краски: <strong>${paint.recommendedOrder} кг</strong>
+                    </p>
+                 </div>
+            `;
         }
         
         html += `</div>`;
