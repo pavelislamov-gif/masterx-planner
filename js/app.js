@@ -70,6 +70,95 @@ function generateOrderNumber() {
     return `З-${year}${month}${day}-${count}`;
 }
 
+// ============== СОЗДАНИЕ ЗАДАЧ ДЛЯ ЗАКАЗА НА КОНКРЕТНУЮ ДАТУ ==============
+
+function createTasksForOrder(order) {
+    const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+    const orderDate = order.date;
+    
+    console.log(`📅 Создание задач для заказа №${order.number} на дату ${orderDate}`);
+    
+    sites.forEach(siteKey => {
+        const operations = getOperationNames(order.items[0].product, siteKey);
+        
+        if (!operations || operations.length === 0) {
+            console.log(`⏭️ Нет операций для ${siteKey} на ${order.items[0].product}`);
+            return;
+        }
+        
+        const storageKey = `tasks_${siteKey}_${orderDate}`;
+        
+        let existingTasks = [];
+        try {
+            const saved = localStorage.getItem(storageKey);
+            if (saved) {
+                existingTasks = JSON.parse(saved);
+            }
+        } catch (e) {
+            console.error('Ошибка загрузки задач:', e);
+        }
+        
+        const newTasks = [];
+        
+        operations.forEach((operation, index) => {
+            const taskId = `${order.id}_${siteKey}_0_${index}`;
+            const exists = existingTasks.some(t => t.id === taskId);
+            
+            if (!exists) {
+                newTasks.push({
+                    id: taskId,
+                    orderId: order.id,
+                    orderNumber: order.number,
+                    product: order.items[0].product,
+                    size: order.items[0].size,
+                    totalQuantity: order.items[0].quantity,
+                    completedQuantity: 0,
+                    operation: operation,
+                    index: index,
+                    status: 'pending',
+                    executors: [],
+                    date: orderDate,
+                    isExtra: false
+                });
+            }
+        });
+        
+        // Добавляем дополнительные задачи, если есть
+        if (order.extraTasks && order.extraTasks.length > 0) {
+            order.extraTasks.forEach((extra, idx) => {
+                if (extra.site !== siteKey) return;
+                
+                const taskId = `${order.id}_extra_${idx}`;
+                const exists = existingTasks.some(t => t.id === taskId);
+                if (!exists) {
+                    newTasks.push({
+                        id: taskId,
+                        orderId: order.id,
+                        orderNumber: order.number,
+                        product: extra.title || 'Доп. задача',
+                        description: extra.description || '',
+                        totalQuantity: 1,
+                        completedQuantity: 0,
+                        operation: extra.title || 'Доп. операция',
+                        isExtra: true,
+                        status: 'pending',
+                        executors: [],
+                        date: orderDate
+                    });
+                }
+            });
+        }
+        
+        if (newTasks.length > 0) {
+            const updatedTasks = [...existingTasks, ...newTasks];
+            localStorage.setItem(storageKey, JSON.stringify(updatedTasks));
+            console.log(`✅ ${siteKey}: добавлено ${newTasks.length} задач на ${orderDate}`);
+        }
+    });
+    
+    console.log(`🎉 Задачи для заказа №${order.number} созданы!`);
+}
+
 // ============== ФУНКЦИИ ДЛЯ РАБОТЫ С ЗАКАЗАМИ ==============
 
 // Загрузка и отображение заказов
@@ -125,8 +214,7 @@ function loadOrders() {
                         <th>Лира</th>
                         <th>RAL</th>
                         <th>Текстура</th>
-                    </tr>
-                </thead>
+                    </thead>
                 <tbody>
                     <tr>
                         <td><strong>${item.product}</strong></td>
@@ -138,7 +226,7 @@ function loadOrders() {
                         <td>${item.texture || '-'}</td>
                     </tr>
                 </tbody>
-            </table>
+             </table>
             
             <div class="sites-section">
                 <h4 style="margin-bottom: 15px;">🏭 Производственные участки</h4>
@@ -570,7 +658,7 @@ function deleteOrder(orderId) {
 function deleteOrderTasksFromAllSites(order) {
     console.log('🔍 Удаление задач заказа', order.id, 'со всех участков');
     
-    const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno-gibochniy', 'polimerniy'];
+    const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
     const dates = getAllRelevantDates();
     let totalDeleted = 0;
     
@@ -835,10 +923,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
             orders.push(order);
             saveOrdersToStorage(orders);
+            
+            // ✅ СОЗДАЁМ ЗАДАЧИ НА ВСЕХ УЧАСТКАХ НА ВЫБРАННУЮ ДАТУ
+            createTasksForOrder(order);
+            
             loadOrders();
             updateStatistics();
             closeOrderModal();
-            alert('✅ Заказ успешно создан!');
+            
+            const formattedDate = new Date(order.date).toLocaleDateString('ru-RU');
+            alert(`✅ Заказ №${order.number} успешно создан на ${formattedDate}!`);
         });
     }
 });
@@ -853,12 +947,14 @@ window.deleteOrder = deleteOrder;
 window.addExtraTask = addExtraTask;
 window.closeMaterialsModal = closeMaterialsModal;
 window.syncTasksFromHistory = syncTasksFromHistory;
+window.createTasksForOrder = createTasksForOrder; // Экспортируем новую функцию
 
 console.log('📤 Экспорт функций в глобальную область...');
 console.log('✅ Функции экспортированы:', Object.keys(window).filter(key => 
     typeof window[key] === 'function' && 
     ['openOrderModal', 'closeOrderModal', 'loadProductSizes', 'exportOrders', 
-     'showMaterialsReport', 'deleteOrder', 'addExtraTask', 'closeMaterialsModal', 'syncTasksFromHistory'].includes(key)
+     'showMaterialsReport', 'deleteOrder', 'addExtraTask', 'closeMaterialsModal', 
+     'syncTasksFromHistory', 'createTasksForOrder'].includes(key)
 ));
 console.log('✅ app.js полностью загружен');
 
