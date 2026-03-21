@@ -134,7 +134,7 @@ class MaterialsReport {
         }
     };
     
-    // 1. КОРПУС (body)
+    // ТОЛЬКО КОРПУС (body) — в листовые материалы
     const bodyNorm = this.materialsNorm[productName]?.body;
     if (bodyNorm) {
         bodyNorm.forEach(material => {
@@ -143,20 +143,8 @@ class MaterialsReport {
         });
     }
     
-    // 2. КОМПЛЕКТУЮЩИЕ (components) — тоже листовые материалы
-    const components = order.components || [];
-    const componentNorms = this.materialsNorm[productName]?.components || {};
-    
-    components.forEach(comp => {
-        const norm = componentNorms[comp.name];
-        if (norm) {
-            const area = norm.area * comp.quantityPerProduct * productQty;
-            addMaterial(norm.material, norm.thickness, area);
-        }
-    });
-    
-    // 3. КРОНШТЕЙНЫ И ЛИРЫ — НЕ ДОБАВЛЯЕМ (они идут в другой блок или краску)
-    // Они будут в краске, но не в листовых
+    // КОМПЛЕКТУЮЩИЕ (components) — НЕ ДОБАВЛЯЕМ в листовые материалы
+    // Они будут только в краске
     
     return materials;
 }
