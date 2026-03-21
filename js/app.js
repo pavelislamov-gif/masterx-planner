@@ -55,6 +55,17 @@ function formatDateForDisplay(dateString) {
     return date.toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+// ============== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ БЕЗОПАСНОГО ВЫВОДА ==============
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 // ============== ПРОВЕРКА ЗАВИСИМОСТЕЙ ==============
 console.log('🔍 ПРОВЕРКА ЗАВИСИМОСТЕЙ app.js:');
 console.log('='.repeat(50));
@@ -184,6 +195,7 @@ function createTasksForOrder(order) {
 }
 
 // ============== ФУНКЦИИ ДЛЯ РАБОТЫ С ЗАКАЗАМИ ==============
+
 // Загрузка и отображение заказов с фильтрацией по дате
 function loadOrders() {
     console.log('loadOrders вызвана, фильтр даты:', window.currentFilterDate);
@@ -220,22 +232,18 @@ function loadOrders() {
         shortInfo.push(`📏 ${item.size}`);
         shortInfo.push(`🔢 ${item.quantity} шт`);
         
-        // Добавляем кронштейн если не отсутствует
         if (item.bracket.type !== 'отсутствует') {
             shortInfo.push(`🔧 ${item.bracket.type} (${item.bracket.quantity} шт)`);
         }
         
-        // Добавляем лиру если не отсутствует
         if (item.lyre.type !== 'отсутствует') {
             shortInfo.push(`🎸 ${item.lyre.type} (${item.lyre.quantity} шт)`);
         }
         
-        // Добавляем RAL если есть
         if (item.ral) {
             shortInfo.push(`🎨 ${item.ral}`);
         }
         
-        // Добавляем текстуру если есть
         if (item.texture) {
             shortInfo.push(`🧵 ${item.texture}`);
         }
@@ -268,45 +276,130 @@ function loadOrders() {
         content.className = 'order-content';
         content.style.display = 'none';
 
-        // ИСПРАВЛЕНО: убраны все дублирования в таблице
-        content.innerHTML = `
-            <table class="items-table">
-                <thead>
-                    <tr>
-                        <th>Изделие</th>
-                        <th>Размер</th>
-                        <th>Кол-во</th>
-                        <th>Кронштейн</th>
-                        <th>Лира</th>
-                        <th>RAL</th>
-                        <th>Текстура</th>
-                    </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>${item.product}</strong>${item.product}
-                        <td>${item.size}${item.size}
-                        <td>${item.quantity} шт${item.quantity}
-                        <td>${item.bracket.type} (${item.bracket.quantity} шт)${item.bracket.type}
-                        <td>${item.lyre.type} (${item.lyre.quantity} шт)${item.lyre.type}
-                        <td>${item.ral || '-'}${item.ral}
-                        <td>${item.texture || '-'}${item.texture}
-                    </tr>
-                </tbody>
-            }</table>
-            
-            <div class="sites-section">
-                <h4 style="margin-bottom: 15px;">🏭 Производственные участки</h4>
-                <div class="sites-grid">
-                    ${createSiteRow(' Токарный', order, 'tokarniy')}
-                    ${createSiteRow(' Слесарный', order, 'slesarniy')}
-                    ${createSiteRow(' Фрезерный', order, 'frezerniy')}
-                    ${createSiteRow(' Лазерно-гибочный', order, 'lazerno')}
-                    ${createSiteRow(' Полимерный', order, 'polimerniy')}
+        // ============== ПОЛНАЯ ИНФОРМАЦИЯ О ЗАКАЗЕ (как на участках) ==============
+        
+        // Формируем отображение кронштейна (всегда показываем количество)
+        let bracketDisplay = '';
+        if (item.bracket.type === 'отсутствует' || item.bracket.quantity === 0) {
+            bracketDisplay = `<span style="color: #fff; margin-left: 8px;">отсутствует</span>
+                              <span style="color: #ff9800; margin-left: 5px;">(0 шт)</span>`;
+        } else {
+            bracketDisplay = `<span style="color: #fff; margin-left: 8px;">${escapeHtml(item.bracket.type)}</span>
+                              <span style="color: #ff9800; margin-left: 5px;">(${item.bracket.quantity} шт)</span>`;
+        }
+
+        // Формируем отображение лиры (всегда показываем количество)
+        let lyreDisplay = '';
+        if (item.lyre.type === 'отсутствует' || item.lyre.quantity === 0) {
+            lyreDisplay = `<span style="color: #fff; margin-left: 8px;">отсутствует</span>
+                           <span style="color: #ff9800; margin-left: 5px;">(0 шт)</span>`;
+        } else {
+            lyreDisplay = `<span style="color: #fff; margin-left: 8px;">${escapeHtml(item.lyre.type)}</span>
+                           <span style="color: #ff9800; margin-left: 5px;">(${item.lyre.quantity} шт)</span>`;
+        }
+
+        // Создаём блок с полной информацией
+        const productInfoDiv = document.createElement('div');
+        productInfoDiv.className = 'product-info';
+        productInfoDiv.style.marginBottom = '15px';
+        productInfoDiv.style.padding = '12px 15px';
+        productInfoDiv.style.background = '#15191f';
+        productInfoDiv.style.borderRadius = '8px';
+        productInfoDiv.style.borderLeft = '3px solid #ff3b3b';
+
+        let infoHtml = `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                <!-- Левая колонка: изделие и размер -->
+                <div>
+                    <div style="margin-bottom: 8px;">
+                        <strong style="color: #ff3b3b;">📦 ИЗДЕЛИЕ:</strong>
+                        <span style="color: #fff; margin-left: 8px;">${escapeHtml(item.product)}</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <strong>📏 РАЗМЕР:</strong>
+                        <span style="color: #fff; margin-left: 8px;">${escapeHtml(item.size) || 'Стандартный'}</span>
+                    </div>
+                    <div>
+                        <strong>🔢 КОЛИЧЕСТВО:</strong>
+                        <span style="color: #4cd964; margin-left: 8px; font-weight: 600;">${item.quantity} шт</span>
+                    </div>
+                </div>
+                
+                <!-- Средняя колонка: кронштейн и лира -->
+                <div>
+                    <div style="margin-bottom: 8px;">
+                        <strong>🔧 КРОНШТЕЙН:</strong>
+                        ${bracketDisplay}
+                    </div>
+                    <div>
+                        <strong>🎸 ЛИРА:</strong>
+                        ${lyreDisplay}
+                    </div>
+                </div>
+                
+                <!-- Правая колонка: RAL и текстура -->
+                <div>
+                    <div style="margin-bottom: 8px;">
+                        <strong>🎨 RAL:</strong>
+                        <span style="color: #fff; margin-left: 8px;">${escapeHtml(item.ral) || '-'}</span>
+                    </div>
+                    <div>
+                        <strong>🧵 ТЕКСТУРА:</strong>
+                        <span style="color: #fff; margin-left: 8px;">${escapeHtml(item.texture) || '-'}</span>
+                    </div>
                 </div>
             </div>
-            
-            ${order.additional ? `<div style="margin-top: 15px; padding: 10px; background: #15191f; border-radius: 5px; color: #a0a0a0;">📝 ${order.additional}</div>` : ''}
         `;
+
+        // Добавляем комплектующие, если есть
+        const components = order.components || [];
+        if (components && components.length > 0) {
+            let compsHtml = '';
+            for (let i = 0; i < components.length; i++) {
+                const comp = components[i];
+                compsHtml += `<span style="background: #1e232b; padding: 6px 15px; border-radius: 20px; font-size: 14px; border: 1px solid #2a2f38;">
+                                ${escapeHtml(comp.name)}: <strong style="color: #4cd964; font-size: 15px;">${comp.quantityPerProduct}</strong> шт/изд
+                              </span>`;
+            }
+            infoHtml += `
+                <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #2a2f38;">
+                    <strong style="color: #ff3b3b; font-size: 14px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>
+                    <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 10px;">
+                        ${compsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Добавляем дополнительные детали, если есть
+        if (order.additional) {
+            infoHtml += `
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #2a2f38;">
+                    <strong>📝 ДОПОЛНИТЕЛЬНО:</strong>
+                    <div style="margin-top: 6px; padding: 8px 12px; background: #1e232b; border-radius: 6px; color: #a0a0a0; font-size: 12px; border-left: 2px solid #ff3b3b;">
+                        ${escapeHtml(order.additional)}
+                    </div>
+                </div>
+            `;
+        }
+
+        productInfoDiv.innerHTML = infoHtml;
+        content.appendChild(productInfoDiv);
+        
+        // Добавляем блок с участками
+        const sitesDiv = document.createElement('div');
+        sitesDiv.className = 'sites-section';
+        sitesDiv.innerHTML = `
+            <h4 style="margin-bottom: 15px;">🏭 Производственные участки</h4>
+            <div class="sites-grid">
+                ${createSiteRow(' Токарный', order, 'tokarniy')}
+                ${createSiteRow(' Слесарный', order, 'slesarniy')}
+                ${createSiteRow(' Фрезерный', order, 'frezerniy')}
+                ${createSiteRow(' Лазерно-гибочный', order, 'lazerno')}
+                ${createSiteRow(' Полимерный', order, 'polimerniy')}
+            </div>
+        `;
+        content.appendChild(sitesDiv);
 
         header.addEventListener('click', function(e) {
             if (!e.target.classList.contains('btn')) {
@@ -838,6 +931,7 @@ window.syncTasksFromHistory = syncTasksFromHistory;
 window.createTasksForOrder = createTasksForOrder;
 window.filterOrdersByDate = filterOrdersByDate;
 window.updateFilterDateDisplay = updateFilterDateDisplay;
+window.escapeHtml = escapeHtml;
 
 // ============== КОМПЛЕКТУЮЩИЕ ==============
 
