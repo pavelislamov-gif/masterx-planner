@@ -123,8 +123,14 @@ class MaterialsReport {
     
     // ============== РАСЧЁТ ЛИСТОВЫХ МАТЕРИАЛОВ ==============
 calculateSheetMaterials(order) {
-    const productName = order.items[0]?.product || '';
+    // БЕРЁМ КОЛИЧЕСТВО ИЗ ЗАКАЗА
     const productQty = order.items[0]?.quantity || 1;
+    const productName = order.items[0]?.product || '';
+    
+    console.log('📦 Расчёт листовых материалов:');
+    console.log('   Изделие:', productName);
+    console.log('   Количество в заказе:', productQty);
+    
     const materials = [];
     
     const addMaterial = (materialName, thickness, area) => {
@@ -145,7 +151,8 @@ calculateSheetMaterials(order) {
     const bodyNorm = this.materialsNorm[productName]?.body;
     if (bodyNorm) {
         bodyNorm.forEach(material => {
-            const area = material.area * productQty;  // убрано * 2
+            const area = material.area * productQty;
+            console.log(`   ${material.material} ${material.thickness}: ${material.area} × ${productQty} = ${area} м²`);
             addMaterial(material.material, material.thickness, area);
         });
     }
@@ -157,7 +164,8 @@ calculateSheetMaterials(order) {
     components.forEach(comp => {
         const norm = componentNorms[comp.name];
         if (norm) {
-            const area = norm.area * comp.quantityPerProduct * productQty;  // убрано * 2
+            const area = norm.area * comp.quantityPerProduct * productQty;
+            console.log(`   Комплектующая ${comp.name}: ${norm.area} × ${comp.quantityPerProduct} × ${productQty} = ${area} м²`);
             addMaterial(norm.material, norm.thickness, area);
         }
     });
@@ -167,7 +175,8 @@ calculateSheetMaterials(order) {
     if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
         const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
         if (bracket) {
-            const area = bracket.area * item.bracket.quantity * productQty;  // убрано * 2
+            const area = bracket.area * item.bracket.quantity * productQty;
+            console.log(`   Кронштейн ${item.bracket.type}: ${bracket.area} × ${item.bracket.quantity} × ${productQty} = ${area} м²`);
             addMaterial('Сталь', bracket.thickness, area);
         }
     }
@@ -176,11 +185,13 @@ calculateSheetMaterials(order) {
     if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
         const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
         if (lyre) {
-            const area = lyre.area * item.lyre.quantity * productQty;  // убрано * 2
+            const area = lyre.area * item.lyre.quantity * productQty;
+            console.log(`   Лира ${item.lyre.type}: ${lyre.area} × ${item.lyre.quantity} × ${productQty} = ${area} м²`);
             addMaterial('Сталь', lyre.thickness, area);
         }
     }
     
+    console.log('   ИТОГО материалов:', materials);
     return materials;
 }
     
