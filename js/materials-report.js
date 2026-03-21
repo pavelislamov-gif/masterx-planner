@@ -123,41 +123,31 @@ class MaterialsReport {
     
     // ============== РАСЧЁТ ЛИСТОВЫХ МАТЕРИАЛОВ ==============
 calculateSheetMaterials(order) {
-    // БЕРЁМ КОЛИЧЕСТВО ИЗ ЗАКАЗА
-    const productQty = order.items[0]?.quantity || 1;
     const productName = order.items[0]?.product || '';
-    
-    console.log('📦 Расчёт листовых материалов:');
-    console.log('   Изделие:', productName);
-    console.log('   Количество в заказе:', productQty);
-    
+    const productQty = order.items[0]?.quantity || 1;
     const materials = [];
     
-    const addMaterial = (materialName, thickness, area) => {
-        const existing = materials.find(m => m.material === materialName && m.thickness === thickness);
-        if (existing) {
-            existing.area += area;
-        } else {
-            materials.push({
-                material: materialName,
-                thickness: thickness,
-                area: area,
-                unit: 'м²'
-            });
-        }
+    // Функция добавления материала (БЕЗ ГРУППИРОВКИ)
+    const addMaterial = (detailName, materialName, thickness, area) => {
+        materials.push({
+            detail: detailName,      // название детали (корпус, заглушка левая и т.д.)
+            material: materialName,
+            thickness: thickness,
+            area: area,
+            unit: 'м²'
+        });
     };
     
-    // 1. Корпус (body) из materialsNorm
+    // 1. Корпус
     const bodyNorm = this.materialsNorm[productName]?.body;
     if (bodyNorm) {
         bodyNorm.forEach(material => {
             const area = material.area * productQty;
-            console.log(`   ${material.material} ${material.thickness}: ${material.area} × ${productQty} = ${area} м²`);
-            addMaterial(material.material, material.thickness, area);
+            addMaterial('Корпус', material.material, material.thickness, area);
         });
     }
     
-    // 2. Комплектующие из materialsNorm
+    // 2. Комплектующие
     const components = order.components || [];
     const componentNorms = this.materialsNorm[productName]?.components || {};
     
@@ -165,8 +155,7 @@ calculateSheetMaterials(order) {
         const norm = componentNorms[comp.name];
         if (norm) {
             const area = norm.area * comp.quantityPerProduct * productQty;
-            console.log(`   Комплектующая ${comp.name}: ${norm.area} × ${comp.quantityPerProduct} × ${productQty} = ${area} м²`);
-            addMaterial(norm.material, norm.thickness, area);
+            addMaterial(comp.name, norm.material, norm.thickness, area);
         }
     });
     
@@ -176,8 +165,7 @@ calculateSheetMaterials(order) {
         const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
         if (bracket) {
             const area = bracket.area * item.bracket.quantity * productQty;
-            console.log(`   Кронштейн ${item.bracket.type}: ${bracket.area} × ${item.bracket.quantity} × ${productQty} = ${area} м²`);
-            addMaterial('Сталь', bracket.thickness, area);
+            addMaterial(`Кронштейн ${item.bracket.type}`, 'Сталь', bracket.thickness, area);
         }
     }
     
@@ -186,12 +174,10 @@ calculateSheetMaterials(order) {
         const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
         if (lyre) {
             const area = lyre.area * item.lyre.quantity * productQty;
-            console.log(`   Лира ${item.lyre.type}: ${lyre.area} × ${item.lyre.quantity} × ${productQty} = ${area} м²`);
-            addMaterial('Сталь', lyre.thickness, area);
+            addMaterial(`Лира ${item.lyre.type}`, 'Сталь', lyre.thickness, area);
         }
     }
     
-    console.log('   ИТОГО материалов:', materials);
     return materials;
 }
     
@@ -463,28 +449,32 @@ calculateSheetMaterials(order) {
             `;
         }
         
-        // БЛОК ПРОФИЛЕЙ
-        if (profiles.length > 0) {
-            html += `
-                <h4 style="margin-top: 30px;">📐 ПРОФИЛИ</h4>
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr style="background: #2a2f38;">
-                            <th style="padding: 10px; text-align: left;">Наименование</th>
-                            <th style="padding: 10px; text-align: right;">Длина (мм) на весь заказ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${profiles.map(prof => `
-                            <tr style="border-bottom: 1px solid #2a2f38;">
-                                <td style="padding: 8px;">${prof.name}</td>
-                                <td style="padding: 8px; text-align: right; color: #4cd964;">${prof.length.toFixed(0)}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-        }
+        // БЛОК ЛИСТОВЫХ МАТЕРИАЛОВ
+if (sheetMaterials.length > 0) {
+    html += `
+        <h4 style="margin-top: 30px;">📄 ЛИСТОВЫЕ МАТЕРИАЛЫ</h4>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #2a2f38;">
+                    <th style="padding: 10px; text-align: left;">Деталь</th>
+                    <th style="padding: 10px; text-align: left;">Материал</th>
+                    <th style="padding: 10px; text-align: left;">Толщина</th>
+                    <th style="padding: 10px; text-align: right;">Площадь (м²)</th>
+                 </tr>
+            </thead>
+            <tbody>
+                ${sheetMaterials.map(mat => `
+                    <tr style="border-bottom: 1px solid #2a2f38;">
+                        <td style="padding: 8px;">${mat.detail}</td>
+                        <td style="padding: 8px;">${mat.material}</td>
+                        <td style="padding: 8px;">${mat.thickness}</td>
+                        <td style="padding: 8px; text-align: right; color: #4cd964;">${fmt(mat.area, 4)}</td>
+                     </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
         
         // БЛОК ПРУТКОВ
         if (rods.length > 0) {
