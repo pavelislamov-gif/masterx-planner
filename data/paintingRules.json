@@ -1,0 +1,352 @@
+{
+  "description": "Правила покраски для каждого изделия",
+  "products": {
+    "XGRAY v.1": {
+      "body": false,
+      "components": {
+        "Заглушки Алюминиевые Левые": true,
+        "Заглушки Алюминиевые Правые": true,
+        "Заглушки Сталь 1": false
+      },
+      "profiles": {
+        "Профиль МП 1928 XGRAY": true,
+        "Профиль СЧ 4446 Планка": true,
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": false
+      }
+    },
+    "XGRAY v.2": {
+      "body": false,
+      "components": {
+        "Заглушки Алюминиевые Левые": true,
+        "Заглушки Алюминиевые Правые": true,
+        "Заглушки Сталь 1": false
+      },
+      "profiles": {
+        "Профиль МП 1928 XGRAY": true,
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": true
+      }
+    },
+    "XYELLOW": {
+      "body": false,
+      "components": {
+        "Заглушки Алюминиевые": true,
+        "Заглушки Сталь 0,5": false
+      },
+      "profiles": {
+        "Профиль СЧ 4515 XYELLOW": true,
+        "Профиль СЧ 4446 Планка": true,
+        "Модуль НПС 2999 (XGRAY/XYELLOW)": false
+      }
+    },
+    "XGLOW": {
+      "body": false,
+      "components": {
+        "Заглушки Алюминиевые Левые": true,
+        "Заглушки Алюминиевые Правые": true
+      },
+      "profiles": {
+        "Профиль НПС 2997": true,
+        "Профиль НПС 2994": true
+      }
+    },
+    "XGLOW mini": {
+      "body": false,
+      "components": {},
+      "profiles": {
+        "Профиль НПС 2993": true,
+        "Профиль НПС 2994": true
+      }
+    },
+    "XLINE": {
+      "body": false,
+      "components": {
+        "Заглушки Алюминиевые": true
+      },
+      "profiles": {
+        "Профиль КП 453434": true,
+        "Рассеиватель XLINE": true,
+        "Профиль КП 453436": true
+      }
+    },
+    "XSTRONG": {
+      "body": false,
+      "components": {},
+      "profiles": {
+        "ТПК 004S": true
+      }
+    },
+    "XLUMO": {
+      "body": false,
+      "components": {
+        "Заглушки Алюминиевые": true
+      },
+      "profiles": {
+        "Профиль НПС 2967 (XLUMO)": true
+      }
+    },
+    "XLUMO PROV": {
+      "body": false,
+      "components": {
+        "Заглушки Алюминиевые": true
+      },
+      "profiles": {
+        "Профиль НПС 2967 (XLUMO)": true
+      }
+    },
+    "XLUMO 1-6": {
+      "body": false,
+      "components": {
+        "Заглушки Алюминиевые": true
+      },
+      "profiles": {
+        "Профиль НПС 2967 (XLUMO)": true
+      }
+    },
+    "XLUMO Двунаправленный": {
+      "body": false,
+      "components": {
+        "Заглушки Алюминиевые": true
+      },
+      "profiles": {
+        "Профиль НПС 3362": true
+      }
+    },
+    "XROLL-lite P": {
+      "body": false,
+      "components": {
+        "Заглушки Алюминиевые": true
+      },
+      "profiles": {
+        "Профиль НПС 3007": true
+      }
+    },
+    "XROLL-lite K": {
+      "body": false,
+      "components": {
+        "Заглушки Алюминиевые": true
+      },
+      "profiles": {
+        "Профиль НПС 3007": true
+      }
+    },
+    "XLITE": {
+      "body": false,
+      "components": {
+        "Заглушки Алюминиевые": true
+      },
+      "profiles": {
+        "Профиль НПС 2966": true
+      }
+    },
+    "XBAR-SW": {
+      "body": false,
+      "components": {},
+      "profiles": {
+        "КП 453054": true
+      }
+    },
+    "XVISION": {
+      "body": false,
+      "components": {},
+      "profiles": {
+        "КП 453849": true
+      }
+    },
+    "XGIRO": {
+      "body": false,
+      "components": {
+        "Заглушки Алюминиевые": true
+      },
+      "profiles": {
+        "Профиль МП 0923-081": true
+      }
+    },
+    "XSMART": {
+      "body": false,
+      "components": {
+        "Заглушки Алюминиевые": true
+      },
+      "profiles": {
+        "КП 453785": true,
+        "КП 453784": true
+      }
+    },
+    "XSMART mini": {
+      "body": false,
+      "components": {
+        "Заглушки Алюминиевые": true
+      },
+      "profiles": {
+        "Профиль НП 455015": true
+      }
+    },
+    "XRAY 6-T2 BT 220 Шторка х2": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "СЧ 4435 труба": true
+      }
+    },
+    "XRAY 6T Накладной": {
+      "body": false,
+      "components": {
+        "крышка": true
+      },
+      "profiles": {},
+      "rods": {
+        "СЧ 4435 труба": true
+      }
+    },
+    "XRAY 1": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "СЧ 4435 труба": true
+      }
+    },
+    "XRAY 3": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "СЧ 4435 труба": true
+      }
+    },
+    "XRAY 3-2": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "СЧ 4435 труба": true
+      }
+    },
+    "XRAY 3-GRP": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "Пруток 40мм Д16Т": true,
+        "Пруток 48мм Д16Т": true
+      }
+    },
+    "XRAY 6": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "СЧ 4435 труба": true
+      }
+    },
+    "XRAY 6 RGBW": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "СЧ 4435 труба": true
+      }
+    },
+    "XRAY 6-2 проходной": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "СЧ 4435 труба": true
+      }
+    },
+    "XRAY 6-2 оконечный": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "СЧ 4435 труба": true
+      }
+    },
+    "XSLOPE": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "Пруток 70мм Д16Т": true
+      }
+    },
+    "XPIXEL BIN v.1": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "Пруток 100мм Д16Т": true,
+        "Пруток 130мм Д16Т": true
+      }
+    },
+    "XPIXEL BIN v.2": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "Пруток 100мм Д16Т": true,
+        "Пруток 130мм Д16Т": true
+      }
+    },
+    "XPIXEL BIN v.3": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "Пруток 110мм Д16Т": true
+      }
+    },
+    "XPIXEL OVHD": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "Пруток 50мм Д16Т": true
+      }
+    },
+    "XDISK": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "Пруток Шестигранник Ал 25мм": true,
+        "Пруток 75мм Д16Т": true,
+        "Пруток 100мм Д16Т": true
+      }
+    },
+    "XPOINT OVHD": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "Пруток 25мм Д16Т": true
+      }
+    },
+    "XSPOT": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "Пруток 55мм Д16Т": true
+      }
+    },
+    "ACENTO 3T": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "Пруток 70мм Д16Т": true,
+        "СЧ 4435 труба": true
+      }
+    },
+    "ACENTO 4": {
+      "body": false,
+      "components": {},
+      "profiles": {},
+      "rods": {
+        "Пруток 100мм Д16Т": true
+      }
+    }
+  }
+}

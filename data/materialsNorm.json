@@ -1,0 +1,249 @@
+{
+  "description": "Нормы материалов для корпуса и комплектующих деталей",
+  "unit": "м²",
+  "products": {
+    "XGRAY v.1": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.0032 },
+        { "material": "Нержавеющая сталь AISI 430", "thickness": "1мм", "area": 0.0002 }
+      ],
+      "components": {
+        "Заглушки Алюминиевые Левые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 },
+        "Заглушки Алюминиевые Правые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 },
+        "Заглушки Сталь 1": { "material": "Нержавеющая сталь AISI 430", "thickness": "1мм", "area": 0.0002 }
+      }
+    },
+    "XGRAY v.2": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.0032 },
+        { "material": "Нержавеющая сталь AISI 430", "thickness": "1мм", "area": 0.0002 }
+      ],
+      "components": {
+        "Заглушки Алюминиевые Левые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 },
+        "Заглушки Алюминиевые Правые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 },
+        "Заглушки Сталь 1": { "material": "Нержавеющая сталь AISI 430", "thickness": "1мм", "area": 0.0002 }
+      }
+    },
+    "XYELLOW": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.004 },
+        { "material": "Нержавеющая сталь AISI 430", "thickness": "1мм", "area": 0.0002 }
+      ],
+      "components": {
+        "Заглушки Алюминиевые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 },
+        "Заглушки Сталь 0,5": { "material": "Сталь", "thickness": "0.5мм", "area": 0.0033 }
+      }
+    },
+    "XLUMO": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.006 }
+      ],
+      "components": {
+        "Заглушки Алюминиевые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 },
+        "Вставка ПВХ нижняя": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 },
+        "Вставка ПВХ нижняя с выемкой": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 },
+        "Вставка ПВХ верхняя": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 },
+        "Вставка ПВХ верхняя с выемкой": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 }
+      }
+    },
+    "XLUMO 1-6": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.006 }
+      ],
+      "components": {
+        "Заглушки Алюминиевые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 },
+        "Вставка ПВХ нижняя": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 },
+        "Вставка ПВХ нижняя с выемкой": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 },
+        "Вставка ПВХ верхняя": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 }
+      }
+    },
+    "XLUMO Двунаправленный": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.008 }
+      ],
+      "components": {
+        "Заглушки Алюминиевые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 },
+        "Вставка ПВХ верхняя": { "material": "ПВХ", "thickness": "3мм", "area": 0.0044 },
+        "Вставка ПВХ средняя": { "material": "ПВХ", "thickness": "3мм", "area": 0.0044 }
+      }
+    },
+    "XLUMO PROV": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.006 }
+      ],
+      "components": {
+        "Заглушки Алюминиевые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 },
+        "Вставка ПВХ нижняя": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 }
+      }
+    },
+    "XGIRO": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.002 }
+      ],
+      "components": {
+        "Заглушки Алюминиевые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 },
+        "Вставка ПВХ": { "material": "ПВХ", "thickness": "3мм", "area": 0.0004 }
+      }
+    },
+    "XGLOW": {
+      "body": [
+        { "material": "Алюминий", "thickness": "8мм", "area": 0.0007 }
+      ],
+      "components": {
+        "Заглушки Алюминиевые Левые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 },
+        "Заглушки Алюминиевые Правые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 }
+      }
+    },
+    "XROLL-lite P": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.0036 }
+      ],
+      "components": {
+        "Заглушки Алюминиевые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 }
+      }
+    },
+    "XROLL-lite K": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.0036 }
+      ],
+      "components": {
+        "Заглушки Алюминиевые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 }
+      }
+    },
+    "XLITE": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.006 }
+      ],
+      "components": {
+        "Заглушки Алюминиевые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 },
+        "Вставка ПВХ": { "material": "ПВХ", "thickness": "3мм", "area": 0.0005 }
+      }
+    },
+    "XSMART": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.01 }
+      ],
+      "components": {
+        "Заглушки Алюминиевые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 },
+        "Вставка ПВХ": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 }
+      }
+    },
+    "XSMART mini": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.005 }
+      ],
+      "components": {
+        "Заглушки Алюминиевые": { "material": "Алюминий", "thickness": "3мм", "area": 0.0092 },
+        "Вставка AL": { "material": "Алюминий", "thickness": "3мм", "area": 0.005 },
+        "Вставка ПВХ": { "material": "ПВХ", "thickness": "3мм", "area": 0.0007 }
+      }
+    },
+    "XSTRONG": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.0012 }
+      ],
+      "components": {
+        "Вставка ПВХ": { "material": "ПВХ", "thickness": "3мм", "area": 0.0005 },
+        "Вставка AL": { "material": "Алюминий", "thickness": "3мм", "area": 0.0012 }
+      }
+    },
+    "XBAR-SW": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.0001 }
+      ],
+      "components": {
+        "Вставка ПВХ": { "material": "ПВХ", "thickness": "3мм", "area": 0.0005 },
+        "Вставка AL": { "material": "Алюминий", "thickness": "3мм", "area": 0.0001 }
+      }
+    },
+    "XFOCUS": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.0006 }
+      ],
+      "components": {
+        "Вставка ПВХ": { "material": "ПВХ", "thickness": "3мм", "area": 0.003 },
+        "Вставка AL": { "material": "Алюминий", "thickness": "3мм", "area": 0.0006 }
+      }
+    },
+    "XLINE": {
+      "body": [
+        { "material": "Алюминий", "thickness": "4мм", "area": 0.008 }
+      ],
+      "components": {
+        "Заглушки Алюминиевые": { "material": "Алюминий", "thickness": "4мм", "area": 0.008 }
+      }
+    },
+    "XRAY 6-T2 BT 220 Шторка х2": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.0033 },
+        { "material": "Сталь", "thickness": "0.5мм", "area": 0.0033 }
+      ],
+      "components": {
+        "Основание платы": { "material": "Сталь", "thickness": "0.5мм", "area": 0.0033 },
+        "Фоновая заглушка": { "material": "Сталь", "thickness": "0.5мм", "area": 0.0033 }
+      }
+    },
+    "XRAY 6T Накладной": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.0072 },
+        { "material": "Сталь", "thickness": "0.5мм", "area": 0.0033 }
+      ],
+      "components": {
+        "крышка": { "material": "Алюминий", "thickness": "3мм", "area": 0.0072 },
+        "Основание платы": { "material": "Сталь", "thickness": "0.5мм", "area": 0.0033 },
+        "Фоновая заглушка": { "material": "Сталь", "thickness": "0.5мм", "area": 0.0033 }
+      }
+    },
+    "XRAY 1": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.0032 },
+        { "material": "Сталь", "thickness": "0.5мм", "area": 0.0022 }
+      ],
+      "components": {
+        "Стекло Поликарбонат": { "material": "Поликарбонат", "thickness": "6мм", "area": 0.0016 }
+      }
+    },
+    "XRAY 3": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.0032 },
+        { "material": "Сталь", "thickness": "0.5мм", "area": 0.0022 }
+      ],
+      "components": {
+        "Стекло Поликарбонат": { "material": "Поликарбонат", "thickness": "6мм", "area": 0.0016 },
+        "РТИ": { "material": "Прочее", "thickness": "—", "area": 0 }
+      }
+    },
+    "XRAY 3-2": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.0032 },
+        { "material": "Сталь", "thickness": "0.5мм", "area": 0.0022 }
+      ],
+      "components": {
+        "Стекло Поликарбонат": { "material": "Поликарбонат", "thickness": "6мм", "area": 0.0032 },
+        "РТИ": { "material": "Прочее", "thickness": "—", "area": 0 }
+      }
+    },
+    "XRAY 6": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.0032 },
+        { "material": "Сталь", "thickness": "0.5мм", "area": 0.0022 }
+      ],
+      "components": {
+        "Фоновая заглушка": { "material": "Сталь", "thickness": "0.5мм", "area": 0.0022 },
+        "Стекло Поликарбонат": { "material": "Поликарбонат", "thickness": "6мм", "area": 0.0016 },
+        "РТИ": { "material": "Прочее", "thickness": "—", "area": 0 }
+      }
+    },
+    "XRAY 6 RGBW": {
+      "body": [
+        { "material": "Алюминий", "thickness": "3мм", "area": 0.0032 },
+        { "material": "Сталь", "thickness": "0.5мм", "area": 0.0022 }
+      ],
+      "components": {
+        "Фоновая заглушка": { "material": "Сталь", "thickness": "0.5мм", "area": 0.0022 },
+        "Стекло Поликарбонат": { "material": "Поликарбонат", "thickness": "6мм", "area": 0.0016 },
+        "РТИ": { "material": "Прочее", "thickness": "—", "area": 0 }
+      }
+    }
+  }
+}
