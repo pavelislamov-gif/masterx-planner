@@ -23,7 +23,6 @@ class MaterialsReport {
         this.normsLoaded = false;
     }
     
-    // ============== ЗАГРУЗКА ВСЕХ ДАННЫХ ==============
     async loadAllData() {
         console.log('📦 Загрузка всех данных...');
         
@@ -48,34 +47,29 @@ class MaterialsReport {
             if (profilesRes.ok) {
                 const profilesData = await profilesRes.json();
                 this.profilesArea = profilesData.products || {};
-                console.log('✅ Загружены площади профилей');
             }
             
             const rodsRes = await fetch('data/rodsByProduct.json');
             if (rodsRes.ok) {
                 const rodsData = await rodsRes.json();
                 this.rodsByProduct = rodsData.products || {};
-                console.log('✅ Загружены прутки');
             }
             
             const normsNormRes = await fetch('data/materialsNorm.json');
             if (normsNormRes.ok) {
                 const normsNormData = await normsNormRes.json();
                 this.materialsNorm = normsNormData.products || {};
-                console.log('✅ Загружены нормы материалов');
             }
             
             const rulesRes = await fetch('data/paintingRules.json');
             if (rulesRes.ok) {
                 const rulesData = await rulesRes.json();
                 this.paintingRules = rulesData.products || {};
-                console.log('✅ Загружены правила покраски');
             }
             
             const paintRes = await fetch('data/paintCalculation.json');
             if (paintRes.ok) {
                 this.paintConfig = await paintRes.json();
-                console.log('✅ Загружены настройки краски');
             } else {
                 this.paintConfig = {
                     lossCoefficients: { flat: 1.10, pipe: 1.30, profile: 1.20 },
@@ -121,67 +115,60 @@ class MaterialsReport {
         return false;
     }
     
-    // ============== РАСЧЁТ ЛИСТОВЫХ МАТЕРИАЛОВ ==============
-calculateSheetMaterials(order) {
-    const productName = order.items[0]?.product || '';
-    const productQty = order.items[0]?.quantity || 1;
-    const materials = [];
-    
-    // Функция добавления материала (БЕЗ ГРУППИРОВКИ)
-    const addMaterial = (detailName, materialName, thickness, area) => {
-        materials.push({
-            detail: detailName,      // название детали (корпус, заглушка левая и т.д.)
-            material: materialName,
-            thickness: thickness,
-            area: area,
-            unit: 'м²'
+    calculateSheetMaterials(order) {
+        const productName = order.items[0]?.product || '';
+        const productQty = order.items[0]?.quantity || 1;
+        const materials = [];
+        
+        const addMaterial = (detailName, materialName, thickness, area) => {
+            materials.push({
+                detail: detailName,
+                material: materialName,
+                thickness: thickness,
+                area: area,
+                unit: 'м²'
+            });
+        };
+        
+        const bodyNorm = this.materialsNorm[productName]?.body;
+        if (bodyNorm) {
+            bodyNorm.forEach(material => {
+                const area = material.area * productQty;
+                addMaterial('Корпус', material.material, material.thickness, area);
+            });
+        }
+        
+        const components = order.components || [];
+        const componentNorms = this.materialsNorm[productName]?.components || {};
+        
+        components.forEach(comp => {
+            const norm = componentNorms[comp.name];
+            if (norm) {
+                const area = norm.area * comp.quantityPerProduct * productQty;
+                addMaterial(comp.name, norm.material, norm.thickness, area);
+            }
         });
-    };
-    
-    // 1. Корпус
-    const bodyNorm = this.materialsNorm[productName]?.body;
-    if (bodyNorm) {
-        bodyNorm.forEach(material => {
-            const area = material.area * productQty;
-            addMaterial('Корпус', material.material, material.thickness, area);
-        });
+        
+        const item = order.items[0];
+        if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
+            const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
+            if (bracket) {
+                const area = bracket.area * item.bracket.quantity * productQty;
+                addMaterial(`Кронштейн ${item.bracket.type}`, 'Сталь', bracket.thickness, area);
+            }
+        }
+        
+        if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
+            const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
+            if (lyre) {
+                const area = lyre.area * item.lyre.quantity * productQty;
+                addMaterial(`Лира ${item.lyre.type}`, 'Сталь', lyre.thickness, area);
+            }
+        }
+        
+        return materials;
     }
     
-    // 2. Комплектующие
-    const components = order.components || [];
-    const componentNorms = this.materialsNorm[productName]?.components || {};
-    
-    components.forEach(comp => {
-        const norm = componentNorms[comp.name];
-        if (norm) {
-            const area = norm.area * comp.quantityPerProduct * productQty;
-            addMaterial(comp.name, norm.material, norm.thickness, area);
-        }
-    });
-    
-    // 3. Кронштейны
-    const item = order.items[0];
-    if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
-        const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
-        if (bracket) {
-            const area = bracket.area * item.bracket.quantity * productQty;
-            addMaterial(`Кронштейн ${item.bracket.type}`, 'Сталь', bracket.thickness, area);
-        }
-    }
-    
-    // 4. Лиры
-    if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
-        const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
-        if (lyre) {
-            const area = lyre.area * item.lyre.quantity * productQty;
-            addMaterial(`Лира ${item.lyre.type}`, 'Сталь', lyre.thickness, area);
-        }
-    }
-    
-    return materials;
-}
-    
-    // ============== РАСЧЁТ ПРОФИЛЕЙ (длина в мм) ==============
     calculateProfiles(order) {
         const productName = order.items[0]?.product || '';
         const productSize = order.items[0]?.size || '';
@@ -205,28 +192,6 @@ calculateSheetMaterials(order) {
         return profiles;
     }
     
-    // ============== РАСЧЁТ ПРУТКОВ (длина в мм) ==============
-    calculateRods(order) {
-        const productName = order.items[0]?.product || '';
-        const productQty = order.items[0]?.quantity || 1;
-        const rods = [];
-        
-        const rodsData = this.materialsDB.rods || [];
-        const productRods = rodsData.filter(rod => rod.product === productName);
-        
-        productRods.forEach(rod => {
-            rods.push({
-                name: rod.rodType || rod.name,
-                diameter: rod.diameter || '—',
-                length: rod.value * productQty,
-                unit: 'мм'
-            });
-        });
-        
-        return rods;
-    }
-    
-    // ============== РАСЧЁТ КРАСКИ ==============
     calculatePaint(order) {
         const productName = order.items[0]?.product || '';
         const productSize = order.items[0]?.size || '';
@@ -241,12 +206,11 @@ calculateSheetMaterials(order) {
         let pipeArea = 0;
         const paintItems = [];
         
-        // 1. КОРПУС
         const bodyNorm = this.materialsNorm[productName]?.body;
         if (bodyNorm) {
             bodyNorm.forEach(material => {
                 if (this.shouldPaint(productName, 'body', material.material)) {
-                    const area = material.area * productQty * 2;
+                    const area = material.area * productQty;
                     flatArea += area;
                     paintItems.push({
                         name: `Корпус (${material.material})`,
@@ -258,14 +222,13 @@ calculateSheetMaterials(order) {
             });
         }
         
-        // 2. КОМПЛЕКТУЮЩИЕ
         const components = order.components || [];
         const componentNorms = this.materialsNorm[productName]?.components || {};
         
         components.forEach(comp => {
             const norm = componentNorms[comp.name];
             if (norm && this.shouldPaint(productName, 'component', comp.name)) {
-                const area = norm.area * comp.quantityPerProduct * productQty * 2;
+                const area = norm.area * comp.quantityPerProduct * productQty;
                 flatArea += area;
                 paintItems.push({
                     name: comp.name,
@@ -276,16 +239,15 @@ calculateSheetMaterials(order) {
             }
         });
         
-        // 3. КРОНШТЕЙНЫ И ЛИРЫ
         const item = order.items[0];
         
         if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
             const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
             if (bracket && this.shouldPaint(productName, 'component', `Кронштейн ${item.bracket.type}`)) {
-                const area = bracket.area * item.bracket.quantity * productQty * 2;
+                const area = bracket.area * item.bracket.quantity * productQty;
                 flatArea += area;
                 paintItems.push({
-                    name: `Кронштейн ${item.bracket.type} (${item.bracket.quantity} шт/изд)`,
+                    name: `Кронштейн ${item.bracket.type}`,
                     type: 'flat',
                     area: area,
                     consumption: area * consumptionPerM2
@@ -296,10 +258,10 @@ calculateSheetMaterials(order) {
         if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
             const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
             if (lyre && this.shouldPaint(productName, 'component', `Лира ${item.lyre.type}`)) {
-                const area = lyre.area * item.lyre.quantity * productQty * 2;
+                const area = lyre.area * item.lyre.quantity * productQty;
                 flatArea += area;
                 paintItems.push({
-                    name: `Лира ${item.lyre.type} (${item.lyre.quantity} шт/изд)`,
+                    name: `Лира ${item.lyre.type}`,
                     type: 'flat',
                     area: area,
                     consumption: area * consumptionPerM2
@@ -307,7 +269,6 @@ calculateSheetMaterials(order) {
             }
         }
         
-        // 4. ПРОФИЛИ
         const profileData = this.profilesArea[productName]?.sizes?.[productSize];
         if (profileData) {
             for (const [profileName, areaPerUnit] of Object.entries(profileData)) {
@@ -324,7 +285,6 @@ calculateSheetMaterials(order) {
             }
         }
         
-        // 5. ПРУТКИ
         const rodsData = this.rodsByProduct[productName]?.rods || [];
         rodsData.forEach(rod => {
             if (this.shouldPaint(productName, 'rod', rod.name)) {
@@ -334,8 +294,6 @@ calculateSheetMaterials(order) {
                     name: rod.name,
                     type: 'pipe',
                     area: area,
-                    diameter: rod.diameter,
-                    length: rod.length,
                     consumption: area * consumptionPerM2
                 });
             }
@@ -364,103 +322,36 @@ calculateSheetMaterials(order) {
         };
     }
     
-    // ============== ОСНОВНОЙ МЕТОД ==============
     async generateReport(order) {
         await this.loadAllData();
         return this.generateReportHTML(order);
     }
     
     async generateReportHTML(order) {
-    const sheetMaterials = this.calculateSheetMaterials(order);
-    const profiles = this.calculateProfiles(order);
-    const paint = this.calculatePaint(order);
-    
-    const fmt = (val, dec = 4) => {
-        if (val === undefined || val === null) return '0';
-        return Number(val).toFixed(dec);
-    };
-    
-    // Группируем листовые материалы по материалу и толщине
-    const groupedMaterials = {};
-    sheetMaterials.forEach(mat => {
-        const key = `${mat.material}_${mat.thickness}`;
-        if (!groupedMaterials[key]) {
-            groupedMaterials[key] = {
-                material: mat.material,
-                thickness: mat.thickness,
-                area: 0
-            };
-        }
-        groupedMaterials[key].area += mat.area;
-    });
-    
-    let html = `
-        <div class="materials-report">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3>📊 Отчет по материалам для заказа №${order.number}</h3>
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="window.print()" class="btn btn-primary">🖨️ Печать</button>
-                    <button onclick="closeMaterialsModal()" class="btn btn-secondary">✖ Закрыть</button>
-                </div>
-            </div>
-            
-            <p style="color: #a0a0a0; margin-bottom: 20px;">
-                Дата: ${order.date ? new Date(order.date).toLocaleDateString('ru-RU') : 'Не указана'}
-            </p>
-            
-            <h4>📦 Состав заказа:</h4>
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-                <thead>
-                    <tr style="background: #2a2f38;">
-                        <th style="padding: 10px; text-align: left;">Изделие</th>
-                        <th style="padding: 10px; text-align: left;">Размер</th>
-                        <th style="padding: 10px; text-align: left;">Кол-во</th>
-                        <th style="padding: 10px; text-align: left;">RAL</th>
-                        <th style="padding: 10px; text-align: left;">Текстура</th>
-                      </tr>
-                </thead>
-                <tbody>
-                    ${order.items.map(item => `
-                        <tr style="border-bottom: 1px solid #2a2f38;">
-                            <td style="padding: 8px;"><strong>${item.product}</strong></td>
-                            <td style="padding: 8px;">${item.size}</td>
-                            <td style="padding: 8px;">${item.quantity} шт</td>
-                            <td style="padding: 8px;">${item.ral || '-'}</td>
-                            <td style="padding: 8px;">${item.texture || '-'}</td>
-                          </tr>
-                    `).join('')}
-                </tbody>
-              </table>
-    `;
-    
-    // БЛОК ЛИСТОВЫХ МАТЕРИАЛОВ
-    if (Object.keys(groupedMaterials).length > 0) {
-        html += `
-            <h4 style="margin-top: 30px;">📄 ЛИСТОВЫЕ МАТЕРИАЛЫ</h4>
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background: #2a2f38;">
-                        <th style="padding: 10px; text-align: left;">Материал</th>
-                        <th style="padding: 10px; text-align: left;">Толщина</th>
-                        <th style="padding: 10px; text-align: right;">Площадь (м²)</th>
-                      </tr>
-                </thead>
-                <tbody>
-                    ${Object.values(groupedMaterials).map(mat => `
-                        <tr style="border-bottom: 1px solid #2a2f38;">
-                            <td style="padding: 8px;">${mat.material}</td>
-                            <td style="padding: 8px;">${mat.thickness}</td>
-                            <td style="padding: 8px; text-align: right; color: #4cd964;">${fmt(mat.area, 4)}</td>
-                          </tr>
-                    `).join('')}
-                </tbody>
-              </table>
-        `;
-    }
-    
-    // БЛОК ПРОФИЛЕЙ (итоговая длина в мм)
-    if (profiles.length > 0) {
-        // Группируем профили по названию
+        const sheetMaterials = this.calculateSheetMaterials(order);
+        const profiles = this.calculateProfiles(order);
+        const paint = this.calculatePaint(order);
+        
+        const fmt = (val, dec = 4) => {
+            if (val === undefined || val === null) return '0';
+            return Number(val).toFixed(dec);
+        };
+        
+        // Группируем листовые материалы
+        const groupedMaterials = {};
+        sheetMaterials.forEach(mat => {
+            const key = `${mat.material}_${mat.thickness}`;
+            if (!groupedMaterials[key]) {
+                groupedMaterials[key] = {
+                    material: mat.material,
+                    thickness: mat.thickness,
+                    area: 0
+                };
+            }
+            groupedMaterials[key].area += mat.area;
+        });
+        
+        // Группируем профили
         const groupedProfiles = {};
         profiles.forEach(prof => {
             if (!groupedProfiles[prof.name]) {
@@ -469,63 +360,141 @@ calculateSheetMaterials(order) {
             groupedProfiles[prof.name] += prof.length;
         });
         
-        html += `
-            <h4 style="margin-top: 30px;">📐 ПРОФИЛИ</h4>
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background: #2a2f38;">
-                        <th style="padding: 10px; text-align: left;">Наименование</th>
-                        <th style="padding: 10px; text-align: right;">Длина (мм)</th>
-                      </tr>
-                </thead>
-                <tbody>
-                    ${Object.entries(groupedProfiles).map(([name, length]) => `
-                        <tr style="border-bottom: 1px solid #2a2f38;">
-                            <td style="padding: 8px;">${name}</td>
-                            <td style="padding: 8px; text-align: right; color: #4cd964;">${Math.round(length).toLocaleString()}</td>
-                          </tr>
-                    `).join('')}
-                </tbody>
-              </table>
+        let html = `
+            <div class="materials-report">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>📊 Отчет по материалам для заказа №${order.number}</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="window.print()" class="btn btn-primary">🖨️ Печать</button>
+                        <button onclick="closeMaterialsModal()" class="btn btn-secondary">✖ Закрыть</button>
+                    </div>
+                </div>
+                
+                <p style="color: #a0a0a0; margin-bottom: 20px;">
+                    Дата: ${order.date ? new Date(order.date).toLocaleDateString('ru-RU') : 'Не указана'}
+                </p>
+                
+                <h4>📦 Состав заказа:</h4>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                    <thead>
+                        <tr style="background: #2a2f38;">
+                            <th style="padding: 10px; text-align: left;">Изделие</th>
+                            <th style="padding: 10px; text-align: left;">Размер</th>
+                            <th style="padding: 10px; text-align: left;">Кол-во</th>
+                            <th style="padding: 10px; text-align: left;">RAL</th>
+                            <th style="padding: 10px; text-align: left;">Текстура</th>
+                           </tr>
+                    </thead>
+                    <tbody>
+                        ${order.items.map(item => `
+                            <tr style="border-bottom: 1px solid #2a2f38;">
+                                <td style="padding: 8px;"><strong>${item.product}</strong></td>
+                                <td style="padding: 8px;">${item.size}</td>
+                                <td style="padding: 8px;">${item.quantity} шт</td>
+                                <td style="padding: 8px;">${item.ral || '-'}</td>
+                                <td style="padding: 8px;">${item.texture || '-'}</td>
+                              </tr>
+                        `).join('')}
+                    </tbody>
+                  </table>
         `;
-    }
-    
-    // БЛОК КРАСКИ
-if (paint && paint.items.length > 0) {
-    html += `
-        <h4 style="margin-top: 30px;">🎨 ПОРОШКОВАЯ КРАСКА (${paint.ral})</h4>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
-            <thead>
-                <tr style="background: #2a2f38;">
-                    <th style="padding: 10px; text-align: left;">Показатель</th>
-                    <th style="padding: 10px; text-align: right;">Значение</th>
-                  </tr>
-            </thead>
-            <tbody>
-                <tr style="border-bottom: 1px solid #2a2f38;">
-                    <td style="padding: 8px;">Площадь окраски</td>
-                    <td style="padding: 8px; text-align: right; color: #4cd964;">${fmt(paint.totalArea, 4)} м²</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #2a2f38;">
-                    <td style="padding: 8px;">Чистый расход краски</td>
-                    <td style="padding: 8px; text-align: right; color: #4cd964;">${fmt(paint.pureConsumption, 3)} кг</td>
-                </tr>
-            </tbody>
-        </table>
         
-        <div style="margin-top: 15px; padding: 12px; background: #1e232b; border-radius: 8px;">
-            <p style="margin: 0 0 8px 0;"><strong>📌 С учетом технологических потерь:</strong></p>
-            <ul style="margin: 0; padding-left: 20px; color: #a0a0a0;">
-                <li>Плоские детали: +${Math.round((paint.lossCoefficients.flat - 1) * 100)}%</li>
-                <li>Профили: +${Math.round((paint.lossCoefficients.profile - 1) * 100)}%</li>
-                <li>Трубы: +${Math.round((paint.lossCoefficients.pipe - 1) * 100)}%</li>
-            </ul>
-            <p style="margin: 10px 0 0 0; font-weight: 600; color: #ff9800;">
-                💰 Рекомендуемый заказ краски: <strong>${paint.recommendedOrder} кг</strong>
-            </p>
-        </div>`;
-    return html;
-}
+        // Листовые материалы
+        if (Object.keys(groupedMaterials).length > 0) {
+            html += `
+                <h4 style="margin-top: 30px;">📄 ЛИСТОВЫЕ МАТЕРИАЛЫ</h4>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #2a2f38;">
+                            <th style="padding: 10px; text-align: left;">Материал</th>
+                            <th style="padding: 10px; text-align: left;">Толщина</th>
+                            <th style="padding: 10px; text-align: right;">Площадь (м²)</th>
+                          </tr>
+                    </thead>
+                    <tbody>
+                        ${Object.values(groupedMaterials).map(mat => `
+                            <tr style="border-bottom: 1px solid #2a2f38;">
+                                <td style="padding: 8px;">${mat.material}</td>
+                                <td style="padding: 8px;">${mat.thickness}</td>
+                                <td style="padding: 8px; text-align: right; color: #4cd964;">${fmt(mat.area, 4)}</td>
+                              </tr>
+                        `).join('')}
+                    </tbody>
+                  </table>
+            `;
+        }
+        
+        // Профили
+        if (Object.keys(groupedProfiles).length > 0) {
+            html += `
+                <h4 style="margin-top: 30px;">📐 ПРОФИЛИ</h4>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #2a2f38;">
+                            <th style="padding: 10px; text-align: left;">Наименование</th>
+                            <th style="padding: 10px; text-align: right;">Длина (мм)</th>
+                          </tr>
+                    </thead>
+                    <tbody>
+                        ${Object.entries(groupedProfiles).map(([name, length]) => `
+                            <tr style="border-bottom: 1px solid #2a2f38;">
+                                <td style="padding: 8px;">${name}</td>
+                                <td style="padding: 8px; text-align: right; color: #4cd964;">${Math.round(length).toLocaleString()}</td>
+                              </tr>
+                        `).join('')}
+                    </tbody>
+                  </table>
+            `;
+        }
+        
+        // Краска
+        if (paint && paint.items.length > 0) {
+            html += `
+                <h4 style="margin-top: 30px;">🎨 ПОРОШКОВАЯ КРАСКА (${paint.ral})</h4>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+                    <thead>
+                        <tr style="background: #2a2f38;">
+                            <th style="padding: 10px; text-align: left;">Показатель</th>
+                            <th style="padding: 10px; text-align: right;">Значение</th>
+                          </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #2a2f38;">
+                            <td style="padding: 8px;">Площадь окраски</td>
+                            <td style="padding: 8px; text-align: right; color: #4cd964;">${fmt(paint.totalArea, 4)} м²</td>
+                          </tr>
+                        <tr style="border-bottom: 1px solid #2a2f38;">
+                            <td style="padding: 8px;">Чистый расход краски</td>
+                            <td style="padding: 8px; text-align: right; color: #4cd964;">${fmt(paint.pureConsumption, 3)} кг</td>
+                          </tr>
+                    </tbody>
+                  </table>
+                
+                <div style="margin-top: 15px; padding: 12px; background: #1e232b; border-radius: 8px;">
+                    <p style="margin: 0 0 8px 0;"><strong>📌 С учетом технологических потерь:</strong></p>
+                    <ul style="margin: 0; padding-left: 20px; color: #a0a0a0;">
+                        <li>Плоские детали: +${Math.round((paint.lossCoefficients.flat - 1) * 100)}%</li>
+                        <li>Профили: +${Math.round((paint.lossCoefficients.profile - 1) * 100)}%</li>
+                        <li>Трубы: +${Math.round((paint.lossCoefficients.pipe - 1) * 100)}%</li>
+                    </ul>
+                    <p style="margin: 10px 0 0 0; font-weight: 600; color: #ff9800;">
+                        💰 Рекомендуемый заказ краски: <strong>${paint.recommendedOrder} кг</strong>
+                    </p>
+                </div>
+            `;
+        }
+        
+        if (Object.keys(groupedMaterials).length === 0 && Object.keys(groupedProfiles).length === 0 && (!paint || paint.items.length === 0)) {
+            html += `
+                <div style="text-align: center; padding: 40px; color: #a0a0a0;">
+                    <p>📭 Нет данных по материалам для этого заказа</p>
+                </div>
+            `;
+        }
+        
+        html += `</div>`;
+        return html;
+    }
 }
 
 window.MaterialsReport = MaterialsReport;
