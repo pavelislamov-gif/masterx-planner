@@ -3,7 +3,8 @@
   "lossCoefficients": {
     "flat": 1.10,
     "pipe": 1.30,
-    "profile": 1.20
+    "profile": 1.20,
+    "sheet": 2.00
   },
   "paintConsumption": {
     "default": 0.165,
