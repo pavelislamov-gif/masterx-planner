@@ -207,134 +207,140 @@ class MaterialsReport {
     }
     
     calculatePaint(order) {
-        const productName = order.items[0]?.product || '';
-        const productSize = order.items[0]?.size || '';
-        const productQty = order.items[0]?.quantity || 1;
-        const ral = order.items[0]?.ral || '';
-        
-        const consumptionPerM2 = this.getPaintConsumption(ral);
-        const lossCoeff = this.paintConfig.lossCoefficients || { flat: 1.10, pipe: 1.30, profile: 1.20 };
-        
-        let flatArea = 0;
-        let profileArea = 0;
-        let pipeArea = 0;
-        const paintItems = [];
-        
-        const bodyNorm = this.materialsNorm[productName]?.body;
-        if (bodyNorm) {
-            bodyNorm.forEach(material => {
-                if (this.shouldPaint(productName, 'body', material.material)) {
-                    const area = material.area * productQty;
-                    flatArea += area;
-                    paintItems.push({
-                        name: `Корпус (${material.material})`,
-                        type: 'flat',
-                        area: area,
-                        consumption: area * consumptionPerM2
-                    });
-                }
+    const productName = order.items[0]?.product || '';
+    const productSize = order.items[0]?.size || '';
+    const productQty = order.items[0]?.quantity || 1;
+    const ral = order.items[0]?.ral || '';
+    
+    const consumptionPerM2 = this.getPaintConsumption(ral);
+    const lossCoeff = this.paintConfig.lossCoefficients || { flat: 1.10, pipe: 1.30, profile: 1.20 };
+    
+    let flatArea = 0;
+    let profileArea = 0;
+    let pipeArea = 0;
+    const paintItems = [];
+    
+    // 1. КОРПУС (body) — по правилам paintingRules
+    const bodyNorm = this.materialsNorm[productName]?.body;
+    if (bodyNorm) {
+        bodyNorm.forEach(material => {
+            if (this.shouldPaint(productName, 'body', material.material)) {
+                const area = material.area * productQty;
+                flatArea += area;
+                paintItems.push({
+                    name: `Корпус (${material.material})`,
+                    type: 'flat',
+                    area: area,
+                    consumption: area * consumptionPerM2
+                });
+            }
+        });
+    }
+    
+    // 2. КОМПЛЕКТУЮЩИЕ (components) — по правилам paintingRules
+    const components = order.components || [];
+    const componentNorms = this.materialsNorm[productName]?.components || {};
+    
+    components.forEach(comp => {
+        const norm = componentNorms[comp.name];
+        if (norm && this.shouldPaint(productName, 'component', comp.name)) {
+            const area = norm.area * comp.quantityPerProduct * productQty;
+            flatArea += area;
+            paintItems.push({
+                name: comp.name,
+                type: 'flat',
+                area: area,
+                consumption: area * consumptionPerM2
             });
         }
-        
-        const components = order.components || [];
-        const componentNorms = this.materialsNorm[productName]?.components || {};
-        
-        components.forEach(comp => {
-            const norm = componentNorms[comp.name];
-            if (norm && this.shouldPaint(productName, 'component', comp.name)) {
-                const area = norm.area * comp.quantityPerProduct * productQty;
-                flatArea += area;
-                paintItems.push({
-                    name: comp.name,
-                    type: 'flat',
-                    area: area,
-                    consumption: area * consumptionPerM2
-                });
-            }
-        });
-        
-        const item = order.items[0];
-        
-        if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
-            const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
-            if (bracket && this.shouldPaint(productName, 'component', `Кронштейн ${item.bracket.type}`)) {
-                const area = bracket.area * item.bracket.quantity * productQty;
-                flatArea += area;
-                paintItems.push({
-                    name: `Кронштейн ${item.bracket.type}`,
-                    type: 'flat',
-                    area: area,
-                    consumption: area * consumptionPerM2
-                });
-            }
+    });
+    
+    const item = order.items[0];
+    
+    // 3. КРОНШТЕЙНЫ — ВСЕГДА КРАСЯТСЯ (без проверки shouldPaint)
+    if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
+        const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
+        if (bracket) {
+            const area = bracket.area * item.bracket.quantity;  // НЕ умножаем на productQty
+            flatArea += area;
+            paintItems.push({
+                name: `Кронштейн ${item.bracket.type}`,
+                type: 'flat',
+                area: area,
+                consumption: area * consumptionPerM2
+            });
         }
-        
-        if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
-            const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
-            if (lyre && this.shouldPaint(productName, 'component', `Лира ${item.lyre.type}`)) {
-                const area = lyre.area * item.lyre.quantity * productQty;
-                flatArea += area;
-                paintItems.push({
-                    name: `Лира ${item.lyre.type}`,
-                    type: 'flat',
-                    area: area,
-                    consumption: area * consumptionPerM2
-                });
-            }
-        }
-        
-        const profileData = this.profilesArea[productName]?.sizes?.[productSize];
-        if (profileData) {
-            for (const [profileName, areaPerUnit] of Object.entries(profileData)) {
-                if (this.shouldPaint(productName, 'profile', profileName)) {
-                    const area = areaPerUnit * productQty;
-                    profileArea += area;
-                    paintItems.push({
-                        name: profileName,
-                        type: 'profile',
-                        area: area,
-                        consumption: area * consumptionPerM2
-                    });
-                }
-            }
-        }
-        
-        const rodsData = this.rodsByProduct[productName]?.rods || [];
-        rodsData.forEach(rod => {
-            if (this.shouldPaint(productName, 'rod', rod.name)) {
-                const area = rod.area * productQty;
-                pipeArea += area;
-                paintItems.push({
-                    name: rod.name,
-                    type: 'pipe',
-                    area: area,
-                    consumption: area * consumptionPerM2
-                });
-            }
-        });
-        
-        const totalArea = flatArea + profileArea + pipeArea;
-        const totalPureConsumption = totalArea * consumptionPerM2;
-        
-        const flatWithLoss = flatArea * consumptionPerM2 * lossCoeff.flat;
-        const profileWithLoss = profileArea * consumptionPerM2 * lossCoeff.profile;
-        const pipeWithLoss = pipeArea * consumptionPerM2 * lossCoeff.pipe;
-        const totalWithLoss = flatWithLoss + profileWithLoss + pipeWithLoss;
-        
-        const roundTo = this.paintConfig.roundTo || 0.5;
-        const recommendedOrder = Math.ceil(totalWithLoss / roundTo) * roundTo;
-        
-        return {
-            items: paintItems,
-            totalArea: totalArea,
-            pureConsumption: totalPureConsumption,
-            consumptionWithLoss: totalWithLoss,
-            recommendedOrder: recommendedOrder,
-            consumptionPerM2: consumptionPerM2,
-            ral: ral || 'Не указан',
-            lossCoefficients: lossCoeff
-        };
     }
+    
+    // 4. ЛИРЫ — ВСЕГДА КРАСЯТСЯ (без проверки shouldPaint)
+    if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
+        const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
+        if (lyre) {
+            const area = lyre.area * item.lyre.quantity;  // НЕ умножаем на productQty
+            flatArea += area;
+            paintItems.push({
+                name: `Лира ${item.lyre.type}`,
+                type: 'flat',
+                area: area,
+                consumption: area * consumptionPerM2
+            });
+        }
+    }
+    
+    // 5. ПРОФИЛИ — по правилам paintingRules
+    const profileData = this.profilesArea[productName]?.sizes?.[productSize];
+    if (profileData) {
+        for (const [profileName, areaPerUnit] of Object.entries(profileData)) {
+            if (this.shouldPaint(productName, 'profile', profileName)) {
+                const area = areaPerUnit * productQty;
+                profileArea += area;
+                paintItems.push({
+                    name: profileName,
+                    type: 'profile',
+                    area: area,
+                    consumption: area * consumptionPerM2
+                });
+            }
+        }
+    }
+    
+    // 6. ПРУТКИ — по правилам paintingRules
+    const rodsData = this.rodsByProduct[productName]?.rods || [];
+    rodsData.forEach(rod => {
+        if (this.shouldPaint(productName, 'rod', rod.name)) {
+            const area = rod.area * productQty;
+            pipeArea += area;
+            paintItems.push({
+                name: rod.name,
+                type: 'pipe',
+                area: area,
+                consumption: area * consumptionPerM2
+            });
+        }
+    });
+    
+    const totalArea = flatArea + profileArea + pipeArea;
+    const totalPureConsumption = totalArea * consumptionPerM2;
+    
+    const flatWithLoss = flatArea * consumptionPerM2 * lossCoeff.flat;
+    const profileWithLoss = profileArea * consumptionPerM2 * lossCoeff.profile;
+    const pipeWithLoss = pipeArea * consumptionPerM2 * lossCoeff.pipe;
+    const totalWithLoss = flatWithLoss + profileWithLoss + pipeWithLoss;
+    
+    const roundTo = this.paintConfig.roundTo || 0.5;
+    const recommendedOrder = Math.ceil(totalWithLoss / roundTo) * roundTo;
+    
+    return {
+        items: paintItems,
+        totalArea: totalArea,
+        pureConsumption: totalPureConsumption,
+        consumptionWithLoss: totalWithLoss,
+        recommendedOrder: recommendedOrder,
+        consumptionPerM2: consumptionPerM2,
+        ral: ral || 'Не указан',
+        lossCoefficients: lossCoeff
+    };
+}
     
     async generateReport(order) {
         await this.loadAllData();
