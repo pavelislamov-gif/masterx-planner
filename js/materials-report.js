@@ -166,17 +166,8 @@ class MaterialsReport {
         }
     }
     
-    // 4. КОМПЛЕКТУЮЩИЕ — умножаем на productQty (количество на 1 изделие)
-    const components = order.components || [];
-    const componentNorms = this.materialsNorm[productName]?.components || {};
-    
-    components.forEach(comp => {
-        const norm = componentNorms[comp.name];
-        if (norm) {
-            const area = norm.area * comp.quantityPerProduct * productQty;
-            addMaterial(norm.material, norm.thickness, area);
-        }
-    });
+    // 4. КОМПЛЕКТУЮЩИЕ — НЕ ДОБАВЛЯЕМ в листовые материалы
+    // Они идут только в краску
     
     return materials;
 }
