@@ -157,28 +157,19 @@ class MaterialsReport {
         const components = order.components || [];
         
         components.forEach(comp => {
-            let norm = null;
-            const materialType = comp.material;
-            
-            if (materialType === 'aluminum') {
-                norm = this.materialsDB.aluminum.find(a => a.product === productName);
-            } else if (materialType === 'steel') {
-                norm = this.materialsDB.steel.find(s => s.product === productName);
-            } else if (materialType === 'stainless') {
-                norm = this.materialsDB.stainless.find(s => s.product === productName);
-            } else if (materialType === 'pvc') {
-                norm = this.materialsDB.pvc.find(p => p.product === productName);
-            } else if (materialType === 'polycarbonate') {
-                norm = this.materialsDB.polycarbonate.find(p => p.product === productName);
-            } else if (materialType === 'other') {
-                norm = this.materialsDB.other.find(o => o.product === productName);
-            }
-            
-            if (norm) {
-                const area = norm.area * comp.quantityPerProduct * productQty;
-                addMaterial(norm.material || materialType, norm.thickness, area);
-            }
-        });
+    let norm = null;
+    const materialType = comp.material;
+    
+    if (materialType === 'aluminum') {
+        norm = this.materialsDB.aluminum.find(a => a.product === productName);
+    } // ... и т.д.
+    
+    if (norm) {
+        // УБИРАЕМ умножение на comp.quantityPerProduct
+        const area = norm.area * productQty;  // только изделие
+        addMaterial(norm.material || materialType, norm.thickness, area);
+    }
+});
         
         const item = order.items[0];
         
