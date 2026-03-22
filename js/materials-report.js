@@ -161,20 +161,16 @@ class MaterialsReport {
     
     const item = order.items[0];
     
-    // 1. КРОНШТЕЙНЫ
+    // 1. КРОНШТЕЙНЫ — ВСЕГДА НЕРЖАВЕЮЩАЯ СТАЛЬ
     if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
         const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
         if (bracket) {
             const area = bracket.area * item.bracket.quantity;
-            let materialName = 'Сталь';
-            if (bracket.name.includes('B(T)') || bracket.name.includes('BZ') || bracket.name.includes('AISI')) {
-                materialName = 'Нержавеющая сталь AISI 430';
-            }
-            addMaterial(materialName, bracket.thickness, area);
+            addMaterial('Нержавеющая сталь AISI 430', bracket.thickness, area);
         }
     }
     
-    // 2. ЛИРЫ
+    // 2. ЛИРЫ — ВСЕГДА НЕРЖАВЕЮЩАЯ СТАЛЬ
     if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
         const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
         if (lyre) {
