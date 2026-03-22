@@ -104,16 +104,39 @@ class MaterialsReport {
     }
     
     shouldPaint(productName, detailType, detailName) {
-        const productRules = this.paintingRules[productName];
-        if (!productRules) return false;
-        
-        if (detailType === 'body') return productRules.body === true;
-        if (detailType === 'component') return productRules.components?.[detailName] === true;
-        if (detailType === 'profile') return productRules.profiles?.[detailName] === true;
-        if (detailType === 'rod') return productRules.rods?.[detailName] === true;
-        
+    // Получаем материал детали
+    let material = '';
+    
+    if (detailType === 'body') {
+        const bodyNorm = this.materialsNorm[productName]?.body;
+        if (bodyNorm) {
+            const found = bodyNorm.find(m => m.material === detailName);
+            material = found?.material || '';
+        }
+    } else if (detailType === 'component') {
+        const compNorm = this.materialsNorm[productName]?.components?.[detailName];
+        material = compNorm?.material || '';
+    } else if (detailType === 'profile') {
+        // Профили могут быть из разных материалов, пока пропускаем
+        material = '';
+    }
+    
+    // Исключения: ПВХ и поликарбонат НЕ КРАСЯТСЯ
+    if (material === 'ПВХ' || material === 'Поликарбонат') {
         return false;
     }
+    
+    // Остальная логика
+    const productRules = this.paintingRules[productName];
+    if (!productRules) return false;
+    
+    if (detailType === 'body') return productRules.body === true;
+    if (detailType === 'component') return productRules.components?.[detailName] === true;
+    if (detailType === 'profile') return productRules.profiles?.[detailName] === true;
+    if (detailType === 'rod') return productRules.rods?.[detailName] === true;
+    
+    return false;
+}
     
     calculateSheetMaterials(order) {
     const productName = order.items[0]?.product || '';
