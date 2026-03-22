@@ -157,23 +157,11 @@ class MaterialsReport {
         }
     };
     
-    // КОРПУС — НЕ ДОБАВЛЯЕМ
-    
-    // 1. КОМПЛЕКТУЮЩИЕ
-    const components = order.components || [];
-    const componentNorms = this.materialsNorm[productName]?.components || {};
-    
-    components.forEach(comp => {
-        const norm = componentNorms[comp.name];
-        if (norm) {
-            const area = norm.area * comp.quantityPerProduct * productQty;
-            addMaterial(norm.material, norm.thickness, area);
-        }
-    });
+    // КОМПЛЕКТУЮЩИЕ — НЕ ДОБАВЛЯЕМ
     
     const item = order.items[0];
     
-    // 2. КРОНШТЕЙНЫ
+    // 1. КРОНШТЕЙНЫ
     if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
         const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
         if (bracket) {
@@ -186,7 +174,7 @@ class MaterialsReport {
         }
     }
     
-    // 3. ЛИРЫ
+    // 2. ЛИРЫ
     if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
         const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
         if (lyre) {
