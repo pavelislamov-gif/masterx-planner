@@ -223,27 +223,36 @@ class MaterialsReport {
 
     
     calculateProfiles(order) {
-        const productName = order.items[0]?.product || '';
-        const productSize = order.items[0]?.size || '';
-        const productQty = order.items[0]?.quantity || 1;
-        const profiles = [];
-        
-        const productSpecs = this.materialsDB.productSpecs?.[productName]?.[productSize];
-        
-        if (productSpecs) {
-            for (const [profileName, spec] of Object.entries(productSpecs)) {
-                if (spec.value) {
-                    profiles.push({
-                        name: profileName,
-                        length: spec.value * productQty,
-                        unit: 'мм'
-                    });
-                }
+    const productName = order.items[0]?.product || '';
+    const productSize = order.items[0]?.size || '';
+    const productQty = order.items[0]?.quantity || 1;
+    const profiles = [];
+    
+    console.log('📐 calculateProfiles:', { productName, productSize, productQty });
+    
+    const productSpecs = this.materialsDB.productSpecs?.[productName]?.[productSize];
+    
+    console.log('📐 productSpecs:', productSpecs);
+    
+    if (productSpecs) {
+        for (const [profileName, spec] of Object.entries(productSpecs)) {
+            if (spec && spec.value) {
+                profiles.push({
+                    name: profileName,
+                    length: spec.value * productQty,
+                    unit: 'мм'
+                });
+                console.log(`📐 Профиль ${profileName}: ${spec.value} × ${productQty} = ${spec.value * productQty} мм`);
+            } else {
+                console.warn(`⚠️ Профиль ${profileName} не имеет value:`, spec);
             }
         }
-        
-        return profiles;
+    } else {
+        console.warn(`⚠️ Нет спецификаций для ${productName} / ${productSize}`);
     }
+    
+    return profiles;
+}
     
     calculatePaint(order) {
         const productName = order.items[0]?.product || '';
