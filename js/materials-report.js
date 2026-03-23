@@ -153,52 +153,44 @@ class MaterialsReport {
         }
     };
     
-    // 1. ИЗДЕЛИЕ (корпус) — из norms.json
-    // Алюминий
+    // 1. АЛЮМИНИЙ
     const aluminumNorm = this.materialsDB.aluminum.find(a => a.product === productName);
     if (aluminumNorm) {
         const area = aluminumNorm.area * productQty;
-        addMaterial(aluminumNorm.material, aluminumNorm.thickness, area);
+        addMaterial('Алюминий', aluminumNorm.thickness, area);
     }
     
-    // Сталь
+    // 2. СТАЛЬ
     const steelNorm = this.materialsDB.steel.find(s => s.product === productName);
     if (steelNorm) {
         const area = steelNorm.area * productQty;
-        addMaterial(steelNorm.material, steelNorm.thickness, area);
+        addMaterial('Сталь', steelNorm.thickness, area);
     }
     
-    // Нержавейка
+    // 3. НЕРЖАВЕЙКА
     const stainlessNorm = this.materialsDB.stainless.find(s => s.product === productName);
     if (stainlessNorm) {
         const area = stainlessNorm.area * productQty;
-        addMaterial(stainlessNorm.material, stainlessNorm.thickness, area);
+        addMaterial('Нержавеющая сталь AISI 430', stainlessNorm.thickness, area);
     }
     
-    // ПВХ
+    // 4. ПВХ
     const pvcNorm = this.materialsDB.pvc.find(p => p.product === productName);
     if (pvcNorm) {
         const area = pvcNorm.area * productQty;
-        addMaterial(pvcNorm.material, pvcNorm.thickness, area);
+        addMaterial('ПВХ', pvcNorm.thickness, area);
     }
     
-    // Поликарбонат
+    // 5. ПОЛИКАРБОНАТ
     const polycarbonateNorm = this.materialsDB.polycarbonate.find(p => p.product === productName);
     if (polycarbonateNorm) {
         const area = polycarbonateNorm.area * productQty;
-        addMaterial(polycarbonateNorm.material, polycarbonateNorm.thickness, area);
-    }
-    
-    // Прочее
-    const otherNorm = this.materialsDB.other.find(o => o.product === productName);
-    if (otherNorm) {
-        const area = otherNorm.area * productQty;
-        addMaterial(otherNorm.material, otherNorm.thickness, area);
+        addMaterial('Поликарбонат', polycarbonateNorm.thickness, area);
     }
     
     const item = order.items[0];
     
-    // 2. КРОНШТЕЙНЫ — из hardwareNorms.json
+    // 6. КРОНШТЕЙНЫ
     if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
         const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
         if (bracket) {
@@ -207,7 +199,7 @@ class MaterialsReport {
         }
     }
     
-    // 3. ЛИРЫ — из hardwareNorms.json
+    // 7. ЛИРЫ
     if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
         const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
         if (lyre) {
@@ -216,11 +208,8 @@ class MaterialsReport {
         }
     }
     
-    // 4. КОМПЛЕКТУЮЩИЕ (заглушки, вставки) — НЕ ДОБАВЛЯЕМ
-    
     return materials;
 }
-
     
     calculateProfiles(order) {
     const productName = order.items[0]?.product || '';
