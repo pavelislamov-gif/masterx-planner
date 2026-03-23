@@ -551,13 +551,13 @@
     },
     "XMODULE-2x2": {
       "components": {
-        "Алюминий 1.5мм": false,
+        "Алюминий 1.5мм": true,
         "Алюминий 3мм": false
       }
     },
     "XMODULE-6x2": {
       "components": {
-        "Алюминий 1.5мм": false
+        "Алюминий 1.5мм": true
       }
     },
     "XWHITE": {
