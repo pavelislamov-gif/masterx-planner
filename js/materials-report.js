@@ -135,64 +135,92 @@ class MaterialsReport {
     }
     
     calculateSheetMaterials(order) {
-        const productName = order.items[0]?.product || '';
-        const productQty = order.items[0]?.quantity || 1;
-        const materials = [];
-        
-        const addMaterial = (materialName, thickness, area) => {
-            const existing = materials.find(m => m.material === materialName && m.thickness === thickness);
-            if (existing) {
-                existing.area += area;
-            } else {
-                materials.push({
-                    material: materialName,
-                    thickness: thickness,
-                    area: area,
-                    unit: 'м²'
-                });
-            }
-        };
-        
-        // 1. КОМПЛЕКТУЮЩИЕ — из norms.json (aluminum, steel, stainless, pvc, polycarbonate, other)
-        const components = order.components || [];
-        
-        components.forEach(comp => {
-    let norm = null;
-    const materialType = comp.material;
+    const productName = order.items[0]?.product || '';
+    const productQty = order.items[0]?.quantity || 1;
+    const materials = [];
     
-    if (materialType === 'aluminum') {
-        norm = this.materialsDB.aluminum.find(a => a.product === productName);
-    } // ... и т.д.
+    const addMaterial = (materialName, thickness, area) => {
+        const existing = materials.find(m => m.material === materialName && m.thickness === thickness);
+        if (existing) {
+            existing.area += area;
+        } else {
+            materials.push({
+                material: materialName,
+                thickness: thickness,
+                area: area,
+                unit: 'м²'
+            });
+        }
+    };
     
-    if (norm) {
-        // УБИРАЕМ умножение на comp.quantityPerProduct
-        const area = norm.area * productQty;  // только изделие
-        addMaterial(norm.material || materialType, norm.thickness, area);
+    // 1. ИЗДЕЛИЕ (корпус) — из norms.json
+    // Алюминий
+    const aluminumNorm = this.materialsDB.aluminum.find(a => a.product === productName);
+    if (aluminumNorm) {
+        const area = aluminumNorm.area * productQty;
+        addMaterial(aluminumNorm.material, aluminumNorm.thickness, area);
     }
-});
-        
-        const item = order.items[0];
-        
-        // 2. КРОНШТЕЙНЫ — из hardwareNorms.json
-        if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
-            const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
-            if (bracket) {
-                const area = bracket.area * item.bracket.quantity;
-                addMaterial('Нержавеющая сталь AISI 430', bracket.thickness, area);
-            }
-        }
-        
-        // 3. ЛИРЫ — из hardwareNorms.json
-        if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
-            const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
-            if (lyre) {
-                const area = lyre.area * item.lyre.quantity;
-                addMaterial('Нержавеющая сталь AISI 430', lyre.thickness, area);
-            }
-        }
-        
-        return materials;
+    
+    // Сталь
+    const steelNorm = this.materialsDB.steel.find(s => s.product === productName);
+    if (steelNorm) {
+        const area = steelNorm.area * productQty;
+        addMaterial(steelNorm.material, steelNorm.thickness, area);
     }
+    
+    // Нержавейка
+    const stainlessNorm = this.materialsDB.stainless.find(s => s.product === productName);
+    if (stainlessNorm) {
+        const area = stainlessNorm.area * productQty;
+        addMaterial(stainlessNorm.material, stainlessNorm.thickness, area);
+    }
+    
+    // ПВХ
+    const pvcNorm = this.materialsDB.pvc.find(p => p.product === productName);
+    if (pvcNorm) {
+        const area = pvcNorm.area * productQty;
+        addMaterial(pvcNorm.material, pvcNorm.thickness, area);
+    }
+    
+    // Поликарбонат
+    const polycarbonateNorm = this.materialsDB.polycarbonate.find(p => p.product === productName);
+    if (polycarbonateNorm) {
+        const area = polycarbonateNorm.area * productQty;
+        addMaterial(polycarbonateNorm.material, polycarbonateNorm.thickness, area);
+    }
+    
+    // Прочее
+    const otherNorm = this.materialsDB.other.find(o => o.product === productName);
+    if (otherNorm) {
+        const area = otherNorm.area * productQty;
+        addMaterial(otherNorm.material, otherNorm.thickness, area);
+    }
+    
+    const item = order.items[0];
+    
+    // 2. КРОНШТЕЙНЫ — из hardwareNorms.json
+    if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
+        const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
+        if (bracket) {
+            const area = bracket.area * item.bracket.quantity;
+            addMaterial('Нержавеющая сталь AISI 430', bracket.thickness, area);
+        }
+    }
+    
+    // 3. ЛИРЫ — из hardwareNorms.json
+    if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
+        const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
+        if (lyre) {
+            const area = lyre.area * item.lyre.quantity;
+            addMaterial('Нержавеющая сталь AISI 430', lyre.thickness, area);
+        }
+    }
+    
+    // 4. КОМПЛЕКТУЮЩИЕ (заглушки, вставки) — НЕ ДОБАВЛЯЕМ
+    
+    return materials;
+}
+
     
     calculateProfiles(order) {
         const productName = order.items[0]?.product || '';
