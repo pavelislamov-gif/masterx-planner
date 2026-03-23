@@ -227,35 +227,27 @@ class MaterialsReport {
 }
     
     calculateProfiles(order) {
-        const productName = order.items[0]?.product || '';
-        const productSize = order.items[0]?.size || '';
-        const productQty = order.items[0]?.quantity || 1;
-        const profiles = [];
-        
-        console.log('🔍 calculateProfiles:', { productName, productSize, productQty });
-        console.log('🔍 productSpecs:', this.materialsDB.productSpecs);
-        
-        const productSpecs = this.materialsDB.productSpecs?.[productName]?.[productSize];
-        
-        console.log('🔍 Найдено productSpecs:', productSpecs);
-        
-        if (productSpecs) {
-            for (const [profileName, spec] of Object.entries(productSpecs)) {
-                if (spec && spec.value) {
-                    profiles.push({
-                        name: profileName,
-                        length: spec.value * productQty,
-                        unit: 'мм'
-                    });
-                    console.log(`📐 Профиль ${profileName}: ${spec.value} × ${productQty} = ${spec.value * productQty} мм`);
-                }
+    const productName = order.items[0]?.product || '';
+    const productSize = order.items[0]?.size || '';
+    const productQty = order.items[0]?.quantity || 1;
+    const profiles = [];
+    
+    const productSpecs = this.materialsDB.productSpecs?.[productName]?.[productSize];
+    
+    if (productSpecs) {
+        for (const [profileName, spec] of Object.entries(productSpecs)) {
+            if (spec && spec.value) {
+                profiles.push({
+                    name: profileName,
+                    length: spec.value * productQty,
+                    unit: 'мм'
+                });
             }
-        } else {
-            console.warn(`⚠️ Нет спецификаций для ${productName} / ${productSize}`);
         }
-        
-        return profiles;
     }
+    
+    return profiles;
+}
     
     calculateRodsLength(order) {
         const productName = order.items[0]?.product || '';
