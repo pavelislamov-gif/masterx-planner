@@ -167,7 +167,7 @@ class MaterialsReport {
         addMaterial('Сталь', steelNorm.thickness, area);
     }
     
-    // 3. НЕРЖАВЕЙКА
+    // 3. НЕРЖАВЕЮЩАЯ СТАЛЬ
     const stainlessNorm = this.materialsDB.stainless.find(s => s.product === productName);
     if (stainlessNorm) {
         const area = stainlessNorm.area * productQty;
@@ -188,9 +188,16 @@ class MaterialsReport {
         addMaterial('Поликарбонат', polycarbonateNorm.thickness, area);
     }
     
+    // 6. ПРОЧЕЕ
+    const otherNorm = this.materialsDB.other.find(o => o.product === productName);
+    if (otherNorm) {
+        const area = otherNorm.area * productQty;
+        addMaterial(otherNorm.material || 'Прочее', otherNorm.thickness, area);
+    }
+    
     const item = order.items[0];
     
-    // 6. КРОНШТЕЙНЫ
+    // 7. КРОНШТЕЙНЫ — из hardwareNorms.json
     if (item.bracket && item.bracket.type !== 'отсутствует' && item.bracket.quantity > 0) {
         const bracket = this.materialsDB.brackets.find(b => b.name === item.bracket.type);
         if (bracket) {
@@ -199,7 +206,7 @@ class MaterialsReport {
         }
     }
     
-    // 7. ЛИРЫ
+    // 8. ЛИРЫ — из hardwareNorms.json
     if (item.lyre && item.lyre.type !== 'отсутствует' && item.lyre.quantity > 0) {
         const lyre = this.materialsDB.lyres.find(l => l.name === item.lyre.type);
         if (lyre) {
