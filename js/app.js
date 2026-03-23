@@ -41,7 +41,6 @@ function updateFilterDateDisplay() {
     const displaySpan = document.getElementById('currentFilterDate');
     if (displaySpan) {
         const date = new Date(window.currentFilterDate);
-        // Проверка на валидную дату
         if (isNaN(date.getTime())) {
             window.currentFilterDate = new Date().toISOString().split('T')[0];
         }
@@ -76,7 +75,6 @@ function escapeHtml(str) {
 console.log('🔍 ПРОВЕРКА ЗАВИСИМОСТЕЙ app.js:');
 console.log('='.repeat(50));
 
-// Проверка storage.js
 if (typeof loadOrdersFromStorage === 'function') {
     console.log('✅ storage.js: loadOrdersFromStorage загружена');
 } else {
@@ -89,7 +87,6 @@ if (typeof saveOrdersToStorage === 'function') {
     console.error('❌ storage.js: saveOrdersToStorage НЕ загружена!');
 }
 
-// Проверка data-loader.js
 if (typeof loadProducts === 'function') {
     console.log('✅ data-loader.js: loadProducts загружена');
 } else {
@@ -108,7 +105,6 @@ if (typeof loadLyres === 'function') {
     console.error('❌ data-loader.js: loadLyres НЕ загружена!');
 }
 
-// Проверка materials-report.js
 if (typeof MaterialsReport === 'function') {
     console.log('✅ materials-report.js: MaterialsReport загружен');
 } else {
@@ -120,14 +116,12 @@ console.log('='.repeat(50));
 
 // ============== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==============
 
-// Форматирование даты
 function formatDate(dateString) {
     if (!dateString) return 'Дата не указана';
     const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
     return new Date(dateString).toLocaleDateString('ru-RU', options);
 }
 
-// Генерация номера заказа
 function generateOrderNumber() {
     const date = new Date();
     const year = date.getFullYear().toString().slice(-2);
@@ -137,7 +131,7 @@ function generateOrderNumber() {
     return `З-${year}${month}${day}-${count}`;
 }
 
-// ============== СОЗДАНИЕ ЗАДАЧ ДЛЯ ЗАКАЗА НА КОНКРЕТНУЮ ДАТУ ==============
+// ============== СОЗДАНИЕ ЗАДАЧ ДЛЯ ЗАКАЗА ==============
 
 function createTasksForOrder(order) {
     const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
@@ -202,13 +196,11 @@ function createTasksForOrder(order) {
 
 // ============== ФУНКЦИИ ДЛЯ РАБОТЫ С ЗАКАЗАМИ ==============
 
-// Загрузка и отображение заказов с фильтрацией по дате
 function loadOrders() {
     console.log('loadOrders вызвана, фильтр даты:', window.currentFilterDate);
     const ordersList = document.getElementById('ordersList');
     if (!ordersList) return;
 
-    // Фильтруем заказы по выбранной дате
     const filteredOrders = orders.filter(order => order.date === window.currentFilterDate);
     
     console.log(`📅 Заказов на ${window.currentFilterDate}: ${filteredOrders.length} из ${orders.length} всего`);
@@ -232,7 +224,6 @@ function loadOrders() {
 
         const item = order.items[0];
         
-        // Формируем строку с краткой информацией для шапки
         const shortInfo = [];
         shortInfo.push(`📦 ${item.product}`);
         shortInfo.push(` ${item.size}`);
@@ -282,9 +273,6 @@ function loadOrders() {
         content.className = 'order-content';
         content.style.display = 'none';
 
-        // ============== ПОЛНАЯ ИНФОРМАЦИЯ О ЗАКАЗЕ ==============
-        
-        // Формируем отображение кронштейна
         let bracketDisplay = '';
         if (item.bracket.type === 'отсутствует' || item.bracket.quantity === 0) {
             bracketDisplay = `<span style="color: #fff; margin-left: 8px;">отсутствует</span>
@@ -294,7 +282,6 @@ function loadOrders() {
                               <span style="color: #ff9800; margin-left: 5px;">(${item.bracket.quantity} шт)</span>`;
         }
 
-        // Формируем отображение лиры
         let lyreDisplay = '';
         if (item.lyre.type === 'отсутствует' || item.lyre.quantity === 0) {
             lyreDisplay = `<span style="color: #fff; margin-left: 8px;">отсутствует</span>
@@ -304,7 +291,6 @@ function loadOrders() {
                            <span style="color: #ff9800; margin-left: 5px;">(${item.lyre.quantity} шт)</span>`;
         }
 
-        // Создаём блок с полной информацией
         const productInfoDiv = document.createElement('div');
         productInfoDiv.className = 'product-info';
         productInfoDiv.style.marginBottom = '15px';
@@ -353,7 +339,6 @@ function loadOrders() {
             </div>
         `;
 
-        // Добавляем комплектующие
         const components = order.components || [];
         if (components && components.length > 0) {
             let compsHtml = '';
@@ -373,7 +358,6 @@ function loadOrders() {
             `;
         }
 
-        // Добавляем дополнительные детали
         if (order.additional) {
             infoHtml += `
                 <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #2a2f38;">
@@ -388,7 +372,6 @@ function loadOrders() {
         productInfoDiv.innerHTML = infoHtml;
         content.appendChild(productInfoDiv);
         
-        // Добавляем блок с участками
         const sitesDiv = document.createElement('div');
         sitesDiv.className = 'sites-section';
         sitesDiv.innerHTML = `
@@ -415,7 +398,6 @@ function loadOrders() {
     });
 }
 
-// Обновление статистики
 function updateStatistics() {
     console.log('updateStatistics вызвана');
     const totalOrdersEl = document.getElementById('totalOrders');
@@ -446,7 +428,6 @@ function updateStatistics() {
     if (completedTasksEl) completedTasksEl.textContent = completedTasks;
 }
 
-// Обновление статуса задачи
 function updateTaskStatus(taskId, status) {
     console.log('updateTaskStatus вызвана', taskId, status);
 
@@ -812,6 +793,73 @@ function exportOrders() {
     }
 }
 
+// ============== ИМПОРТ ЗАКАЗОВ ==============
+
+function importOrders() {
+    // Создаём временный input для выбора файла
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        try {
+            const text = await file.text();
+            const data = JSON.parse(text);
+            
+            if (!data.orders || !Array.isArray(data.orders)) {
+                alert('❌ Неверный формат файла. Файл должен содержать массив orders.');
+                return;
+            }
+            
+            let existingOrders = loadOrdersFromStorage();
+            const existingIds = new Set(existingOrders.map(o => o.id));
+            
+            let importedCount = 0;
+            let skippedCount = 0;
+            let replacedCount = 0;
+            
+            for (const importedOrder of data.orders) {
+                if (existingIds.has(importedOrder.id)) {
+                    if (confirm(`Заказ №${importedOrder.number} уже существует. Перезаписать?`)) {
+                        existingOrders = existingOrders.filter(o => o.id !== importedOrder.id);
+                        existingOrders.push(importedOrder);
+                        replacedCount++;
+                        importedCount++;
+                    } else {
+                        skippedCount++;
+                    }
+                } else {
+                    existingOrders.push(importedOrder);
+                    importedCount++;
+                }
+            }
+            
+            saveOrdersToStorage(existingOrders);
+            orders = existingOrders;
+            
+            // Создаём задачи для импортированных заказов на текущую дату
+            const today = new Date().toISOString().split('T')[0];
+            data.orders.forEach(order => {
+                if (order.date === today) {
+                    createTasksForOrder(order);
+                }
+            });
+            
+            loadOrders();
+            updateStatistics();
+            
+            alert(`✅ Импорт завершён!\n📦 Импортировано: ${importedCount} заказов\n🔄 Перезаписано: ${replacedCount}\n⏭️ Пропущено: ${skippedCount}\n📅 Дата экспорта: ${data.exportDate ? new Date(data.exportDate).toLocaleString('ru-RU') : 'неизвестна'}`);
+            
+        } catch (error) {
+            console.error('❌ Ошибка импорта:', error);
+            alert('❌ Ошибка при импорте файла. Убедитесь, что файл имеет правильный формат JSON.');
+        }
+    };
+    input.click();
+}
+
 function closeMaterialsModal() {
     const modal = document.getElementById('materialsModal');
     if (modal) modal.style.display = 'none';
@@ -829,7 +877,6 @@ async function loadAllData() {
         syncTasksFromHistory();
         populateSelects();
         
-        // Инициализация currentFilterDate
         if (typeof window.currentFilterDate === 'undefined') {
             window.currentFilterDate = new Date().toISOString().split('T')[0];
         }
@@ -924,6 +971,7 @@ window.openOrderModal = openOrderModal;
 window.closeOrderModal = closeOrderModal;
 window.loadProductSizes = loadProductSizes;
 window.exportOrders = exportOrders;
+window.importOrders = importOrders;
 window.showMaterialsReport = showMaterialsReport;
 window.deleteOrder = deleteOrder;
 window.addExtraTask = addExtraTask;
@@ -953,9 +1001,7 @@ function updateComponentsList() {
     desc.innerHTML = 'Введите количество на 1 изделие:';
     container.appendChild(desc);
     components.forEach(comp => {
-        // Определяем значение по умолчанию
         let defaultValue = 0;
-        // Для заглушек ставим 1 по умолчанию
         if (comp.name.includes('Заглушка') || comp.name.includes('заглушка')) {
             defaultValue = 1;
         }
