@@ -217,11 +217,12 @@ class MaterialsReport {
     const productQty = order.items[0]?.quantity || 1;
     const profiles = [];
     
-    console.log('📐 calculateProfiles:', { productName, productSize, productQty });
+    console.log('🔍 calculateProfiles:', { productName, productSize, productQty });
+    console.log('🔍 productSpecs:', this.materialsDB.productSpecs);
     
     const productSpecs = this.materialsDB.productSpecs?.[productName]?.[productSize];
     
-    console.log('📐 productSpecs:', productSpecs);
+    console.log('🔍 Найдено productSpecs:', productSpecs);
     
     if (productSpecs) {
         for (const [profileName, spec] of Object.entries(productSpecs)) {
@@ -232,8 +233,6 @@ class MaterialsReport {
                     unit: 'мм'
                 });
                 console.log(`📐 Профиль ${profileName}: ${spec.value} × ${productQty} = ${spec.value * productQty} мм`);
-            } else {
-                console.warn(`⚠️ Профиль ${profileName} не имеет value:`, spec);
             }
         }
     } else {
