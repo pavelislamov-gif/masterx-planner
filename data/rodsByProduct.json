@@ -1,19 +1,19 @@
 {
-  "description": "Прутки, которые красятся для каждого изделия (по техкарте покраски)",
+  "description": "Прутки, которые красятся для каждого изделия (по техкарте покраски и прутки AL)",
   "products": {
     "XRAY 1": {
       "rods": [
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 80, "area": 0.01885 }
+        { "name": "Пруток 50мм Д16Т", "diameter": 50, "length": 80, "area": 0.01257 }
       ]
     },
     "XRAY 3": {
       "rods": [
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 110, "area": 0.02592 }
+        { "name": "Пруток 58мм Д16Т", "diameter": 58, "length": 110, "area": 0.02004 }
       ]
     },
     "XRAY 3-2": {
       "rods": [
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 152, "area": 0.03582 }
+        { "name": "Пруток 58мм Д16Т", "diameter": 58, "length": 152, "area": 0.02769 }
       ]
     },
     "XRAY 3-GRP": {
@@ -24,22 +24,22 @@
     },
     "XRAY 6": {
       "rods": [
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 105, "area": 0.02474 }
+        { "name": "Пруток 85мм Д16Т", "diameter": 85, "length": 105, "area": 0.02803 }
       ]
     },
     "XRAY 6 RGBW": {
       "rods": [
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 105, "area": 0.02474 }
+        { "name": "Пруток 85мм Д16Т", "diameter": 85, "length": 105, "area": 0.02803 }
       ]
     },
     "XRAY 6-2 проходной": {
       "rods": [
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 130, "area": 0.03063 }
+        { "name": "Пруток 85мм Д16Т", "diameter": 85, "length": 130, "area": 0.03471 }
       ]
     },
     "XRAY 6-2 оконечный": {
       "rods": [
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 130, "area": 0.03063 }
+        { "name": "Пруток 85мм Д16Т", "diameter": 85, "length": 130, "area": 0.03471 }
       ]
     },
     "XRAY 6-T2 BT 180": {
@@ -63,11 +63,6 @@
       ]
     },
     "XRAY 6-T2 BT 240 Шторка": {
-      "rods": [
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 243, "area": 0.05725 }
-      ]
-    },
-    "XRAY 6-T2 BT 240 Шторка х2": {
       "rods": [
         { "name": "СЧ 4435 труба", "diameter": 75, "length": 243, "area": 0.05725 }
       ]
@@ -97,14 +92,9 @@
         { "name": "СЧ 4435 труба", "diameter": 75, "length": 243, "area": 0.05725 }
       ]
     },
-    "XRAY 6-T2 BZ 240 Шторка х2": {
-      "rods": [
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 243, "area": 0.05725 }
-      ]
-    },
     "XRAY 6T Накладной": {
       "rods": [
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 34, "area": 0.00801 }
+        { "name": "Пруток 90мм Д16Т", "diameter": 90, "length": 34, "area": 0.00961 }
       ]
     },
     "XRAY 6T BT 120": {
@@ -134,37 +124,37 @@
     },
     "XRAY 9": {
       "rods": [
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 100, "area": 0.02356 }
+        { "name": "Пруток 120мм Д16Т", "diameter": 120, "length": 100, "area": 0.03770 }
       ]
     },
     "XRAY 9S": {
       "rods": [
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 65, "area": 0.01531 }
+        { "name": "Пруток 120мм Д16Т", "diameter": 120, "length": 65, "area": 0.02450 }
       ]
     },
     "XRAY 12S": {
       "rods": [
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 70, "area": 0.01649 }
+        { "name": "Пруток 150мм Д16Т", "diameter": 150, "length": 70, "area": 0.03300 }
       ]
     },
     "XRAY 18": {
       "rods": [
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 120, "area": 0.02827 }
+        { "name": "Пруток 150мм Д16Т", "diameter": 150, "length": 120, "area": 0.05655 }
       ]
     },
     "XRAY 18S": {
       "rods": [
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 75, "area": 0.01767 }
+        { "name": "Пруток 150мм Д16Т", "diameter": 150, "length": 75, "area": 0.03534 }
       ]
     },
     "XRAY 36": {
       "rods": [
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 100, "area": 0.02356 }
+        { "name": "Пруток 150мм Д16Т", "diameter": 150, "length": 100, "area": 0.04712 }
       ]
     },
     "XRAY 36S": {
       "rods": [
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 70, "area": 0.01649 }
+        { "name": "Пруток 150мм Д16Т", "diameter": 150, "length": 70, "area": 0.03300 }
       ]
     },
     "XSLOPE": {
@@ -213,8 +203,8 @@
     },
     "ACENTO 3T": {
       "rods": [
-        { "name": "Пруток 70мм Д16Т", "diameter": 70, "length": 35, "area": 0.00770 },
-        { "name": "СЧ 4435 труба", "diameter": 75, "length": 95, "area": 0.02238 }
+        { "name": "СЧ 4435 труба", "diameter": 75, "length": 95, "area": 0.02238 },
+        { "name": "Пруток 70мм Д16Т", "diameter": 70, "length": 35, "area": 0.00770 }
       ]
     },
     "ACENTO 4": {
