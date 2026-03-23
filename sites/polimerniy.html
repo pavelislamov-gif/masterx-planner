@@ -506,8 +506,6 @@
                 <option value="in_progress">В работе</option>
                 <option value="completed">Завершённые</option>
             </select>
-            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="applyFilters()">🔍 Применить</button>
-            <button class="btn btn-warning" style="padding: 6px 12px; font-size: 12px;" onclick="clearHistory()">🗑️ Очистить историю</button>
         </div>
 
         <!-- СТАТИСТИКА -->
@@ -1229,26 +1227,78 @@ content.appendChild(productInfoDiv);
 
             // ============== ЭКСПОРТ В EXCEL ==============
             window.exportToExcel = function() {
-                const tasks = taskManager.tasks;
-                const dateStr = taskManager.formatDate(taskManager.currentDate);
-                
-                let csv = "Заказ,Изделие,Операция,Исполнитель,Количество,Статус\n";
-                tasks.forEach(task => {
-                    if (task.executors.length > 0) {
-                        task.executors.forEach(executor => {
-                            csv += `${task.orderNumber},${task.product},${task.operation},${executor.name},${executor.quantity},${executor.status}\n`;
-                        });
-                    } else {
-                        csv += `${task.orderNumber},${task.product},${task.operation},Нет,0,${task.status}\n`;
-                    }
+    const tasks = taskManager.tasks;
+    const dateStr = taskManager.formatDate(taskManager.currentDate);
+    
+    // Форматирование даты и времени
+    const formatDateTime = (isoString) => {
+        if (!isoString) return '';
+        const date = new Date(isoString);
+        return date.toLocaleString('ru-RU', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    };
+    
+    // Получаем название статуса на русском
+    const getStatusText = (status) => {
+        switch(status) {
+            case 'pending': return 'Ожидает';
+            case 'in_progress': return 'В работе';
+            case 'shift_ended': return 'Смена закрыта';
+            case 'completed': return 'Завершено';
+            default: return status;
+        }
+    };
+    
+    // Группируем задачи по заказам
+    const ordersMap = new Map();
+    
+    tasks.forEach(task => {
+        if (!ordersMap.has(task.orderId)) {
+            ordersMap.set(task.orderId, {
+                orderNumber: task.orderNumber,
+                product: task.product,
+                tasks: []
+            });
+        }
+        ordersMap.get(task.orderId).tasks.push(task);
+    });
+    
+    // Формируем CSV
+    let csv = "Заказ,Изделие,Операция,Исполнитель,Количество,Статус,Начало работы,Закрытие смены,Завершение задачи\n";
+    
+    ordersMap.forEach(order => {
+        order.tasks.forEach(task => {
+            if (task.executors && task.executors.length > 0) {
+                task.executors.forEach(executor => {
+                    // Пытаемся получить время из существующих полей
+                    // Если в executor нет полей времени, они будут пустыми
+                    const startTime = formatDateTime(executor.startTime);
+                    const shiftEndTime = formatDateTime(executor.shiftEndTime);
+                    const endTime = formatDateTime(executor.endTime);
+                    const statusText = getStatusText(executor.status);
+                    
+                    csv += `"${order.orderNumber}","${order.product}","${task.operation}","${executor.name}",${executor.quantity || 0},"${statusText}","${startTime}","${shiftEndTime}","${endTime}"\n`;
                 });
-                
-                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `polimerniy_${dateStr}.csv`;
-                link.click();
-            };
+            } else {
+                const statusText = getStatusText(task.status);
+                csv += `"${order.orderNumber}","${order.product}","${task.operation}","Нет",0,"${statusText}","","",""\n`;
+            }
+        });
+    });
+    
+    // Скачиваем файл
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${taskManager.siteType}_${dateStr}.csv`;
+    link.click();
+};
         }
     </script>
 </body>
