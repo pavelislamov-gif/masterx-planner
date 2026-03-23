@@ -1,19 +1,19 @@
 {
-  "description": "Правила покраски деталей (ДА - красится, НЕТ - не красится)",
+  "description": "Правила покраски деталей (ДА - красится, НЕТ - не красится) - обновлено по техкарте покраски и прутки AL",
   "products": {
     "XRAY 1": {
       "rods": {
-        "СЧ 4435 труба": true
+        "Пруток 50мм Д16Т": true
       }
     },
     "XRAY 3": {
       "rods": {
-        "СЧ 4435 труба": true
+        "Пруток 58мм Д16Т": true
       }
     },
     "XRAY 3-2": {
       "rods": {
-        "СЧ 4435 труба": true
+        "Пруток 58мм Д16Т": true
       }
     },
     "XRAY 3-GRP": {
@@ -24,13 +24,33 @@
     },
     "XRAY 6": {
       "components": {
-        "Сталь 0.5мм": true
+        "Сталь 0.5мм": true,
+        "Поликарбонат 6мм": false
       },
       "rods": {
-        "СЧ 4435 труба": true
+        "Пруток 85мм Д16Т": true
       }
     },
     "XRAY 6 RGBW": {
+      "components": {
+        "Сталь 0.5мм": true,
+        "Поликарбонат 6мм": false
+      },
+      "rods": {
+        "Пруток 85мм Д16Т": true
+      }
+    },
+    "XRAY 6-2 проходной": {
+      "rods": {
+        "Пруток 85мм Д16Т": true
+      }
+    },
+    "XRAY 6-2 оконечный": {
+      "rods": {
+        "Пруток 85мм Д16Т": true
+      }
+    },
+    "XRAY 6-T2 BT 180": {
       "components": {
         "Сталь 0.5мм": true
       },
@@ -38,77 +58,91 @@
         "СЧ 4435 труба": true
       }
     },
-    "XRAY 6-2 проходной": {
-      "rods": {
-        "СЧ 4435 труба": true
-      }
-    },
-    "XRAY 6-2 оконечный": {
-      "rods": {
-        "СЧ 4435 труба": true
-      }
-    },
-    "XRAY 6-T2 BT 180": {
-      "rods": {
-        "СЧ 4435 труба": true
-      }
-    },
     "XRAY 6-T2 BT 200": {
+      "components": {
+        "Сталь 0.5мм": true
+      },
       "rods": {
         "СЧ 4435 труба": true
       }
     },
     "XRAY 6-T2 BT 220": {
+      "components": {
+        "Сталь 0.5мм": true
+      },
       "rods": {
         "СЧ 4435 труба": true
       }
     },
     "XRAY 6-T2 BT 220 Шторка х2": {
+      "components": {
+        "Сталь 0.5мм": true
+      },
       "rods": {
         "СЧ 4435 труба": true
       }
     },
     "XRAY 6-T2 BT 240 Шторка": {
+      "components": {
+        "Сталь 0.5мм": true
+      },
       "rods": {
         "СЧ 4435 труба": true
       }
     },
     "XRAY 6-T2 BZ 180": {
+      "components": {
+        "Сталь 0.5мм": true
+      },
       "rods": {
         "СЧ 4435 труба": true
       }
     },
     "XRAY 6-T2 BZ 200 Шторка": {
+      "components": {
+        "Сталь 0.5мм": true
+      },
       "rods": {
         "СЧ 4435 труба": true
       }
     },
     "XRAY 6-T2 BZ 220": {
+      "components": {
+        "Сталь 0.5мм": true
+      },
       "rods": {
         "СЧ 4435 труба": true
       }
     },
     "XRAY 6-T2 BZ 220 Шторка х2": {
+      "components": {
+        "Сталь 0.5мм": true
+      },
       "rods": {
         "СЧ 4435 труба": true
       }
     },
     "XRAY 6-T2 BZ 240 Шторка": {
+      "components": {
+        "Сталь 0.5мм": true
+      },
       "rods": {
         "СЧ 4435 труба": true
       }
     },
     "XRAY 6T Накладной": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "Сталь 0.5мм": true
       },
       "rods": {
-        "СЧ 4435 труба": true
+        "Пруток 90мм Д16Т": true
       }
     },
     "XRAY 6T BT 120": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "Сталь 0.5мм": true
       },
       "rods": {
         "СЧ 4435 труба": true
@@ -116,7 +150,8 @@
     },
     "XRAY 6T BT 140 Шторка": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "Сталь 0.5мм": true
       },
       "rods": {
         "СЧ 4435 труба": true
@@ -124,7 +159,8 @@
     },
     "XRAY 6T BZ 120": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "Сталь 0.5мм": true
       },
       "rods": {
         "СЧ 4435 труба": true
@@ -132,7 +168,8 @@
     },
     "XRAY 6T BZ 140 Шторка": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "Сталь 0.5мм": true
       },
       "rods": {
         "СЧ 4435 труба": true
@@ -140,20 +177,25 @@
     },
     "XRAY 6T RGBW BT 150": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "Сталь 0.5мм": true
       },
       "rods": {
         "СЧ 4435 труба": true
       }
     },
     "XRAY 9": {
+      "components": {
+        "Поликарбонат 6мм": false
+      },
       "rods": {
         "Пруток 120мм Д16Т": true
       }
     },
     "XRAY 9S": {
       "components": {
-        "Сталь 0.5мм": true
+        "Сталь 0.5мм": true,
+        "Алюминий 3мм": false
       },
       "rods": {
         "Пруток 120мм Д16Т": true
@@ -161,7 +203,8 @@
     },
     "XRAY 12S": {
       "components": {
-        "Сталь 0.5мм": true
+        "Сталь 0.5мм": true,
+        "Алюминий 4мм": false
       },
       "rods": {
         "Пруток 150мм Д16Т": true
@@ -177,7 +220,8 @@
     },
     "XRAY 18S": {
       "components": {
-        "Сталь 0.5мм": true
+        "Сталь 0.5мм": true,
+        "Алюминий 4мм": false
       },
       "rods": {
         "Пруток 150мм Д16Т": true
@@ -193,13 +237,18 @@
     },
     "XRAY 36S": {
       "components": {
-        "Сталь 0.5мм": true
+        "Сталь 0.5мм": true,
+        "Алюминий 8мм": false
       },
       "rods": {
         "Пруток 150мм Д16Т": true
       }
     },
     "XSLOPE": {
+      "components": {
+        "Алюминий 4мм": false,
+        "Нержавеющая сталь AISI 430 1мм": false
+      },
       "rods": {
         "Пруток 70мм Д16Т": true
       }
@@ -230,9 +279,13 @@
       }
     },
     "XDISK": {
+      "components": {
+        "ПВХ 10мм": false
+      },
       "rods": {
         "Пруток 75мм Д16Т": true,
-        "Пруток 100мм Д16Т": true
+        "Пруток 100мм Д16Т": true,
+        "Пруток Шестигранник Ал 25мм": false
       }
     },
     "XPOINT OVHD": {
@@ -241,21 +294,27 @@
       }
     },
     "XSPOT": {
+      "components": {
+        "Полистирол Черный 2мм": false
+      },
       "rods": {
         "Пруток 55мм Д16Т": true
       }
     },
     "ACENTO 3T": {
       "components": {
-        "Сталь 0.5мм": true
+        "Сталь 0.5мм": true,
+        "Алюминий 3мм": false
       },
       "rods": {
-        "СЧ 4435 труба": true
+        "СЧ 4435 труба": true,
+        "Пруток 70мм Д16Т": false
       }
     },
     "ACENTO 4": {
       "components": {
-        "Сталь 0.5мм": true
+        "Сталь 0.5мм": true,
+        "Алюминий 4мм": false
       },
       "rods": {
         "Пруток 100мм Д16Т": true
@@ -279,52 +338,65 @@
     },
     "XEYES 130*90 1": {
       "components": {
-        "Алюминий 2мм": true
+        "Алюминий 2мм": true,
+        "Поликарбонат 3мм": false
       }
     },
     "XEYES 130*90 2": {
       "components": {
-        "Алюминий 2мм": true
+        "Алюминий 2мм": true,
+        "Поликарбонат 3мм": false
       }
     },
     "XEYES 130*90 3": {
       "components": {
-        "Алюминий 2мм": true
+        "Алюминий 2мм": true,
+        "Поликарбонат 3мм": false
       }
     },
     "XEYES 130*90 4": {
       "components": {
-        "Алюминий 2мм": true
+        "Алюминий 2мм": true,
+        "Поликарбонат 3мм": false
       }
     },
     "XEYES 130*120 1": {
       "components": {
-        "Алюминий 2мм": true
+        "Алюминий 2мм": true,
+        "Поликарбонат 3мм": false
       }
     },
     "XEYES 130*120 2": {
       "components": {
-        "Алюминий 2мм": true
+        "Алюминий 2мм": true,
+        "Поликарбонат 3мм": false
       }
     },
     "XEYES 130*120 3": {
       "components": {
-        "Алюминий 2мм": true
+        "Алюминий 2мм": true,
+        "Поликарбонат 3мм": false
       }
     },
     "XEYES 130*120 4": {
       "components": {
-        "Алюминий 2мм": true
+        "Алюминий 2мм": true,
+        "Поликарбонат 3мм": false
       }
     },
     "XEYES mini-1": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "Алюминий 4мм": false
+      },
+      "profiles": {
+        "Профиль Труба 140*80*60": true
       }
     },
     "XGIRO": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "ПВХ 3мм": false
       },
       "profiles": {
         "Профиль МП 0923-081": true
@@ -347,7 +419,8 @@
     },
     "XGRAY v.1": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "Нержавеющая сталь AISI 430 1мм": false
       },
       "profiles": {
         "Профиль МП 1928 XGRAY": true,
@@ -357,7 +430,8 @@
     },
     "XGRAY v.2": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "Нержавеющая сталь AISI 430 1мм": false
       },
       "profiles": {
         "Профиль МП 1928 XGRAY": true
@@ -365,7 +439,8 @@
     },
     "XLITE": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "ПВХ 3мм": false
       },
       "profiles": {
         "Профиль НПС 2966": true
@@ -373,23 +448,25 @@
     },
     "XSMART": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "ПВХ 3мм": false
       },
       "profiles": {
         "Профиль КП 453785": true
       }
     },
     "XSMART mini": {
-      "profiles": {
-        "Профиль НП 455015": true
-      },
       "components": {
         "Алюминий 3мм": true
+      },
+      "profiles": {
+        "Профиль НП 455015": true
       }
     },
     "XSTRONG": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "ПВХ 3мм": false
       },
       "profiles": {
         "Профиль ТПК 004S": true
@@ -397,7 +474,8 @@
     },
     "XLUMO": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "ПВХ 3мм": false
       },
       "profiles": {
         "Профиль НПС 2967 (XLUMO)": true
@@ -405,7 +483,8 @@
     },
     "XLUMO 1-6": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "ПВХ 3мм": false
       },
       "profiles": {
         "Профиль НПС 2967 (XLUMO)": true
@@ -413,7 +492,8 @@
     },
     "XLUMO Двунаправленный": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "ПВХ 3мм": false
       },
       "profiles": {
         "Профиль НПС 3362": true
@@ -421,7 +501,8 @@
     },
     "XLUMO PROV": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "ПВХ 3мм": false
       },
       "profiles": {
         "Профиль НПС 2967 (XLUMO)": true
@@ -434,20 +515,26 @@
     },
     "XBAR-SW": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "ПВХ 3мм": false
       },
       "profiles": {
         "КП 453054": true
       }
     },
     "XFOCUS": {
+      "components": {
+        "Алюминий 3мм": false,
+        "ПВХ 3мм": false
+      },
       "profiles": {
         "ТПК 004S": true
       }
     },
     "XYELLOW": {
       "components": {
-        "Алюминий 3мм": true
+        "Алюминий 3мм": true,
+        "Нержавеющая сталь AISI 430 1мм": false
       },
       "profiles": {
         "Профиль СЧ 4515 XYELLOW": true,
@@ -455,8 +542,27 @@
       }
     },
     "XLINE": {
+      "components": {
+        "Алюминий 4мм": false
+      },
       "profiles": {
         "Профиль КП 453434": true
+      }
+    },
+    "XMODULE-2x2": {
+      "components": {
+        "Алюминий 1.5мм": false,
+        "Алюминий 3мм": false
+      }
+    },
+    "XMODULE-6x2": {
+      "components": {
+        "Алюминий 1.5мм": false
+      }
+    },
+    "XWHITE": {
+      "components": {
+        "Алюминий 3мм": true
       }
     }
   }
