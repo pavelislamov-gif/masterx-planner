@@ -244,35 +244,47 @@ class TaskManager {
     
     // ============== ПОИСК ОПЕРАЦИИ ПО КЛЮЧЕВЫМ СЛОВАМ ==============
     findMatchingOperation(componentName) {
-        // Получаем все операции для этого участка
-        const siteOps = this.getSiteOperations();
-        
-        // Создаём массив ключевых слов из названия комплектующей
-        const keywords = componentName.toLowerCase().split(/\s+/);
-        
-        // Ищем операцию, которая содержит любое из ключевых слов
-        for (const op of siteOps) {
-            const opName = op.name || op;
-            const opNameLower = opName.toLowerCase();
-            
-            for (const keyword of keywords) {
-                if (keyword.length > 2 && opNameLower.includes(keyword)) {
-                    // Возвращаем операцию в формате { name, quantity }
-                    return typeof op === 'object' ? op : { name: op, quantity: 1 };
-                }
-            }
+    // Получаем все операции для этого участка
+    const siteOps = this.getSiteOperations();
+    
+    // 1. Сначала ищем точное совпадение (самый приоритет)
+    for (const op of siteOps) {
+        const opName = op.name || op;
+        if (opName.toLowerCase() === componentName.toLowerCase()) {
+            console.log(`🎯 Точное совпадение: "${componentName}" → "${opName}"`);
+            return typeof op === 'object' ? op : { name: op, quantity: 1 };
         }
-        
-        // Если не нашли по ключевым словам, пробуем точное совпадение
-        for (const op of siteOps) {
-            const opName = op.name || op;
-            if (opName.toLowerCase() === componentName.toLowerCase()) {
-                return typeof op === 'object' ? op : { name: op, quantity: 1 };
-            }
-        }
-        
-        return null;
     }
+    
+    // 2. Если точного нет, ищем по ключевым словам из полного названия
+    // Разбиваем название на слова, но ищем все слова вместе
+    const fullNameLower = componentName.toLowerCase();
+    const words = fullNameLower.split(/\s+/);
+    
+    for (const op of siteOps) {
+        const opName = op.name || op;
+        const opNameLower = opName.toLowerCase();
+        
+        // Проверяем, содержит ли операция всё название целиком
+        if (opNameLower.includes(fullNameLower)) {
+            console.log(`🔍 Найдено по полному названию: "${componentName}" → "${opName}"`);
+            return typeof op === 'object' ? op : { name: op, quantity: 1 };
+        }
+        
+        // Проверяем, содержит ли операция все ключевые слова (не одно, а все)
+        const allWordsMatch = words.every(word => 
+            word.length > 2 && opNameLower.includes(word)
+        );
+        
+        if (allWordsMatch && words.length > 0) {
+            console.log(`🔍 Найдено по всем ключевым словам: "${componentName}" → "${opName}"`);
+            return typeof op === 'object' ? op : { name: op, quantity: 1 };
+        }
+    }
+    
+    console.log(`⚠️ Не найдена операция для "${componentName}" на участке ${this.siteType}`);
+    return null;
+}
     
     // ============== ПОЛУЧЕНИЕ ВСЕХ ОПЕРАЦИЙ УЧАСТКА ==============
     getSiteOperations() {
