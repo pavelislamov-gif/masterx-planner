@@ -6,7 +6,7 @@
     <title>MasterX - Лазерно-гибочный участок</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        /* ========== СТИЛИ ДЛЯ СТРАНИЦЫ ЛАЗЕРНО-ГИБОЧНОГО УЧАСТКА ========== */
+        /* ========== СТИЛИ ДЛЯ СТРАНИЦ УЧАСТКОВ ========== */
         .date-navigation {
             background: linear-gradient(135deg, #1a1e24, #0f1217);
             padding: 15px 25px;
@@ -70,18 +70,48 @@
             display: none;
         }
         
-        .product-info {
-            padding: 10px 15px;
-            background: #15191f;
-            border-bottom: 1px solid #2a2f38;
-            color: #a0a0a0;
-            font-size: 13px;
+        /* СТИЛИ ДЛЯ ИЗДЕЛИЯ */
+        .item-card {
+            margin-bottom: 20px;
+            border: 1px solid #2a2f38;
+            border-radius: 8px;
+            overflow: hidden;
         }
         
-        .product-info strong {
+        .item-header {
+            padding: 10px 15px;
+            background: #232830;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
             color: #ff3b3b;
         }
         
+        .item-header span:first-child {
+            font-size: 14px;
+        }
+        
+        .item-header .collapse-icon {
+            color: #a0a0a0;
+            font-size: 12px;
+        }
+        
+        .item-content {
+            padding: 15px;
+            display: none;
+        }
+        
+        .item-content.collapsed {
+            display: none;
+        }
+        
+        .item-content:not(.collapsed) {
+            display: block;
+        }
+        
+        /* СТИЛИ ДЛЯ ЗАДАЧ */
         .task-card {
             padding: 12px 15px;
             border-bottom: 1px solid #2a2f38;
@@ -103,12 +133,22 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         .task-title {
             font-size: 14px;
             font-weight: 600;
             color: #fff;
+        }
+        
+        .task-planned {
+            font-size: 12px;
+            color: #ff9800;
+            background: rgba(255, 152, 0, 0.15);
+            padding: 4px 10px;
+            border-radius: 20px;
         }
         
         .task-progress {
@@ -304,16 +344,6 @@
             margin-left: 10px;
         }
         
-        .warning-message {
-            background: #ff3b3b20;
-            border: 1px solid #ff3b3b;
-            color: #ff3b3b;
-            padding: 6px;
-            border-radius: 4px;
-            margin: 8px 0;
-            font-size: 11px;
-        }
-        
         .filter-section {
             display: flex;
             gap: 10px;
@@ -432,7 +462,7 @@
             background: #138496;
         }
         
-        /* ========== КНОПКА ЗАКРЫТИЯ СМЕНЫ ========== */
+        /* КНОПКА ЗАКРЫТИЯ СМЕНЫ */
         .btn-end-shift {
             background: #ff9800;
             color: white;
@@ -472,6 +502,22 @@
         .executor-item input:disabled {
             opacity: 0.6;
         }
+        
+        /* СТАТУСЫ ГРУППЫ */
+        .order-header.status-green {
+            background: linear-gradient(135deg, #1a3a1a, #0f2a0f);
+            border-left: 4px solid #2ecc71;
+        }
+        
+        .order-header.status-orange {
+            background: linear-gradient(135deg, #3a2a1a, #2a1f0f);
+            border-left: 4px solid #ff9800;
+        }
+        
+        .order-header.status-gray {
+            background: linear-gradient(135deg, #2a2a2a, #1f1f1f);
+            border-left: 4px solid #6c757d;
+        }
     </style>
 </head>
 <body>
@@ -500,7 +546,8 @@
 
         <!-- ФИЛЬТРЫ -->
         <div class="filter-section">
-            <select id="statusFilter" class="search-box" style="width: auto; padding: 6px 10px;">
+            <input type="text" class="search-box" placeholder="🔍 Поиск по группе или изделию..." id="searchInput">
+            <select id="statusFilter" class="search-box" style="width: auto;">
                 <option value="all">Все задачи</option>
                 <option value="pending">Ожидают</option>
                 <option value="in_progress">В работе</option>
@@ -524,8 +571,8 @@
             </div>
         </div>
 
-        <!-- СПИСОК ЗАДАЧ -->
-        <div id="tasksList" class="tasks-list">
+        <!-- СПИСОК ГРУПП С ЗАДАЧАМИ -->
+        <div id="ordersList" class="orders-list">
             <div class="loading">
                 <div class="spinner"></div>
                 <p>Загрузка задач...</p>
@@ -540,7 +587,7 @@
     <script src="../js/task-manager.js"></script>
 
     <script>
-        // ============== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ БЕЗОПАСНОГО ВЫВОДА ==============
+        // ============== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==============
         function escapeHtml(str) {
             if (!str) return '';
             return String(str)
@@ -551,46 +598,61 @@
                 .replace(/'/g, '&#39;');
         }
 
+        function formatDateDisplay(date) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('ru-RU', options);
+        }
+
+        function getGroupStatus(order) {
+            if (!order.tasks || Object.keys(order.tasks).length === 0) return 'gray';
+            
+            let hasInProgress = false;
+            let allCompleted = true;
+            
+            Object.values(order.tasks).forEach(status => {
+                if (status === 'orange') {
+                    hasInProgress = true;
+                    allCompleted = false;
+                }
+                if (status !== 'green') {
+                    allCompleted = false;
+                }
+            });
+            
+            if (allCompleted && Object.keys(order.tasks).length > 0) return 'green';
+            if (hasInProgress) return 'orange';
+            return 'gray';
+        }
+
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         if (typeof TaskManager === 'undefined') {
-            console.error('❌ TaskManager не загружен! Проверьте подключение task-manager.js');
-            document.getElementById('tasksList').innerHTML = `
+            console.error('❌ TaskManager не загружен!');
+            document.getElementById('ordersList').innerHTML = `
                 <div class="no-tasks">
                     <p style="font-size: 18px;">❌ Ошибка загрузки</p>
                     <p style="color: #666;">Не удалось загрузить менеджер задач</p>
                 </div>
             `;
         } else {
-            // Создаем экземпляр TaskManager для лазерно-гибочного участка
-            const taskManager = new TaskManager('lazerno', window.TASK_OPERATIONS.lazerno || {});
+            const taskManager = new TaskManager('lazerno', window.TASK_OPERATIONS?.lazerno || {});
             let currentFilter = 'all';
-            
-            // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТОЙ КАРТОЧКИ ==============
             let currentlyOpenOrderId = null;
-            let isLoadingTasks = false;
             
+            // Сохранение состояния открытых карточек
             function saveOpenOrderState() {
                 const allContents = document.querySelectorAll('.order-content');
                 let foundOpenId = null;
-                
                 allContents.forEach((content) => {
                     const card = content.closest('.order-card');
                     if (card && !content.classList.contains('collapsed')) {
                         foundOpenId = card.dataset.orderId;
                     }
                 });
-                
                 currentlyOpenOrderId = foundOpenId;
-                console.log('💾 Открытая карточка:', currentlyOpenOrderId);
             }
             
             function restoreOpenOrderState() {
-                if (!currentlyOpenOrderId) {
-                    console.log('📂 Нет открытой карточки для восстановления');
-                    return;
-                }
-                
-                console.log('📂 Восстанавливаем открытую карточку:', currentlyOpenOrderId);
+                if (!currentlyOpenOrderId) return;
                 
                 document.querySelectorAll('.order-content').forEach(content => {
                     content.classList.add('collapsed');
@@ -606,94 +668,45 @@
                     if (header && content) {
                         header.classList.remove('collapsed');
                         content.classList.remove('collapsed');
-                        console.log('✅ Карточка восстановлена');
                     }
                 }
             }
             
-            let _historyTimer = null;
-            let _loadTimer = null;
-            
             window.taskManager = taskManager;
-            
-            document.addEventListener('DOMContentLoaded', function() {
-                console.log('✅ Страница лазерно-гибочного участка загружена');
-                updateDateDisplay();
-                loadTasks();
-                
-                window.addEventListener('taskStatusChanged', function() {
-                    if (_loadTimer) clearTimeout(_loadTimer);
-                    _loadTimer = setTimeout(() => {
-                    }, 100);
-                });
-                
-                window.addEventListener('taskHistoryChanged', function(e) {
-                    if (e.detail.siteType === 'lazerno') {
-                        console.log('🔄 Изменение истории для лазерно-гибочного участка');
-                        if (_historyTimer) clearTimeout(_historyTimer);
-                        _historyTimer = setTimeout(() => {
-                        }, 200);
-                    }
-                });
-                
-                window.addEventListener('storage', function(e) {
-                    if (e.key === 'masterx_orders' || (e.key && e.key.startsWith('tasks_lazerno_'))) {
-                        console.log('🔄 Изменение в localStorage');
-                        if (_loadTimer) clearTimeout(_loadTimer);
-                        _loadTimer = setTimeout(() => {
-                            taskManager.loadData();
-                        }, 100);
-                    }
-                });
-            });
             
             // ============== НАВИГАЦИЯ ПО ДАТАМ ==============
             window.changeDate = function(action) {
                 switch(action) {
-                    case 'prev': 
-                        taskManager.prevDay(); 
-                        break;
-                    case 'next': 
-                        taskManager.nextDay(); 
-                        break;
-                    case 'today': 
-                        taskManager.today(); 
-                        break;
+                    case 'prev': taskManager.prevDay(); break;
+                    case 'next': taskManager.nextDay(); break;
+                    case 'today': taskManager.today(); break;
                 }
                 currentlyOpenOrderId = null;
                 updateDateDisplay();
-                loadTasks();
+                loadOrders();
             };
             
             function updateDateDisplay() {
-                const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                const dateStr = taskManager.currentDate.toLocaleDateString('ru-RU', options);
+                const dateStr = formatDateDisplay(taskManager.currentDate);
                 const isToday = taskManager.formatDate(taskManager.currentDate) === taskManager.formatDate(new Date());
-                
-                document.getElementById('currentDateDisplay').innerHTML = `
-                    ${dateStr} ${!isToday ? '<span class="history-indicator">(история)</span>' : ''}
-                `;
+                document.getElementById('currentDateDisplay').innerHTML = `${dateStr} ${!isToday ? '<span class="history-indicator">(история)</span>' : ''}`;
             }
             
             // ============== ФИЛЬТРАЦИЯ ==============
-            window.applyFilters = function() {
+            function applyFilters() {
                 currentFilter = document.getElementById('statusFilter').value;
-                loadTasks();
-            };
+                loadOrders();
+            }
             
-            // ============== ЗАГРУЗКА ЗАДАЧ ==============
-            function loadTasks() {
-                if (isLoadingTasks) {
-                    console.log('loadTasks уже выполняется, пропускаем');
-                    return;
-                }
-                
-                isLoadingTasks = true;
-                console.log('loadTasks вызвана');
+            document.getElementById('statusFilter')?.addEventListener('change', applyFilters);
+            document.getElementById('searchInput')?.addEventListener('input', applyFilters);
+            
+            // ============== ЗАГРУЗКА ГРУПП С ЗАДАЧАМИ ==============
+            function loadOrders() {
+                const ordersList = document.getElementById('ordersList');
+                if (!ordersList) return;
                 
                 saveOpenOrderState();
-                
-                const tasksList = document.getElementById('tasksList');
                 
                 taskManager.loadData();
                 let tasks = taskManager.getTasksByStatus(currentFilter);
@@ -703,218 +716,128 @@
                 document.getElementById('tasksInProgress').textContent = stats.inProgress;
                 document.getElementById('tasksCompleted').textContent = stats.completed;
                 
-                tasksList.innerHTML = '';
+                ordersList.innerHTML = '';
                 
                 if (tasks.length === 0) {
-                    tasksList.innerHTML = `
-                        <div class="no-tasks">
-                            <p style="font-size: 16px;">📭 Нет задач на этот день</p>
-                            <p style="color: #666; font-size: 13px;">Выберите другую дату или создайте заказ</p>
-                        </div>
-                    `;
-                    isLoadingTasks = false;
+                    ordersList.innerHTML = `<div class="no-tasks"><p style="font-size: 16px;">📭 Нет задач на этот день</p><p style="color: #666; font-size: 13px;">Выберите другую дату или создайте заказ</p></div>`;
                     return;
                 }
                 
+                // Группируем задачи по заказам
                 const byOrder = {};
                 tasks.forEach(task => {
                     if (!byOrder[task.orderId]) {
                         byOrder[task.orderId] = {
-                            number: task.orderNumber,
                             orderId: task.orderId,
+                            orderNumber: task.orderNumber,
+                            groupName: '',
+                            items: []
+                        };
+                    }
+                    if (!byOrder[task.orderId].items[task.product]) {
+                        byOrder[task.orderId].items[task.product] = {
+                            product: task.product,
+                            size: task.size,
                             tasks: []
                         };
                     }
-                    byOrder[task.orderId].tasks.push(task);
+                    byOrder[task.orderId].items[task.product].tasks.push(task);
                 });
                 
-                Object.values(byOrder).forEach(order => {
-                    const orderDiv = document.createElement('div');
-                    orderDiv.className = 'order-card';
-                    orderDiv.dataset.orderId = order.orderId;
+                // Получаем названия групп из заказов
+                const allOrders = loadOrdersFromStorage() || [];
+                for (const orderId in byOrder) {
+                    const fullOrder = allOrders.find(o => o.id == orderId);
+                    if (fullOrder) {
+                        byOrder[orderId].groupName = fullOrder.groupName;
+                    }
+                }
+                
+                // Отображаем группы
+                for (const orderId in byOrder) {
+                    const order = byOrder[orderId];
+                    const groupStatus = getGroupStatus(allOrders.find(o => o.id == orderId) || {});
+                    const statusClass = groupStatus === 'green' ? 'status-green' : (groupStatus === 'orange' ? 'status-orange' : 'status-gray');
+                    
+                    const card = document.createElement('div');
+                    card.className = 'order-card';
+                    card.dataset.orderId = orderId;
                     
                     const header = document.createElement('div');
-                    header.className = 'order-header collapsed';
+                    header.className = `order-header collapsed ${statusClass}`;
                     header.innerHTML = `
-                        <h3>📦 Заказ №${escapeHtml(order.number)}</h3>
-                        <span class="collapse-icon">▼</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div>
+                                <h3>📁 ${escapeHtml(order.groupName || 'Группа')}</h3>
+                                <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
+                                    Заказ №${order.orderNumber}
+                                </div>
+                            </div>
+                            <span class="collapse-icon">▼</span>
+                        </div>
                     `;
                     
                     const content = document.createElement('div');
                     content.className = 'order-content collapsed';
                     
-                    const byProduct = {};
-                    order.tasks.forEach(task => {
-                        const key = task.product;
-                        if (!byProduct[key]) {
-                            byProduct[key] = {
-                                product: task.product,
-                                size: task.size,
-                                totalQuantity: task.totalQuantity,
-                                tasks: []
-                            };
-                        }
-                        byProduct[key].tasks.push(task);
-                    });
-                    
-                    // ============== ПОЛНАЯ ИНФОРМАЦИЯ О ЗАКАЗЕ ==============
-                    // ПОЛУЧАЕМ ПОЛНЫЙ ЗАКАЗ ИЗ localStorage
-                    let fullOrder = null;
-try {
-    const allOrders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
-    fullOrder = allOrders.find(o => o.id == order.orderId);
-} catch (e) {
-    console.error('Ошибка получения заказа:', e);
-}
-
-// Данные из заказа
-const productQty = fullOrder?.items[0]?.quantity || 1;
-const productName = fullOrder?.items[0]?.product || '';
-const productSize = fullOrder?.items[0]?.size || '';
-const bracket = fullOrder?.items[0]?.bracket || { type: 'отсутствует', quantity: 0 };
-const lyre = fullOrder?.items[0]?.lyre || { type: 'отсутствует', quantity: 0 };
-const ral = fullOrder?.items[0]?.ral || '';
-const texture = fullOrder?.items[0]?.texture || '';
-const additional = fullOrder?.items[0]?.additional || '';
-const components = fullOrder?.components || [];
-
-// Формируем отображение кронштейна (всегда показываем количество)
-let bracketDisplay = '';
-if (bracket.type === 'отсутствует' || bracket.quantity === 0) {
-    bracketDisplay = `<span style="color: #fff; margin-left: 8px;">отсутствует</span>
-                      <span style="color: #ff9800; margin-left: 5px;">(0 шт)</span>`;
-} else {
-    bracketDisplay = `<span style="color: #fff; margin-left: 8px;">${escapeHtml(bracket.type)}</span>
-                      <span style="color: #ff9800; margin-left: 5px;">(${bracket.quantity} шт)</span>`;
-}
-
-// Формируем отображение лиры (всегда показываем количество)
-let lyreDisplay = '';
-if (lyre.type === 'отсутствует' || lyre.quantity === 0) {
-    lyreDisplay = `<span style="color: #fff; margin-left: 8px;">отсутствует</span>
-                   <span style="color: #ff9800; margin-left: 5px;">(0 шт)</span>`;
-} else {
-    lyreDisplay = `<span style="color: #fff; margin-left: 8px;">${escapeHtml(lyre.type)}</span>
-                   <span style="color: #ff9800; margin-left: 5px;">(${lyre.quantity} шт)</span>`;
-}
-
-// Создаём блок с полной информацией
-const productInfoDiv = document.createElement('div');
-productInfoDiv.className = 'product-info';
-productInfoDiv.style.marginBottom = '15px';
-productInfoDiv.style.padding = '12px 15px';
-productInfoDiv.style.background = '#15191f';
-productInfoDiv.style.borderRadius = '8px';
-productInfoDiv.style.borderLeft = '3px solid #ffba3b';
-productInfoDiv.style.fontSize = '15px';
-
-let infoHtml = `
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-        <!-- Левая колонка: изделие и размер -->
-        <div>
-            <div style="margin-bottom: 8px;">
-                <strong style="color: #ff3b3b;">📦 ИЗДЕЛИЕ:</strong>
-                <span style="color: #fff; margin-left: 8px;">${escapeHtml(productName)}</span>
-            </div>
-            <div style="margin-bottom: 8px;">
-                <strong> РАЗМЕР:</strong>
-                <span style="color: #fff; margin-left: 8px;">${escapeHtml(productSize) || 'Стандартный'}</span>
-            </div>
-            <div>
-                <strong> КОЛИЧЕСТВО:</strong>
-                <span style="color: #4cd964; margin-left: 8px; font-weight: 600;">${productQty} шт</span>
-            </div>
-        </div>
-        
-        <!-- Средняя колонка: кронштейн и лира -->
-        <div>
-            <div style="margin-bottom: 8px;">
-                <strong> КРОНШТЕЙН:</strong>
-                ${bracketDisplay}
-            </div>
-            <div>
-                <strong> ЛИРА:</strong>
-                ${lyreDisplay}
-            </div>
-        </div>
-        
-        <!-- Правая колонка: RAL и текстура -->
-        <div>
-            <div style="margin-bottom: 8px;">
-                <strong> RAL:</strong>
-                <span style="color: #fff; margin-left: 8px;">${escapeHtml(ral) || '-'}</span>
-            </div>
-            <div>
-                <strong> ТЕКСТУРА:</strong>
-                <span style="color: #fff; margin-left: 8px;">${escapeHtml(texture) || '-'}</span>
-            </div>
-        </div>
-    </div>
-`;
-
-// Добавляем комплектующие, если есть
-if (components && components.length > 0) {
-    infoHtml += `
-        <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #2a2f38;">
-            <strong style="color: #ff3b3b;"> КОМПЛЕКТУЮЩИЕ:</strong>
-            <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;">
-                ${components.map(comp => `
-                    <span style="background: #1e232b; padding: 4px 12px; border-radius: 20px; font-size: 15px; border: 1px solid #2a2f38;">
-                        ${escapeHtml(comp.name)}: <strong style="color: #4cd964;">${comp.quantityPerProduct}</strong> шт/изд
-                    </span>
-                `).join('')}
-            </div>
-        </div>
-    `;
-}
-
-// Добавляем дополнительные детали, если есть
-if (additional) {
-    infoHtml += `
-        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #2a2f38;">
-            <strong>📝 ДОПОЛНИТЕЛЬНО:</strong>
-            <div style="margin-top: 6px; padding: 8px 12px; background: #1e232b; border-radius: 6px; color: #a0a0a0; font-size: 12px; border-left: 2px solid #ff3b3b;">
-                ${escapeHtml(additional)}
-            </div>
-        </div>
-    `;
-}
-
-productInfoDiv.innerHTML = infoHtml;
-content.appendChild(productInfoDiv);
-                    
-                    // Добавляем задачи
-                    Object.values(byProduct).forEach(product => {
-                        product.tasks.sort((a, b) => a.index - b.index);
-                        product.tasks.forEach(task => {
-                            content.appendChild(createTaskCard(task));
+                    // Отображаем изделия
+                    for (const productName in order.items) {
+                        const item = order.items[productName];
+                        
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'item-card';
+                        
+                        const itemHeader = document.createElement('div');
+                        itemHeader.className = 'item-header collapsed';
+                        itemHeader.innerHTML = `
+                            <span>📦 ${escapeHtml(item.product)}</span>
+                            <span class="collapse-icon">▼</span>
+                        `;
+                        
+                        const itemContent = document.createElement('div');
+                        itemContent.className = 'item-content collapsed';
+                        
+                        // Отображаем задачи
+                        item.tasks.sort((a, b) => (a.index || 0) - (b.index || 0));
+                        item.tasks.forEach(task => {
+                            itemContent.appendChild(createTaskCard(task));
                         });
-                    });
+                        
+                        itemHeader.onclick = () => {
+                            const isCollapsed = itemContent.classList.contains('collapsed');
+                            if (isCollapsed) {
+                                itemContent.classList.remove('collapsed');
+                                itemHeader.classList.remove('collapsed');
+                            } else {
+                                itemContent.classList.add('collapsed');
+                                itemHeader.classList.add('collapsed');
+                            }
+                        };
+                        
+                        itemDiv.appendChild(itemHeader);
+                        itemDiv.appendChild(itemContent);
+                        content.appendChild(itemDiv);
+                    }
                     
-                    header.addEventListener('click', function(e) {
-                        if (e.target.tagName === 'BUTTON') return;
-                        
-                        content.classList.toggle('collapsed');
-                        header.classList.toggle('collapsed');
-                        
-                        if (!content.classList.contains('collapsed')) {
-                            currentlyOpenOrderId = order.orderId;
-                        } else if (currentlyOpenOrderId === order.orderId) {
-                            currentlyOpenOrderId = null;
+                    header.onclick = () => {
+                        const isCollapsed = content.classList.contains('collapsed');
+                        if (isCollapsed) {
+                            content.classList.remove('collapsed');
+                            header.classList.remove('collapsed');
+                            currentlyOpenOrderId = orderId;
+                        } else {
+                            content.classList.add('collapsed');
+                            header.classList.add('collapsed');
+                            if (currentlyOpenOrderId === orderId) currentlyOpenOrderId = null;
                         }
-                        
-                        console.log('👆 Открыта карточка:', currentlyOpenOrderId);
-                    });
+                    };
                     
-                    orderDiv.appendChild(header);
-                    orderDiv.appendChild(content);
-                    tasksList.appendChild(orderDiv);
-                });
+                    card.appendChild(header);
+                    card.appendChild(content);
+                    ordersList.appendChild(card);
+                }
                 
-                setTimeout(() => {
-                    restoreOpenOrderState();
-                    isLoadingTasks = false;
-                }, 50);
+                setTimeout(() => restoreOpenOrderState(), 50);
             }
             
             // ============== СОЗДАНИЕ КАРТОЧКИ ЗАДАЧИ ==============
@@ -930,10 +853,12 @@ content.appendChild(productInfoDiv);
                         ${escapeHtml(task.operation)}
                         ${task.isExtra ? '<span class="extra-task-badge">Доп.</span>' : ''}
                     </span>
+                    <span class="task-planned">
+                        📦 Запланировано: <strong>${task.plannedQuantity || task.totalQuantity || 1} шт</strong>
+                    </span>
                 `;
                 card.appendChild(header);
                 
-                // Только описание для дополнительных задач, без лишней информации
                 if (task.isExtra && task.description) {
                     const desc = document.createElement('div');
                     desc.className = 'task-description';
@@ -943,12 +868,7 @@ content.appendChild(productInfoDiv);
                 
                 const headers = document.createElement('div');
                 headers.className = 'executor-header';
-                headers.innerHTML = `
-                    <span>ФИО</span>
-                    <span>Кол-во</span>
-                    <span>Статус</span>
-                    <span></span>
-                `;
+                headers.innerHTML = `<span>ФИО</span><span>Кол-во</span><span>Статус</span><span></span>`;
                 card.appendChild(headers);
                 
                 const executorList = document.createElement('div');
@@ -977,7 +897,6 @@ content.appendChild(productInfoDiv);
                     addBtn.onclick = () => showAddExecutorForm(task, actionContainer);
                     actionContainer.appendChild(addBtn);
                 }
-                
                 card.appendChild(actionContainer);
                 
                 const readyBtn = document.createElement('button');
@@ -1004,9 +923,6 @@ content.appendChild(productInfoDiv);
                 nameInput.value = escapeHtml(executor.name);
                 nameInput.placeholder = 'ФИО';
                 nameInput.disabled = task.status === 'completed' || isShiftEnded;
-                nameInput.onchange = function(e) {
-                    console.log('Имя изменено на:', e.target.value);
-                };
                 div.appendChild(nameInput);
                 
                 const quantityInput = document.createElement('input');
@@ -1014,17 +930,18 @@ content.appendChild(productInfoDiv);
                 quantityInput.className = 'executor-quantity';
                 quantityInput.value = executor.quantity || 0;
                 quantityInput.min = 0;
+                quantityInput.max = task.plannedQuantity || task.totalQuantity || 1;
                 quantityInput.disabled = task.status === 'completed' || isShiftEnded;
                 quantityInput.onchange = function(e) {
                     const val = parseInt(e.target.value) || 0;
                     taskManager.updateExecutorQuantity(task.id, executor.id, val);
+                    updateTaskProgress(task.id);
                 };
                 div.appendChild(quantityInput);
                 
                 const workBtn = document.createElement('button');
                 workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''}`;
-                workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : 
-                                      isShiftEnded ? 'СМЕНА ЗАКРЫТА' : 'НАЧАТЬ';
+                workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : (isShiftEnded ? 'СМЕНА ЗАКРЫТА' : 'НАЧАТЬ');
                 workBtn.disabled = task.status === 'completed' || isShiftEnded;
                 workBtn.onclick = function() {
                     if (isShiftEnded) return;
@@ -1042,18 +959,7 @@ content.appendChild(productInfoDiv);
                 endShiftBtn.onclick = function() {
                     if (confirm(`Закрыть смену для ${executor.name}?`)) {
                         taskManager.updateExecutorStatus(task.id, executor.id, 'shift_ended');
-                        
-                        // Обновляем список исполнителей для этой задачи
-                        const executorList = document.getElementById(`executors-${task.id}`);
-                        if (executorList) {
-                            executorList.innerHTML = '';
-                            const updatedTask = taskManager.tasks.find(t => t.id === task.id);
-                            if (updatedTask && updatedTask.executors.length > 0) {
-                                updatedTask.executors.forEach(executor => {
-                                    executorList.appendChild(createExecutorItem(updatedTask, executor));
-                                });
-                            }
-                        }
+                        refreshTaskCard(task.id);
                     }
                 };
                 div.appendChild(endShiftBtn);
@@ -1065,6 +971,7 @@ content.appendChild(productInfoDiv);
                 removeBtn.onclick = function() {
                     if (confirm('Удалить этого исполнителя?')) {
                         taskManager.removeExecutor(task.id, executor.id);
+                        refreshTaskCard(task.id);
                     }
                 };
                 div.appendChild(removeBtn);
@@ -1072,10 +979,23 @@ content.appendChild(productInfoDiv);
                 return div;
             }
             
+            function refreshTaskCard(taskId) {
+                const updatedTask = taskManager.tasks.find(t => t.id === taskId);
+                if (updatedTask) {
+                    const oldCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+                    if (oldCard) {
+                        const newCard = createTaskCard(updatedTask);
+                        oldCard.parentNode.replaceChild(newCard, oldCard);
+                    }
+                }
+            }
+            
+            function updateTaskProgress(taskId) {
+                refreshTaskCard(taskId);
+            }
+            
             // ============== ФОРМА ДОБАВЛЕНИЯ ИСПОЛНИТЕЛЯ ==============
             function showAddExecutorForm(task, actionContainer) {
-                console.log('showAddExecutorForm вызвана для задачи:', task.id);
-                
                 const oldForm = actionContainer.querySelector('.new-executor-form');
                 if (oldForm) oldForm.remove();
                 
@@ -1100,25 +1020,7 @@ content.appendChild(productInfoDiv);
                     const result = taskManager.addExecutor(task.id, name);
                     if (result) {
                         formDiv.remove();
-                        
-                        // Находим контейнер с исполнителями и обновляем его
-                        const executorList = document.getElementById(`executors-${task.id}`);
-                        if (executorList) {
-                            executorList.innerHTML = '';
-                            
-                            const updatedTask = taskManager.tasks.find(t => t.id === task.id);
-                            
-                            if (updatedTask && updatedTask.executors.length > 0) {
-                                updatedTask.executors.forEach(executor => {
-                                    executorList.appendChild(createExecutorItem(updatedTask, executor));
-                                });
-                            } else {
-                                const noExecutors = document.createElement('p');
-                                noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 12px;';
-                                noExecutors.textContent = 'Нет исполнителей';
-                                executorList.appendChild(noExecutors);
-                            }
-                        }
+                        refreshTaskCard(task.id);
                     } else {
                         alert('Не удалось добавить исполнителя. Возможно, он уже существует.');
                     }
@@ -1138,167 +1040,56 @@ content.appendChild(productInfoDiv);
             }
             
             // ============== ДЕЙСТВИЯ С ЗАДАЧАМИ ==============
-            window.toggleWorkStatus = function(taskId, executorId, btn) {
-                const newStatus = btn.classList.contains('active') ? 'pending' : 'in_progress';
-                taskManager.updateExecutorStatus(taskId, executorId, newStatus);
-                btn.classList.toggle('active');
-                btn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
-            };
-            
-            window.removeExecutor = function(taskId, executorId) {
-                if (confirm('Удалить этого исполнителя?')) {
-                    taskManager.removeExecutor(taskId, executorId);
-                }
-            };
-            
             window.completeTask = function(taskId) {
-                // Находим задачу для получения информации
                 const task = taskManager.tasks.find(t => t.id === taskId);
                 if (!task) return;
                 
-                // Формируем сообщение с информацией о задаче
-                let message = `Завершить задачу?\n\n`;
-                message += `📌 Операция: ${task.operation}\n`;
-                message += `📦 Заказ: ${task.orderNumber}\n`;
+                let message = `Завершить задачу?\n\n📌 Операция: ${task.operation}\n📦 Заказ: ${task.orderNumber}\n`;
+                const completedTotal = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
+                message += `🔢 Выполнено: ${completedTotal} из ${task.plannedQuantity || task.totalQuantity || 1} шт`;
                 
-                // Добавляем информацию о количестве
-                const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
-                message += `🔢 Выполнено: ${totalAssigned} шт`;
-                
-                // Показываем подтверждение
                 if (confirm(message)) {
-                    // Вызываем метод completeTask из taskManager
                     taskManager.completeTask(taskId);
-                    
-                    // Находим карточку задачи и обновляем её
-                    const taskCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
-                    if (taskCard) {
-                        // Находим обновленную задачу в taskManager
-                        const updatedTask = taskManager.tasks.find(t => t.id === taskId);
-                        if (updatedTask) {
-                            // Создаем новую карточку с актуальными данными
-                            const newCard = createTaskCard(updatedTask);
-                            // Заменяем старую карточку новой
-                            taskCard.parentNode.replaceChild(newCard, taskCard);
-                        }
-                    }
+                    refreshTaskCard(taskId);
                 }
             };
-
-            // ============== ДОБАВЛЕНИЕ ДОПОЛНИТЕЛЬНОЙ ЗАДАЧИ ==============
-            window.addExtraTask = function(orderId, siteKey) {
-                console.log('addExtraTask вызвана', orderId, siteKey);
-                
-                const taskDescription = prompt('Введите описание дополнительной задачи:');
-                if (!taskDescription) return;
-
-                let orders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
-                const order = orders.find(o => o.id == orderId);
-                
-                if (!order) {
-                    alert('Заказ не найден');
-                    return;
-                }
-
-                if (!order.extraTasks) order.extraTasks = [];
-
-                order.extraTasks.push({
-                    title: taskDescription,
-                    description: taskDescription,
-                    site: siteKey,
-                    createdAt: new Date().toISOString()
-                });
-
-                localStorage.setItem('masterx_orders', JSON.stringify(orders));
-                
-                taskManager.loadData();
-                
-                alert('✅ Дополнительная задача добавлена');
-            };
-
-            // ============== ОЧИСТКА ИСТОРИИ ==============
-            window.clearHistory = function() {
-                if (!confirm('Очистить историю задач для текущей даты?')) return;
-                const dateStr = taskManager.formatDate(taskManager.currentDate);
-                localStorage.removeItem(`tasks_lazerno_${dateStr}`);
-                taskManager.loadData();
-                loadTasks();
-            };
-
+            
             // ============== ЭКСПОРТ В EXCEL ==============
             window.exportToExcel = function() {
-    const tasks = taskManager.tasks;
-    const dateStr = taskManager.formatDate(taskManager.currentDate);
-    
-    // Форматирование даты и времени
-    const formatDateTime = (isoString) => {
-        if (!isoString) return '';
-        const date = new Date(isoString);
-        return date.toLocaleString('ru-RU', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-    };
-    
-    // Получаем название статуса на русском
-    const getStatusText = (status) => {
-        switch(status) {
-            case 'pending': return 'Ожидает';
-            case 'in_progress': return 'В работе';
-            case 'shift_ended': return 'Смена закрыта';
-            case 'completed': return 'Завершено';
-            default: return status;
-        }
-    };
-    
-    // Группируем задачи по заказам
-    const ordersMap = new Map();
-    
-    tasks.forEach(task => {
-        if (!ordersMap.has(task.orderId)) {
-            ordersMap.set(task.orderId, {
-                orderNumber: task.orderNumber,
-                product: task.product,
-                tasks: []
-            });
-        }
-        ordersMap.get(task.orderId).tasks.push(task);
-    });
-    
-    // Формируем CSV
-    let csv = "Заказ,Изделие,Операция,Исполнитель,Количество,Статус,Начало работы,Закрытие смены,Завершение задачи\n";
-    
-    ordersMap.forEach(order => {
-        order.tasks.forEach(task => {
-            if (task.executors && task.executors.length > 0) {
-                task.executors.forEach(executor => {
-                    // Пытаемся получить время из существующих полей
-                    // Если в executor нет полей времени, они будут пустыми
-                    const startTime = formatDateTime(executor.startTime);
-                    const shiftEndTime = formatDateTime(executor.shiftEndTime);
-                    const endTime = formatDateTime(executor.endTime);
-                    const statusText = getStatusText(executor.status);
-                    
-                    csv += `"${order.orderNumber}","${order.product}","${task.operation}","${executor.name}",${executor.quantity || 0},"${statusText}","${startTime}","${shiftEndTime}","${endTime}"\n`;
+                const tasks = taskManager.tasks;
+                const dateStr = taskManager.formatDate(taskManager.currentDate);
+                
+                let csv = "Заказ,Изделие,Операция,Запланировано,Исполнитель,Выполнено,Статус\n";
+                
+                tasks.forEach(task => {
+                    if (task.executors && task.executors.length > 0) {
+                        task.executors.forEach(executor => {
+                            csv += `"${task.orderNumber}","${task.product}","${task.operation}",${task.plannedQuantity || task.totalQuantity || 1},"${executor.name}",${executor.quantity || 0},"${executor.status}"\n`;
+                        });
+                    } else {
+                        csv += `"${task.orderNumber}","${task.product}","${task.operation}",${task.plannedQuantity || task.totalQuantity || 1},"Нет",0,"${task.status}"\n`;
+                    }
                 });
-            } else {
-                const statusText = getStatusText(task.status);
-                csv += `"${order.orderNumber}","${order.product}","${task.operation}","Нет",0,"${statusText}","","",""\n`;
-            }
-        });
-    });
-    
-    // Скачиваем файл
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `${taskManager.siteType}_${dateStr}.csv`;
-    link.click();
-};
+                
+                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${taskManager.siteType}_${dateStr}.csv`;
+                link.click();
+            };
+            
+            // Запуск
+            document.addEventListener('DOMContentLoaded', function() {
+                updateDateDisplay();
+                loadOrders();
+                
+                window.addEventListener('taskHistoryChanged', function(e) {
+                    if (e.detail.siteType === 'lazerno') loadOrders();
+                });
+                window.addEventListener('storage', function(e) {
+                    if (e.key === 'masterx_orders' || (e.key && e.key.startsWith('tasks_lazerno_'))) loadOrders();
+                });
+            });
         }
     </script>
 </body>
