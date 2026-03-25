@@ -1,9 +1,8 @@
 // ============== task-manager.js - УНИВЕРСАЛЬНЫЙ МЕНЕДЖЕР ЗАДАЧ ==============
-// ВСЕ ОПЕРАЦИИ БЕРУТСЯ ИЗ task-operations.js (TASK_OPERATIONS)
 
 // Хранилище задач
 let tasks = [];
-let currentFilterDate = new Date().toISOString().split('T')[0]; // Сегодня по умолчанию
+let currentFilterDate = new Date().toISOString().split('T')[0];
 
 // Класс TaskManager
 class TaskManager {
@@ -14,18 +13,14 @@ class TaskManager {
         this.orders = [];
         this.tasks = [];
         
-        // Флаги для предотвращения рекурсии
         this._isSaving = false;
         this._isLoading = false;
         this._isNotifying = false;
         this._lastNotificationTime = 0;
     }
 
-    // ============== ЗАГРУЗКА ДАННЫХ ==============
-    
     loadData() {
         if (this._isLoading) {
-            console.log('loadData: уже загружается, пропускаем');
             return this.tasks;
         }
         
@@ -54,7 +49,6 @@ class TaskManager {
         this.tasks = [];
         const dateStr = this.formatDate(this.currentDate);
         
-        // Загружаем историю для этой даты
         let historyTasks = [];
         try {
             const historyKey = `tasks_${this.siteType}_${dateStr}`;
@@ -62,8 +56,6 @@ class TaskManager {
             if (history) {
                 historyTasks = JSON.parse(history);
                 console.log(`📋 Загружено ${historyTasks.length} задач из истории для ${dateStr}`);
-            } else {
-                console.log(`📭 Нет задач в истории для ${dateStr}`);
             }
         } catch (error) {
             console.error('Ошибка загрузки истории:', error);
@@ -71,23 +63,16 @@ class TaskManager {
         
         if (!this.orders || this.orders.length === 0) {
             this.tasks = historyTasks;
-            console.log(`✅ Итого задач на ${dateStr}: ${this.tasks.length}`);
             return;
         }
         
-        // ============== ФИЛЬТРУЕМ ЗАКАЗЫ ПО ДАТЕ ==============
         const ordersForDate = this.orders.filter(order => order.date === dateStr);
         
-        console.log(`📅 Заказов на ${dateStr}: ${ordersForDate.length} из ${this.orders.length} всего`);
-        
         if (ordersForDate.length === 0) {
-            // Нет заказов на эту дату, используем только сохранённые задачи
             this.tasks = historyTasks;
-            console.log(`✅ Итого задач на ${dateStr}: ${this.tasks.length}`);
             return;
         }
         
-        // Создаём Map для быстрого поиска существующих задач
         const historyTasksMap = new Map();
         historyTasks.forEach(task => {
             historyTasksMap.set(task.id, task);
@@ -95,7 +80,6 @@ class TaskManager {
         
         const newTasks = [];
         
-        // Генерируем задачи только из заказов на текущую дату
         ordersForDate.forEach(order => {
             if (order.status !== 'active') return;
             
@@ -104,10 +88,8 @@ class TaskManager {
                     const productName = item.product || 'Изделие';
                     const itemQuantity = parseInt(item.size?.quantity) || parseInt(item.quantity) || 1;
                     
-                    // ПОЛУЧАЕМ ОПЕРАЦИИ ДЛЯ ЭТОГО ИЗДЕЛИЯ
                     const operations = this.getOperationsForProduct(productName);
                     
-                    // СОЗДАЁМ ЗАДАЧИ ИЗ ОПЕРАЦИЙ ИЗДЕЛИЯ
                     if (operations && operations.length > 0) {
                         operations.forEach((op, opIndex) => {
                             let operationName = '';
@@ -145,54 +127,48 @@ class TaskManager {
                         });
                     }
                     
-                    // ============== ОБНОВЛЯЕМ ПЛАН ИЗ КОМПЛЕКТУЮЩИХ (ПОИСК ПО КЛЮЧЕВЫМ СЛОВАМ) ==============
+                    // ============== ОБНОВЛЯЕМ ПЛАН ИЗ КОМПЛЕКТУЮЩИХ ==============
                     if (item.components && item.components.length > 0) {
-    if (item.components && item.components.length > 0) {
-    item.components.forEach((comp) => {
-        // plannedQuantity = то, что вы указали в заказе (итоговое количество)
-        const plannedQty = comp.quantity || 1;
-        
-        // Ищем существующую задачу, которая подходит по ключевым словам
-        const existingTask = newTasks.find(task => 
-            this.isMatchingByKeywords(task.operation, comp.name)
-        );
-        
-        if (existingTask) {
-            // Обновляем план существующей задачи
-            existingTask.plannedQuantity = plannedQty;
-            existingTask.totalQuantity = plannedQty;
-            existingTask.isFromComponent = true;
-            console.log(`📊 ОБНОВЛЕН ПЛАН: "${existingTask.operation}" → ${plannedQty} шт (из комплектующей "${comp.name}")`);
-        } else {
-            // Если не нашли задачу, создаём новую для комплектующей
-            const matchedOperation = this.findMatchingOperation(comp.name);
-            if (matchedOperation) {
-                const taskId = `${order.id}_${this.siteType}_comp_${itemIndex}_${Date.now()}_${Math.random()}`;
-                const task = {
-                    id: taskId,
-                    orderId: order.id,
-                    orderNumber: order.number || order.id,
-                    product: comp.name,
-                    component: true,
-                    operation: matchedOperation.name,
-                    plannedQuantity: plannedQty,
-                    completedQuantity: 0,
-                    totalQuantity: plannedQty,
-                    isComponent: true,
-                    status: 'pending',
-                    executors: [],
-                    date: dateStr
-                };
-                newTasks.push(task);
-                console.log(`🔧 Создана задача для комплектующей: "${matchedOperation.name}" (${plannedQty} шт)`);
-            }
-        }
-    });
-}
+                        item.components.forEach((comp) => {
+                            const plannedQty = comp.quantity || 1;
+                            
+                            const existingTask = newTasks.find(task => 
+                                this.isMatchingByKeywords(task.operation, comp.name)
+                            );
+                            
+                            if (existingTask) {
+                                existingTask.plannedQuantity = plannedQty;
+                                existingTask.totalQuantity = plannedQty;
+                                existingTask.isFromComponent = true;
+                                console.log(`📊 ОБНОВЛЕН ПЛАН: "${existingTask.operation}" → ${plannedQty} шт (из комплектующей "${comp.name}")`);
+                            } else {
+                                const matchedOperation = this.findMatchingOperation(comp.name);
+                                if (matchedOperation) {
+                                    const taskId = `${order.id}_${this.siteType}_comp_${itemIndex}_${Date.now()}_${Math.random()}`;
+                                    const task = {
+                                        id: taskId,
+                                        orderId: order.id,
+                                        orderNumber: order.number || order.id,
+                                        product: comp.name,
+                                        component: true,
+                                        operation: matchedOperation.name,
+                                        plannedQuantity: plannedQty,
+                                        completedQuantity: 0,
+                                        totalQuantity: plannedQty,
+                                        isComponent: true,
+                                        status: 'pending',
+                                        executors: [],
+                                        date: dateStr
+                                    };
+                                    newTasks.push(task);
+                                    console.log(`🔧 Создана задача для комплектующей: "${matchedOperation.name}" (${plannedQty} шт)`);
+                                }
+                            }
+                        });
+                    }
                 });
             }
             
-            // Дополнительные задачи
             if (order.extraTasks && Array.isArray(order.extraTasks)) {
                 order.extraTasks.forEach((extra, index) => {
                     if (extra.site !== this.siteType) return;
@@ -223,8 +199,6 @@ class TaskManager {
         });
         
         this.tasks = newTasks;
-        
-        console.log(`✅ generateTasks завершена, всего задач на ${dateStr}: ${this.tasks.length}`);
         this._saveTasksToHistoryInternal(dateStr);
     }
     
@@ -235,13 +209,10 @@ class TaskManager {
         const opLower = operationName.toLowerCase();
         const compLower = componentName.toLowerCase();
         
-        // Разбиваем название комплектующей на слова
         const keywords = compLower.split(/\s+/);
         
-        // Проверяем, содержит ли операция хотя бы одно ключевое слово (длиннее 2 символов)
         for (const keyword of keywords) {
             if (keyword.length > 2 && opLower.includes(keyword)) {
-                console.log(`🔍 Совпадение: "${componentName}" → "${operationName}" (по слову "${keyword}")`);
                 return true;
             }
         }
@@ -251,19 +222,15 @@ class TaskManager {
     
     // ============== ПОИСК ОПЕРАЦИИ ПО КЛЮЧЕВЫМ СЛОВАМ ==============
     findMatchingOperation(componentName) {
-        // Получаем все операции для этого участка
         const siteOps = this.getSiteOperations();
         
-        // 1. Сначала ищем точное совпадение (самый приоритет)
         for (const op of siteOps) {
             const opName = op.name || op;
             if (opName.toLowerCase() === componentName.toLowerCase()) {
-                console.log(`🎯 Точное совпадение: "${componentName}" → "${opName}"`);
                 return typeof op === 'object' ? op : { name: op, quantity: 1 };
             }
         }
         
-        // 2. Если точного нет, ищем по ключевым словам из полного названия
         const fullNameLower = componentName.toLowerCase();
         const words = fullNameLower.split(/\s+/);
         
@@ -271,24 +238,19 @@ class TaskManager {
             const opName = op.name || op;
             const opNameLower = opName.toLowerCase();
             
-            // Проверяем, содержит ли операция всё название целиком
             if (opNameLower.includes(fullNameLower)) {
-                console.log(`🔍 Найдено по полному названию: "${componentName}" → "${opName}"`);
                 return typeof op === 'object' ? op : { name: op, quantity: 1 };
             }
             
-            // Проверяем, содержит ли операция все ключевые слова (не одно, а все)
             const allWordsMatch = words.every(word => 
                 word.length > 2 && opNameLower.includes(word)
             );
             
             if (allWordsMatch && words.length > 0) {
-                console.log(`🔍 Найдено по всем ключевым словам: "${componentName}" → "${opName}"`);
                 return typeof op === 'object' ? op : { name: op, quantity: 1 };
             }
         }
         
-        console.log(`⚠️ Не найдена операция для "${componentName}" на участке ${this.siteType}`);
         return null;
     }
     
@@ -296,16 +258,13 @@ class TaskManager {
     getSiteOperations() {
         const siteOps = [];
         
-        // Собираем все операции для этого участка из TASK_OPERATIONS
         if (window.TASK_OPERATIONS && window.TASK_OPERATIONS[this.siteType]) {
             const ops = window.TASK_OPERATIONS[this.siteType];
             
-            // Добавляем операции по умолчанию
             if (ops.default) {
                 siteOps.push(...ops.default);
             }
             
-            // Добавляем все остальные операции
             for (const key in ops) {
                 if (key !== 'default' && Array.isArray(ops[key])) {
                     siteOps.push(...ops[key]);
@@ -313,7 +272,6 @@ class TaskManager {
             }
         }
         
-        // Убираем дубликаты
         const uniqueOps = [];
         const opNames = new Set();
         for (const op of siteOps) {
@@ -327,42 +285,31 @@ class TaskManager {
         return uniqueOps;
     }
     
-    // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ИЗ ТЕХКАРТ ==============
-    
     getOperationsForProduct(productName) {
-        // 1. Сначала ищем в кастомных операциях
         if (this.customOperations[productName]) {
             return this.customOperations[productName];
         }
         
-        // 2. Потом в TASK_OPERATIONS из task-operations.js
         if (window.TASK_OPERATIONS && window.TASK_OPERATIONS[this.siteType]) {
             const siteOps = window.TASK_OPERATIONS[this.siteType];
             
-            // Точное совпадение
             if (siteOps[productName]) {
                 return siteOps[productName];
             }
             
-            // Частичное совпадение
             for (const key in siteOps) {
                 if (key !== 'default' && productName && productName.includes(key)) {
                     return siteOps[key];
                 }
             }
             
-            // Операции по умолчанию для этого участка
             if (siteOps['default']) {
                 return siteOps['default'];
             }
         }
         
-        // 3. Если ничего не нашли - возвращаем ПУСТОЙ МАССИВ
-        console.warn(`Не найдены операции для ${productName} на участке ${this.siteType}`);
         return [];
     }
-    
-    // ============== КОНВЕРТАЦИЯ СТАТУСОВ ==============
     
     convertSquareStatus(squareStatus) {
         if (squareStatus === 'green') return 'completed';
@@ -377,22 +324,15 @@ class TaskManager {
         return '';
     }
     
-    // ============== РАБОТА С ИСТОРИЕЙ ==============
-    
     _saveTasksToHistoryInternal(dateStr) {
-        if (this._isSaving) {
-            console.log('saveTasksToHistoryInternal: уже сохраняется, пропускаем');
-            return;
-        }
-        
+        if (this._isSaving) return;
         this._isSaving = true;
         
         try {
             const historyKey = `tasks_${this.siteType}_${dateStr}`;
             localStorage.setItem(historyKey, JSON.stringify(this.tasks));
-            console.log(`✅ История сохранена для ${dateStr}, задач: ${this.tasks.length}`);
         } catch (error) {
-            console.error('Ошибка сохранения в историю:', error);
+            console.error('Ошибка сохранения:', error);
         } finally {
             setTimeout(() => {
                 this._isSaving = false;
@@ -404,9 +344,7 @@ class TaskManager {
         this._saveTasksToHistoryInternal(dateStr);
         
         const now = Date.now();
-        if (now - this._lastNotificationTime < 500) {
-            return;
-        }
+        if (now - this._lastNotificationTime < 500) return;
         
         this._lastNotificationTime = now;
         this.notifyHistoryChanged(dateStr);
@@ -414,7 +352,6 @@ class TaskManager {
     
     notifyHistoryChanged(dateStr) {
         if (this._isNotifying) return;
-        
         this._isNotifying = true;
         
         setTimeout(() => {
@@ -427,7 +364,6 @@ class TaskManager {
                     }
                 });
                 window.dispatchEvent(event);
-                console.log(`📢 Уведомление отправлено для ${dateStr}`);
             } catch (error) {
                 console.error('Ошибка при отправке уведомления:', error);
             } finally {
@@ -438,11 +374,7 @@ class TaskManager {
         }, 10);
     }
     
-    // ============== УПРАВЛЕНИЕ ИСПОЛНИТЕЛЯМИ ==============
-
     addExecutor(taskId, executorName) {
-        console.log('addExecutor:', taskId, executorName);
-        
         if (!executorName || !executorName.trim()) return false;
         
         const task = this.tasks.find(t => t.id === taskId);
@@ -466,10 +398,8 @@ class TaskManager {
         this.saveTasksToHistory(this.formatDate(this.currentDate));
         return true;
     }
-
+    
     updateExecutorQuantity(taskId, executorId, quantity) {
-        console.log('updateExecutorQuantity:', taskId, executorId, quantity);
-        
         const task = this.tasks.find(t => t.id === taskId);
         if (!task) return false;
         
@@ -484,24 +414,15 @@ class TaskManager {
         this.saveTasksToHistory(this.formatDate(this.currentDate));
         return true;
     }
-
+    
     updateExecutorStatus(taskId, executorId, status) {
-        console.log('updateExecutorStatus вызван:', { taskId, executorId, status });
-        
         const task = this.tasks.find(t => t.id === taskId);
-        if (!task) {
-            console.warn('Задача не найдена:', taskId);
-            return false;
-        }
+        if (!task) return false;
         
         const executor = task.executors.find(e => e.id === executorId);
-        if (!executor) {
-            console.warn('Исполнитель не найден:', executorId);
-            return false;
-        }
+        if (!executor) return false;
         
         executor.status = status;
-        console.log('Статус исполнителя обновлен:', executor);
         
         let taskStatus = 'pending';
         const anyInProgress = task.executors.some(e => e.status === 'in_progress');
@@ -517,53 +438,37 @@ class TaskManager {
         }
         
         task.status = taskStatus;
-        console.log('Статус задачи обновлен:', taskStatus);
         
         this.updateOrderStatus(taskId, taskStatus);
         this.saveTasksToHistory(this.formatDate(this.currentDate));
         return true;
     }
-
+    
     updateOrderStatus(taskId, status) {
-        console.log('updateOrderStatus:', taskId, status);
-        
         const [orderId] = taskId.split('_');
-        console.log('orderId:', orderId);
         
         if (typeof window.loadOrdersFromStorage === 'function') {
             const orders = window.loadOrdersFromStorage() || [];
-            console.log('Загружено заказов:', orders.length);
-            
             const orderIndex = orders.findIndex(o => o.id == orderId);
-            console.log('orderIndex:', orderIndex);
             
             if (orderIndex !== -1) {
                 if (!orders[orderIndex].tasks) {
                     orders[orderIndex].tasks = {};
-                    console.log('Создан объект tasks для заказа');
                 }
                 
                 const squareColor = this.convertTaskStatus(status);
                 orders[orderIndex].tasks[taskId] = squareColor;
-                console.log(`Установлен статус для задачи ${taskId}: ${squareColor}`);
                 
                 if (typeof window.saveOrdersToStorage === 'function') {
                     window.saveOrdersToStorage(orders);
-                    console.log('✅ Заказ сохранен в localStorage');
                 }
-            } else {
-                console.log('❌ Заказ не найден, orderId:', orderId);
             }
         }
-
+        
         this.notifyOtherTabs(taskId, status);
     }
     
-    // ============== МЕТОД ДЛЯ УДАЛЕНИЯ ИСПОЛНИТЕЛЯ ==============
-    
     removeExecutor(taskId, executorId) {
-        console.log('removeExecutor:', taskId, executorId);
-        
         const task = this.tasks.find(t => t.id === taskId);
         if (!task) return false;
         
@@ -571,11 +476,8 @@ class TaskManager {
         if (executorIndex === -1) return false;
         
         task.executors.splice(executorIndex, 1);
-        
-        // Пересчитываем completedQuantity
         task.completedQuantity = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
         
-        // Обновляем статус задачи
         if (task.executors.length === 0) {
             task.status = 'pending';
         } else {
@@ -593,18 +495,11 @@ class TaskManager {
         this.saveTasksToHistory(this.formatDate(this.currentDate));
         return true;
     }
-
-    // ============== ЗАВЕРШЕНИЕ ЗАДАЧИ ==============
+    
     completeTask(taskId) {
-        console.log('completeTask:', taskId);
-        
         const task = this.tasks.find(t => t.id === taskId);
-        if (!task) {
-            console.warn('Задача не найдена:', taskId);
-            return false;
-        }
+        if (!task) return false;
         
-        // Проверяем, выполнено ли запланированное количество
         if (task.completedQuantity < task.plannedQuantity) {
             const confirmMsg = `Выполнено ${task.completedQuantity} из ${task.plannedQuantity} шт.\nЗавершить задачу?`;
             if (!confirm(confirmMsg)) return false;
@@ -617,21 +512,15 @@ class TaskManager {
         this.saveTasksToHistory(this.formatDate(this.currentDate));
         return true;
     }
-
-    // ============== МЕТОД ДЛЯ УВЕДОМЛЕНИЯ ДРУГИХ ВКЛАДОК ==============
+    
     notifyOtherTabs(taskId, status) {
-        console.log('📢 notifyOtherTabs:', taskId, status);
-        
         const data = {
             taskId: taskId,
             status: status,
             timestamp: Date.now()
         };
         localStorage.setItem('taskStatusChanged', JSON.stringify(data));
-        console.log('💾 Сохранено в localStorage:', data);
     }
-    
-    // ============== НАВИГАЦИЯ ПО ДАТАМ ==============
     
     setDate(date) {
         const [year, month, day] = date.split('-');
@@ -670,8 +559,6 @@ class TaskManager {
         return `${year}-${month}-${day}`;
     }
     
-    // ============== СТАТИСТИКА ==============
-    
     getStats() {
         return {
             total: this.tasks.length,
@@ -685,8 +572,6 @@ class TaskManager {
         if (status === 'all') return this.tasks;
         return this.tasks.filter(t => t.status === status);
     }
-    
-    // ============== ВСПОМОГАТЕЛЬНЫЕ ==============
     
     safeParseInt(value) {
         if (value === undefined || value === null) return 0;
@@ -712,55 +597,13 @@ class TaskManager {
     }
 }
 
-// ============== ГЛОБАЛЬНЫЕ ФУНКЦИИ ДЛЯ РАБОТЫ С ЗАДАЧАМИ ==============
-
+// ============== ГЛОБАЛЬНЫЕ ФУНКЦИИ ==============
 function loadTasks() {
     const savedTasks = localStorage.getItem('production_tasks');
     if (savedTasks) {
         tasks = JSON.parse(savedTasks);
     } else {
-        tasks = [
-            {
-                id: 1,
-                title: 'Изготовление вала',
-                description: 'Вал приводной, чертеж 123',
-                site: 'tokarniy',
-                status: 'in-progress',
-                date: '2026-03-18',
-                deadline: '2026-03-18',
-                assignee: 'Петров'
-            },
-            {
-                id: 2,
-                title: 'Фрезеровка корпуса',
-                description: 'Корпус редуктора',
-                site: 'frezerniy',
-                status: 'new',
-                date: '2026-03-18',
-                deadline: '2026-03-19',
-                assignee: 'Сидоров'
-            },
-            {
-                id: 3,
-                title: 'Гибка листа',
-                description: 'Лист 3мм, чертеж 456',
-                site: 'lazerno-gibochniy',
-                status: 'pending',
-                date: '2026-03-19',
-                deadline: '2026-03-20',
-                assignee: 'Иванов'
-            },
-            {
-                id: 4,
-                title: 'Полировка деталей',
-                description: 'Комплект деталей',
-                site: 'polimerniy',
-                status: 'new',
-                date: '2026-03-20',
-                deadline: '2026-03-21',
-                assignee: 'Козлов'
-            }
-        ];
+        tasks = [];
         saveTasks();
     }
     return tasks;
@@ -832,7 +675,6 @@ function getTasksStats(date = currentFilterDate) {
     };
 }
 
-// ============== ЭКСПОРТ В ГЛОБАЛЬНУЮ ОБЛАСТЬ ==============
 window.TaskManager = TaskManager;
 window.tasks = tasks;
 window.loadTasks = loadTasks;
@@ -847,4 +689,4 @@ window.updateTask = updateTask;
 window.deleteTask = deleteTask;
 window.getTasksStats = getTasksStats;
 
-console.log('✅ task-manager.js загружен (с поиском по ключевым словам и обновлением плана)');
+console.log('✅ task-manager.js загружен');
