@@ -141,9 +141,9 @@ class TaskManager {
                             product: productName,
                             size: item.size?.name || 'Стандартный',
                             operation: operationName,
-                            plannedQuantity: plannedQuantity,      // Сколько нужно сделать по плану
+                            plannedQuantity: plannedQuantity,
                             completedQuantity: historyTask?.completedQuantity || 0,
-                            totalQuantity: plannedQuantity,        // Для совместимости
+                            totalQuantity: plannedQuantity,
                             index: opIndex,
                             status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
                             executors: historyTask?.executors || [],
@@ -154,6 +154,43 @@ class TaskManager {
                         newTasks.push(task);
                         console.log(`📌 Создана задача: ${operationName} (${plannedQuantity} шт) для ${productName}`);
                     });
+                    
+                    // ============== ЗАДАЧИ ДЛЯ КОМПЛЕКТУЮЩИХ (поиск по ключевым словам) ==============
+                    if (item.components && item.components.length > 0) {
+                        item.components.forEach((comp, compIndex) => {
+                            // Ищем операцию для этой комплектующей на текущем участке
+                            const matchedOperation = this.findMatchingOperation(comp.name);
+                            
+                            if (matchedOperation) {
+                                const taskId = `${order.id}_${this.siteType}_comp_${itemIndex}_${compIndex}`;
+                                const taskStatus = order.tasks?.[taskId];
+                                const historyTask = historyTasksMap.get(taskId);
+                                
+                                const plannedQty = (matchedOperation.quantity || 1) * itemQuantity;
+                                
+                                const task = {
+                                    id: taskId,
+                                    orderId: order.id,
+                                    orderNumber: order.number || order.id,
+                                    product: comp.name,
+                                    component: true,
+                                    operation: matchedOperation.name,
+                                    plannedQuantity: plannedQty,
+                                    completedQuantity: historyTask?.completedQuantity || 0,
+                                    totalQuantity: plannedQty,
+                                    isComponent: true,
+                                    status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
+                                    executors: historyTask?.executors || [],
+                                    date: dateStr
+                                };
+                                
+                                newTasks.push(task);
+                                console.log(`🔧 Создана задача для комплектующей "${comp.name}" → "${matchedOperation.name}" (${plannedQty} шт)`);
+                            } else {
+                                console.log(`⚠️ Не найдена операция для комплектующей "${comp.name}" на участке ${this.siteType}`);
+                            }
+                        });
+                    }
                 });
             }
             
@@ -192,6 +229,73 @@ class TaskManager {
         
         console.log(`✅ generateTasks завершена, всего задач на ${dateStr}: ${this.tasks.length}`);
         this._saveTasksToHistoryInternal(dateStr);
+    }
+    
+    // ============== ПОИСК ОПЕРАЦИИ ПО КЛЮЧЕВЫМ СЛОВАМ ==============
+    findMatchingOperation(componentName) {
+        // Получаем все операции для этого участка
+        const siteOps = this.getSiteOperations();
+        
+        // Создаём массив ключевых слов из названия комплектующей
+        const keywords = componentName.toLowerCase().split(/\s+/);
+        
+        // Ищем операцию, которая содержит любое из ключевых слов
+        for (const op of siteOps) {
+            const opName = op.name || op;
+            const opNameLower = opName.toLowerCase();
+            
+            for (const keyword of keywords) {
+                if (keyword.length > 2 && opNameLower.includes(keyword)) {
+                    // Возвращаем операцию в формате { name, quantity }
+                    return typeof op === 'object' ? op : { name: op, quantity: 1 };
+                }
+            }
+        }
+        
+        // Если не нашли по ключевым словам, пробуем точное совпадение
+        for (const op of siteOps) {
+            const opName = op.name || op;
+            if (opName.toLowerCase() === componentName.toLowerCase()) {
+                return typeof op === 'object' ? op : { name: op, quantity: 1 };
+            }
+        }
+        
+        return null;
+    }
+    
+    // ============== ПОЛУЧЕНИЕ ВСЕХ ОПЕРАЦИЙ УЧАСТКА ==============
+    getSiteOperations() {
+        const siteOps = [];
+        
+        // Собираем все операции для этого участка из TASK_OPERATIONS
+        if (window.TASK_OPERATIONS && window.TASK_OPERATIONS[this.siteType]) {
+            const ops = window.TASK_OPERATIONS[this.siteType];
+            
+            // Добавляем операции по умолчанию
+            if (ops.default) {
+                siteOps.push(...ops.default);
+            }
+            
+            // Добавляем все остальные операции
+            for (const key in ops) {
+                if (key !== 'default' && Array.isArray(ops[key])) {
+                    siteOps.push(...ops[key]);
+                }
+            }
+        }
+        
+        // Убираем дубликаты
+        const uniqueOps = [];
+        const opNames = new Set();
+        for (const op of siteOps) {
+            const opName = op.name || op;
+            if (!opNames.has(opName)) {
+                opNames.add(opName);
+                uniqueOps.push(op);
+            }
+        }
+        
+        return uniqueOps;
     }
     
     // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ИЗ ТЕХКАРТ ==============
@@ -714,4 +818,4 @@ window.updateTask = updateTask;
 window.deleteTask = deleteTask;
 window.getTasksStats = getTasksStats;
 
-console.log('✅ task-manager.js загружен (операции берутся из TASK_OPERATIONS)');
+console.log('✅ task-manager.js загружен (с поиском по ключевым словам для комплектующих)');
