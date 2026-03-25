@@ -100,10 +100,11 @@ class TaskManager {
             if (order.status !== 'active') return;
             
             if (order.items && Array.isArray(order.items)) {
-                order.items.forEach((item, idx) => {
+                order.items.forEach((item, itemIndex) => {
                     const productName = item.product || 'Изделие';
+                    const itemQuantity = parseInt(item.size?.quantity) || parseInt(item.quantity) || 1;
                     
-                    // ПОЛУЧАЕМ ОПЕРАЦИИ ДЛЯ ЭТОГО ИЗДЕЛИЯ
+                    // ПОЛУЧАЕМ ОПЕРАЦИИ ДЛЯ ЭТОГО ИЗДЕЛИЯ (с количеством деталей)
                     const operations = this.getOperationsForProduct(productName);
                     
                     // ЕСЛИ ОПЕРАЦИЙ НЕТ - НЕ СОЗДАЕМ ЗАДАЧИ
@@ -112,8 +113,23 @@ class TaskManager {
                         return;
                     }
                     
-                    operations.forEach((op, index) => {
-                        const taskId = `${order.id}_${this.siteType}_${idx}_${index}`;
+                    operations.forEach((op, opIndex) => {
+                        // Определяем количество для операции
+                        let plannedQuantity = 0;
+                        let operationName = '';
+                        
+                        // Если операция в формате { name, quantity }
+                        if (typeof op === 'object' && op.name) {
+                            operationName = op.name;
+                            // Количество детали умножаем на количество изделий в заказе
+                            plannedQuantity = (op.quantity || 1) * itemQuantity;
+                        } else {
+                            // Если операция просто строка
+                            operationName = op;
+                            plannedQuantity = itemQuantity;
+                        }
+                        
+                        const taskId = `${order.id}_${this.siteType}_${itemIndex}_${opIndex}`;
                         const taskStatus = order.tasks?.[taskId];
                         
                         const historyTask = historyTasksMap.get(taskId);
@@ -123,11 +139,12 @@ class TaskManager {
                             orderId: order.id,
                             orderNumber: order.number || order.id,
                             product: productName,
-                            size: item.size || 'Стандартный',
-                            totalQuantity: parseInt(item.quantity) || 1,
+                            size: item.size?.name || 'Стандартный',
+                            operation: operationName,
+                            plannedQuantity: plannedQuantity,      // Сколько нужно сделать по плану
                             completedQuantity: historyTask?.completedQuantity || 0,
-                            operation: op,
-                            index: index,
+                            totalQuantity: plannedQuantity,        // Для совместимости
+                            index: opIndex,
                             status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
                             executors: historyTask?.executors || [],
                             date: dateStr,
@@ -135,6 +152,7 @@ class TaskManager {
                         };
                         
                         newTasks.push(task);
+                        console.log(`📌 Создана задача: ${operationName} (${plannedQuantity} шт) для ${productName}`);
                     });
                 });
             }
@@ -155,9 +173,10 @@ class TaskManager {
                         orderNumber: order.number || order.id,
                         product: extra.title || 'Доп. задача',
                         description: extra.description || '',
-                        totalQuantity: 1,
-                        completedQuantity: historyTask?.completedQuantity || 0,
                         operation: extra.title || 'Доп. операция',
+                        plannedQuantity: 1,
+                        completedQuantity: historyTask?.completedQuantity || 0,
+                        totalQuantity: 1,
                         isExtra: true,
                         status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
                         executors: historyTask?.executors || [],
@@ -406,6 +425,41 @@ class TaskManager {
 
         this.notifyOtherTabs(taskId, status);
     }
+    
+    // ============== МЕТОД ДЛЯ УДАЛЕНИЯ ИСПОЛНИТЕЛЯ ==============
+    
+    removeExecutor(taskId, executorId) {
+        console.log('removeExecutor:', taskId, executorId);
+        
+        const task = this.tasks.find(t => t.id === taskId);
+        if (!task) return false;
+        
+        const executorIndex = task.executors.findIndex(e => e.id === executorId);
+        if (executorIndex === -1) return false;
+        
+        task.executors.splice(executorIndex, 1);
+        
+        // Пересчитываем completedQuantity
+        task.completedQuantity = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
+        
+        // Обновляем статус задачи
+        if (task.executors.length === 0) {
+            task.status = 'pending';
+        } else {
+            const anyInProgress = task.executors.some(e => e.status === 'in_progress');
+            const allCompleted = task.executors.every(e => e.status === 'completed');
+            if (allCompleted) {
+                task.status = 'completed';
+            } else if (anyInProgress) {
+                task.status = 'in_progress';
+            } else {
+                task.status = 'pending';
+            }
+        }
+        
+        this.saveTasksToHistory(this.formatDate(this.currentDate));
+        return true;
+    }
 
     // ============== ЗАВЕРШЕНИЕ ЗАДАЧИ ==============
     completeTask(taskId) {
@@ -415,6 +469,12 @@ class TaskManager {
         if (!task) {
             console.warn('Задача не найдена:', taskId);
             return false;
+        }
+        
+        // Проверяем, выполнено ли запланированное количество
+        if (task.completedQuantity < task.plannedQuantity) {
+            const confirmMsg = `Выполнено ${task.completedQuantity} из ${task.plannedQuantity} шт.\nЗавершить задачу?`;
+            if (!confirm(confirmMsg)) return false;
         }
         
         task.status = 'completed';
@@ -511,7 +571,7 @@ class TaskManager {
             console.log(`Дата: ${dateStr}`);
             console.log(`Задач в истории: ${tasks.length}`);
             tasks.forEach(t => {
-                console.log(`  Задача ${t.id}: ${t.executors?.length || 0} исполнителей`);
+                console.log(`  Задача ${t.id}: ${t.executors?.length || 0} исполнителей, план: ${t.plannedQuantity} шт`);
             });
         } else {
             console.log(`Нет истории для ${dateStr}`);
