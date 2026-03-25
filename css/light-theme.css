@@ -1,0 +1,31 @@
+function initThemeToggle() {
+    const toggle = document.getElementById('themeToggle');
+    const lightStylesheet = document.getElementById('lightThemeStylesheet');
+    if (!toggle || !lightStylesheet) return;
+    
+    const savedTheme = localStorage.getItem('masterx_theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        lightStylesheet.disabled = false;
+        toggle.checked = true;
+    } else {
+        document.body.classList.remove('light-theme');
+        lightStylesheet.disabled = true;
+        toggle.checked = false;
+    }
+    
+    toggle.addEventListener('change', function() {
+        if (this.checked) {
+            document.body.classList.add('light-theme');
+            lightStylesheet.disabled = false;
+            localStorage.setItem('masterx_theme', 'light');
+        } else {
+            document.body.classList.remove('light-theme');
+            lightStylesheet.disabled = true;
+            localStorage.setItem('masterx_theme', 'dark');
+        }
+    });
+}
+
+// Вызов в initMainPage или DOMContentLoaded
+initThemeToggle();
