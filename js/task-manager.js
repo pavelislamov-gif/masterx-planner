@@ -147,47 +147,47 @@ class TaskManager {
                     
                     // ============== ОБНОВЛЯЕМ ПЛАН ИЗ КОМПЛЕКТУЮЩИХ (ПОИСК ПО КЛЮЧЕВЫМ СЛОВАМ) ==============
                     if (item.components && item.components.length > 0) {
-                        item.components.forEach((comp) => {
-                            const compQuantity = comp.quantity || 1;
-                            const plannedQty = compQuantity * itemQuantity;
-                            
-                            // Ищем существующую задачу, которая подходит по ключевым словам
-                            const existingTask = newTasks.find(task => 
-                                this.isMatchingByKeywords(task.operation, comp.name)
-                            );
-                            
-                            if (existingTask) {
-                                // Обновляем план существующей задачи
-                                existingTask.plannedQuantity = plannedQty;
-                                existingTask.totalQuantity = plannedQty;
-                                existingTask.isFromComponent = true;
-                                console.log(`📊 ОБНОВЛЕН ПЛАН: "${existingTask.operation}" → ${plannedQty} шт (из комплектующей "${comp.name}")`);
-                            } else {
-                                // Если не нашли задачу, ищем операцию для комплектующей
-                                const matchedOperation = this.findMatchingOperation(comp.name);
-                                if (matchedOperation) {
-                                    const taskId = `${order.id}_${this.siteType}_comp_${itemIndex}_${Date.now()}_${Math.random()}`;
-                                    const task = {
-                                        id: taskId,
-                                        orderId: order.id,
-                                        orderNumber: order.number || order.id,
-                                        product: comp.name,
-                                        component: true,
-                                        operation: matchedOperation.name,
-                                        plannedQuantity: plannedQty,
-                                        completedQuantity: 0,
-                                        totalQuantity: plannedQty,
-                                        isComponent: true,
-                                        status: 'pending',
-                                        executors: [],
-                                        date: dateStr
-                                    };
-                                    newTasks.push(task);
-                                    console.log(`🔧 Создана задача для комплектующей: "${matchedOperation.name}" (${plannedQty} шт)`);
-                                }
-                            }
-                        });
-                    }
+    item.components.forEach((comp) => {
+        // plannedQuantity берём напрямую из комплектующей, без умножения
+        const plannedQty = comp.quantity || 1;
+        
+        // Ищем существующую задачу, которая подходит по ключевым словам
+        const existingTask = newTasks.find(task => 
+            this.isMatchingByKeywords(task.operation, comp.name)
+        );
+        
+        if (existingTask) {
+            // Обновляем план существующей задачи
+            existingTask.plannedQuantity = plannedQty;
+            existingTask.totalQuantity = plannedQty;
+            existingTask.isFromComponent = true;
+            console.log(`📊 ОБНОВЛЕН ПЛАН: "${existingTask.operation}" → ${plannedQty} шт (из комплектующей "${comp.name}")`);
+        } else {
+            // Если не нашли задачу, ищем операцию для комплектующей
+            const matchedOperation = this.findMatchingOperation(comp.name);
+            if (matchedOperation) {
+                const taskId = `${order.id}_${this.siteType}_comp_${itemIndex}_${Date.now()}_${Math.random()}`;
+                const task = {
+                    id: taskId,
+                    orderId: order.id,
+                    orderNumber: order.number || order.id,
+                    product: comp.name,
+                    component: true,
+                    operation: matchedOperation.name,
+                    plannedQuantity: plannedQty,
+                    completedQuantity: 0,
+                    totalQuantity: plannedQty,
+                    isComponent: true,
+                    status: 'pending',
+                    executors: [],
+                    date: dateStr
+                };
+                newTasks.push(task);
+                console.log(`🔧 Создана задача для комплектующей: "${matchedOperation.name}" (${plannedQty} шт)`);
+            }
+        }
+    });
+}
                 });
             }
             
