@@ -147,8 +147,9 @@ class TaskManager {
                     
                     // ============== ОБНОВЛЯЕМ ПЛАН ИЗ КОМПЛЕКТУЮЩИХ (ПОИСК ПО КЛЮЧЕВЫМ СЛОВАМ) ==============
                     if (item.components && item.components.length > 0) {
+    if (item.components && item.components.length > 0) {
     item.components.forEach((comp) => {
-        // plannedQuantity берём напрямую из комплектующей (уже итоговое количество)
+        // plannedQuantity = то, что вы указали в заказе (итоговое количество)
         const plannedQty = comp.quantity || 1;
         
         // Ищем существующую задачу, которая подходит по ключевым словам
