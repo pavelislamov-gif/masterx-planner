@@ -1,279 +1,400 @@
-/* ============== СВЕТЛАЯ ТЕМА ============== */
+/* ============== СВЕТЛАЯ ТЕМА (переопределение стилей) ============== */
 body.light-theme {
-    background-color: #f5f5f7;
-    color: #212529;
+    background-color: #f0f2f5;
+    color: #1e293b;
 }
 
 body.light-theme .container {
-    background-color: #f5f5f7;
+    background-color: #f0f2f5;
 }
 
 body.light-theme header {
-    background: linear-gradient(135deg, #ffffff, #f8f9fa);
-    border: 1px solid #dee2e6;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
 }
 
 body.light-theme .logo-text {
-    color: #212529;
+    color: #1e293b;
+}
+
+body.light-theme .logo-text .x-red {
+    color: #e11d48;
+    text-shadow: none;
 }
 
 body.light-theme .btn {
-    background: #e9ecef;
-    color: #212529;
-    border: 1px solid #dee2e6;
+    background: #ffffff;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+}
+
+body.light-theme .btn:hover {
+    background: #f1f5f9;
+    transform: translateY(-2px);
 }
 
 body.light-theme .btn-primary {
-    background: linear-gradient(135deg, #007bff, #0056b3);
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
     color: white;
     border: none;
 }
 
+body.light-theme .btn-primary:hover {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
 body.light-theme .btn-success {
-    background: linear-gradient(135deg, #28a745, #1e7e34);
+    background: linear-gradient(135deg, #22c55e, #16a34a);
     color: white;
     border: none;
 }
 
 body.light-theme .btn-danger {
-    background: linear-gradient(135deg, #dc3545, #b02a37);
+    background: linear-gradient(135deg, #ef4444, #dc2626);
     color: white;
     border: none;
 }
 
 body.light-theme .btn-info {
-    background: linear-gradient(135deg, #17a2b8, #0f7a8c);
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
     color: white;
     border: none;
 }
 
 body.light-theme .modal-content {
-    background: linear-gradient(135deg, #ffffff, #f8f9fa);
-    border: 1px solid #dee2e6;
+    background: linear-gradient(135deg, #ffffff, #fefefe);
+    border: 1px solid #e2e8f0;
 }
 
 body.light-theme .close {
-    background: #f8f9fa;
-    color: #6c757d;
+    background: #f8fafc;
+    color: #64748b;
 }
 
 body.light-theme .close:hover {
-    background: #e9ecef;
-    color: #dc3545;
+    background: #f1f5f9;
+    color: #e11d48;
 }
 
 body.light-theme .order-card {
-    background: white;
-    border: 1px solid #dee2e6;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+body.light-theme .order-card:hover {
+    border-color: #e11d48;
+    box-shadow: 0 4px 12px rgba(225,29,72,0.1);
 }
 
 body.light-theme .order-header {
-    background: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-bottom: 1px solid #e2e8f0;
 }
 
 body.light-theme .order-header h3 {
-    color: #212529;
+    color: #1e293b;
+}
+
+body.light-theme .order-header h3::before {
+    content: "📦 ";
+}
+
+body.light-theme .items-table th {
+    background: #f1f5f9;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+body.light-theme .items-table td {
+    border-bottom: 1px solid #e2e8f0;
+    color: #1e293b;
+}
+
+body.light-theme .items-table tr:hover td {
+    background: #f8fafc;
 }
 
 body.light-theme .sites-section {
-    background: #f8f9fa;
-    border-top: 1px solid #dee2e6;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
 }
 
 body.light-theme .site-item {
-    background: white;
-    border: 1px solid #dee2e6;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+}
+
+body.light-theme .site-item:hover {
+    border-color: #e11d48;
+    background: #fef2f2;
 }
 
 body.light-theme .site-name {
-    color: #212529;
+    color: #1e293b;
 }
 
 body.light-theme .square {
-    background: #e9ecef;
-    border: 1px solid #dee2e6;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
 }
 
 body.light-theme .square.orange {
-    background-color: #ff9800 !important;
-    border-color: #e65100 !important;
+    background-color: #f97316 !important;
+    border-color: #ea580c !important;
 }
 
 body.light-theme .square.green {
-    background-color: #4caf50 !important;
-    border-color: #2e7d32 !important;
+    background-color: #22c55e !important;
+    border-color: #16a34a !important;
 }
 
 body.light-theme .square.red {
-    background-color: #dc3545 !important;
-    border-color: #b02a37 !important;
+    background-color: #ef4444 !important;
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 12px rgba(239,68,68,0.3) !important;
+}
+
+body.light-theme .order-stats {
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border: 1px solid #e2e8f0;
 }
 
 body.light-theme .stat-item {
-    background: white;
-    border: 1px solid #dee2e6;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+}
+
+body.light-theme .stat-item::before {
+    background: linear-gradient(180deg, #e11d48, #f97316);
+}
+
+body.light-theme .stat-value {
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 body.light-theme .stat-label {
-    color: #6c757d;
-}
-
-body.light-theme .search-box {
-    background: white;
-    border: 1px solid #ced4da;
-    color: #212529;
-}
-
-body.light-theme .search-box::placeholder {
-    color: #adb5bd;
-}
-
-body.light-theme .sites-navigation {
-    background: linear-gradient(135deg, #ffffff, #f8f9fa);
-    border: 1px solid #dee2e6;
-}
-
-body.light-theme .site-link {
-    background: white;
-    border: 1px solid #dee2e6;
-    color: #495057;
-}
-
-body.light-theme .site-link:hover {
-    background: linear-gradient(135deg, #ff3b3b, #cc2e2e);
-    color: white;
-}
-
-body.light-theme .empty-state {
-    background: white;
-    border: 2px dashed #dee2e6;
-    color: #6c757d;
-}
-
-body.light-theme .notification {
-    background: linear-gradient(135deg, #ffffff, #f8f9fa);
-    border: 1px solid #dee2e6;
-}
-
-body.light-theme .product-info {
-    background: #f8f9fa;
-}
-
-body.light-theme .product-info strong {
-    color: #dc3545;
-}
-
-body.light-theme .product-info span {
-    color: #212529 !important;
-}
-
-body.light-theme .components-title {
-    color: #dc3545;
-}
-
-body.light-theme .component-row {
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-}
-
-body.light-theme .task-card {
-    border-bottom: 1px solid #dee2e6;
-}
-
-body.light-theme .task-card.completed {
-    background: #d4edda;
-    border-left: 3px solid #28a745;
-}
-
-body.light-theme .task-title {
-    color: #212529;
-}
-
-body.light-theme .executor-header {
-    color: #6c757d;
-}
-
-body.light-theme .executor-item {
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-}
-
-body.light-theme .executor-name,
-body.light-theme .executor-quantity {
-    background: white;
-    border: 1px solid #ced4da;
-    color: #212529;
-}
-
-body.light-theme .btn-work {
-    background: #ffc107;
-    color: #212529;
-}
-
-body.light-theme .btn-add-executor {
-    background: #6c757d;
-    color: white;
-}
-
-body.light-theme .new-executor-form {
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-}
-
-body.light-theme .new-executor-form input {
-    background: white;
-    border: 1px solid #ced4da;
-    color: #212529;
-}
-
-body.light-theme .task-description {
-    background: #f8f9fa;
-    color: #6c757d;
-    border-left: 3px solid #dc3545;
-}
-
-body.light-theme .no-tasks {
-    background: white;
-    border: 1px solid #dee2e6;
-    color: #6c757d;
-}
-
-body.light-theme .history-indicator {
-    color: #6c757d;
-}
-
-body.light-theme .warning-message {
-    background: #fff3cd;
-    border: 1px solid #ffc107;
-    color: #856404;
+    color: #64748b;
 }
 
 body.light-theme .filter-section {
     background: transparent;
 }
 
+body.light-theme .search-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+}
+
+body.light-theme .search-box:focus {
+    border-color: #e11d48;
+    box-shadow: 0 0 10px rgba(225,29,72,0.1);
+}
+
+body.light-theme .search-box::placeholder {
+    color: #94a3b8;
+}
+
+body.light-theme .sites-navigation {
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border: 1px solid #e2e8f0;
+}
+
+body.light-theme .site-link {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+}
+
+body.light-theme .site-link:hover {
+    background: linear-gradient(135deg, #e11d48, #be123c);
+    color: white;
+}
+
+body.light-theme .empty-state {
+    background: #ffffff;
+    border: 2px dashed #e2e8f0;
+    color: #64748b;
+}
+
+body.light-theme .notification {
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #e11d48;
+}
+
+body.light-theme .notification.success {
+    border-left-color: #22c55e;
+}
+
+body.light-theme .notification.error {
+    border-left-color: #ef4444;
+}
+
+body.light-theme .notification.warning {
+    border-left-color: #f97316;
+}
+
+body.light-theme .product-info {
+    background: #f8fafc;
+    border-left: 3px solid #e11d48;
+}
+
+body.light-theme .product-info strong {
+    color: #e11d48;
+}
+
+body.light-theme .product-info span {
+    color: #1e293b !important;
+}
+
+body.light-theme .components-title {
+    color: #e11d48;
+    border-left-color: #e11d48;
+}
+
+body.light-theme .component-row {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+body.light-theme .task-card {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+body.light-theme .task-card.completed {
+    background: #f0fdf4;
+    border-left: 3px solid #22c55e;
+}
+
+body.light-theme .task-title {
+    color: #1e293b;
+}
+
+body.light-theme .task-progress {
+    background: #f1f5f9;
+    color: #16a34a;
+}
+
+body.light-theme .executor-header {
+    color: #64748b;
+}
+
+body.light-theme .executor-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+body.light-theme .executor-name,
+body.light-theme .executor-quantity {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+}
+
+body.light-theme .btn-work {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+body.light-theme .btn-work.active {
+    background: #f97316;
+    color: white;
+}
+
+body.light-theme .btn-add-executor {
+    background: #64748b;
+    color: white;
+}
+
+body.light-theme .btn-add-executor:hover {
+    background: #475569;
+}
+
+body.light-theme .new-executor-form {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+body.light-theme .new-executor-form input {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+}
+
+body.light-theme .task-description {
+    background: #f8fafc;
+    color: #475569;
+    border-left: 3px solid #e11d48;
+}
+
+body.light-theme .no-tasks {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+}
+
+body.light-theme .history-indicator {
+    color: #64748b;
+}
+
+body.light-theme .warning-message {
+    background: #fef9c3;
+    border: 1px solid #eab308;
+    color: #854d0e;
+}
+
 body.light-theme .stats-bar {
-    background: linear-gradient(135deg, #ffffff, #f8f9fa);
-    border: 1px solid #dee2e6;
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border: 1px solid #e2e8f0;
 }
 
 body.light-theme .stat-compact {
-    background: white;
-    border: 1px solid #dee2e6;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
 }
 
 body.light-theme .stat-compact-label {
-    color: #6c757d;
-}
-
-body.light-theme .theme-icon {
-    color: #ff9800;
+    color: #64748b;
 }
 
 body.light-theme .btn-outline {
-    border-color: #ced4da;
-    color: #6c757d;
+    border-color: #e2e8f0;
+    color: #475569;
+}
+
+body.light-theme .btn-outline:hover {
+    border-color: #e11d48;
+    color: #e11d48;
+}
+
+body.light-theme .btn-end-shift {
+    background: #f97316;
+    color: white;
+}
+
+body.light-theme .btn-end-shift:disabled {
+    background: #22c55e;
+}
+
+body.light-theme .square:hover::after {
+    background: #f1f5f9;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+}
+
+body.light-theme ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+body.light-theme ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+}
+
+body.light-theme ::-webkit-scrollbar-thumb:hover {
+    background: #e11d48;
 }
