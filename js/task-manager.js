@@ -104,104 +104,90 @@ class TaskManager {
                     const productName = item.product || 'Изделие';
                     const itemQuantity = parseInt(item.size?.quantity) || parseInt(item.quantity) || 1;
                     
-                    // ПОЛУЧАЕМ ОПЕРАЦИИ ДЛЯ ЭТОГО ИЗДЕЛИЯ (с количеством деталей)
+                    // ПОЛУЧАЕМ ОПЕРАЦИИ ДЛЯ ЭТОГО ИЗДЕЛИЯ
                     const operations = this.getOperationsForProduct(productName);
                     
-                    // ЕСЛИ ОПЕРАЦИЙ НЕТ - НЕ СОЗДАЕМ ЗАДАЧИ
-                    if (!operations || operations.length === 0) {
-                        console.log(`⏭️ Пропускаем ${productName} на ${this.siteType} - нет операций`);
-                        return;
+                    // СОЗДАЁМ ЗАДАЧИ ИЗ ОПЕРАЦИЙ ИЗДЕЛИЯ
+                    if (operations && operations.length > 0) {
+                        operations.forEach((op, opIndex) => {
+                            let operationName = '';
+                            let plannedQuantity = itemQuantity;
+                            
+                            if (typeof op === 'object' && op.name) {
+                                operationName = op.name;
+                            } else {
+                                operationName = op;
+                            }
+                            
+                            const taskId = `${order.id}_${this.siteType}_${itemIndex}_${opIndex}`;
+                            const taskStatus = order.tasks?.[taskId];
+                            const historyTask = historyTasksMap.get(taskId);
+                            
+                            const task = {
+                                id: taskId,
+                                orderId: order.id,
+                                orderNumber: order.number || order.id,
+                                product: productName,
+                                size: item.size?.name || 'Стандартный',
+                                operation: operationName,
+                                plannedQuantity: plannedQuantity,
+                                completedQuantity: historyTask?.completedQuantity || 0,
+                                totalQuantity: plannedQuantity,
+                                index: opIndex,
+                                status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
+                                executors: historyTask?.executors || [],
+                                date: dateStr,
+                                isExtra: false
+                            };
+                            
+                            newTasks.push(task);
+                            console.log(`📌 Создана задача: ${operationName} (${plannedQuantity} шт) для ${productName}`);
+                        });
                     }
                     
-                    operations.forEach((op, opIndex) => {
-                        // Определяем количество для операции
-                        let plannedQuantity = 0;
-                        let operationName = '';
-                        
-                        // Если операция в формате { name, quantity }
-                        if (typeof op === 'object' && op.name) {
-                            operationName = op.name;
-                            // Количество детали умножаем на количество изделий в заказе
-                            plannedQuantity = (op.quantity || 1) * itemQuantity;
-                        } else {
-                            // Если операция просто строка
-                            operationName = op;
-                            plannedQuantity = itemQuantity;
-                        }
-                        
-                        const taskId = `${order.id}_${this.siteType}_${itemIndex}_${opIndex}`;
-                        const taskStatus = order.tasks?.[taskId];
-                        
-                        const historyTask = historyTasksMap.get(taskId);
-                        
-                        const task = {
-                            id: taskId,
-                            orderId: order.id,
-                            orderNumber: order.number || order.id,
-                            product: productName,
-                            size: item.size?.name || 'Стандартный',
-                            operation: operationName,
-                            plannedQuantity: plannedQuantity,
-                            completedQuantity: historyTask?.completedQuantity || 0,
-                            totalQuantity: plannedQuantity,
-                            index: opIndex,
-                            status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
-                            executors: historyTask?.executors || [],
-                            date: dateStr,
-                            isExtra: false
-                        };
-                        
-                        newTasks.push(task);
-                        console.log(`📌 Создана задача: ${operationName} (${plannedQuantity} шт) для ${productName}`);
-                    });
-                    
-                    // ============== ЗАДАЧИ ДЛЯ КОМПЛЕКТУЮЩИХ (поиск по ключевым словам) ==============
+                    // ============== ОБНОВЛЯЕМ ПЛАН ИЗ КОМПЛЕКТУЮЩИХ (ПОИСК ПО КЛЮЧЕВЫМ СЛОВАМ) ==============
                     if (item.components && item.components.length > 0) {
-    item.components.forEach((comp, compIndex) => {
-        // Ищем операцию для этой комплектующей на текущем участке
-        const matchedOperation = this.findMatchingOperation(comp.name);
-        
-        if (matchedOperation) {
-            // ПРОВЕРКА: нет ли уже такой задачи из операций изделия?
-            const alreadyExists = newTasks.some(t => 
-                t.operation === matchedOperation.name && 
-                t.product !== comp.name
-            );
-            
-            if (alreadyExists) {
-                console.log(`⏭️ Пропускаем дубликат: "${matchedOperation.name}" уже есть в задачах изделия`);
-                return;
-            }
-            
-            const taskId = `${order.id}_${this.siteType}_comp_${itemIndex}_${compIndex}`;
-            const taskStatus = order.tasks?.[taskId];
-            const historyTask = historyTasksMap.get(taskId);
-            
-            // ВАЖНО: plannedQuantity берём из комплектующей, а не из операции!
-            const compQuantity = comp.quantity || 1;  // ← количество из комплектующей
-            const plannedQty = compQuantity * itemQuantity;
-            
-            const task = {
-                id: taskId,
-                orderId: order.id,
-                orderNumber: order.number || order.id,
-                product: comp.name,
-                component: true,
-                operation: matchedOperation.name,
-                plannedQuantity: plannedQty,      // ← берём из комплектующей
-                completedQuantity: historyTask?.completedQuantity || 0,
-                totalQuantity: plannedQty,
-                isComponent: true,
-                status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
-                executors: historyTask?.executors || [],
-                date: dateStr
-            };
-            
-            newTasks.push(task);
-            console.log(`🔧 Создана задача для комплектующей "${comp.name}" → "${matchedOperation.name}" (${plannedQty} шт)`);
-        }
-    });
-}
+                        item.components.forEach((comp) => {
+                            const compQuantity = comp.quantity || 1;
+                            const plannedQty = compQuantity * itemQuantity;
+                            
+                            // Ищем существующую задачу, которая подходит по ключевым словам
+                            const existingTask = newTasks.find(task => 
+                                this.isMatchingByKeywords(task.operation, comp.name)
+                            );
+                            
+                            if (existingTask) {
+                                // Обновляем план существующей задачи
+                                existingTask.plannedQuantity = plannedQty;
+                                existingTask.totalQuantity = plannedQty;
+                                existingTask.isFromComponent = true;
+                                console.log(`📊 ОБНОВЛЕН ПЛАН: "${existingTask.operation}" → ${plannedQty} шт (из комплектующей "${comp.name}")`);
+                            } else {
+                                // Если не нашли задачу, ищем операцию для комплектующей
+                                const matchedOperation = this.findMatchingOperation(comp.name);
+                                if (matchedOperation) {
+                                    const taskId = `${order.id}_${this.siteType}_comp_${itemIndex}_${Date.now()}_${Math.random()}`;
+                                    const task = {
+                                        id: taskId,
+                                        orderId: order.id,
+                                        orderNumber: order.number || order.id,
+                                        product: comp.name,
+                                        component: true,
+                                        operation: matchedOperation.name,
+                                        plannedQuantity: plannedQty,
+                                        completedQuantity: 0,
+                                        totalQuantity: plannedQty,
+                                        isComponent: true,
+                                        status: 'pending',
+                                        executors: [],
+                                        date: dateStr
+                                    };
+                                    newTasks.push(task);
+                                    console.log(`🔧 Создана задача для комплектующей: "${matchedOperation.name}" (${plannedQty} шт)`);
+                                }
+                            }
+                        });
+                    }
                 });
             }
             
@@ -212,7 +198,6 @@ class TaskManager {
                     
                     const taskId = `${order.id}_extra_${index}`;
                     const taskStatus = order.tasks?.[taskId];
-                    
                     const historyTask = historyTasksMap.get(taskId);
                     
                     const task = {
@@ -242,49 +227,69 @@ class TaskManager {
         this._saveTasksToHistoryInternal(dateStr);
     }
     
+    // ============== ПРОВЕРКА СОВПАДЕНИЯ ПО КЛЮЧЕВЫМ СЛОВАМ ==============
+    isMatchingByKeywords(operationName, componentName) {
+        if (!operationName || !componentName) return false;
+        
+        const opLower = operationName.toLowerCase();
+        const compLower = componentName.toLowerCase();
+        
+        // Разбиваем название комплектующей на слова
+        const keywords = compLower.split(/\s+/);
+        
+        // Проверяем, содержит ли операция хотя бы одно ключевое слово (длиннее 2 символов)
+        for (const keyword of keywords) {
+            if (keyword.length > 2 && opLower.includes(keyword)) {
+                console.log(`🔍 Совпадение: "${componentName}" → "${operationName}" (по слову "${keyword}")`);
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
     // ============== ПОИСК ОПЕРАЦИИ ПО КЛЮЧЕВЫМ СЛОВАМ ==============
     findMatchingOperation(componentName) {
-    // Получаем все операции для этого участка
-    const siteOps = this.getSiteOperations();
-    
-    // 1. Сначала ищем точное совпадение (самый приоритет)
-    for (const op of siteOps) {
-        const opName = op.name || op;
-        if (opName.toLowerCase() === componentName.toLowerCase()) {
-            console.log(`🎯 Точное совпадение: "${componentName}" → "${opName}"`);
-            return typeof op === 'object' ? op : { name: op, quantity: 1 };
+        // Получаем все операции для этого участка
+        const siteOps = this.getSiteOperations();
+        
+        // 1. Сначала ищем точное совпадение (самый приоритет)
+        for (const op of siteOps) {
+            const opName = op.name || op;
+            if (opName.toLowerCase() === componentName.toLowerCase()) {
+                console.log(`🎯 Точное совпадение: "${componentName}" → "${opName}"`);
+                return typeof op === 'object' ? op : { name: op, quantity: 1 };
+            }
         }
+        
+        // 2. Если точного нет, ищем по ключевым словам из полного названия
+        const fullNameLower = componentName.toLowerCase();
+        const words = fullNameLower.split(/\s+/);
+        
+        for (const op of siteOps) {
+            const opName = op.name || op;
+            const opNameLower = opName.toLowerCase();
+            
+            // Проверяем, содержит ли операция всё название целиком
+            if (opNameLower.includes(fullNameLower)) {
+                console.log(`🔍 Найдено по полному названию: "${componentName}" → "${opName}"`);
+                return typeof op === 'object' ? op : { name: op, quantity: 1 };
+            }
+            
+            // Проверяем, содержит ли операция все ключевые слова (не одно, а все)
+            const allWordsMatch = words.every(word => 
+                word.length > 2 && opNameLower.includes(word)
+            );
+            
+            if (allWordsMatch && words.length > 0) {
+                console.log(`🔍 Найдено по всем ключевым словам: "${componentName}" → "${opName}"`);
+                return typeof op === 'object' ? op : { name: op, quantity: 1 };
+            }
+        }
+        
+        console.log(`⚠️ Не найдена операция для "${componentName}" на участке ${this.siteType}`);
+        return null;
     }
-    
-    // 2. Если точного нет, ищем по ключевым словам из полного названия
-    // Разбиваем название на слова, но ищем все слова вместе
-    const fullNameLower = componentName.toLowerCase();
-    const words = fullNameLower.split(/\s+/);
-    
-    for (const op of siteOps) {
-        const opName = op.name || op;
-        const opNameLower = opName.toLowerCase();
-        
-        // Проверяем, содержит ли операция всё название целиком
-        if (opNameLower.includes(fullNameLower)) {
-            console.log(`🔍 Найдено по полному названию: "${componentName}" → "${opName}"`);
-            return typeof op === 'object' ? op : { name: op, quantity: 1 };
-        }
-        
-        // Проверяем, содержит ли операция все ключевые слова (не одно, а все)
-        const allWordsMatch = words.every(word => 
-            word.length > 2 && opNameLower.includes(word)
-        );
-        
-        if (allWordsMatch && words.length > 0) {
-            console.log(`🔍 Найдено по всем ключевым словам: "${componentName}" → "${opName}"`);
-            return typeof op === 'object' ? op : { name: op, quantity: 1 };
-        }
-    }
-    
-    console.log(`⚠️ Не найдена операция для "${componentName}" на участке ${this.siteType}`);
-    return null;
-}
     
     // ============== ПОЛУЧЕНИЕ ВСЕХ ОПЕРАЦИЙ УЧАСТКА ==============
     getSiteOperations() {
@@ -841,4 +846,4 @@ window.updateTask = updateTask;
 window.deleteTask = deleteTask;
 window.getTasksStats = getTasksStats;
 
-console.log('✅ task-manager.js загружен (с поиском по ключевым словам для комплектующих)');
+console.log('✅ task-manager.js загружен (с поиском по ключевым словам и обновлением плана)');
