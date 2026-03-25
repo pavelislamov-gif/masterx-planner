@@ -842,72 +842,80 @@
             
             // ============== СОЗДАНИЕ КАРТОЧКИ ЗАДАЧИ ==============
             function createTaskCard(task) {
-                const card = document.createElement('div');
-                card.className = `task-card ${task.status === 'completed' ? 'completed' : ''}`;
-                card.dataset.taskId = task.id;
-                
-                const header = document.createElement('div');
-                header.className = 'task-header';
-                header.innerHTML = `
-                    <span class="task-title">
-                        ${escapeHtml(task.operation)}
-                        ${task.isExtra ? '<span class="extra-task-badge">Доп.</span>' : ''}
-                    </span>
-                    <span class="task-planned">
-                        📦 Запланировано: <strong>${task.plannedQuantity || task.totalQuantity || 1} шт</strong>
-                    </span>
-                `;
-                card.appendChild(header);
-                
-                if (task.isExtra && task.description) {
-                    const desc = document.createElement('div');
-                    desc.className = 'task-description';
-                    desc.textContent = escapeHtml(task.description);
-                    card.appendChild(desc);
-                }
-                
-                const headers = document.createElement('div');
-                headers.className = 'executor-header';
-                headers.innerHTML = `<span>ФИО</span><span>Кол-во</span><span>Статус</span><span></span>`;
-                card.appendChild(headers);
-                
-                const executorList = document.createElement('div');
-                executorList.className = 'executor-list';
-                executorList.id = `executors-${task.id}`;
-                
-                if (task.executors && task.executors.length > 0) {
-                    task.executors.forEach(executor => {
-                        executorList.appendChild(createExecutorItem(task, executor));
-                    });
-                } else {
-                    const noExecutors = document.createElement('p');
-                    noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 12px;';
-                    noExecutors.textContent = 'Нет исполнителей';
-                    executorList.appendChild(noExecutors);
-                }
-                card.appendChild(executorList);
-                
-                const actionContainer = document.createElement('div');
-                actionContainer.className = 'action-container';
-                
-                if (task.status !== 'completed') {
-                    const addBtn = document.createElement('button');
-                    addBtn.className = 'btn-add-executor';
-                    addBtn.textContent = '+ Добавить исполнителя';
-                    addBtn.onclick = () => showAddExecutorForm(task, actionContainer);
-                    actionContainer.appendChild(addBtn);
-                }
-                card.appendChild(actionContainer);
-                
-                const readyBtn = document.createElement('button');
-                readyBtn.className = 'btn-ready';
-                readyBtn.textContent = '✅ ГОТОВО';
-                readyBtn.disabled = task.status === 'completed';
-                readyBtn.onclick = () => completeTask(task.id);
-                card.appendChild(readyBtn);
-                
-                return card;
-            }
+    const card = document.createElement('div');
+    card.className = `task-card ${task.status === 'completed' ? 'completed' : ''}`;
+    card.dataset.taskId = task.id;
+    
+    // Запланированное количество
+    const plannedQty = task.plannedQuantity || task.totalQuantity || 1;
+    
+    const header = document.createElement('div');
+    header.className = 'task-header';
+    header.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 5px; width: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="task-title">
+                    ${escapeHtml(task.operation)}
+                    ${task.isComponent ? '<span class="component-badge">🔧 Комплектующая</span>' : ''}
+                </span>
+            </div>
+            <div class="task-planned-info">
+                📦 Запланировано: <strong>${plannedQty} шт</strong>
+            </div>
+        </div>
+    `;
+    card.appendChild(header);
+    
+    // Описание для доп. задач
+    if (task.isExtra && task.description) {
+        const desc = document.createElement('div');
+        desc.className = 'task-description';
+        desc.textContent = escapeHtml(task.description);
+        card.appendChild(desc);
+    }
+    
+    const headers = document.createElement('div');
+    headers.className = 'executor-header';
+    headers.innerHTML = `<span>ФИО</span><span>Кол-во</span><span>Статус</span><span></span>`;
+    card.appendChild(headers);
+    
+    const executorList = document.createElement('div');
+    executorList.className = 'executor-list';
+    executorList.id = `executors-${task.id}`;
+    
+    if (task.executors && task.executors.length > 0) {
+        task.executors.forEach(executor => {
+            executorList.appendChild(createExecutorItem(task, executor));
+        });
+    } else {
+        const noExecutors = document.createElement('p');
+        noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 12px;';
+        noExecutors.textContent = 'Нет исполнителей';
+        executorList.appendChild(noExecutors);
+    }
+    card.appendChild(executorList);
+    
+    const actionContainer = document.createElement('div');
+    actionContainer.className = 'action-container';
+    
+    if (task.status !== 'completed') {
+        const addBtn = document.createElement('button');
+        addBtn.className = 'btn-add-executor';
+        addBtn.textContent = '+ Добавить исполнителя';
+        addBtn.onclick = () => showAddExecutorForm(task, actionContainer);
+        actionContainer.appendChild(addBtn);
+    }
+    card.appendChild(actionContainer);
+    
+    const readyBtn = document.createElement('button');
+    readyBtn.className = 'btn-ready';
+    readyBtn.textContent = '✅ ГОТОВО';
+    readyBtn.disabled = task.status === 'completed';
+    readyBtn.onclick = () => completeTask(task.id);
+    card.appendChild(readyBtn);
+    
+    return card;
+}
             
             // ============== СОЗДАНИЕ ЭЛЕМЕНТА ИСПОЛНИТЕЛЯ ==============
             function createExecutorItem(task, executor) {
