@@ -157,40 +157,51 @@ class TaskManager {
                     
                     // ============== ЗАДАЧИ ДЛЯ КОМПЛЕКТУЮЩИХ (поиск по ключевым словам) ==============
                     if (item.components && item.components.length > 0) {
-                        item.components.forEach((comp, compIndex) => {
-                            // Ищем операцию для этой комплектующей на текущем участке
-                            const matchedOperation = this.findMatchingOperation(comp.name);
-                            
-                            if (matchedOperation) {
-                                const taskId = `${order.id}_${this.siteType}_comp_${itemIndex}_${compIndex}`;
-                                const taskStatus = order.tasks?.[taskId];
-                                const historyTask = historyTasksMap.get(taskId);
-                                
-                                const plannedQty = (matchedOperation.quantity || 1) * itemQuantity;
-                                
-                                const task = {
-                                    id: taskId,
-                                    orderId: order.id,
-                                    orderNumber: order.number || order.id,
-                                    product: comp.name,
-                                    component: true,
-                                    operation: matchedOperation.name,
-                                    plannedQuantity: plannedQty,
-                                    completedQuantity: historyTask?.completedQuantity || 0,
-                                    totalQuantity: plannedQty,
-                                    isComponent: true,
-                                    status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
-                                    executors: historyTask?.executors || [],
-                                    date: dateStr
-                                };
-                                
-                                newTasks.push(task);
-                                console.log(`🔧 Создана задача для комплектующей "${comp.name}" → "${matchedOperation.name}" (${plannedQty} шт)`);
-                            } else {
-                                console.log(`⚠️ Не найдена операция для комплектующей "${comp.name}" на участке ${this.siteType}`);
-                            }
-                        });
-                    }
+    item.components.forEach((comp, compIndex) => {
+        // Ищем операцию для этой комплектующей на текущем участке
+        const matchedOperation = this.findMatchingOperation(comp.name);
+        
+        if (matchedOperation) {
+            // ПРОВЕРКА: нет ли уже такой задачи из операций изделия?
+            const alreadyExists = newTasks.some(t => 
+                t.operation === matchedOperation.name && 
+                t.product !== comp.name  // не задача из комплектующих
+            );
+            
+            if (alreadyExists) {
+                console.log(`⏭️ Пропускаем дубликат: "${matchedOperation.name}" уже есть в задачах изделия`);
+                return;
+            }
+            
+            const taskId = `${order.id}_${this.siteType}_comp_${itemIndex}_${compIndex}`;
+            const taskStatus = order.tasks?.[taskId];
+            const historyTask = historyTasksMap.get(taskId);
+            
+            const plannedQty = (matchedOperation.quantity || 1) * itemQuantity;
+            
+            const task = {
+                id: taskId,
+                orderId: order.id,
+                orderNumber: order.number || order.id,
+                product: comp.name,
+                component: true,
+                operation: matchedOperation.name,
+                plannedQuantity: plannedQty,
+                completedQuantity: historyTask?.completedQuantity || 0,
+                totalQuantity: plannedQty,
+                isComponent: true,
+                status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
+                executors: historyTask?.executors || [],
+                date: dateStr
+            };
+            
+            newTasks.push(task);
+            console.log(`🔧 Создана задача для комплектующей "${comp.name}" → "${matchedOperation.name}" (${plannedQty} шт)`);
+        } else {
+            console.log(`⚠️ Не найдена операция для комплектующей "${comp.name}" на участке ${this.siteType}`);
+        }
+    });
+}
                 });
             }
             
