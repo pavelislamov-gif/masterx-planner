@@ -549,35 +549,39 @@
 
     <script>
         // ============== ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ==============
-        function initThemeToggle() {
+         function initThemeToggle() {
             const toggle = document.getElementById('themeToggle');
-            const lightStylesheet = document.getElementById('lightThemeStylesheet');
-            if (!toggle || !lightStylesheet) return;
+            if (!toggle) {
+                console.error('Переключатель темы не найден!');
+                return;
+            }
             
             const savedTheme = localStorage.getItem('masterx_theme');
+            console.log('Сохранённая тема:', savedTheme);
+            
             if (savedTheme === 'light') {
                 document.body.classList.add('light-theme');
-                lightStylesheet.disabled = false;
                 toggle.checked = true;
+                console.log('Применена светлая тема');
             } else {
                 document.body.classList.remove('light-theme');
-                lightStylesheet.disabled = true;
                 toggle.checked = false;
+                console.log('Применена тёмная тема');
             }
             
             toggle.addEventListener('change', function() {
+                console.log('Переключатель изменён, новое состояние:', this.checked);
                 if (this.checked) {
                     document.body.classList.add('light-theme');
-                    lightStylesheet.disabled = false;
                     localStorage.setItem('masterx_theme', 'light');
+                    console.log('Переключено на светлую тему');
                 } else {
                     document.body.classList.remove('light-theme');
-                    lightStylesheet.disabled = true;
                     localStorage.setItem('masterx_theme', 'dark');
+                    console.log('Переключено на тёмную тему');
                 }
             });
         }
-
         // ============== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==============
         let tempItemsList = [];
         let productsList = [];
