@@ -6,17 +6,11 @@
     <title>MasterX - Планировщик производства</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Дополнительные стили для анимации */
+        /* Дополнительные стили */
         .order-content {
             transition: opacity 0.2s ease;
         }
         
-        .order-content.loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        /* Стили для фильтра даты */
         .date-filter-section {
             display: flex;
             justify-content: space-between;
@@ -47,16 +41,142 @@
             font-size: 14px;
         }
 
-        .filter-label {
+        /* Стили для модального окна создания группы */
+        .group-modal-content {
+            max-width: 800px;
+        }
+
+        .items-list-container {
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #2a2f38;
+            border-radius: 8px;
+            background: #15191f;
+        }
+
+        .item-card {
+            background: #1a1e24;
+            border: 1px solid #2a2f38;
+            border-radius: 8px;
+            margin: 10px;
+            padding: 15px;
+        }
+
+        .item-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #2a2f38;
+        }
+
+        .item-card-title {
+            font-weight: 600;
+            color: #ff3b3b;
+        }
+
+        .item-card-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .remove-item-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .remove-item-btn:hover {
+            background: #c82333;
+        }
+
+        .add-item-form {
+            background: #15191f;
+            border: 1px solid #2a2f38;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .components-list {
+            margin-top: 10px;
+            padding: 10px;
+            background: #1a1e24;
+            border-radius: 6px;
+        }
+
+        .component-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 10px;
+            margin-bottom: 5px;
+            background: #15191f;
+            border-radius: 4px;
+        }
+
+        .component-name {
+            font-size: 13px;
+        }
+
+        .component-qty-input {
+            width: 70px;
+            padding: 4px;
+            background: #1e232b;
+            border: 1px solid #2a2f38;
+            border-radius: 4px;
             color: #fff;
-            font-weight: 500;
-            margin-right: 10px;
+            text-align: center;
+        }
+
+        .size-quantity-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .size-quantity-row select {
+            flex: 2;
+        }
+
+        .size-quantity-row input {
+            flex: 1;
+        }
+
+        .profile-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .profile-row input {
+            flex: 1;
+        }
+
+        .btn-sm {
+            padding: 5px 12px;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- ШАПКА С ЛОГОТИПОМ -->
+        <!-- ШАПКА -->
         <header>
             <div class="logo-container">
                 <img src="images/logo.png" alt="MasterX Logo" class="logo-img" onerror="this.style.display='none'">
@@ -64,8 +184,8 @@
                     Master<span class="x-red">X</span>
                 </div>
             </div>
-            <button class="btn btn-primary" onclick="window.openOrderModal()">
-                <span style="font-size: 20px; margin-right: 5px;">+</span> Новый заказ
+            <button class="btn btn-primary" onclick="openGroupModal()">
+                <span style="font-size: 20px; margin-right: 5px;">+</span> Создать группу
             </button>
         </header>
 
@@ -90,16 +210,14 @@
                 <button class="btn btn-primary" onclick="filterOrdersByDate('next')" style="padding: 6px 12px;">Завтра →</button>
                 <button class="btn btn-success" onclick="importOrders()">📤 Импорт заказов</button>
             </div>
-            <span id="currentFilterDate" class="current-date-display">
-                Загрузка...
-            </span>
+            <span id="currentFilterDate" class="current-date-display">Загрузка...</span>
         </div>
 
         <!-- СТАТИСТИКА -->
         <div class="order-stats" id="orderStats">
             <div class="stat-item">
                 <div class="stat-value" id="totalOrders">0</div>
-                <div class="stat-label">Всего заказов</div>
+                <div class="stat-label">Всего групп</div>
             </div>
             <div class="stat-item">
                 <div class="stat-value" id="totalItems">0</div>
@@ -117,7 +235,7 @@
 
         <!-- ФИЛЬТРЫ И ПОИСК -->
         <div class="filter-section">
-            <input type="text" class="search-box" placeholder="🔍 Поиск по номеру заказа или изделию..." id="searchInput">
+            <input type="text" class="search-box" placeholder="🔍 Поиск по названию группы или изделию..." id="searchInput">
             <select id="statusFilter" class="search-box" style="width: auto;">
                 <option value="all">Все статусы</option>
                 <option value="active">Активные</option>
@@ -126,101 +244,136 @@
             <button class="btn btn-primary" onclick="exportOrders()">📥 Экспорт заказов</button>
         </div>
 
-        <!-- МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ЗАКАЗА -->
-        <div id="orderModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="window.closeOrderModal()">&times;</span>
-                <h2 style="color: #fff; margin-bottom: 20px;">📋 Создание нового заказа</h2>
-                <form id="orderForm">
-                    <div class="form-group">
-                        <label>📅 Дата заказа:</label>
-                        <input type="date" id="orderDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label> Номер заказа:</label>
-                        <input type="text" id="orderNumber" placeholder="Например: З-2024-001" required>
-                    </div>
-                    <div class="form-group">
-                        <label> Изделие:</label>
-                        <select id="productSelect" onchange="window.loadProductSizes()" required>
-                            <option value="">Выберите изделие</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label> Размер/Имя:</label>
-                        <select id="sizeSelect" required>
-                            <option value="">Сначала выберите изделие</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label> Кол-во изделий:</label>
-                        <input type="number" id="quantity" min="1" value="1" required>
-                    </div>
+        <!-- МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ГРУППЫ -->
+        <div id="groupModal" class="modal">
+            <div class="modal-content group-modal-content">
+                <span class="close" onclick="closeGroupModal()">&times;</span>
+                <h2 style="color: #fff; margin-bottom: 20px;">📁 Создание группы заказов</h2>
+                
+                <!-- Название группы -->
+                <div class="form-group">
+                    <label>🏷️ Название группы:</label>
+                    <input type="text" id="groupNameInput" placeholder="Например: Санкт Петербург КИ000004020" required>
+                </div>
 
-                    <!-- Кронштейн с количеством -->
-                    <div class="form-group">
-                        <label> Тип кронштейна:</label>
-                        <div class="quantity-row">
-                            <select id="bracketSelect">
-                                <option value="">Выберите кронштейн</option>
+                <!-- Список добавленных изделий -->
+                <div class="form-group">
+                    <label>📦 Изделия в группе:</label>
+                    <div id="itemsListContainer" class="items-list-container">
+                        <div style="text-align: center; padding: 30px; color: #a0a0a0;">
+                            Нет добавленных изделий. Нажмите "Добавить изделие"
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Кнопка добавления изделия -->
+                <button type="button" class="btn btn-primary" onclick="showAddItemForm()" style="width: 100%; margin-bottom: 15px;">
+                    + Добавить изделие
+                </button>
+
+                <!-- Форма добавления изделия (скрыта по умолчанию) -->
+                <div id="addItemForm" style="display: none;" class="add-item-form">
+                    <h3 style="color: #ff3b3b; margin-bottom: 15px;">➕ Новое изделие</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Изделие:</label>
+                            <select id="newItemProduct" onchange="onNewItemProductChange()">
+                                <option value="">Выберите изделие</option>
                             </select>
-                            <input type="number" id="bracketQuantity" min="0" value="1" placeholder="Кол-во">
                         </div>
                     </div>
 
-                    <!-- Лира с количеством -->
-                    <div class="form-group">
-                        <label> Тип лиры:</label>
-                        <div class="quantity-row">
-                            <select id="lyreSelect">
-                                <option value="">Выберите лиру</option>
-                            </select>
-                            <input type="number" id="lyreQuantity" min="0" value="1" placeholder="Кол-во">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Размер:</label>
+                            <div class="size-quantity-row">
+                                <select id="newItemSize">
+                                    <option value="">Сначала выберите изделие</option>
+                                </select>
+                                <input type="number" id="newItemSizeQuantity" placeholder="Кол-во" min="1" value="1">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Профиль (метры):</label>
+                            <div class="profile-row">
+                                <input type="number" id="newItemProfileMeters" placeholder="метры" step="0.1" min="0" value="0">
+                                <input type="number" id="newItemProfileQuantity" placeholder="кол-во" min="1" value="1">
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Цвет RAL и текстура -->
-                    <div class="form-group">
-                        <label> Цвет RAL (вручную):</label>
-                        <input type="text" id="ralInput" placeholder="Например: RAL 9003">
-                    </div>
-                    <div class="form-group">
-                        <label> Текстура:</label>
-                        <select id="textureSelect">
-                            <option value="">Выберите текстуру</option>
-                            <option value="матовая">Матовая</option>
-                            <option value="глянцевая">Глянцевая</option>
-                            <option value="сатиновая">Муар</option>
-                        </select>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Кронштейн:</label>
+                            <div class="quantity-row">
+                                <select id="newItemBracket">
+                                    <option value="">Выберите кронштейн</option>
+                                </select>
+                                <input type="number" id="newItemBracketQuantity" placeholder="Кол-во" min="0" value="0">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Лира:</label>
+                            <div class="quantity-row">
+                                <select id="newItemLyre">
+                                    <option value="">Выберите лиру</option>
+                                </select>
+                                <input type="number" id="newItemLyreQuantity" placeholder="Кол-во" min="0" value="0">
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- КОМПЛЕКТУЮЩИЕ ДЕТАЛИ (появляются при выборе изделия) -->
-                    <div id="componentsContainer" class="form-group" style="margin-top: 20px;"></div>
-
-                    <div class="form-group">
-                        <label>📝 Дополнительные детали:</label>
-                        <textarea id="additionalDetails" rows="3" placeholder="Особые требования или примечания..."></textarea>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>RAL:</label>
+                            <input type="text" id="newItemRal" placeholder="Например: RAL 9003">
+                        </div>
+                        <div class="form-group">
+                            <label>Текстура:</label>
+                            <select id="newItemTexture">
+                                <option value="">Выберите текстуру</option>
+                                <option value="матовая">Матовая</option>
+                                <option value="глянцевая">Глянцевая</option>
+                                <option value="сатиновая">Муар</option>
+                            </select>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-success" style="width: 100%; padding: 12px;">✅ Создать заказ</button>
-                </form>
+
+                    <!-- Комплектующие -->
+                    <div id="newItemComponentsContainer" class="components-list" style="display: none;">
+                        <div style="font-weight: 600; margin-bottom: 10px; color: #ff3b3b;">🔧 Комплектующие:</div>
+                        <div id="newItemComponentsList"></div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button type="button" class="btn btn-success" onclick="addItemToGroup()">✅ Добавить изделие</button>
+                        <button type="button" class="btn btn-danger" onclick="hideAddItemForm()">Отмена</button>
+                    </div>
+                </div>
+
+                <!-- Кнопка формирования заказа -->
+                <button type="button" class="btn btn-success" onclick="createGroupOrder()" style="width: 100%; margin-top: 20px; padding: 12px;">
+                    📋 Сформировать группу
+                </button>
             </div>
         </div>
 
         <!-- МОДАЛЬНОЕ ОКНО МАТЕРИАЛОВ -->
         <div id="materialsModal" class="modal">
             <div class="modal-content" style="max-width: 900px;">
-                <span class="close" onclick="window.closeMaterialsModal()">&times;</span>
+                <span class="close" onclick="closeMaterialsModal()">&times;</span>
                 <div id="materialsReport"></div>
             </div>
         </div>
 
-        <!-- СПИСОК ЗАКАЗОВ -->
+        <!-- СПИСОК ГРУПП (ЗАКАЗОВ) -->
         <div id="ordersList" class="orders-list">
-            <!-- Заказы будут загружаться сюда -->
+            <!-- Группы будут загружаться сюда -->
         </div>
     </div>
 
-    <!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ В ПРАВИЛЬНОМ ПОРЯДКЕ -->
+    <!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ -->
     <script src="js/storage.js"></script>
     <script src="js/data-loader.js"></script>
     <script src="js/task-operations.js"></script>
@@ -228,71 +381,477 @@
     <script src="js/task-manager.js"></script>
     <script src="js/app.js"></script>
 
-    <!-- ДИАГНОСТИКА -->
+    <!-- НОВАЯ ЛОГИКА ДЛЯ ГЛАВНОЙ СТРАНИЦЫ -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('='.repeat(50));
-            console.log('🔍 ДИАГНОСТИКА ЗАГРУЗКИ СКРИПТОВ');
-            console.log('='.repeat(50));
+        // ============== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==============
+        let tempItemsList = [];  // временные изделия для новой группы
+        let productsList = [];
+        let bracketsList = [];
+        let lyresList = [];
+        let componentsData = {};
 
-            console.log('📦 storage.js:', typeof loadOrdersFromStorage === 'function' ? '✅' : '❌');
-            console.log('📦 data-loader.js:', typeof loadProducts === 'function' ? '✅' : '❌');
-            console.log('📦 materials-report.js:', typeof MaterialsReport === 'function' ? '✅' : '❌');
-            console.log('📦 task-manager.js:', typeof TaskManager === 'function' ? '✅' : '❌');
-            console.log('📦 app.js:', typeof openOrderModal === 'function' ? '✅' : '❌');
+        // ============== ОТКРЫТИЕ/ЗАКРЫТИЕ МОДАЛЬНОГО ОКНА ГРУППЫ ==============
+        function openGroupModal() {
+            tempItemsList = [];
+            updateItemsListDisplay();
+            document.getElementById('groupNameInput').value = '';
+            document.getElementById('itemsListContainer').innerHTML = `
+                <div style="text-align: center; padding: 30px; color: #a0a0a0;">
+                    Нет добавленных изделий. Нажмите "Добавить изделие"
+                </div>
+            `;
+            document.getElementById('groupModal').style.display = 'block';
+        }
 
-            console.log('='.repeat(50));
+        function closeGroupModal() {
+            document.getElementById('groupModal').style.display = 'none';
+            hideAddItemForm();
+        }
 
-            if (typeof openOrderModal === 'function') {
-                console.log('🎉 ВСЁ РАБОТАЕТ! openOrderModal доступна');
-            } else {
-                console.error('❌ ПРОБЛЕМА: openOrderModal не определена!');
-                console.log('Проверьте, что в app.js есть строка: window.openOrderModal = openOrderModal;');
+        // ============== ОТОБРАЖЕНИЕ СПИСКА ИЗДЕЛИЙ В МОДАЛЬНОМ ОКНЕ ==============
+        function updateItemsListDisplay() {
+            const container = document.getElementById('itemsListContainer');
+            if (!container) return;
+
+            if (tempItemsList.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 30px; color: #a0a0a0;">
+                        Нет добавленных изделий. Нажмите "Добавить изделие"
+                    </div>
+                `;
+                return;
             }
-        });
-    </script>
 
-    <!-- ДОБАВЛЯЕМ СОХРАНЕНИЕ СОСТОЯНИЯ КАРТОЧЕК -->
-    <script>
-        // Переопределяем функцию loadOrders из app.js с сохранением состояния
+            let html = '';
+            tempItemsList.forEach((item, index) => {
+                const componentsHtml = (item.components || []).map(comp => 
+                    `<span style="background: #1e232b; padding: 2px 8px; border-radius: 12px; font-size: 11px;">
+                        ${comp.name}: ${comp.quantity} шт
+                    </span>`
+                ).join('');
+
+                html += `
+                    <div class="item-card">
+                        <div class="item-card-header">
+                            <span class="item-card-title">${escapeHtml(item.product)}</span>
+                            <button class="remove-item-btn" onclick="removeItemFromGroup(${index})">✕ Удалить</button>
+                        </div>
+                        <div class="item-card-content">
+                            <div>📏 Размер: ${escapeHtml(item.size?.name || '-')} x ${item.size?.quantity || 0} шт</div>
+                            <div>📐 Профиль: ${item.profileLength?.meters || 0} м x ${item.profileLength?.quantity || 0} шт</div>
+                            <div>🔧 Кронштейн: ${item.bracket?.type || 'нет'} (${item.bracket?.quantity || 0} шт)</div>
+                            <div>🎸 Лира: ${item.lyre?.type || 'нет'} (${item.lyre?.quantity || 0} шт)</div>
+                            <div>🎨 RAL: ${item.ral || '-'} / ${item.texture || '-'}</div>
+                            ${componentsHtml ? `<div>🔩 Комплектующие: ${componentsHtml}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function removeItemFromGroup(index) {
+            tempItemsList.splice(index, 1);
+            updateItemsListDisplay();
+        }
+
+        // ============== ФОРМА ДОБАВЛЕНИЯ ИЗДЕЛИЯ ==============
+        function showAddItemForm() {
+            document.getElementById('addItemForm').style.display = 'block';
+            // Очищаем форму
+            document.getElementById('newItemProduct').value = '';
+            document.getElementById('newItemSize').innerHTML = '<option value="">Сначала выберите изделие</option>';
+            document.getElementById('newItemSizeQuantity').value = '1';
+            document.getElementById('newItemProfileMeters').value = '0';
+            document.getElementById('newItemProfileQuantity').value = '1';
+            document.getElementById('newItemBracket').value = '';
+            document.getElementById('newItemBracketQuantity').value = '0';
+            document.getElementById('newItemLyre').value = '';
+            document.getElementById('newItemLyreQuantity').value = '0';
+            document.getElementById('newItemRal').value = '';
+            document.getElementById('newItemTexture').value = '';
+            document.getElementById('newItemComponentsContainer').style.display = 'none';
+            document.getElementById('newItemComponentsList').innerHTML = '';
+            
+            // Заполняем выпадающие списки
+            populateNewItemSelects();
+        }
+
+        function hideAddItemForm() {
+            document.getElementById('addItemForm').style.display = 'none';
+        }
+
+        function populateNewItemSelects() {
+            const productSelect = document.getElementById('newItemProduct');
+            if (productSelect && productsList.length) {
+                productSelect.innerHTML = '<option value="">Выберите изделие</option>';
+                productsList.forEach(p => {
+                    const option = document.createElement('option');
+                    option.value = p.name;
+                    option.textContent = p.name;
+                    productSelect.appendChild(option);
+                });
+            }
+
+            const bracketSelect = document.getElementById('newItemBracket');
+            if (bracketSelect && bracketsList.length) {
+                bracketSelect.innerHTML = '<option value="">Выберите кронштейн</option>';
+                bracketsList.forEach(b => {
+                    const option = document.createElement('option');
+                    option.value = b.name;
+                    option.textContent = b.name;
+                    bracketSelect.appendChild(option);
+                });
+            }
+
+            const lyreSelect = document.getElementById('newItemLyre');
+            if (lyreSelect && lyresList.length) {
+                lyreSelect.innerHTML = '<option value="">Выберите лиру</option>';
+                lyresList.forEach(l => {
+                    const option = document.createElement('option');
+                    option.value = l.name;
+                    option.textContent = l.name;
+                    lyreSelect.appendChild(option);
+                });
+            }
+        }
+
+        function onNewItemProductChange() {
+            const productName = document.getElementById('newItemProduct').value;
+            const sizeSelect = document.getElementById('newItemSize');
+            const componentsContainer = document.getElementById('newItemComponentsContainer');
+            const componentsList = document.getElementById('newItemComponentsList');
+
+            // Заполняем размеры
+            const product = productsList.find(p => p.name === productName);
+            if (product && product.sizes) {
+                sizeSelect.innerHTML = '<option value="">Выберите размер</option>';
+                product.sizes.forEach(size => {
+                    const option = document.createElement('option');
+                    option.value = size;
+                    option.textContent = size;
+                    sizeSelect.appendChild(option);
+                });
+            } else {
+                sizeSelect.innerHTML = '<option value="">Нет доступных размеров</option>';
+            }
+
+            // Заполняем комплектующие
+            const comps = componentsData[productName] || [];
+            if (comps.length > 0) {
+                componentsContainer.style.display = 'block';
+                let compsHtml = '';
+                comps.forEach(comp => {
+                    compsHtml += `
+                        <div class="component-item">
+                            <span class="component-name">${escapeHtml(comp.name)}</span>
+                            <input type="number" class="component-qty-input" data-comp-name="${comp.name}" placeholder="кол-во" min="0" value="0">
+                        </div>
+                    `;
+                });
+                componentsList.innerHTML = compsHtml;
+            } else {
+                componentsContainer.style.display = 'none';
+                componentsList.innerHTML = '';
+            }
+        }
+
+        function collectComponentsFromForm() {
+            const components = [];
+            document.querySelectorAll('#newItemComponentsList .component-qty-input').forEach(input => {
+                const qty = parseInt(input.value) || 0;
+                if (qty > 0) {
+                    components.push({
+                        name: input.dataset.compName,
+                        quantity: qty
+                    });
+                }
+            });
+            return components;
+        }
+
+        function addItemToGroup() {
+            const product = document.getElementById('newItemProduct').value;
+            if (!product) {
+                alert('Выберите изделие');
+                return;
+            }
+
+            const sizeName = document.getElementById('newItemSize').value;
+            if (!sizeName) {
+                alert('Выберите размер');
+                return;
+            }
+
+            const newItem = {
+                product: product,
+                size: {
+                    name: sizeName,
+                    quantity: parseInt(document.getElementById('newItemSizeQuantity').value) || 1
+                },
+                profileLength: {
+                    meters: parseFloat(document.getElementById('newItemProfileMeters').value) || 0,
+                    quantity: parseInt(document.getElementById('newItemProfileQuantity').value) || 1
+                },
+                bracket: {
+                    type: document.getElementById('newItemBracket').value || '',
+                    quantity: parseInt(document.getElementById('newItemBracketQuantity').value) || 0
+                },
+                lyre: {
+                    type: document.getElementById('newItemLyre').value || '',
+                    quantity: parseInt(document.getElementById('newItemLyreQuantity').value) || 0
+                },
+                ral: document.getElementById('newItemRal').value || '',
+                texture: document.getElementById('newItemTexture').value || '',
+                components: collectComponentsFromForm()
+            };
+
+            tempItemsList.push(newItem);
+            updateItemsListDisplay();
+            hideAddItemForm();
+        }
+
+        // ============== СОЗДАНИЕ ГРУППЫ (ЗАКАЗА) ==============
+        function createGroupOrder() {
+            const groupName = document.getElementById('groupNameInput').value.trim();
+            if (!groupName) {
+                alert('Введите название группы');
+                return;
+            }
+            if (tempItemsList.length === 0) {
+                alert('Добавьте хотя бы одно изделие');
+                return;
+            }
+
+            const orders = loadOrdersFromStorage();
+            const newOrder = {
+                id: Date.now(),
+                groupName: groupName,
+                date: new Date().toISOString().split('T')[0],
+                number: generateOrderNumber(orders.length + 1),
+                items: tempItemsList,
+                status: 'active',
+                tasks: {},
+                extraTasks: []
+            };
+
+            orders.push(newOrder);
+            saveOrdersToStorage(orders);
+            
+            // Создаём задачи для участков
+            if (typeof createTasksForOrder === 'function') {
+                createTasksForOrder(newOrder);
+            }
+            
+            closeGroupModal();
+            loadOrders();
+            updateStatistics();
+            alert(`✅ Группа "${groupName}" успешно создана!`);
+        }
+
+        function generateOrderNumber(index) {
+            const date = new Date();
+            const year = date.getFullYear().toString().slice(-2);
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `Г-${year}${month}${day}-${index.toString().padStart(3, '0')}`;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        // ============== ЗАГРУЗКА ДАННЫХ ==============
+        async function initMainPage() {
+            productsList = await loadProducts() || [];
+            bracketsList = await loadBrackets() || [];
+            lyresList = await loadLyres() || [];
+            await loadComponents();
+            componentsData = window.componentsData || {};
+            
+            // Загружаем заказы
+            if (typeof window.loadOrders === 'function') {
+                window.loadOrders();
+            }
+            if (typeof window.updateStatistics === 'function') {
+                window.updateStatistics();
+            }
+            if (typeof window.updateFilterDateDisplay === 'function') {
+                window.updateFilterDateDisplay();
+            }
+        }
+
+        // Переопределяем loadOrders для отображения групп
         const originalLoadOrders = window.loadOrders;
-        
         window.loadOrders = function() {
-            console.log('loadOrders вызвана (с сохранением состояния)');
             const ordersList = document.getElementById('ordersList');
             if (!ordersList) return;
 
-            // Сохраняем состояние развернутости карточек перед обновлением
-            const expandedStates = {};
-            document.querySelectorAll('.order-card').forEach(card => {
-                const orderId = card.dataset.orderId;
-                const content = card.querySelector('.order-content');
-                if (orderId && content) {
-                    expandedStates[orderId] = content.style.display === 'block';
-                    console.log(`💾 Сохранено состояние карточки ${orderId}: ${expandedStates[orderId] ? 'развернута' : 'свернута'}`);
-                }
-            });
+            const orders = loadOrdersFromStorage() || [];
+            const currentDate = window.currentFilterDate || new Date().toISOString().split('T')[0];
+            const filteredOrders = orders.filter(order => order.date === currentDate);
 
-            // Вызываем оригинальную функцию loadOrders из app.js
-            if (originalLoadOrders) {
-                originalLoadOrders();
+            ordersList.innerHTML = '';
+
+            if (filteredOrders.length === 0) {
+                ordersList.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">Нет групп на ${formatDateForDisplay(currentDate)}</div></div>`;
+                return;
             }
 
-            // Восстанавливаем состояние после загрузки
-            setTimeout(() => {
-                document.querySelectorAll('.order-card').forEach(card => {
-                    const orderId = card.dataset.orderId;
-                    const content = card.querySelector('.order-content');
-                    if (orderId && content && expandedStates[orderId] !== undefined) {
-                        content.style.display = expandedStates[orderId] ? 'block' : 'none';
-                        console.log(`🔄 Восстановлено состояние карточки ${orderId}: ${expandedStates[orderId] ? 'развернута' : 'свернута'}`);
-                    }
+            filteredOrders.forEach(order => {
+                const card = document.createElement('div');
+                card.className = 'order-card';
+                card.dataset.orderId = order.id;
+
+                const header = document.createElement('div');
+                header.className = 'order-header';
+                header.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <div>
+                            <h3>📁 ${escapeHtml(order.groupName)}</h3>
+                            <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
+                                Изделий: ${order.items.length} | Заказ №${order.number}
+                            </div>
+                        </div>
+                        <div>
+                            <button class="btn btn-info" onclick="event.stopPropagation(); showMaterialsReport(${order.id})">📊 Материалы</button>
+                            <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
+                        </div>
+                    </div>
+                `;
+
+                const content = document.createElement('div');
+                content.className = 'order-content';
+                content.style.display = 'none';
+
+                // Отображаем каждое изделие
+                order.items.forEach((item, itemIndex) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.style.marginBottom = '20px';
+                    itemDiv.style.border = '1px solid #2a2f38';
+                    itemDiv.style.borderRadius = '8px';
+                    itemDiv.style.overflow = 'hidden';
+
+                    const itemHeader = document.createElement('div');
+                    itemHeader.style.padding = '10px 15px';
+                    itemHeader.style.background = '#232830';
+                    itemHeader.style.cursor = 'pointer';
+                    itemHeader.style.display = 'flex';
+                    itemHeader.style.justifyContent = 'space-between';
+                    itemHeader.innerHTML = `
+                        <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product)}</span>
+                        <span>▼</span>
+                    `;
+
+                    const itemContent = document.createElement('div');
+                    itemContent.style.padding = '15px';
+                    itemContent.style.display = 'none';
+
+                    // Информация об изделии
+                    itemContent.innerHTML = `
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #2a2f38;">
+                            <div>📏 Размер: ${escapeHtml(item.size?.name)} x ${item.size?.quantity} шт</div>
+                            <div>📐 Профиль: ${item.profileLength?.meters} м x ${item.profileLength?.quantity} шт</div>
+                            <div>🔧 Кронштейн: ${item.bracket?.type || 'нет'} (${item.bracket?.quantity || 0} шт)</div>
+                            <div>🎸 Лира: ${item.lyre?.type || 'нет'} (${item.lyre?.quantity || 0} шт)</div>
+                            <div>🎨 RAL: ${item.ral || '-'} / ${item.texture || '-'}</div>
+                        </div>
+                        <div id="sites-${order.id}-${itemIndex}" class="sites-section">
+                            <h4 style="margin-bottom: 10px;">🏭 Производственные участки</h4>
+                            <div class="sites-grid">
+                                ${createSiteRow('🔧 Токарный', order, itemIndex, 'tokarniy')}
+                                ${createSiteRow('🔨 Слесарный', order, itemIndex, 'slesarniy')}
+                                ${createSiteRow('⚙️ Фрезерный', order, itemIndex, 'frezerniy')}
+                                ${createSiteRow('✨ Лазерно-гибочный', order, itemIndex, 'lazerno')}
+                                ${createSiteRow('🧪 Полимерный', order, itemIndex, 'polimerniy')}
+                            </div>
+                        </div>
+                    `;
+
+                    itemHeader.onclick = () => {
+                        const isVisible = itemContent.style.display !== 'none';
+                        itemContent.style.display = isVisible ? 'none' : 'block';
+                        itemHeader.querySelector('span:last-child').textContent = isVisible ? '▼' : '▲';
+                    };
+
+                    itemDiv.appendChild(itemHeader);
+                    itemDiv.appendChild(itemContent);
+                    content.appendChild(itemDiv);
                 });
-            }, 50);
+
+                header.onclick = (e) => {
+                    if (e.target.tagName === 'BUTTON') return;
+                    content.style.display = content.style.display === 'none' ? 'block' : 'none';
+                    header.classList.toggle('collapsed');
+                };
+
+                card.appendChild(header);
+                card.appendChild(content);
+                ordersList.appendChild(card);
+            });
         };
 
-        // Сохраняем оригинальную функцию addExtraTask если нужно
-        console.log('✅ Добавлено сохранение состояния карточек в планировщике');
+        function createSiteRow(name, order, itemIndex, siteKey) {
+            const item = order.items[itemIndex];
+            if (!item) return '<div>Нет данных</div>';
+
+            const operations = getOperationNames(item.product, siteKey);
+            
+            if (operations.length === 0) {
+                return `
+                    <div class="site-item">
+                        <span class="site-name">${name}</span>
+                        <div class="squares">
+                            <div class="square red" title="Нет операций"></div>
+                        </div>
+                        <span>0/0</span>
+                        <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
+                    </div>
+                `;
+            }
+
+            let squares = '';
+            let completedCount = 0;
+
+            for (let i = 0; i < operations.length; i++) {
+                const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
+                let status = '';
+                if (order.tasks && order.tasks[taskId]) {
+                    status = order.tasks[taskId];
+                    if (status === 'green') completedCount++;
+                }
+                squares += `<div class="square ${status}" data-task="${taskId}" title="${operations[i]}"></div>`;
+            }
+
+            return `
+                <div class="site-item">
+                    <span class="site-name">${name}</span>
+                    <div class="squares">${squares}</div>
+                    <span>${completedCount}/${operations.length}</span>
+                    <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
+                </div>
+            `;
+        }
+
+        function getOperationNames(productName, siteKey) {
+            const ops = window.TASK_OPERATIONS || {};
+            const siteOps = ops[siteKey] || {};
+            if (siteOps[productName]) return siteOps[productName];
+            for (let key in siteOps) {
+                if (productName.includes(key)) return siteOps[key];
+            }
+            return [];
+        }
+
+        function formatDateForDisplay(dateString) {
+            if (!dateString) return 'Дата не указана';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        // Запуск
+        document.addEventListener('DOMContentLoaded', initMainPage);
     </script>
 </body>
 </html>
