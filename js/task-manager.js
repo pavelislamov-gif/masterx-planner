@@ -148,7 +148,7 @@ class TaskManager {
                     // ============== ОБНОВЛЯЕМ ПЛАН ИЗ КОМПЛЕКТУЮЩИХ (ПОИСК ПО КЛЮЧЕВЫМ СЛОВАМ) ==============
                     if (item.components && item.components.length > 0) {
     item.components.forEach((comp) => {
-        // plannedQuantity берём напрямую из комплектующей, без умножения
+        // plannedQuantity берём напрямую из комплектующей (уже итоговое количество)
         const plannedQty = comp.quantity || 1;
         
         // Ищем существующую задачу, которая подходит по ключевым словам
@@ -163,7 +163,7 @@ class TaskManager {
             existingTask.isFromComponent = true;
             console.log(`📊 ОБНОВЛЕН ПЛАН: "${existingTask.operation}" → ${plannedQty} шт (из комплектующей "${comp.name}")`);
         } else {
-            // Если не нашли задачу, ищем операцию для комплектующей
+            // Если не нашли задачу, создаём новую для комплектующей
             const matchedOperation = this.findMatchingOperation(comp.name);
             if (matchedOperation) {
                 const taskId = `${order.id}_${this.siteType}_comp_${itemIndex}_${Date.now()}_${Math.random()}`;
