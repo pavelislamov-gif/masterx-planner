@@ -11,36 +11,6 @@
             transition: opacity 0.2s ease;
         }
 
-        .date-filter-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 15px 20px;
-            background: linear-gradient(135deg, #1a1e24, #0f1217);
-            border-radius: 12px;
-            border: 1px solid #2a2f38;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .date-filter-buttons {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .current-date-display {
-            color: #ff3b3b;
-            font-weight: 500;
-            background: #1a1e24;
-            padding: 8px 18px;
-            border-radius: 25px;
-            border: 1px solid #2a2f38;
-            font-size: 14px;
-        }
-
         .group-modal-content {
             max-width: 1200px;
             width: 95%;
@@ -288,7 +258,123 @@
             justify-content: flex-end;
         }
 
-        /* ============== ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ============== */
+        /* СТАТУСЫ ГРУППЫ */
+        .order-header.status-green {
+            background: linear-gradient(135deg, #1a3a1a, #0f2a0f);
+            border-left: 4px solid #2ecc71;
+        }
+
+        .order-header.status-orange {
+            background: linear-gradient(135deg, #3a2a1a, #2a1f0f);
+            border-left: 4px solid #ff9800;
+        }
+
+        .order-header.status-gray {
+            background: linear-gradient(135deg, #2a2a2a, #1f1f1f);
+            border-left: 4px solid #6c757d;
+        }
+
+        /* СТАТИСТИКА */
+        .order-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1e24, #0f1217);
+            border-radius: 12px;
+            border: 1px solid #2a2f38;
+        }
+
+        .stat-item {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            background: #15191f;
+            border-radius: 8px;
+            border: 1px solid #2a2f38;
+            position: relative;
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #ff3b3b, #ff9f1c);
+            border-radius: 4px 0 0 4px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d4ff, #0077ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #a0a0a0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ФИЛЬТРЫ */
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            padding: 10px 15px;
+            background: #1a1e24;
+            border: 1px solid #2a2f38;
+            border-radius: 8px;
+            width: 300px;
+            font-size: 14px;
+            color: #e0e0e0;
+        }
+
+        /* НАВИГАЦИЯ ПО УЧАСТКАМ */
+        .sites-navigation {
+            background: linear-gradient(135deg, #1a1e24, #0f1217);
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid #2a2f38;
+        }
+
+        .sites-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .site-link {
+            padding: 8px 20px;
+            background: #1a1e24;
+            border: 1px solid #2a2f38;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #e0e0e0;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .site-link:hover {
+            background: linear-gradient(135deg, #ff3b3b, #cc2e2e);
+            color: white;
+            border-color: #ff3b3b;
+        }
+
+        /* ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ */
         .theme-switch-wrapper {
             display: flex;
             align-items: center;
@@ -339,7 +425,7 @@
             background-color: #fff;
         }
 
-        /* ============== СВЕТЛАЯ ТЕМА ============== */
+        /* СВЕТЛАЯ ТЕМА - ШАПКА ОСТАЁТСЯ ТЁМНОЙ */
         body.light-theme {
             background-color: #f0f2f5 !important;
             color: #1e293b !important;
@@ -349,7 +435,6 @@
             background-color: #f0f2f5 !important;
         }
 
-        /* ШАПКА ОСТАЁТСЯ ТЁМНОЙ */
         body.light-theme header {
             background: linear-gradient(135deg, #1a1e24, #0f1217) !important;
             border: 1px solid #2a2f38 !important;
@@ -359,11 +444,6 @@
             color: #ffffff !important;
         }
 
-        body.light-theme .logo-text .x-red {
-            color: #ff3b3b !important;
-        }
-
-        /* КНОПКИ В ШАПКЕ ОСТАЮТСЯ ТЁМНЫМИ */
         body.light-theme .btn {
             background: #2a2f38 !important;
             color: #e0e0e0 !important;
@@ -375,24 +455,21 @@
             color: white !important;
         }
 
-        /* ПЕРЕКЛЮЧАТЕЛЬ ОСТАЁТСЯ ТЁМНЫМ */
-        body.light-theme .theme-switch .slider {
-            background-color: #2a2f38 !important;
+        body.light-theme .btn-success {
+            background: linear-gradient(135deg, #1a7f3d, #0e5a2a) !important;
+            color: white !important;
         }
 
-        body.light-theme .theme-switch .slider:before {
-            background-color: #ff3b3b !important;
+        body.light-theme .btn-danger {
+            background: linear-gradient(135deg, #b33c3c, #8b2e2e) !important;
+            color: white !important;
         }
 
-        body.light-theme .theme-switch input:checked + .slider {
-            background-color: #ff9800 !important;
+        body.light-theme .btn-info {
+            background: linear-gradient(135deg, #1f8a9c, #146b7a) !important;
+            color: white !important;
         }
 
-        body.light-theme .theme-switch input:checked + .slider:before {
-            background-color: #fff !important;
-        }
-
-        /* ОСТАЛЬНЫЕ СТИЛИ ДЛЯ СВЕТЛОЙ ТЕМЫ (основной контент) */
         body.light-theme .order-card {
             background: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
@@ -443,25 +520,8 @@
             border: 1px solid #e2e8f0 !important;
         }
 
-        body.light-theme .stat-value {
-            background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
-            -webkit-background-clip: text !important;
-            -webkit-text-fill-color: transparent !important;
-        }
-
         body.light-theme .stat-label {
             color: #64748b !important;
-        }
-
-        body.light-theme .date-filter-section {
-            background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
-            border: 1px solid #e2e8f0 !important;
-        }
-
-        body.light-theme .current-date-display {
-            background: #e9ecef !important;
-            border: 1px solid #dee2e6 !important;
-            color: #e11d48 !important;
         }
 
         body.light-theme .sites-navigation {
@@ -477,11 +537,6 @@
             background: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
             color: #334155 !important;
-        }
-
-        body.light-theme .site-link:hover {
-            background: linear-gradient(135deg, #e11d48, #be123c) !important;
-            color: white !important;
         }
 
         body.light-theme .search-box {
@@ -519,19 +574,6 @@
             background: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
             color: #1e293b !important;
-        }
-
-        body.light-theme .btn-outline {
-            border-color: #e2e8f0 !important;
-            color: #64748b !important;
-        }
-
-        body.light-theme .position-item {
-            background: #f1f5f9 !important;
-        }
-
-        body.light-theme .component-item {
-            background: #f1f5f9 !important;
         }
 
         body.light-theme .modal-content {
@@ -578,7 +620,7 @@
 
         <!-- НАВИГАЦИЯ ПО УЧАСТКАМ -->
         <div class="sites-navigation">
-            <h3 style="margin-bottom: 15px;">🏭 Производственные участки:</h3>
+            <h3>🏭 Производственные участки:</h3>
             <div class="sites-links">
                 <a href="sites/tokarniy.html" class="site-link">Токарный</a>
                 <a href="sites/slesarniy.html" class="site-link">Слесарный</a>
@@ -588,21 +630,8 @@
             </div>
         </div>
 
-        <!-- ФИЛЬТР ПО ДАТЕ -->
-        <div class="date-filter-section">
-            <div class="date-filter-buttons">
-                <span class="filter-label">📅 Показать заказы на:</span>
-                <button class="btn btn-primary" onclick="filterOrdersByDate('prev')" style="padding: 6px 12px;">← Вчера</button>
-                <button class="btn btn-success" onclick="filterOrdersByDate('today')" style="padding: 6px 12px;">Сегодня</button>
-                <button class="btn btn-primary" onclick="filterOrdersByDate('next')" style="padding: 6px 12px;">Завтра →</button>
-                <button class="btn btn-success" onclick="importOrders()">📤 Импорт заказов</button>
-            </div>
-            <span id="currentFilterDate" class="current-date-display">Загрузка...</span>
-        </div>
-
         <!-- СТАТИСТИКА -->
-        <!-- СТАТИСТИКА -->
-        <div class="order-stats" id="orderStats">
+        <div class="order-stats">
             <div class="stat-item">
                 <div class="stat-value" id="totalOrders">0</div>
                 <div class="stat-label">Всего групп</div>
@@ -637,7 +666,7 @@
         <div id="groupModal" class="modal">
             <div class="modal-content group-modal-content">
                 <span class="close" onclick="closeGroupModal()">&times;</span>
-                <h2 style="margin-bottom: 20px;">📁 Создание группы заказов</h2>
+                <h2>📁 Создание группы заказов</h2>
 
                 <div class="form-group">
                     <label>🏷️ Название группы:</label>
@@ -741,6 +770,7 @@
             </div>
         </div>
 
+        <!-- СПИСОК ГРУПП -->
         <div id="ordersList" class="orders-list"></div>
     </div>
 
@@ -755,36 +785,48 @@
         // ============== ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ==============
         function initThemeToggle() {
             const toggle = document.getElementById('themeToggle');
-            if (!toggle) {
-                console.error('Переключатель темы не найден!');
-                return;
-            }
+            if (!toggle) return;
             
             const savedTheme = localStorage.getItem('masterx_theme');
-            console.log('Сохранённая тема:', savedTheme);
-            
             if (savedTheme === 'light') {
                 document.body.classList.add('light-theme');
                 toggle.checked = true;
-                console.log('Применена светлая тема');
             } else {
                 document.body.classList.remove('light-theme');
                 toggle.checked = false;
-                console.log('Применена тёмная тема');
             }
             
             toggle.addEventListener('change', function() {
-                console.log('Переключатель изменён, новое состояние:', this.checked);
                 if (this.checked) {
                     document.body.classList.add('light-theme');
                     localStorage.setItem('masterx_theme', 'light');
-                    console.log('Переключено на светлую тему');
                 } else {
                     document.body.classList.remove('light-theme');
                     localStorage.setItem('masterx_theme', 'dark');
-                    console.log('Переключено на тёмную тему');
                 }
             });
+        }
+
+        // ============== ОПРЕДЕЛЕНИЕ СТАТУСА ГРУППЫ ==============
+        function getGroupStatus(order) {
+            if (!order.tasks || Object.keys(order.tasks).length === 0) return 'gray';
+            
+            let hasInProgress = false;
+            let allCompleted = true;
+            
+            Object.values(order.tasks).forEach(status => {
+                if (status === 'orange') {
+                    hasInProgress = true;
+                    allCompleted = false;
+                }
+                if (status !== 'green') {
+                    allCompleted = false;
+                }
+            });
+            
+            if (allCompleted && Object.keys(order.tasks).length > 0) return 'green';
+            if (hasInProgress) return 'orange';
+            return 'gray';
         }
 
         // ============== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==============
@@ -793,10 +835,10 @@
         let bracketsList = [];
         let lyresList = [];
         let componentsData = {};
-        
         let tempBrackets = [];
         let tempLyres = [];
 
+        // ============== ОТКРЫТИЕ/ЗАКРЫТИЕ МОДАЛЬНОГО ОКНА ==============
         function openGroupModal() {
             tempItemsList = [];
             tempBrackets = [];
@@ -1146,56 +1188,54 @@
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
-        async function initMainPage() {
-            productsList = await loadProducts() || [];
-            bracketsList = await loadBrackets() || [];
-            lyresList = await loadLyres() || [];
-            await loadComponents();
-            componentsData = window.componentsData || {};
-            
-            populateNewItemSelects();
-            initThemeToggle();
-            
-            if (typeof window.loadOrders === 'function') {
-                window.loadOrders();
-            }
-            if (typeof window.updateStatistics === 'function') {
-                window.updateStatistics();
-            }
-            if (typeof window.updateFilterDateDisplay === 'function') {
-                window.updateFilterDateDisplay();
-            }
-        }
-
-        const originalLoadOrders = window.loadOrders;
-        window.loadOrders = function() {
+        // ============== ОТОБРАЖЕНИЕ СПИСКА ГРУПП ==============
+        function renderOrdersList() {
             const ordersList = document.getElementById('ordersList');
             if (!ordersList) return;
 
             const orders = loadOrdersFromStorage() || [];
-            const currentDate = window.currentFilterDate || new Date().toISOString().split('T')[0];
-            const filteredOrders = orders.filter(order => order.date === currentDate);
+            const searchText = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            const statusFilter = document.getElementById('statusFilter')?.value || 'all';
+            
+            let filteredOrders = orders.filter(order => {
+                const matchSearch = order.groupName.toLowerCase().includes(searchText) ||
+                    order.items.some(item => item.product.toLowerCase().includes(searchText));
+                if (!matchSearch) return false;
+                
+                const groupStatus = getGroupStatus(order);
+                if (statusFilter === 'active') {
+                    return groupStatus === 'orange' || groupStatus === 'gray';
+                }
+                if (statusFilter === 'completed') {
+                    return groupStatus === 'green';
+                }
+                return true;
+            });
 
             ordersList.innerHTML = '';
 
             if (filteredOrders.length === 0) {
-                ordersList.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">Нет групп на ${formatDateForDisplay(currentDate)}</div></div>`;
+                ordersList.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">Нет групп</div></div>`;
                 return;
             }
 
             filteredOrders.forEach(order => {
+                const groupStatus = getGroupStatus(order);
+                const statusClass = groupStatus === 'green' ? 'status-green' : (groupStatus === 'orange' ? 'status-orange' : 'status-gray');
+                
                 const card = document.createElement('div');
                 card.className = 'order-card';
                 card.dataset.orderId = order.id;
 
                 const header = document.createElement('div');
-                header.className = 'order-header';
+                header.className = `order-header ${statusClass}`;
                 header.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                         <div>
                             <h3>📁 ${escapeHtml(order.groupName)}</h3>
                             <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
-                                Изделий: ${order.items.length} | Заказ №${order.number}
+                                Изделий: ${order.items.length} | №${order.number}
+                                ${groupStatus === 'green' ? ' | ✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? ' | ⚡ В РАБОТЕ' : ' | ⏳ ОЖИДАЕТ')}
                             </div>
                         </div>
                         <div>
@@ -1278,7 +1318,7 @@
                 card.appendChild(content);
                 ordersList.appendChild(card);
             });
-        };
+        }
 
         function createSiteRow(name, order, itemIndex, siteKey) {
             const item = order.items[itemIndex];
@@ -1332,11 +1372,236 @@
             return [];
         }
 
-        function formatDateForDisplay(dateString) {
-            if (!dateString) return 'Дата не указана';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+        // ============== СТАТИСТИКА ==============
+        function updateStatistics() {
+            const orders = loadOrdersFromStorage() || [];
+            const totalOrders = orders.length;
+            const totalItems = orders.reduce((sum, order) => sum + order.items.length, 0);
+            
+            let activeTasks = 0;
+            let completedTasks = 0;
+            
+            orders.forEach(order => {
+                if (order.tasks) {
+                    Object.values(order.tasks).forEach(status => {
+                        if (status === 'orange') activeTasks++;
+                        if (status === 'green') completedTasks++;
+                    });
+                }
+            });
+            
+            document.getElementById('totalOrders').textContent = totalOrders;
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('activeTasks').textContent = activeTasks;
+            document.getElementById('completedTasks').textContent = completedTasks;
         }
+
+        // ============== ЭКСПОРТ/ИМПОРТ ==============
+        function exportOrders() {
+            const orders = loadOrdersFromStorage() || [];
+            if (orders.length === 0) {
+                alert('Нет групп для экспорта');
+                return;
+            }
+            const exportData = { exportDate: new Date().toISOString(), version: '1.0', orders: orders };
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+            const date = new Date();
+            const fileName = `masterx_groups_${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')}.json`;
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', fileName);
+            linkElement.click();
+            alert(`✅ Экспортировано ${orders.length} групп`);
+        }
+
+        function importOrders() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                try {
+                    const text = await file.text();
+                    const data = JSON.parse(text);
+                    
+                    if (!data.orders || !Array.isArray(data.orders)) {
+                        alert('❌ Неверный формат файла');
+                        return;
+                    }
+                    
+                    let existingOrders = loadOrdersFromStorage();
+                    const existingIds = new Set(existingOrders.map(o => o.id));
+                    
+                    let importedCount = 0;
+                    let skippedCount = 0;
+                    
+                    for (const importedOrder of data.orders) {
+                        if (existingIds.has(importedOrder.id)) {
+                            if (confirm(`Группа "${importedOrder.groupName}" уже существует. Перезаписать?`)) {
+                                existingOrders = existingOrders.filter(o => o.id !== importedOrder.id);
+                                existingOrders.push(importedOrder);
+                                importedCount++;
+                            } else {
+                                skippedCount++;
+                            }
+                        } else {
+                            existingOrders.push(importedOrder);
+                            importedCount++;
+                        }
+                    }
+                    
+                    saveOrdersToStorage(existingOrders);
+                    renderOrdersList();
+                    updateStatistics();
+                    
+                    alert(`✅ Импорт завершён!\n📦 Импортировано: ${importedCount} групп\n⏭️ Пропущено: ${skippedCount}`);
+                    
+                } catch (error) {
+                    console.error('❌ Ошибка импорта:', error);
+                    alert('❌ Ошибка при импорте файла');
+                }
+            };
+            input.click();
+        }
+
+        function showMaterialsReport(orderId) {
+            const orders = loadOrdersFromStorage() || [];
+            const order = orders.find(o => o.id === orderId);
+            if (!order) {
+                alert('Группа не найдена');
+                return;
+            }
+            if (!window.materialsReport) {
+                alert('Отчет по материалам не доступен');
+                return;
+            }
+            const modal = document.getElementById('materialsModal');
+            const reportDiv = document.getElementById('materialsReport');
+            if (!modal || !reportDiv) return;
+            
+            reportDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Загрузка отчета...</p></div>';
+            modal.style.display = 'block';
+            window.materialsReport.generateReport(order).then(html => {
+                reportDiv.innerHTML = html;
+            }).catch(err => {
+                console.error(err);
+                reportDiv.innerHTML = '<div class="error">Ошибка загрузки отчета</div>';
+            });
+        }
+
+        function closeMaterialsModal() {
+            document.getElementById('materialsModal').style.display = 'none';
+        }
+
+        function addExtraTask(orderId, siteKey) {
+            const taskDescription = prompt('Введите описание дополнительной задачи:');
+            if (!taskDescription) return;
+
+            let orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            
+            if (!order) {
+                alert('Группа не найдена');
+                return;
+            }
+
+            if (!order.extraTasks) order.extraTasks = [];
+
+            order.extraTasks.push({
+                title: taskDescription,
+                description: taskDescription,
+                site: siteKey,
+                createdAt: new Date().toISOString()
+            });
+
+            saveOrdersToStorage(orders);
+            renderOrdersList();
+            updateStatistics();
+            alert('✅ Дополнительная задача добавлена');
+        }
+
+        function deleteOrder(orderId) {
+            if (!confirm('Удалить группу? Все связанные задачи также будут удалены.')) return;
+            
+            let orders = loadOrdersFromStorage();
+            orders = orders.filter(o => o.id !== orderId);
+            saveOrdersToStorage(orders);
+            
+            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+            const dates = [];
+            const today = new Date();
+            for (let i = -30; i <= 30; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                dates.push(date.toISOString().split('T')[0]);
+            }
+            
+            sites.forEach(site => {
+                dates.forEach(date => {
+                    const key = `tasks_${site}_${date}`;
+                    const tasks = localStorage.getItem(key);
+                    if (tasks) {
+                        let tasksArr = JSON.parse(tasks);
+                        tasksArr = tasksArr.filter(t => t.orderId !== orderId);
+                        localStorage.setItem(key, JSON.stringify(tasksArr));
+                    }
+                });
+            });
+            
+            renderOrdersList();
+            updateStatistics();
+            alert('✅ Группа удалена');
+        }
+
+        // ============== ИНИЦИАЛИЗАЦИЯ ==============
+        async function initMainPage() {
+            productsList = await loadProducts() || [];
+            bracketsList = await loadBrackets() || [];
+            lyresList = await loadLyres() || [];
+            await loadComponents();
+            componentsData = window.componentsData || {};
+            
+            populateNewItemSelects();
+            initThemeToggle();
+            
+            renderOrdersList();
+            updateStatistics();
+            
+            // Обработчики фильтров
+            document.getElementById('searchInput')?.addEventListener('input', function() {
+                renderOrdersList();
+                updateStatistics();
+            });
+            document.getElementById('statusFilter')?.addEventListener('change', function() {
+                renderOrdersList();
+                updateStatistics();
+            });
+            
+            // Слушаем изменения в localStorage
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'masterx_orders') {
+                    renderOrdersList();
+                    updateStatistics();
+                }
+            });
+        }
+
+        // Глобальные функции
+        window.openGroupModal = openGroupModal;
+        window.closeGroupModal = closeGroupModal;
+        window.addBracketField = addBracketField;
+        window.addLyreField = addLyreField;
+        window.addItemToGroup = addItemToGroup;
+        window.createGroupOrder = createGroupOrder;
+        window.exportOrders = exportOrders;
+        window.importOrders = importOrders;
+        window.showMaterialsReport = showMaterialsReport;
+        window.closeMaterialsModal = closeMaterialsModal;
+        window.addExtraTask = addExtraTask;
+        window.deleteOrder = deleteOrder;
 
         document.addEventListener('DOMContentLoaded', initMainPage);
     </script>
