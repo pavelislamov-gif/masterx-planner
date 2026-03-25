@@ -165,7 +165,7 @@ class TaskManager {
             // ПРОВЕРКА: нет ли уже такой задачи из операций изделия?
             const alreadyExists = newTasks.some(t => 
                 t.operation === matchedOperation.name && 
-                t.product !== comp.name  // не задача из комплектующих
+                t.product !== comp.name
             );
             
             if (alreadyExists) {
@@ -177,7 +177,9 @@ class TaskManager {
             const taskStatus = order.tasks?.[taskId];
             const historyTask = historyTasksMap.get(taskId);
             
-            const plannedQty = (matchedOperation.quantity || 1) * itemQuantity;
+            // ВАЖНО: plannedQuantity берём из комплектующей, а не из операции!
+            const compQuantity = comp.quantity || 1;  // ← количество из комплектующей
+            const plannedQty = compQuantity * itemQuantity;
             
             const task = {
                 id: taskId,
@@ -186,7 +188,7 @@ class TaskManager {
                 product: comp.name,
                 component: true,
                 operation: matchedOperation.name,
-                plannedQuantity: plannedQty,
+                plannedQuantity: plannedQty,      // ← берём из комплектующей
                 completedQuantity: historyTask?.completedQuantity || 0,
                 totalQuantity: plannedQty,
                 isComponent: true,
@@ -197,8 +199,6 @@ class TaskManager {
             
             newTasks.push(task);
             console.log(`🔧 Создана задача для комплектующей "${comp.name}" → "${matchedOperation.name}" (${plannedQty} шт)`);
-        } else {
-            console.log(`⚠️ Не найдена операция для комплектующей "${comp.name}" на участке ${this.siteType}`);
         }
     });
 }
