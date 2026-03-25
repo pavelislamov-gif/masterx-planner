@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MasterX - Планировщик производства</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/light-theme.css" id="lightThemeStylesheet" disabled>
     <style>
         /* Дополнительные стили */
         .order-content {
@@ -42,7 +41,6 @@
             font-size: 14px;
         }
 
-        /* Стили для модального окна создания группы */
         .group-modal-content {
             max-width: 1200px;
             width: 95%;
@@ -340,6 +338,236 @@
             transform: translateX(20px);
             background-color: #fff;
         }
+
+        /* ============== СВЕТЛАЯ ТЕМА ============== */
+        body.light-theme {
+            background-color: #f0f2f5 !important;
+            color: #1e293b !important;
+        }
+
+        body.light-theme .container {
+            background-color: #f0f2f5 !important;
+        }
+
+        body.light-theme header {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa) !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .logo-text {
+            color: #1e293b !important;
+        }
+
+        body.light-theme .logo-text .x-red {
+            color: #e11d48 !important;
+        }
+
+        body.light-theme .btn {
+            background: #ffffff !important;
+            color: #1e293b !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+            color: white !important;
+        }
+
+        body.light-theme .btn-success {
+            background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+            color: white !important;
+        }
+
+        body.light-theme .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+            color: white !important;
+        }
+
+        body.light-theme .btn-info {
+            background: linear-gradient(135deg, #06b6d4, #0891b2) !important;
+            color: white !important;
+        }
+
+        body.light-theme .modal-content {
+            background: linear-gradient(135deg, #ffffff, #fefefe) !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .close {
+            background: #f8fafc !important;
+            color: #64748b !important;
+        }
+
+        body.light-theme .order-card {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .order-header {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .order-header h3 {
+            color: #1e293b !important;
+        }
+
+        body.light-theme .site-item {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .site-name {
+            color: #1e293b !important;
+        }
+
+        body.light-theme .square {
+            background: #e9ecef !important;
+            border: 1px solid #dee2e6 !important;
+        }
+
+        body.light-theme .square.orange {
+            background-color: #f97316 !important;
+        }
+
+        body.light-theme .square.green {
+            background-color: #22c55e !important;
+        }
+
+        body.light-theme .square.red {
+            background-color: #ef4444 !important;
+        }
+
+        body.light-theme .order-stats {
+            background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .stat-item {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .stat-value {
+            background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+        }
+
+        body.light-theme .stat-label {
+            color: #64748b !important;
+        }
+
+        body.light-theme .date-filter-section {
+            background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .current-date-display {
+            background: #e9ecef !important;
+            border: 1px solid #dee2e6 !important;
+            color: #e11d48 !important;
+        }
+
+        body.light-theme .sites-navigation {
+            background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .sites-navigation h3 {
+            color: #1e293b !important;
+        }
+
+        body.light-theme .site-link {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #334155 !important;
+        }
+
+        body.light-theme .site-link:hover {
+            background: linear-gradient(135deg, #e11d48, #be123c) !important;
+            color: white !important;
+        }
+
+        body.light-theme .search-box {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #1e293b !important;
+        }
+
+        body.light-theme .add-item-panel {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .items-list-panel {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .item-card {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .item-card-content div {
+            background: #f1f5f9 !important;
+            color: #1e293b !important;
+        }
+
+        body.light-theme .form-group label {
+            color: #64748b !important;
+        }
+
+        body.light-theme .form-group input,
+        body.light-theme .form-group select {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #1e293b !important;
+        }
+
+        body.light-theme .btn-outline {
+            border-color: #e2e8f0 !important;
+            color: #64748b !important;
+        }
+
+        body.light-theme .position-item {
+            background: #f1f5f9 !important;
+        }
+
+        body.light-theme .component-item {
+            background: #f1f5f9 !important;
+        }
+
+        body.light-theme .empty-state {
+            background: #ffffff !important;
+            border: 2px dashed #e2e8f0 !important;
+            color: #64748b !important;
+        }
+
+        body.light-theme .product-info {
+            background: #f8fafc !important;
+        }
+
+        body.light-theme .product-info span {
+            color: #1e293b !important;
+        }
+
+        body.light-theme .theme-switch .slider {
+            background-color: #e2e8f0 !important;
+        }
+
+        body.light-theme .theme-switch .slider:before {
+            background-color: #64748b !important;
+        }
+
+        body.light-theme .theme-switch input:checked + .slider {
+            background-color: #f97316 !important;
+        }
+
+        body.light-theme .theme-switch input:checked + .slider:before {
+            background-color: #ffffff !important;
+        }
     </style>
 </head>
 <body>
@@ -356,7 +584,6 @@
                 <button class="btn btn-primary" onclick="openGroupModal()">
                     <span style="font-size: 20px; margin-right: 5px;">+</span> Создать группу
                 </button>
-                <!-- ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ -->
                 <div class="theme-switch-wrapper">
                     <span style="font-size: 14px;">🌙</span>
                     <label class="theme-switch">
@@ -370,7 +597,7 @@
 
         <!-- НАВИГАЦИЯ ПО УЧАСТКАМ -->
         <div class="sites-navigation">
-            <h3 style="margin-bottom: 15px; color: #fff;">🏭 Производственные участки:</h3>
+            <h3 style="margin-bottom: 15px;">🏭 Производственные участки:</h3>
             <div class="sites-links">
                 <a href="sites/tokarniy.html" class="site-link">Токарный</a>
                 <a href="sites/slesarniy.html" class="site-link">Слесарный</a>
@@ -427,17 +654,14 @@
         <div id="groupModal" class="modal">
             <div class="modal-content group-modal-content">
                 <span class="close" onclick="closeGroupModal()">&times;</span>
-                <h2 style="color: #fff; margin-bottom: 20px;">📁 Создание группы заказов</h2>
+                <h2 style="margin-bottom: 20px;">📁 Создание группы заказов</h2>
 
-                <!-- Название группы -->
                 <div class="form-group">
                     <label>🏷️ Название группы:</label>
                     <input type="text" id="groupNameInput" placeholder="Например: Санкт Петербург КИ000004020" required>
                 </div>
 
-                <!-- ДВЕ КОЛОНКИ -->
                 <div class="group-modal-layout">
-                    <!-- ЛЕВАЯ КОЛОНКА: Форма добавления изделия -->
                     <div class="add-item-panel">
                         <h3>➕ Добавить изделие</h3>
                         
@@ -460,7 +684,7 @@
 
                         <div class="form-group">
                             <label>Профиль (метры):</label>
-                            <div class="profile-row" style="display: flex; gap: 8px;">
+                            <div style="display: flex; gap: 8px;">
                                 <input type="number" id="newItemProfileMeters" placeholder="метры" step="0.1" min="0" value="0" style="flex: 1;">
                                 <input type="number" id="newItemProfileQuantity" placeholder="кол-во" min="1" value="1" style="flex: 1;">
                             </div>
@@ -504,7 +728,6 @@
                         </button>
                     </div>
 
-                    <!-- ПРАВАЯ КОЛОНКА: Список добавленных изделий -->
                     <div class="items-list-panel">
                         <h3>
                             📦 Добавленные изделия
@@ -535,11 +758,9 @@
             </div>
         </div>
 
-        <!-- СПИСОК ГРУПП (ЗАКАЗОВ) -->
         <div id="ordersList" class="orders-list"></div>
     </div>
 
-    <!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ -->
     <script src="js/storage.js"></script>
     <script src="js/data-loader.js"></script>
     <script src="js/task-operations.js"></script>
@@ -549,7 +770,7 @@
 
     <script>
         // ============== ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ==============
-         function initThemeToggle() {
+        function initThemeToggle() {
             const toggle = document.getElementById('themeToggle');
             if (!toggle) {
                 console.error('Переключатель темы не найден!');
@@ -582,6 +803,7 @@
                 }
             });
         }
+
         // ============== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==============
         let tempItemsList = [];
         let productsList = [];
@@ -592,7 +814,6 @@
         let tempBrackets = [];
         let tempLyres = [];
 
-        // ============== ОТКРЫТИЕ/ЗАКРЫТИЕ МОДАЛЬНОГО ОКНА ==============
         function openGroupModal() {
             tempItemsList = [];
             tempBrackets = [];
@@ -819,7 +1040,7 @@
             if (comps.length > 0) {
                 componentsContainer.style.display = 'block';
                 let compsHtml = '';
-                comps.forEach((comp, idx) => {
+                comps.forEach((comp) => {
                     compsHtml += `
                         <div class="component-item">
                             <span class="component-name">${escapeHtml(comp.name)}</span>
@@ -942,7 +1163,6 @@
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
-        // ============== ЗАГРУЗКА ДАННЫХ ==============
         async function initMainPage() {
             productsList = await loadProducts() || [];
             bracketsList = await loadBrackets() || [];
@@ -964,7 +1184,6 @@
             }
         }
 
-        // Переопределяем loadOrders для отображения групп
         const originalLoadOrders = window.loadOrders;
         window.loadOrders = function() {
             const ordersList = document.getElementById('ordersList');
