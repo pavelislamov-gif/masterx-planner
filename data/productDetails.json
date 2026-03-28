@@ -1,0 +1,614 @@
+{
+  "description": "Список деталей для каждого изделия из техкарты",
+  "products": {
+    "XRAY 1": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Поликарбонат Прозрачный 6мм", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 3": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Поликарбонат Прозрачный 6мм", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 3-2": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Поликарбонат Прозрачный 6мм", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 3-GRP": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы", "material": "алюминий", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6 RGBW": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6-2 проходной": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Поликарбонат Прозрачный 6мм", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6-2 оконечный": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Поликарбонат Прозрачный 6мм", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6-T2 BT 180": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6-T2 BT 200": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6-T2 BT 220": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6-T2 BT 220 Шторка х2": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6-T2 BT 240 Шторка": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6-T2 BZ 180": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6-T2 BZ 200 Шторка": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6-T2 BZ 220": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6-T2 BZ 220 Шторка х2": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6-T2 BZ 240 Шторка": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6T Накладной": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Крепление", "material": "алюминий", "quantity": 1 },
+        { "name": "Крышка 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6T BT 120": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Крышка 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6T BT 140 Шторка": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Крышка 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6T BZ 120": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Крышка 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6T BZ 140 Шторка": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Крышка 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 6T RGBW BT 150": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Крышка 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 9": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Поликарбонат Прозрачный 6мм", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 9S": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 12S": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 4мм", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 18": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Поликарбонат Прозрачный 6мм", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 18S": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 4мм", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 36": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Поликарбонат Прозрачный 6мм", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XRAY 36S": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 8мм", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XSLOPE": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Модуль", "material": "алюминий", "quantity": 1 },
+        { "name": "Пластина 1мм AISI", "material": "нержавейка", "quantity": 1 },
+        { "name": "Шайба 4мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XPIXEL BIN v.1": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Plexiglas 2мм опал 30%", "material": "оргстекло", "quantity": 1 }
+      ]
+    },
+    "XPIXEL BIN v.2": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Plexiglas 2мм опал 30%", "material": "оргстекло", "quantity": 1 }
+      ]
+    },
+    "XPIXEL BIN v.3": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Plexiglas 2мм опал 30%", "material": "оргстекло", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XPIXEL OVHD": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Чаша 1,2мм Алюминий", "material": "алюминий", "quantity": 1 }
+      ]
+    },
+    "XDISK": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Крышка", "material": "алюминий", "quantity": 1 },
+        { "name": "Стойка", "material": "алюминий", "quantity": 1 },
+        { "name": "Кронштейн", "material": "алюминий", "quantity": 1 },
+        { "name": "Держатель кабеля ПВХ 10мм", "material": "ПВХ", "quantity": 1 }
+      ]
+    },
+    "XPOINT OVHD": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 }
+      ]
+    },
+    "XSPOT": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка GEBAU 2мм черный", "material": "пластик", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "ACENTO 3T": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "ACENTO 4": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Фоновая заглушка 0,5мм Сталь", "material": "сталь", "quantity": 1 },
+        { "name": "Основание платы 4мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XROLL-lite P": {
+      "details": [
+        { "name": "Профиль НПС 3007", "material": "алюминий", "quantity": 1 },
+        { "name": "Профиль поликарбонатный XROLL-lite", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Заглушка 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XROLL-lite K": {
+      "details": [
+        { "name": "Профиль НПС 3007", "material": "алюминий", "quantity": 1 },
+        { "name": "Профиль поликарбонатный XROLL-lite", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Заглушка 3мм Алюминий", "material": "алюминий", "quantity": 1 }
+      ]
+    },
+    "XWHITE": {
+      "details": [
+        { "name": "Профиль Н2248", "material": "алюминий", "quantity": 1 },
+        { "name": "Рассеиватель для Н2248", "material": "поликарбонат", "quantity": 1 }
+      ]
+    },
+    "XEYES 130*90 1": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Пластина 1 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Пластина 2 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Поликарбонат Прозрачный 3мм", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XEYES 130*90 2": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Пластина 1 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Пластина 2 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Поликарбонат Прозрачный 3мм", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XEYES 130*90 3": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Пластина 1 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Пластина 2 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Поликарбонат Прозрачный 3мм", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XEYES 130*90 4": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Пластина 1 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Пластина 2 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Поликарбонат Прозрачный 3мм", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XEYES 130*120 1": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Пластина 1 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Пластина 2 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Поликарбонат Прозрачный 3мм", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XEYES 130*120 2": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Пластина 1 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Пластина 2 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Поликарбонат Прозрачный 3мм", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XEYES 130*120 3": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Пластина 1 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Пластина 2 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Поликарбонат Прозрачный 3мм", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XEYES 130*120 4": {
+      "details": [
+        { "name": "Корпус", "material": "алюминий", "quantity": 1 },
+        { "name": "Пластина 1 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Пластина 2 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 2мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Поликарбонат Прозрачный 3мм", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XEYES mini-1": {
+      "details": [
+        { "name": "Профиль 80*60*4", "material": "алюминий", "quantity": 1 },
+        { "name": "Профиль 100*40*4", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка 4мм", "material": "алюминий", "quantity": 1 },
+        { "name": "Основание платы 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XGIRO": {
+      "details": [
+        { "name": "Профиль МП 0923-081", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Вставка ПВХ 3мм", "material": "ПВХ", "quantity": 1 },
+        { "name": "Лира", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XGLOW": {
+      "details": [
+        { "name": "Профиль НПС 2997", "material": "алюминий", "quantity": 1 },
+        { "name": "Профиль НПС 2994", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка левая 8мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка правая 8мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XGLOW mini": {
+      "details": [
+        { "name": "Профиль НПС 2993", "material": "алюминий", "quantity": 1 },
+        { "name": "Профиль НПС 2994", "material": "алюминий", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XGRAY v.1": {
+      "details": [
+        { "name": "Профиль МП 1928 XGRAY", "material": "алюминий", "quantity": 1 },
+        { "name": "Профиль НПС 2999 (XGRAY/XYELLOW)", "material": "алюминий", "quantity": 1 },
+        { "name": "Профиль СЧ 4446 Планка", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка левая 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка правая 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка модуля 1мм AISI", "material": "нержавейка", "quantity": 1 }
+      ]
+    },
+    "XGRAY v.2": {
+      "details": [
+        { "name": "Профиль МП 1928 XGRAY", "material": "алюминий", "quantity": 1 },
+        { "name": "Профиль НПС 2999 (XGRAY/XYELLOW)", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка левая 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка правая 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка модуля 1мм AISI", "material": "нержавейка", "quantity": 1 },
+        { "name": "Лира", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XLITE": {
+      "details": [
+        { "name": "Профиль НПС 2966", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Вставка ПВХ 3мм", "material": "ПВХ", "quantity": 1 },
+        { "name": "Лира", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XSMART": {
+      "details": [
+        { "name": "Профиль КП 453785", "material": "алюминий", "quantity": 1 },
+        { "name": "Профиль КП 453784", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Вставка ПВХ 3мм", "material": "ПВХ", "quantity": 1 },
+        { "name": "Лира", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XSMART mini": {
+      "details": [
+        { "name": "Профиль НП 455015", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Вставка ПВХ 3мм", "material": "ПВХ", "quantity": 1 },
+        { "name": "Вставка Алюминиевая 3мм", "material": "алюминий", "quantity": 1 },
+        { "name": "Лира", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XSTRONG": {
+      "details": [
+        { "name": "Профиль ТПК 004S", "material": "алюминий", "quantity": 1 },
+        { "name": "Вставка ПВХ 3мм", "material": "ПВХ", "quantity": 1 },
+        { "name": "Вставка Алюминиевая 3мм", "material": "алюминий", "quantity": 1 },
+        { "name": "Лира", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XLUMO": {
+      "details": [
+        { "name": "Профиль НПС 2967 (XLUMO)", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Вставка ПВХ 3мм без выемки верхняя", "material": "ПВХ", "quantity": 1 },
+        { "name": "Вставка ПВХ 3мм без выемки нижняя", "material": "ПВХ", "quantity": 1 },
+        { "name": "Вставка ПВХ 3мм с выемкой верхняя", "material": "ПВХ", "quantity": 1 },
+        { "name": "Вставка ПВХ 3мм с выемкой нижняя", "material": "ПВХ", "quantity": 1 },
+        { "name": "Лира", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XLUMO 1-6": {
+      "details": [
+        { "name": "Профиль НПС 2967 (XLUMO)", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Вставка ПВХ 3мм без выемки верхняя", "material": "ПВХ", "quantity": 1 },
+        { "name": "Вставка ПВХ 3мм без выемки нижняя", "material": "ПВХ", "quantity": 1 },
+        { "name": "Вставка ПВХ 3мм с выемкой верхняя", "material": "ПВХ", "quantity": 1 },
+        { "name": "Лира", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XLUMO Двунаправленный": {
+      "details": [
+        { "name": "Профиль НПС 3362", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Вставка ПВХ 3мм без выемки верхняя", "material": "ПВХ", "quantity": 1 },
+        { "name": "Вставка ПВХ 3мм средняя", "material": "ПВХ", "quantity": 1 },
+        { "name": "Лира", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XLUMO PROV": {
+      "details": [
+        { "name": "Профиль НПС 2967 (XLUMO)", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Вставка Алюминиевая 3мм", "material": "алюминий", "quantity": 1 },
+        { "name": "Вставка ПВХ 3мм без выемки нижняя", "material": "ПВХ", "quantity": 1 },
+        { "name": "Лира", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XVISION": {
+      "details": [
+        { "name": "Профиль КП 453849", "material": "алюминий", "quantity": 1 },
+        { "name": "Лира", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XBAR-SW": {
+      "details": [
+        { "name": "Профиль КП 453054", "material": "алюминий", "quantity": 1 },
+        { "name": "Вставка ПВХ 3мм", "material": "ПВХ", "quantity": 1 },
+        { "name": "Вставка 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Лира", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XMODULE-2x2": {
+      "details": [
+        { "name": "Основание платы 1,5мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Проставка 3мм Алюминий", "material": "алюминий", "quantity": 1 }
+      ]
+    },
+    "XMODULE-6x2": {
+      "details": [
+        { "name": "Основание платы 1,5мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Профиль ABA-2261 6063 T6 Б", "material": "алюминий", "quantity": 1 }
+      ]
+    },
+    "XFOCUS": {
+      "details": [
+        { "name": "Профиль ТПК 004S", "material": "алюминий", "quantity": 1 },
+        { "name": "Вставка ПВХ 3мм", "material": "ПВХ", "quantity": 1 },
+        { "name": "Вставка Алюминиевая 3мм", "material": "алюминий", "quantity": 1 },
+        { "name": "Лира", "material": "сталь", "quantity": 1 },
+        { "name": "Кронштейн", "material": "сталь", "quantity": 1 }
+      ]
+    },
+    "XYELLOW": {
+      "details": [
+        { "name": "Профиль МП 1928 XGRAY", "material": "алюминий", "quantity": 1 },
+        { "name": "Профиль НПС 2999 (XGRAY/XYELLOW)", "material": "алюминий", "quantity": 1 },
+        { "name": "Профиль СЧ 4446 Планка", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка 3мм Алюминий", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка модуля 1мм AISI", "material": "нержавейка", "quantity": 1 }
+      ]
+    },
+    "XLINE": {
+      "details": [
+        { "name": "Профиль КП 453434", "material": "алюминий", "quantity": 1 },
+        { "name": "Рассеиватель XLINE", "material": "поликарбонат", "quantity": 1 },
+        { "name": "Профиль КП 453436", "material": "алюминий", "quantity": 1 },
+        { "name": "Заглушка 4мм Алюминий", "material": "алюминий", "quantity": 1 }
+      ]
+    }
+  }
+}
