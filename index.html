@@ -6,7 +6,7 @@
     <title>MasterX - Планировщик производства</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Дополнительные стили */
+        /* ========== СТИЛИ ========== */
         .order-content {
             transition: opacity 0.2s ease;
         }
@@ -99,7 +99,6 @@
             border: 1px solid #2a2f38;
             border-radius: 8px;
             padding: 12px;
-            position: relative;
         }
 
         .item-card-header {
@@ -140,10 +139,6 @@
             font-size: 12px;
         }
 
-        .remove-item-btn:hover {
-            background: #c82333;
-        }
-
         .form-group {
             margin-bottom: 15px;
         }
@@ -155,7 +150,8 @@
             color: #a0a0a0;
         }
 
-        .form-group input, .form-group select {
+        .form-group input,
+        .form-group select {
             width: 100%;
             padding: 8px 10px;
             background: #1e232b;
@@ -187,11 +183,6 @@
             cursor: pointer;
             font-size: 12px;
             margin-top: 5px;
-        }
-
-        .btn-outline:hover {
-            border-color: #ff3b3b;
-            color: #ff3b3b;
         }
 
         .position-item {
@@ -262,17 +253,6 @@
             border-radius: 4px;
             color: #fff;
             text-align: center;
-        }
-
-        .component-remove {
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
-            cursor: pointer;
-            font-size: 10px;
-            margin-left: 8px;
         }
 
         .empty-items {
@@ -397,7 +377,6 @@
         .site-link:hover {
             background: linear-gradient(135deg, #ff3b3b, #cc2e2e);
             color: white;
-            border-color: #ff3b3b;
         }
 
         .theme-switch-wrapper {
@@ -455,19 +434,6 @@
             color: #1e293b !important;
         }
 
-        body.light-theme .container {
-            background-color: #f0f2f5 !important;
-        }
-
-        body.light-theme header {
-            background: linear-gradient(135deg, #1a1e24, #0f1217) !important;
-            border: 1px solid #2a2f38 !important;
-        }
-
-        body.light-theme .logo-text {
-            color: #ffffff !important;
-        }
-
         body.light-theme .order-card {
             background: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
@@ -475,38 +441,6 @@
 
         body.light-theme .order-header {
             background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
-            border-bottom: 1px solid #e2e8f0 !important;
-        }
-
-        body.light-theme .order-header h3 {
-            color: #1e293b !important;
-        }
-
-        body.light-theme .site-item {
-            background: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-        }
-
-        body.light-theme .site-name {
-            color: #1e293b !important;
-        }
-
-        body.light-theme .square {
-            background: #e9ecef !important;
-            border: 1px solid #dee2e6 !important;
-        }
-
-        body.light-theme .square.orange {
-            background-color: #f97316 !important;
-        }
-
-        body.light-theme .square.green {
-            background-color: #22c55e !important;
-        }
-
-        body.light-theme .btn {
-            background: #2a2f38 !important;
-            color: #e0e0e0 !important;
         }
 
         .site-item {
@@ -549,13 +483,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #2ecc71;
             color: white;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-
-        .op-toggle-btn.remove {
-            background: #e74c3c;
         }
 
         .square {
@@ -571,13 +500,6 @@
         .square.orange {
             background-color: #ff9800;
             border-color: #e65100;
-            box-shadow: 0 0 10px rgba(255, 152, 0, 0.3);
-        }
-
-        .square.green {
-            background-color: #4caf50;
-            border-color: #2e7d32;
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
         }
 
         .operation-name-small {
@@ -587,6 +509,71 @@
             text-align: center;
             max-width: 60px;
             word-break: break-word;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1e24, #0f1217);
+            margin: 2% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 12px;
+            border: 1px solid #2a2f38;
+        }
+
+        .close {
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+            color: #a0a0a0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            background: #1a1e24;
+            border-radius: 12px;
+            color: #a0a0a0;
         }
     </style>
 </head>
@@ -598,7 +585,7 @@
                 <div class="logo-text">Master<span class="x-red">X</span></div>
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
-                <button class="btn btn-primary" onclick="openGroupModal()">+ Создать группу</button>
+                <button class="btn btn-primary" id="createGroupBtn">+ Создать группу</button>
                 <div class="theme-switch-wrapper">
                     <span>🌙</span>
                     <label class="theme-switch">
@@ -623,9 +610,9 @@
 
         <div class="date-filter-section">
             <div class="date-filter-buttons">
-                <button class="btn btn-primary" onclick="filterOrdersByDate('prev')">← Вчера</button>
-                <button class="btn btn-success" onclick="filterOrdersByDate('today')">Сегодня</button>
-                <button class="btn btn-primary" onclick="filterOrdersByDate('next')">Завтра →</button>
+                <button class="btn btn-primary" id="prevDateBtn">← Вчера</button>
+                <button class="btn btn-success" id="todayDateBtn">Сегодня</button>
+                <button class="btn btn-primary" id="nextDateBtn">Завтра →</button>
             </div>
             <span id="currentFilterDate" class="current-date-display">Загрузка...</span>
         </div>
@@ -644,8 +631,8 @@
                 <option value="active">Активные</option>
                 <option value="completed">Завершённые</option>
             </select>
-            <button class="btn btn-primary" onclick="exportOrders()">📥 Экспорт</button>
-            <button class="btn btn-success" onclick="importOrders()">📤 Импорт</button>
+            <button class="btn btn-primary" id="exportBtn">📥 Экспорт</button>
+            <button class="btn btn-success" id="importBtn">📤 Импорт</button>
         </div>
 
         <div id="ordersList"></div>
@@ -665,7 +652,7 @@
                     <h3>➕ Добавить изделие</h3>
                     <div class="form-group">
                         <label>Изделие:</label>
-                        <select id="newItemProduct" onchange="onNewItemProductChange()">
+                        <select id="newItemProduct">
                             <option value="">Выберите изделие</option>
                         </select>
                     </div>
@@ -679,12 +666,12 @@
                     <div class="form-group">
                         <label>Кронштейны:</label>
                         <div id="bracketsListContainer"></div>
-                        <button type="button" class="btn-outline" onclick="addBracketField()">+ Добавить кронштейн</button>
+                        <button type="button" class="btn-outline" id="addBracketBtn">+ Добавить кронштейн</button>
                     </div>
                     <div class="form-group">
                         <label>Лиры:</label>
                         <div id="lyresListContainer"></div>
-                        <button type="button" class="btn-outline" onclick="addLyreField()">+ Добавить лиру</button>
+                        <button type="button" class="btn-outline" id="addLyreBtn">+ Добавить лиру</button>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div class="form-group"><label>RAL:</label><input type="text" id="newItemRal"></div>
@@ -694,7 +681,7 @@
                         <div class="components-title">🔧 Комплектующие:</div>
                         <div id="newItemComponentsList"></div>
                     </div>
-                    <button type="button" class="btn btn-success" onclick="addItemToGroup()" style="width: 100%; margin-top: 15px;">✅ Добавить изделие</button>
+                    <button type="button" class="btn btn-success" id="addItemBtn" style="width: 100%; margin-top: 15px;">✅ Добавить изделие</button>
                 </div>
                 <div class="items-list-panel">
                     <h3>📦 Добавленные изделия <span id="itemsCount" style="font-size: 12px; color: #ff3b3b;">0</span></h3>
@@ -703,7 +690,7 @@
             </div>
             <div class="form-actions">
                 <button class="btn btn-danger" onclick="closeGroupModal()">Отмена</button>
-                <button class="btn btn-success" onclick="createGroupOrder()">📋 Сформировать группу</button>
+                <button class="btn btn-success" id="createGroupOrderBtn">📋 Сформировать группу</button>
             </div>
         </div>
     </div>
@@ -754,7 +741,7 @@
         }
 
         // ============== ОСНОВНАЯ ФУНКЦИЯ - ДОБАВЛЕНИЕ/УДАЛЕНИЕ ОПЕРАЦИИ ==============
-        function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName) {
+        window.toggleSiteOperation = function(button, orderId, siteKey, itemIndex, opIndex, operationName) {
             const orders = loadOrdersFromStorage();
             const order = orders.find(o => o.id == orderId);
             if (!order) { alert('Заказ не найден'); return; }
@@ -772,7 +759,6 @@
             const squareDiv = button.parentElement?.querySelector('.square');
             
             if (taskExists) {
-                // УДАЛЕНИЕ
                 if (confirm(`Удалить операцию "${operationName}" с участка ${getSiteDisplayName(siteKey)}?`)) {
                     const filteredTasks = existingTasks.filter(t => t.id !== taskId);
                     localStorage.setItem(storageKey, JSON.stringify(filteredTasks));
@@ -792,7 +778,6 @@
                     alert(`✅ Операция "${operationName}" удалена`);
                 }
             } else {
-                // ДОБАВЛЕНИЕ
                 const item = order.items[itemIndex];
                 const newTask = {
                     id: taskId,
@@ -830,7 +815,7 @@
             
             renderOrdersList();
             updateStatistics();
-        }
+        };
 
         // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА С КНОПКАМИ ==============
         function createSiteRow(name, order, itemIndex, siteKey) {
@@ -1027,7 +1012,7 @@
             });
         }
 
-        // ============== ОСТАЛЬНЫЕ ФУНКЦИИ (СОЗДАНИЕ ГРУППЫ, СТАТИСТИКА И Т.Д.) ==============
+        // ============== ОСТАЛЬНЫЕ ФУНКЦИИ ==============
         function getGroupStatus(order) {
             if (!order.tasks || Object.keys(order.tasks).length === 0) return 'gray';
             let hasInProgress = false, allCompleted = true;
@@ -1064,7 +1049,7 @@
             return `Г-${date.getFullYear().toString().slice(-2)}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}-${index.toString().padStart(3,'0')}`;
         }
 
-        function createGroupOrder() {
+        window.createGroupOrder = function() {
             const groupName = document.getElementById('groupNameInput').value.trim();
             if (!groupName) { alert('Введите название группы'); return; }
             if (tempItemsList.length === 0) { alert('Добавьте хотя бы одно изделие'); return; }
@@ -1075,7 +1060,7 @@
                 groupName: groupName,
                 date: currentFilterDate,
                 number: generateOrderNumber(orders.length + 1),
-                items: tempItemsList,
+                items: JSON.parse(JSON.stringify(tempItemsList)),
                 status: 'active',
                 tasks: {},
                 extraTasks: []
@@ -1086,9 +1071,9 @@
             renderOrdersList();
             updateStatistics();
             alert(`✅ Группа "${groupName}" создана!`);
-        }
+        };
 
-        function deleteOrder(orderId) {
+        window.deleteOrder = function(orderId) {
             if (!confirm('Удалить группу?')) return;
             let orders = loadOrdersFromStorage();
             orders = orders.filter(o => o.id !== orderId);
@@ -1112,9 +1097,9 @@
             renderOrdersList();
             updateStatistics();
             alert('✅ Группа удалена');
-        }
+        };
 
-        function exportOrders() {
+        window.exportOrders = function() {
             const orders = loadOrdersFromStorage();
             if (orders.length === 0) { alert('Нет групп'); return; }
             const data = JSON.stringify({ exportDate: new Date().toISOString(), orders }, null, 2);
@@ -1123,9 +1108,9 @@
             link.href = URL.createObjectURL(blob);
             link.download = `masterx_export_${new Date().toISOString().slice(0,10)}.json`;
             link.click();
-        }
+        };
 
-        function importOrders() {
+        window.importOrders = function() {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = '.json';
@@ -1147,13 +1132,13 @@
                 alert('Импорт завершён');
             };
             input.click();
-        }
+        };
 
-        function showMaterialsReport(orderId) { alert('Отчет в разработке'); }
-        function closeMaterialsModal() { document.getElementById('materialsModal').style.display = 'none'; }
-        function addExtraTask(orderId, siteKey) { alert('Дополнительная задача будет доступна позже'); }
+        window.showMaterialsReport = function(orderId) { alert('Отчет в разработке'); };
+        window.closeMaterialsModal = function() { document.getElementById('materialsModal').style.display = 'none'; };
+        window.addExtraTask = function(orderId, siteKey) { alert('Дополнительная задача будет доступна позже'); };
 
-        function filterOrdersByDate(action) {
+        window.filterOrdersByDate = function(action) {
             const today = new Date();
             let newDate = new Date(currentFilterDate);
             if (action === 'prev') newDate.setDate(newDate.getDate() - 1);
@@ -1162,11 +1147,12 @@
             currentFilterDate = newDate.toISOString().split('T')[0];
             document.getElementById('currentFilterDate').textContent = currentFilterDate;
             renderOrdersList();
-        }
+        };
 
         // ============== ФУНКЦИИ ДЛЯ МОДАЛЬНОГО ОКНА ==============
-        function openGroupModal() { document.getElementById('groupModal').style.display = 'block'; }
-        function closeGroupModal() { document.getElementById('groupModal').style.display = 'none'; }
+        window.openGroupModal = function() { document.getElementById('groupModal').style.display = 'block'; };
+        window.closeGroupModal = function() { document.getElementById('groupModal').style.display = 'none'; };
+        
         function addBracketField() { tempBrackets.push({ type: '', quantity: 0 }); renderBracketsFields(); }
         function addLyreField() { tempLyres.push({ type: '', quantity: 0 }); renderLyresFields(); }
         
@@ -1280,26 +1266,24 @@
             populateNewItemSelects();
             initThemeToggle();
             document.getElementById('currentFilterDate').textContent = currentFilterDate;
+            
+            document.getElementById('createGroupBtn').onclick = () => openGroupModal();
+            document.getElementById('prevDateBtn').onclick = () => filterOrdersByDate('prev');
+            document.getElementById('todayDateBtn').onclick = () => filterOrdersByDate('today');
+            document.getElementById('nextDateBtn').onclick = () => filterOrdersByDate('next');
+            document.getElementById('exportBtn').onclick = () => exportOrders();
+            document.getElementById('importBtn').onclick = () => importOrders();
+            document.getElementById('addBracketBtn').onclick = () => addBracketField();
+            document.getElementById('addLyreBtn').onclick = () => addLyreField();
+            document.getElementById('addItemBtn').onclick = () => addItemToGroup();
+            document.getElementById('createGroupOrderBtn').onclick = () => createGroupOrder();
+            document.getElementById('newItemProduct').onchange = () => onNewItemProductChange();
+            
             renderOrdersList();
             updateStatistics();
             document.getElementById('searchInput')?.addEventListener('input', () => renderOrdersList());
             document.getElementById('statusFilter')?.addEventListener('change', () => renderOrdersList());
         }
-        
-        window.toggleSiteOperation = toggleSiteOperation;
-        window.openGroupModal = openGroupModal;
-        window.closeGroupModal = closeGroupModal;
-        window.addBracketField = addBracketField;
-        window.addLyreField = addLyreField;
-        window.addItemToGroup = addItemToGroup;
-        window.createGroupOrder = createGroupOrder;
-        window.exportOrders = exportOrders;
-        window.importOrders = importOrders;
-        window.showMaterialsReport = showMaterialsReport;
-        window.closeMaterialsModal = closeMaterialsModal;
-        window.addExtraTask = addExtraTask;
-        window.deleteOrder = deleteOrder;
-        window.filterOrdersByDate = filterOrdersByDate;
         
         document.addEventListener('DOMContentLoaded', initMainPage);
     </script>
