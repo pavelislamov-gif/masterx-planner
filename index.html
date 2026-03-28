@@ -848,7 +848,8 @@
     <script src="js/task-operations.js"></script>
     <script src="js/materials-report.js"></script>
     <script src="js/task-manager.js"></script>
-    <script src="js/app.js"></script>
+    <!-- app.js отключен, так как он дублирует функциональность -->
+    <!-- <script src="js/app.js"></script> -->
 
     <script>
         // ============== ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ==============
@@ -1326,7 +1327,7 @@
                 groupName: groupName,
                 date: new Date().toISOString().split('T')[0],
                 number: generateOrderNumber(orders.length + 1),
-                items: tempItemsList,
+                items: JSON.parse(JSON.stringify(tempItemsList)),
                 status: 'active',
                 tasks: {},
                 extraTasks: []
@@ -1335,12 +1336,8 @@
             orders.push(newOrder);
             saveOrdersToStorage(orders);
             
-            if (typeof createTasksForOrder === 'function') {
-                createTasksForOrder(newOrder);
-            }
-            
             closeGroupModal();
-            loadOrders();
+            renderOrdersList();
             updateStatistics();
             alert(`✅ Группа "${groupName}" успешно создана!`);
         }
@@ -1358,18 +1355,30 @@
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
+        // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ДЛЯ УЧАСТКА ==============
+        function getOperationNames(productName, siteKey) {
+            const ops = window.TASK_OPERATIONS || {};
+            const siteOps = ops[siteKey] || {};
+            if (siteOps[productName]) return siteOps[productName];
+            for (let key in siteOps) {
+                if (productName && productName.includes(key)) return siteOps[key];
+            }
+            return [];
+        }
+
         // ============== ОТОБРАЖЕНИЕ СПИСКА ГРУПП ==============
         function renderOrdersList() {
             const ordersList = document.getElementById('ordersList');
             if (!ordersList) return;
 
             const orders = loadOrdersFromStorage() || [];
-            const searchText = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            const searchText = document.getElementById('searchInput')?.value?.toLowerCase() || '';
             const statusFilter = document.getElementById('statusFilter')?.value || 'all';
             
             let filteredOrders = orders.filter(order => {
+                if (!order.groupName) return false;
                 const matchSearch = order.groupName.toLowerCase().includes(searchText) ||
-                    order.items.some(item => item.product.toLowerCase().includes(searchText));
+                    (order.items && order.items.some(item => item.product && item.product.toLowerCase().includes(searchText)));
                 if (!matchSearch) return false;
                 
                 const groupStatus = getGroupStatus(order);
@@ -1404,7 +1413,7 @@
                         <div>
                             <h3>📁 ${escapeHtml(order.groupName)}</h3>
                             <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
-                                Изделий: ${order.items.length} | №${order.number}
+                                Изделий: ${order.items ? order.items.length : 0} | №${order.number || '---'}
                                 ${groupStatus === 'green' ? ' | ✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? ' | ⚡ В РАБОТЕ' : ' | ⏳ ОЖИДАЕТ')}
                             </div>
                         </div>
@@ -1419,64 +1428,66 @@
                 content.className = 'order-content';
                 content.style.display = 'none';
 
-                order.items.forEach((item, itemIndex) => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.style.marginBottom = '20px';
-                    itemDiv.style.border = '1px solid #2a2f38';
-                    itemDiv.style.borderRadius = '8px';
-                    itemDiv.style.overflow = 'hidden';
+                if (order.items && order.items.length > 0) {
+                    order.items.forEach((item, itemIndex) => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.style.marginBottom = '20px';
+                        itemDiv.style.border = '1px solid #2a2f38';
+                        itemDiv.style.borderRadius = '8px';
+                        itemDiv.style.overflow = 'hidden';
 
-                    const itemHeader = document.createElement('div');
-                    itemHeader.style.padding = '10px 15px';
-                    itemHeader.style.background = '#232830';
-                    itemHeader.style.cursor = 'pointer';
-                    itemHeader.style.display = 'flex';
-                    itemHeader.style.justifyContent = 'space-between';
-                    itemHeader.innerHTML = `
-                        <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product)}</span>
-                        <span>▼</span>
-                    `;
+                        const itemHeader = document.createElement('div');
+                        itemHeader.style.padding = '10px 15px';
+                        itemHeader.style.background = '#232830';
+                        itemHeader.style.cursor = 'pointer';
+                        itemHeader.style.display = 'flex';
+                        itemHeader.style.justifyContent = 'space-between';
+                        itemHeader.innerHTML = `
+                            <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
+                            <span>▼</span>
+                        `;
 
-                    const itemContent = document.createElement('div');
-                    itemContent.style.padding = '15px';
-                    itemContent.style.display = 'none';
+                        const itemContent = document.createElement('div');
+                        itemContent.style.padding = '15px';
+                        itemContent.style.display = 'none';
 
-                    let bracketsHtml = item.brackets && item.brackets.length > 0 ? 
-                        item.brackets.map(b => `<span>${b.type}: ${b.quantity} шт</span>`).join(', ') : 'нет';
-                    
-                    let lyresHtml = item.lyres && item.lyres.length > 0 ? 
-                        item.lyres.map(l => `<span>${l.type}: ${l.quantity} шт</span>`).join(', ') : 'нет';
+                        let bracketsHtml = item.brackets && item.brackets.length > 0 ? 
+                            item.brackets.map(b => `<span>${b.type}: ${b.quantity} шт</span>`).join(', ') : 'нет';
+                        
+                        let lyresHtml = item.lyres && item.lyres.length > 0 ? 
+                            item.lyres.map(l => `<span>${l.type}: ${l.quantity} шт</span>`).join(', ') : 'нет';
 
-                    itemContent.innerHTML = `
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #2a2f38;">
-                            <div>📏 Размер: ${escapeHtml(item.size?.name)} x ${item.size?.quantity} шт</div>
-                            <div>📐 Профиль: ${item.profileLength?.meters} м x ${item.profileLength?.quantity} шт</div>
-                            <div>🔧 Кронштейны: ${bracketsHtml}</div>
-                            <div>🎸 Лиры: ${lyresHtml}</div>
-                            <div>🎨 RAL: ${item.ral || '-'} / ${item.texture || '-'}</div>
-                        </div>
-                        <div id="sites-${order.id}-${itemIndex}" class="sites-section">
-                            <h4 style="margin-bottom: 10px;">🏭 Производственные участки</h4>
-                            <div class="sites-grid">
-                                ${createSiteRow('🔧 Токарный', order, itemIndex, 'tokarniy')}
-                                ${createSiteRow('🔨 Слесарный', order, itemIndex, 'slesarniy')}
-                                ${createSiteRow('⚙️ Фрезерный', order, itemIndex, 'frezerniy')}
-                                ${createSiteRow('✨ Лазерно-гибочный', order, itemIndex, 'lazerno')}
-                                ${createSiteRow('🧪 Полимерный', order, itemIndex, 'polimerniy')}
+                        itemContent.innerHTML = `
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #2a2f38;">
+                                <div>📏 Размер: ${escapeHtml(item.size?.name || '-')} x ${item.size?.quantity || 0} шт</div>
+                                <div>📐 Профиль: ${item.profileLength?.meters || 0} м x ${item.profileLength?.quantity || 0} шт</div>
+                                <div>🔧 Кронштейны: ${bracketsHtml}</div>
+                                <div>🎸 Лиры: ${lyresHtml}</div>
+                                <div>🎨 RAL: ${item.ral || '-'} / ${item.texture || '-'}</div>
                             </div>
-                        </div>
-                    `;
+                            <div id="sites-${order.id}-${itemIndex}" class="sites-section">
+                                <h4 style="margin-bottom: 10px;">🏭 Производственные участки</h4>
+                                <div class="sites-grid">
+                                    ${createSiteRow('🔧 Токарный', order, itemIndex, 'tokarniy')}
+                                    ${createSiteRow('🔨 Слесарный', order, itemIndex, 'slesarniy')}
+                                    ${createSiteRow('⚙️ Фрезерный', order, itemIndex, 'frezerniy')}
+                                    ${createSiteRow('✨ Лазерно-гибочный', order, itemIndex, 'lazerno')}
+                                    ${createSiteRow('🧪 Полимерный', order, itemIndex, 'polimerniy')}
+                                </div>
+                            </div>
+                        `;
 
-                    itemHeader.onclick = () => {
-                        const isVisible = itemContent.style.display !== 'none';
-                        itemContent.style.display = isVisible ? 'none' : 'block';
-                        itemHeader.querySelector('span:last-child').textContent = isVisible ? '▼' : '▲';
-                    };
+                        itemHeader.onclick = () => {
+                            const isVisible = itemContent.style.display !== 'none';
+                            itemContent.style.display = isVisible ? 'none' : 'block';
+                            itemHeader.querySelector('span:last-child').textContent = isVisible ? '▼' : '▲';
+                        };
 
-                    itemDiv.appendChild(itemHeader);
-                    itemDiv.appendChild(itemContent);
-                    content.appendChild(itemDiv);
-                });
+                        itemDiv.appendChild(itemHeader);
+                        itemDiv.appendChild(itemContent);
+                        content.appendChild(itemDiv);
+                    });
+                }
 
                 header.onclick = (e) => {
                     if (e.target.tagName === 'BUTTON') return;
@@ -1497,7 +1508,7 @@
 
             const operations = getOperationNames(item.product, siteKey);
 
-            if (operations.length === 0) {
+            if (!operations || operations.length === 0) {
                 return `
                     <div class="site-item">
                         <span class="site-name">${name}</span>
@@ -1560,21 +1571,11 @@
             `;
         }
 
-        function getOperationNames(productName, siteKey) {
-            const ops = window.TASK_OPERATIONS || {};
-            const siteOps = ops[siteKey] || {};
-            if (siteOps[productName]) return siteOps[productName];
-            for (let key in siteOps) {
-                if (productName.includes(key)) return siteOps[key];
-            }
-            return [];
-        }
-
         // ============== СТАТИСТИКА ==============
         function updateStatistics() {
             const orders = loadOrdersFromStorage() || [];
             const totalOrders = orders.length;
-            const totalItems = orders.reduce((sum, order) => sum + order.items.length, 0);
+            const totalItems = orders.reduce((sum, order) => sum + (order.items ? order.items.length : 0), 0);
             
             let activeTasks = 0;
             let completedTasks = 0;
