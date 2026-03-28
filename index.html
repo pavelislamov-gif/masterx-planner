@@ -678,6 +678,27 @@
             margin-bottom: 6px;
             border: 1px solid #2a2f38;
         }
+
+        /* Стили для профилей */
+        .profile-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #1e232b;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            border: 1px solid #2a2f38;
+        }
+
+        .profile-name-custom {
+            min-width: 180px;
+            padding: 4px;
+            background: #15191f;
+            border: 1px solid #2a2f38;
+            border-radius: 4px;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -779,6 +800,13 @@
                                 </select>
                                 <input type="number" id="newItemSizeQuantity" placeholder="Кол-во" min="1" value="1">
                             </div>
+                        </div>
+
+                        <!-- БЛОК ПРОФИЛЕЙ -->
+                        <div id="profilesContainer" style="display: none;">
+                            <div class="components-title">📐 ПРОФИЛИ:</div>
+                            <div id="profilesList"></div>
+                            <button type="button" class="btn-outline" onclick="addCustomProfile()" style="margin-top: 5px; width: 100%;">+ Добавить профиль</button>
                         </div>
 
                         <!-- Блок с деталями из техкарты -->
@@ -932,6 +960,7 @@
         let productDetailsData = {};
         let tempBrackets = [];
         let tempLyres = [];
+        let tempProfiles = [];
 
         // ============== ЗАГРУЗКА ДАННЫХ О ДЕТАЛЯХ ==============
         async function loadProductDetails() {
@@ -1042,12 +1071,137 @@
             }
         }
 
+        // ============== ФУНКЦИИ ДЛЯ РАБОТЫ С ПРОФИЛЯМИ ==============
+        function addCustomProfile() {
+            const profilesList = document.getElementById('profilesList');
+            if (!profilesList) return;
+            
+            const idx = tempProfiles.length;
+            tempProfiles.push({
+                name: '',
+                material: 'алюминий',
+                lengthMm: 0,
+                quantity: 1,
+                isCustom: true
+            });
+            
+            renderProfilesList();
+        }
+
+        function removeCustomProfile(index) {
+            if (index >= 0 && index < tempProfiles.length && tempProfiles[index].isCustom) {
+                tempProfiles.splice(index, 1);
+                renderProfilesList();
+            }
+        }
+
+        function renderProfilesList() {
+            const profilesList = document.getElementById('profilesList');
+            if (!profilesList) return;
+            
+            if (tempProfiles.length === 0) {
+                document.getElementById('profilesContainer').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('profilesContainer').style.display = 'block';
+            let profilesHtml = '';
+            
+            tempProfiles.forEach((profile, idx) => {
+                if (profile.isCustom) {
+                    profilesHtml += `
+                        <div class="profile-item" data-profile-index="${idx}">
+                            <input type="text" 
+                                   class="profile-name-custom" 
+                                   data-profile-index="${idx}"
+                                   value="${escapeHtml(profile.name)}"
+                                   placeholder="Название профиля"
+                                   style="min-width: 180px; padding: 4px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="number" 
+                                       class="profile-length-custom" 
+                                       data-profile-index="${idx}"
+                                       value="${profile.lengthMm}" 
+                                       min="0" 
+                                       step="1"
+                                       style="width: 90px; padding: 4px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                                <span style="color: #a0a0a0;">мм</span>
+                                <input type="number" 
+                                       class="profile-qty-custom" 
+                                       data-profile-index="${idx}"
+                                       value="${profile.quantity}" 
+                                       min="0" 
+                                       style="width: 70px; padding: 4px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                                <span style="color: #a0a0a0;">шт</span>
+                                <button class="remove-profile-btn" onclick="removeCustomProfile(${idx})" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer;">✕</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    profilesHtml += `
+                        <div class="profile-item" data-profile-index="${idx}">
+                            <span style="font-size: 13px; min-width: 180px;">${escapeHtml(profile.name)}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="number" 
+                                       class="profile-length" 
+                                       data-profile-index="${idx}"
+                                       value="${profile.lengthMm}" 
+                                       min="0" 
+                                       step="1"
+                                       style="width: 90px; padding: 4px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                                <span style="color: #a0a0a0;">мм</span>
+                                <input type="number" 
+                                       class="profile-qty" 
+                                       data-profile-index="${idx}"
+                                       value="${profile.quantity}" 
+                                       min="0" 
+                                       style="width: 70px; padding: 4px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                                <span style="color: #a0a0a0;">шт</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            profilesList.innerHTML = profilesHtml;
+            
+            // Добавляем обработчики
+            document.querySelectorAll('#profilesList .profile-length, #profilesList .profile-length-custom').forEach(input => {
+                const profileIdx = parseInt(input.dataset.profileIndex);
+                input.addEventListener('change', function() {
+                    if (tempProfiles[profileIdx]) {
+                        tempProfiles[profileIdx].lengthMm = parseInt(this.value) || 0;
+                    }
+                });
+            });
+            
+            document.querySelectorAll('#profilesList .profile-qty, #profilesList .profile-qty-custom').forEach(input => {
+                const profileIdx = parseInt(input.dataset.profileIndex);
+                input.addEventListener('change', function() {
+                    if (tempProfiles[profileIdx]) {
+                        tempProfiles[profileIdx].quantity = parseInt(this.value) || 0;
+                    }
+                });
+            });
+            
+            document.querySelectorAll('#profilesList .profile-name-custom').forEach(input => {
+                const profileIdx = parseInt(input.dataset.profileIndex);
+                input.addEventListener('change', function() {
+                    if (tempProfiles[profileIdx]) {
+                        tempProfiles[profileIdx].name = this.value;
+                    }
+                });
+            });
+        }
+
         // ============== ОБНОВЛЕНИЕ ПРИ ВЫБОРЕ ИЗДЕЛИЯ ==============
         function onNewItemProductChange() {
             const productName = document.getElementById('newItemProduct').value;
             const sizeSelect = document.getElementById('newItemSize');
             const detailsContainer = document.getElementById('detailsContainer');
             const detailsList = document.getElementById('detailsList');
+            const profilesContainer = document.getElementById('profilesContainer');
+            const profilesList = document.getElementById('profilesList');
             const componentsContainer = document.getElementById('newItemComponentsContainer');
             const componentsList = document.getElementById('newItemComponentsList');
 
@@ -1068,10 +1222,28 @@
             // Загружаем детали из productDetails.json
             const productDetails = productDetailsData.products?.[productName]?.details || [];
             
-            if (productDetails.length > 0) {
+            // Разделяем детали и профили
+            const regularDetails = productDetails.filter(d => 
+                !d.name.includes('Профиль') && 
+                !d.name.includes('профиль') &&
+                !d.name.includes('НПС') &&
+                !d.name.includes('МП') &&
+                !d.name.includes('КП')
+            );
+            
+            const profilesFromDetails = productDetails.filter(d => 
+                d.name.includes('Профиль') || 
+                d.name.includes('профиль') ||
+                d.name.includes('НПС') ||
+                d.name.includes('МП') ||
+                d.name.includes('КП')
+            );
+            
+            // Обычные детали
+            if (regularDetails.length > 0) {
                 detailsContainer.style.display = 'block';
                 let detailsHtml = '';
-                productDetails.forEach((detail) => {
+                regularDetails.forEach((detail) => {
                     detailsHtml += `
                         <div class="detail-item">
                             <span style="font-size: 13px;">${escapeHtml(detail.name)}</span>
@@ -1091,7 +1263,23 @@
                 detailsList.innerHTML = detailsHtml;
             } else {
                 detailsContainer.style.display = 'none';
-                detailsList.innerHTML = '';
+            }
+            
+            // Профили
+            tempProfiles = [];
+            if (profilesFromDetails.length > 0) {
+                profilesFromDetails.forEach(profile => {
+                    tempProfiles.push({
+                        name: profile.name,
+                        material: profile.material,
+                        lengthMm: 0,
+                        quantity: profile.quantity,
+                        isCustom: false
+                    });
+                });
+                renderProfilesList();
+            } else {
+                profilesContainer.style.display = 'none';
             }
 
             // Загружаем комплектующие
@@ -1118,16 +1306,33 @@
         // ============== СБОР ДЕТАЛЕЙ ИЗ ФОРМЫ ==============
         function collectDetailsFromForm() {
             const details = [];
+            
+            // Обычные детали
             document.querySelectorAll('#detailsList .detail-qty').forEach(input => {
                 const qty = parseInt(input.value) || 0;
                 if (qty > 0) {
                     details.push({
                         name: input.dataset.detailName,
                         material: input.dataset.detailMaterial,
-                        quantity: qty
+                        quantity: qty,
+                        type: 'detail'
                     });
                 }
             });
+            
+            // Профили
+            tempProfiles.forEach(profile => {
+                if (profile.name && profile.quantity > 0) {
+                    details.push({
+                        name: profile.name,
+                        material: profile.material,
+                        lengthMm: profile.lengthMm,
+                        quantity: profile.quantity,
+                        type: 'profile'
+                    });
+                }
+            });
+            
             return details;
         }
 
@@ -1136,6 +1341,7 @@
             tempItemsList = [];
             tempBrackets = [];
             tempLyres = [];
+            tempProfiles = [];
             updateItemsListDisplay();
             resetAddItemForm();
             document.getElementById('groupNameInput').value = '';
@@ -1156,11 +1362,14 @@
             document.getElementById('newItemTexture').value = '';
             document.getElementById('detailsContainer').style.display = 'none';
             document.getElementById('detailsList').innerHTML = '';
+            document.getElementById('profilesContainer').style.display = 'none';
+            document.getElementById('profilesList').innerHTML = '';
             document.getElementById('newItemComponentsContainer').style.display = 'none';
             document.getElementById('newItemComponentsList').innerHTML = '';
             
             tempBrackets = [];
             tempLyres = [];
+            tempProfiles = [];
             renderBracketsFields();
             renderLyresFields();
         }
@@ -1296,8 +1505,15 @@
                 let lyresHtml = item.lyres && item.lyres.length > 0 ? 
                     item.lyres.map(l => `<span>${l.type}: ${l.quantity} шт</span>`).join('') : '<span>нет</span>';
                 
-                let detailsHtml = item.details && item.details.length > 0 ? 
-                    item.details.map(d => `<span>${d.name}: ${d.quantity} шт</span>`).join(', ') : '';
+                // Разделяем детали и профили
+                const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
+                const profiles = (item.details || []).filter(d => d.type === 'profile');
+                
+                let regularDetailsHtml = regularDetails.length > 0 ? 
+                    regularDetails.map(d => `<span>${d.name}: ${d.quantity} шт</span>`).join('') : '';
+                
+                let profilesHtml = profiles.length > 0 ? 
+                    profiles.map(p => `<span>${p.name}: ${p.lengthMm}мм x ${p.quantity} шт</span>`).join('') : '';
                 
                 let componentsHtml = item.components && item.components.length > 0 ? 
                     item.components.map(comp => `<span>${comp.name}: ${comp.quantity} шт</span>`).join('') : '';
@@ -1310,11 +1526,11 @@
                         </div>
                         <div class="item-card-content">
                             <div>📏 Размер: ${escapeHtml(item.size?.name || '-')} x ${item.size?.quantity || 0} шт</div>
-                            <div>📐 Профиль: ${item.profileLength?.meters || 0} м x ${item.profileLength?.quantity || 0} шт</div>
                             <div>🔧 Кронштейны: ${bracketsHtml}</div>
                             <div>🎸 Лиры: ${lyresHtml}</div>
                             <div>🎨 RAL: ${item.ral || '-'} / ${item.texture || '-'}</div>
-                            ${detailsHtml ? `<div>🔩 Детали: ${detailsHtml}</div>` : ''}
+                            ${regularDetailsHtml ? `<div>🔩 Детали: ${regularDetailsHtml}</div>` : ''}
+                            ${profilesHtml ? `<div>📐 Профили: ${profilesHtml}</div>` : ''}
                             ${componentsHtml ? `<div>🔩 Комплектующие: ${componentsHtml}</div>` : ''}
                         </div>
                     </div>
@@ -1382,10 +1598,6 @@
                 size: {
                     name: sizeName,
                     quantity: parseInt(document.getElementById('newItemSizeQuantity').value) || 1
-                },
-                profileLength: {
-                    meters: parseFloat(document.getElementById('newItemProfileMeters').value) || 0,
-                    quantity: parseInt(document.getElementById('newItemProfileQuantity').value) || 1
                 },
                 brackets: brackets,
                 lyres: lyres,
@@ -1549,17 +1761,24 @@
                         let lyresHtml = item.lyres && item.lyres.length > 0 ? 
                             item.lyres.map(l => `<span>${l.type}: ${l.quantity} шт</span>`).join(', ') : 'нет';
                         
-                        let detailsHtml = item.details && item.details.length > 0 ? 
-                            item.details.map(d => `<span>${d.name}: ${d.quantity} шт</span>`).join(', ') : '';
+                        // Разделяем детали и профили
+                        const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
+                        const profiles = (item.details || []).filter(d => d.type === 'profile');
+                        
+                        let regularDetailsHtml = regularDetails.length > 0 ? 
+                            regularDetails.map(d => `<span>${d.name}: ${d.quantity} шт</span>`).join(', ') : '';
+                        
+                        let profilesHtml = profiles.length > 0 ? 
+                            profiles.map(p => `<span>${p.name}: ${p.lengthMm}мм x ${p.quantity} шт</span>`).join(', ') : '';
 
                         itemContent.innerHTML = `
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #2a2f38;">
                                 <div>📏 Размер: ${escapeHtml(item.size?.name || '-')} x ${item.size?.quantity || 0} шт</div>
-                                <div>📐 Профиль: ${item.profileLength?.meters || 0} м x ${item.profileLength?.quantity || 0} шт</div>
                                 <div>🔧 Кронштейны: ${bracketsHtml}</div>
                                 <div>🎸 Лиры: ${lyresHtml}</div>
                                 <div>🎨 RAL: ${item.ral || '-'} / ${item.texture || '-'}</div>
-                                ${detailsHtml ? `<div>🔩 Детали: ${detailsHtml}</div>` : ''}
+                                ${regularDetailsHtml ? `<div>🔩 Детали: ${regularDetailsHtml}</div>` : ''}
+                                ${profilesHtml ? `<div>📐 Профили: ${profilesHtml}</div>` : ''}
                             </div>
                             <div id="sites-${order.id}-${itemIndex}" class="sites-section">
                                 <h4 style="margin-bottom: 10px;">🏭 Производственные участки</h4>
@@ -1909,6 +2128,8 @@
         window.addExtraTask = addExtraTask;
         window.deleteOrder = deleteOrder;
         window.toggleSiteOperation = toggleSiteOperation;
+        window.addCustomProfile = addCustomProfile;
+        window.removeCustomProfile = removeCustomProfile;
 
         document.addEventListener('DOMContentLoaded', initMainPage);
     </script>
