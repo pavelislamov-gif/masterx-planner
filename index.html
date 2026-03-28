@@ -6,39 +6,9 @@
     <title>MasterX - Планировщик производства</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* ========== СТИЛИ ========== */
+        /* Дополнительные стили */
         .order-content {
             transition: opacity 0.2s ease;
-        }
-
-        .date-filter-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 15px 20px;
-            background: linear-gradient(135deg, #1a1e24, #0f1217);
-            border-radius: 12px;
-            border: 1px solid #2a2f38;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .date-filter-buttons {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .current-date-display {
-            color: #ff3b3b;
-            font-weight: 500;
-            background: #1a1e24;
-            padding: 8px 18px;
-            border-radius: 25px;
-            border: 1px solid #2a2f38;
-            font-size: 14px;
         }
 
         .group-modal-content {
@@ -99,6 +69,7 @@
             border: 1px solid #2a2f38;
             border-radius: 8px;
             padding: 12px;
+            position: relative;
         }
 
         .item-card-header {
@@ -139,6 +110,10 @@
             font-size: 12px;
         }
 
+        .remove-item-btn:hover {
+            background: #c82333;
+        }
+
         .form-group {
             margin-bottom: 15px;
         }
@@ -150,8 +125,7 @@
             color: #a0a0a0;
         }
 
-        .form-group input,
-        .form-group select {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 8px 10px;
             background: #1e232b;
@@ -183,6 +157,11 @@
             cursor: pointer;
             font-size: 12px;
             margin-top: 5px;
+        }
+
+        .btn-outline:hover {
+            border-color: #ff3b3b;
+            color: #ff3b3b;
         }
 
         .position-item {
@@ -255,6 +234,17 @@
             text-align: center;
         }
 
+        .component-remove {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 10px;
+            margin-left: 8px;
+        }
+
         .empty-items {
             text-align: center;
             padding: 40px;
@@ -268,6 +258,7 @@
             justify-content: flex-end;
         }
 
+        /* СТАТУСЫ ГРУППЫ */
         .order-header.status-green {
             background: linear-gradient(135deg, #1a3a1a, #0f2a0f);
             border-left: 4px solid #2ecc71;
@@ -283,6 +274,7 @@
             border-left: 4px solid #6c757d;
         }
 
+        /* СТАТИСТИКА */
         .order-stats {
             display: flex;
             gap: 20px;
@@ -330,6 +322,7 @@
             letter-spacing: 0.5px;
         }
 
+        /* ФИЛЬТРЫ */
         .filter-section {
             display: flex;
             gap: 15px;
@@ -348,6 +341,7 @@
             color: #e0e0e0;
         }
 
+        /* НАВИГАЦИЯ ПО УЧАСТКАМ */
         .sites-navigation {
             background: linear-gradient(135deg, #1a1e24, #0f1217);
             padding: 15px 25px;
@@ -377,8 +371,10 @@
         .site-link:hover {
             background: linear-gradient(135deg, #ff3b3b, #cc2e2e);
             color: white;
+            border-color: #ff3b3b;
         }
 
+        /* ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ */
         .theme-switch-wrapper {
             display: flex;
             align-items: center;
@@ -429,9 +425,49 @@
             background-color: #fff;
         }
 
+        /* СВЕТЛАЯ ТЕМА - ШАПКА ОСТАЁТСЯ ТЁМНОЙ */
         body.light-theme {
             background-color: #f0f2f5 !important;
             color: #1e293b !important;
+        }
+
+        body.light-theme .container {
+            background-color: #f0f2f5 !important;
+        }
+
+        body.light-theme header {
+            background: linear-gradient(135deg, #1a1e24, #0f1217) !important;
+            border: 1px solid #2a2f38 !important;
+        }
+
+        body.light-theme .logo-text {
+            color: #ffffff !important;
+        }
+
+        body.light-theme .btn {
+            background: #2a2f38 !important;
+            color: #e0e0e0 !important;
+            border: 1px solid #3a404b !important;
+        }
+
+        body.light-theme .btn-primary {
+            background: linear-gradient(135deg, #0057b3, #003d80) !important;
+            color: white !important;
+        }
+
+        body.light-theme .btn-success {
+            background: linear-gradient(135deg, #1a7f3d, #0e5a2a) !important;
+            color: white !important;
+        }
+
+        body.light-theme .btn-danger {
+            background: linear-gradient(135deg, #b33c3c, #8b2e2e) !important;
+            color: white !important;
+        }
+
+        body.light-theme .btn-info {
+            background: linear-gradient(135deg, #1f8a9c, #146b7a) !important;
+            color: white !important;
         }
 
         body.light-theme .order-card {
@@ -441,167 +477,148 @@
 
         body.light-theme .order-header {
             background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
+            border-bottom: 1px solid #e2e8f0 !important;
         }
 
-        .site-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 20px;
-            background: #1a1e24;
-            border-radius: 8px;
-            border: 1px solid #2a2f38;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-            gap: 15px;
+        body.light-theme .order-header h3 {
+            color: #1e293b !important;
         }
 
-        .squares {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            align-items: flex-start;
+        body.light-theme .site-item {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
         }
 
-        .operation-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0 5px;
+        body.light-theme .site-name {
+            color: #1e293b !important;
         }
 
-        .op-toggle-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: none;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        body.light-theme .square {
+            background: #e9ecef !important;
+            border: 1px solid #dee2e6 !important;
         }
 
-        .square {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            background: #1e232b;
-            border: 2px solid #3a404b;
-            transition: all 0.2s;
-            cursor: pointer;
+        body.light-theme .square.orange {
+            background-color: #f97316 !important;
         }
 
-        .square.orange {
-            background-color: #ff9800;
-            border-color: #e65100;
+        body.light-theme .square.green {
+            background-color: #22c55e !important;
         }
 
-        .operation-name-small {
-            font-size: 10px;
-            margin-top: 4px;
-            color: #a0a0a0;
-            text-align: center;
-            max-width: 60px;
-            word-break: break-word;
+        body.light-theme .square.red {
+            background-color: #ef4444 !important;
         }
 
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
+        body.light-theme .order-stats {
+            background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+            border: 1px solid #e2e8f0 !important;
         }
 
-        .btn-primary {
-            background: #007bff;
-            color: white;
+        body.light-theme .stat-item {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
         }
 
-        .btn-success {
-            background: #28a745;
-            color: white;
+        body.light-theme .stat-label {
+            color: #64748b !important;
         }
 
-        .btn-danger {
-            background: #dc3545;
-            color: white;
+        body.light-theme .sites-navigation {
+            background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+            border: 1px solid #e2e8f0 !important;
         }
 
-        .btn-info {
-            background: #17a2b8;
-            color: white;
+        body.light-theme .sites-navigation h3 {
+            color: #1e293b !important;
         }
 
-        .btn-sm {
-            padding: 4px 10px;
-            font-size: 11px;
+        body.light-theme .site-link {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #334155 !important;
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
+        body.light-theme .search-box {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #1e293b !important;
         }
 
-        .modal-content {
-            background: linear-gradient(135deg, #1a1e24, #0f1217);
-            margin: 2% auto;
-            padding: 20px;
-            width: 90%;
-            max-width: 600px;
-            border-radius: 12px;
-            border: 1px solid #2a2f38;
+        body.light-theme .add-item-panel {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
         }
 
-        .close {
-            float: right;
-            font-size: 28px;
-            cursor: pointer;
-            color: #a0a0a0;
+        body.light-theme .items-list-panel {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 50px;
-            background: #1a1e24;
-            border-radius: 12px;
-            color: #a0a0a0;
+        body.light-theme .item-card {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .item-card-content div {
+            background: #f1f5f9 !important;
+            color: #1e293b !important;
+        }
+
+        body.light-theme .form-group label {
+            color: #64748b !important;
+        }
+
+        body.light-theme .form-group input,
+        body.light-theme .form-group select {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #1e293b !important;
+        }
+
+        body.light-theme .modal-content {
+            background: linear-gradient(135deg, #ffffff, #fefefe) !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .close {
+            background: #f8fafc !important;
+            color: #64748b !important;
+        }
+
+        body.light-theme .empty-state {
+            background: #ffffff !important;
+            border: 2px dashed #e2e8f0 !important;
+            color: #64748b !important;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- ШАПКА -->
         <header>
             <div class="logo-container">
                 <img src="images/logo.png" alt="MasterX Logo" class="logo-img" onerror="this.style.display='none'">
-                <div class="logo-text">Master<span class="x-red">X</span></div>
+                <div class="logo-text">
+                    Master<span class="x-red">X</span>
+                </div>
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
-                <button class="btn btn-primary" id="createGroupBtn">+ Создать группу</button>
+                <button class="btn btn-primary" onclick="openGroupModal()">
+                    <span style="font-size: 20px; margin-right: 5px;">+</span> Создать группу
+                </button>
                 <div class="theme-switch-wrapper">
-                    <span>🌙</span>
+                    <span style="font-size: 14px;">🌙</span>
                     <label class="theme-switch">
                         <input type="checkbox" id="themeToggle">
                         <span class="slider"></span>
                     </label>
-                    <span>☀️</span>
+                    <span style="font-size: 14px;">☀️</span>
                 </div>
             </div>
         </header>
 
+        <!-- НАВИГАЦИЯ ПО УЧАСТКАМ -->
         <div class="sites-navigation">
             <h3>🏭 Производственные участки:</h3>
             <div class="sites-links">
@@ -613,98 +630,148 @@
             </div>
         </div>
 
-        <div class="date-filter-section">
-            <div class="date-filter-buttons">
-                <button class="btn btn-primary" id="prevDateBtn">← Вчера</button>
-                <button class="btn btn-success" id="todayDateBtn">Сегодня</button>
-                <button class="btn btn-primary" id="nextDateBtn">Завтра →</button>
-            </div>
-            <span id="currentFilterDate" class="current-date-display">Загрузка...</span>
-        </div>
-
+        <!-- СТАТИСТИКА -->
         <div class="order-stats">
-            <div class="stat-item"><div class="stat-value" id="totalOrders">0</div><div class="stat-label">Всего групп</div></div>
-            <div class="stat-item"><div class="stat-value" id="totalItems">0</div><div class="stat-label">Изделий</div></div>
-            <div class="stat-item"><div class="stat-value" id="activeTasks">0</div><div class="stat-label">В работе</div></div>
-            <div class="stat-item"><div class="stat-value" id="completedTasks">0</div><div class="stat-label">Выполнено</div></div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalOrders">0</div>
+                <div class="stat-label">Всего групп</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalItems">0</div>
+                <div class="stat-label">Изделий</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="activeTasks">0</div>
+                <div class="stat-label">В работе</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="completedTasks">0</div>
+                <div class="stat-label">Выполнено</div>
+            </div>
         </div>
 
+        <!-- ФИЛЬТРЫ И ПОИСК -->
         <div class="filter-section">
-            <input type="text" class="search-box" placeholder="🔍 Поиск..." id="searchInput">
+            <input type="text" class="search-box" placeholder="🔍 Поиск по названию группы или изделию..." id="searchInput">
             <select id="statusFilter" class="search-box" style="width: auto;">
                 <option value="all">Все статусы</option>
                 <option value="active">Активные</option>
                 <option value="completed">Завершённые</option>
             </select>
-            <button class="btn btn-primary" id="exportBtn">📥 Экспорт</button>
-            <button class="btn btn-success" id="importBtn">📤 Импорт</button>
+            <button class="btn btn-primary" onclick="exportOrders()">📥 Экспорт заказов</button>
+            <button class="btn btn-success" onclick="importOrders()">📤 Импорт заказов</button>
         </div>
 
-        <div id="ordersList"></div>
-    </div>
+        <!-- МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ГРУППЫ -->
+        <div id="groupModal" class="modal">
+            <div class="modal-content group-modal-content">
+                <span class="close" onclick="closeGroupModal()">&times;</span>
+                <h2>📁 Создание группы заказов</h2>
 
-    <!-- МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ГРУППЫ -->
-    <div id="groupModal" class="modal">
-        <div class="modal-content group-modal-content">
-            <span class="close" onclick="closeGroupModal()">&times;</span>
-            <h2>📁 Создание группы заказов</h2>
-            <div class="form-group">
-                <label>Название группы:</label>
-                <input type="text" id="groupNameInput" placeholder="Например: Санкт-Петербург КИ000004020">
-            </div>
-            <div class="group-modal-layout">
-                <div class="add-item-panel">
-                    <h3>➕ Добавить изделие</h3>
-                    <div class="form-group">
-                        <label>Изделие:</label>
-                        <select id="newItemProduct">
-                            <option value="">Выберите изделие</option>
-                        </select>
+                <div class="form-group">
+                    <label>🏷️ Название группы:</label>
+                    <input type="text" id="groupNameInput" placeholder="Например: Санкт Петербург КИ000004020" required>
+                </div>
+
+                <div class="group-modal-layout">
+                    <div class="add-item-panel">
+                        <h3>➕ Добавить изделие</h3>
+                        
+                        <div class="form-group">
+                            <label>Изделие:</label>
+                            <select id="newItemProduct" onchange="onNewItemProductChange()">
+                                <option value="">Выберите изделие</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Размер:</label>
+                            <div class="size-quantity-row">
+                                <select id="newItemSize">
+                                    <option value="">Сначала выберите изделие</option>
+                                </select>
+                                <input type="number" id="newItemSizeQuantity" placeholder="Кол-во" min="1" value="1">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Профиль (метры):</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="number" id="newItemProfileMeters" placeholder="метры" step="0.1" min="0" value="0" style="flex: 1;">
+                                <input type="number" id="newItemProfileQuantity" placeholder="кол-во" min="1" value="1" style="flex: 1;">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Кронштейны:</label>
+                            <div id="bracketsListContainer"></div>
+                            <button type="button" class="btn-outline" onclick="addBracketField()">+ Добавить кронштейн</button>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Лиры:</label>
+                            <div id="lyresListContainer"></div>
+                            <button type="button" class="btn-outline" onclick="addLyreField()">+ Добавить лиру</button>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div class="form-group">
+                                <label>RAL:</label>
+                                <input type="text" id="newItemRal" placeholder="Например: RAL 9003">
+                            </div>
+                            <div class="form-group">
+                                <label>Текстура:</label>
+                                <select id="newItemTexture">
+                                    <option value="">Выберите текстуру</option>
+                                    <option value="матовая">Матовая</option>
+                                    <option value="глянцевая">Глянцевая</option>
+                                    <option value="сатиновая">Муар</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="newItemComponentsContainer" class="components-section" style="display: none;">
+                            <div class="components-title">🔧 Комплектующие:</div>
+                            <div id="newItemComponentsList"></div>
+                        </div>
+
+                        <button type="button" class="btn btn-success" onclick="addItemToGroup()" style="width: 100%; margin-top: 15px;">
+                            ✅ Добавить изделие в группу
+                        </button>
                     </div>
-                    <div class="form-group">
-                        <label>Размер:</label>
-                        <div class="size-quantity-row">
-                            <select id="newItemSize"><option value="">Сначала выберите изделие</option></select>
-                            <input type="number" id="newItemSizeQuantity" placeholder="Кол-во" min="1" value="1">
+
+                    <div class="items-list-panel">
+                        <h3>
+                            📦 Добавленные изделия
+                            <span id="itemsCount" style="font-size: 12px; color: #ff3b3b;">0</span>
+                        </h3>
+                        <div id="itemsListContainer" class="items-list-container">
+                            <div class="empty-items">
+                                <div style="font-size: 40px; margin-bottom: 10px;">📭</div>
+                                <p>Нет добавленных изделий</p>
+                                <p style="font-size: 12px;">Заполните форму слева и нажмите "Добавить изделие"</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Кронштейны:</label>
-                        <div id="bracketsListContainer"></div>
-                        <button type="button" class="btn-outline" id="addBracketBtn">+ Добавить кронштейн</button>
-                    </div>
-                    <div class="form-group">
-                        <label>Лиры:</label>
-                        <div id="lyresListContainer"></div>
-                        <button type="button" class="btn-outline" id="addLyreBtn">+ Добавить лиру</button>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div class="form-group"><label>RAL:</label><input type="text" id="newItemRal"></div>
-                        <div class="form-group"><label>Текстура:</label><select id="newItemTexture"><option value="">Выберите</option><option value="матовая">Матовая</option><option value="глянцевая">Глянцевая</option></select></div>
-                    </div>
-                    <div id="newItemComponentsContainer" class="components-section" style="display: none;">
-                        <div class="components-title">🔧 Комплектующие:</div>
-                        <div id="newItemComponentsList"></div>
-                    </div>
-                    <button type="button" class="btn btn-success" id="addItemBtn" style="width: 100%; margin-top: 15px;">✅ Добавить изделие</button>
                 </div>
-                <div class="items-list-panel">
-                    <h3>📦 Добавленные изделия <span id="itemsCount" style="font-size: 12px; color: #ff3b3b;">0</span></h3>
-                    <div id="itemsListContainer" class="items-list-container"></div>
-                </div>
-            </div>
-            <div class="form-actions">
-                <button class="btn btn-danger" onclick="closeGroupModal()">Отмена</button>
-                <button class="btn btn-success" id="createGroupOrderBtn">📋 Сформировать группу</button>
-            </div>
-        </div>
-    </div>
 
-    <div id="materialsModal" class="modal">
-        <div class="modal-content" style="max-width: 900px;">
-            <span class="close" onclick="closeMaterialsModal()">&times;</span>
-            <div id="materialsReport"></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" onclick="closeGroupModal()">Отмена</button>
+                    <button type="button" class="btn btn-success" onclick="createGroupOrder()">📋 Сформировать группу</button>
+                </div>
+            </div>
         </div>
+
+        <!-- МОДАЛЬНОЕ ОКНО МАТЕРИАЛОВ -->
+        <div id="materialsModal" class="modal">
+            <div class="modal-content" style="max-width: 900px;">
+                <span class="close" onclick="closeMaterialsModal()">&times;</span>
+                <div id="materialsReport"></div>
+            </div>
+        </div>
+
+        <!-- СПИСОК ГРУПП -->
+        <div id="ordersList" class="orders-list"></div>
     </div>
 
     <script src="js/storage.js"></script>
@@ -712,8 +779,56 @@
     <script src="js/task-operations.js"></script>
     <script src="js/materials-report.js"></script>
     <script src="js/task-manager.js"></script>
+    <script src="js/app.js"></script>
 
     <script>
+        // ============== ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ==============
+        function initThemeToggle() {
+            const toggle = document.getElementById('themeToggle');
+            if (!toggle) return;
+            
+            const savedTheme = localStorage.getItem('masterx_theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+                toggle.checked = true;
+            } else {
+                document.body.classList.remove('light-theme');
+                toggle.checked = false;
+            }
+            
+            toggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.body.classList.add('light-theme');
+                    localStorage.setItem('masterx_theme', 'light');
+                } else {
+                    document.body.classList.remove('light-theme');
+                    localStorage.setItem('masterx_theme', 'dark');
+                }
+            });
+        }
+
+        // ============== ОПРЕДЕЛЕНИЕ СТАТУСА ГРУППЫ ==============
+        function getGroupStatus(order) {
+            if (!order.tasks || Object.keys(order.tasks).length === 0) return 'gray';
+            
+            let hasInProgress = false;
+            let allCompleted = true;
+            
+            Object.values(order.tasks).forEach(status => {
+                if (status === 'orange') {
+                    hasInProgress = true;
+                    allCompleted = false;
+                }
+                if (status !== 'green') {
+                    allCompleted = false;
+                }
+            });
+            
+            if (allCompleted && Object.keys(order.tasks).length > 0) return 'green';
+            if (hasInProgress) return 'orange';
+            return 'gray';
+        }
+
         // ============== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==============
         let tempItemsList = [];
         let productsList = [];
@@ -722,172 +837,355 @@
         let componentsData = {};
         let tempBrackets = [];
         let tempLyres = [];
-        let currentFilterDate = new Date().toISOString().split('T')[0];
 
-        // ============== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==============
+        // ============== ОТКРЫТИЕ/ЗАКРЫТИЕ МОДАЛЬНОГО ОКНА ==============
+        function openGroupModal() {
+            tempItemsList = [];
+            tempBrackets = [];
+            tempLyres = [];
+            updateItemsListDisplay();
+            resetAddItemForm();
+            document.getElementById('groupNameInput').value = '';
+            document.getElementById('groupModal').style.display = 'block';
+        }
+
+        function closeGroupModal() {
+            document.getElementById('groupModal').style.display = 'none';
+        }
+
+        function resetAddItemForm() {
+            document.getElementById('newItemProduct').value = '';
+            document.getElementById('newItemSize').innerHTML = '<option value="">Сначала выберите изделие</option>';
+            document.getElementById('newItemSizeQuantity').value = '1';
+            document.getElementById('newItemProfileMeters').value = '0';
+            document.getElementById('newItemProfileQuantity').value = '1';
+            document.getElementById('newItemRal').value = '';
+            document.getElementById('newItemTexture').value = '';
+            document.getElementById('newItemComponentsContainer').style.display = 'none';
+            document.getElementById('newItemComponentsList').innerHTML = '';
+            
+            tempBrackets = [];
+            tempLyres = [];
+            renderBracketsFields();
+            renderLyresFields();
+        }
+
+        function renderBracketsFields() {
+            const container = document.getElementById('bracketsListContainer');
+            if (!container) return;
+            
+            if (tempBrackets.length === 0) {
+                container.innerHTML = '<div style="color: #a0a0a0; font-size: 12px; padding: 5px;">Нет кронштейнов</div>';
+                return;
+            }
+            
+            let html = '';
+            tempBrackets.forEach((bracket, idx) => {
+                html += `
+                    <div class="position-item">
+                        <select data-bracket-index="${idx}" class="bracket-select">
+                            <option value="">Выберите кронштейн</option>
+                            ${bracketsList.map(b => `<option value="${b.name}" ${bracket.type === b.name ? 'selected' : ''}>${b.name}</option>`).join('')}
+                        </select>
+                        <input type="number" class="bracket-quantity" data-bracket-index="${idx}" value="${bracket.quantity || 0}" min="0" placeholder="кол-во">
+                        <button class="remove-position" onclick="removeBracketField(${idx})">✕</button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            
+            document.querySelectorAll('.bracket-select').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const idx = parseInt(e.target.dataset.bracketIndex);
+                    if (!isNaN(idx) && tempBrackets[idx]) {
+                        tempBrackets[idx].type = e.target.value;
+                    }
+                });
+            });
+            document.querySelectorAll('.bracket-quantity').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const idx = parseInt(e.target.dataset.bracketIndex);
+                    if (!isNaN(idx) && tempBrackets[idx]) {
+                        tempBrackets[idx].quantity = parseInt(e.target.value) || 0;
+                    }
+                });
+            });
+        }
+        
+        function addBracketField() {
+            tempBrackets.push({ type: '', quantity: 0 });
+            renderBracketsFields();
+        }
+        
+        function removeBracketField(index) {
+            tempBrackets.splice(index, 1);
+            renderBracketsFields();
+        }
+
+        function renderLyresFields() {
+            const container = document.getElementById('lyresListContainer');
+            if (!container) return;
+            
+            if (tempLyres.length === 0) {
+                container.innerHTML = '<div style="color: #a0a0a0; font-size: 12px; padding: 5px;">Нет лир</div>';
+                return;
+            }
+            
+            let html = '';
+            tempLyres.forEach((lyre, idx) => {
+                html += `
+                    <div class="position-item">
+                        <select data-lyre-index="${idx}" class="lyre-select">
+                            <option value="">Выберите лиру</option>
+                            ${lyresList.map(l => `<option value="${l.name}" ${lyre.type === l.name ? 'selected' : ''}>${l.name}</option>`).join('')}
+                        </select>
+                        <input type="number" class="lyre-quantity" data-lyre-index="${idx}" value="${lyre.quantity || 0}" min="0" placeholder="кол-во">
+                        <button class="remove-position" onclick="removeLyreField(${idx})">✕</button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            
+            document.querySelectorAll('.lyre-select').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const idx = parseInt(e.target.dataset.lyreIndex);
+                    if (!isNaN(idx) && tempLyres[idx]) {
+                        tempLyres[idx].type = e.target.value;
+                    }
+                });
+            });
+            document.querySelectorAll('.lyre-quantity').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const idx = parseInt(e.target.dataset.lyreIndex);
+                    if (!isNaN(idx) && tempLyres[idx]) {
+                        tempLyres[idx].quantity = parseInt(e.target.value) || 0;
+                    }
+                });
+            });
+        }
+        
+        function addLyreField() {
+            tempLyres.push({ type: '', quantity: 0 });
+            renderLyresFields();
+        }
+        
+        function removeLyreField(index) {
+            tempLyres.splice(index, 1);
+            renderLyresFields();
+        }
+
+        function updateItemsListDisplay() {
+            const container = document.getElementById('itemsListContainer');
+            const countSpan = document.getElementById('itemsCount');
+            if (!container) return;
+
+            if (tempItemsList.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-items">
+                        <div style="font-size: 40px; margin-bottom: 10px;">📭</div>
+                        <p>Нет добавленных изделий</p>
+                        <p style="font-size: 12px;">Заполните форму слева и нажмите "Добавить изделие"</p>
+                    </div>
+                `;
+                if (countSpan) countSpan.textContent = '0';
+                return;
+            }
+
+            if (countSpan) countSpan.textContent = tempItemsList.length;
+
+            let html = '';
+            tempItemsList.forEach((item, index) => {
+                let bracketsHtml = item.brackets && item.brackets.length > 0 ? 
+                    item.brackets.map(b => `<span>${b.type}: ${b.quantity} шт</span>`).join('') : '<span>нет</span>';
+                
+                let lyresHtml = item.lyres && item.lyres.length > 0 ? 
+                    item.lyres.map(l => `<span>${l.type}: ${l.quantity} шт</span>`).join('') : '<span>нет</span>';
+                
+                let componentsHtml = item.components && item.components.length > 0 ? 
+                    item.components.map(comp => `<span>${comp.name}: ${comp.quantity} шт</span>`).join('') : '';
+
+                html += `
+                    <div class="item-card">
+                        <div class="item-card-header">
+                            <span class="item-card-title">📦 ${escapeHtml(item.product)}</span>
+                            <button class="remove-item-btn" onclick="removeItemFromGroup(${index})">✕ Удалить</button>
+                        </div>
+                        <div class="item-card-content">
+                            <div>📏 Размер: ${escapeHtml(item.size?.name || '-')} x ${item.size?.quantity || 0} шт</div>
+                            <div>📐 Профиль: ${item.profileLength?.meters || 0} м x ${item.profileLength?.quantity || 0} шт</div>
+                            <div>🔧 Кронштейны: ${bracketsHtml}</div>
+                            <div>🎸 Лиры: ${lyresHtml}</div>
+                            <div>🎨 RAL: ${item.ral || '-'} / ${item.texture || '-'}</div>
+                            ${componentsHtml ? `<div>🔩 Комплектующие: ${componentsHtml}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function removeItemFromGroup(index) {
+            tempItemsList.splice(index, 1);
+            updateItemsListDisplay();
+        }
+
+        function populateNewItemSelects() {
+            const productSelect = document.getElementById('newItemProduct');
+            if (productSelect && productsList.length) {
+                productSelect.innerHTML = '<option value="">Выберите изделие</option>';
+                productsList.forEach(p => {
+                    const option = document.createElement('option');
+                    option.value = p.name;
+                    option.textContent = p.name;
+                    productSelect.appendChild(option);
+                });
+            }
+        }
+
+        function onNewItemProductChange() {
+            const productName = document.getElementById('newItemProduct').value;
+            const sizeSelect = document.getElementById('newItemSize');
+            const componentsContainer = document.getElementById('newItemComponentsContainer');
+            const componentsList = document.getElementById('newItemComponentsList');
+
+            const product = productsList.find(p => p.name === productName);
+            if (product && product.sizes) {
+                sizeSelect.innerHTML = '<option value="">Выберите размер</option>';
+                product.sizes.forEach(size => {
+                    const option = document.createElement('option');
+                    option.value = size;
+                    option.textContent = size;
+                    sizeSelect.appendChild(option);
+                });
+            } else {
+                sizeSelect.innerHTML = '<option value="">Нет доступных размеров</option>';
+            }
+
+            const comps = componentsData[productName] || [];
+            if (comps.length > 0) {
+                componentsContainer.style.display = 'block';
+                let compsHtml = '';
+                comps.forEach((comp) => {
+                    compsHtml += `
+                        <div class="component-item">
+                            <span class="component-name">${escapeHtml(comp.name)}</span>
+                            <input type="number" class="component-qty-input" data-comp-name="${comp.name}" placeholder="кол-во" min="0" value="0">
+                            <button class="component-remove" onclick="removeComponentField(this)">✕</button>
+                        </div>
+                    `;
+                });
+                componentsList.innerHTML = compsHtml;
+            } else {
+                componentsContainer.style.display = 'none';
+                componentsList.innerHTML = '';
+            }
+        }
+        
+        function removeComponentField(btn) {
+            btn.closest('.component-item').remove();
+        }
+
+        function collectComponentsFromForm() {
+            const components = [];
+            document.querySelectorAll('#newItemComponentsList .component-qty-input').forEach(input => {
+                const qty = parseInt(input.value) || 0;
+                if (qty > 0) {
+                    components.push({
+                        name: input.dataset.compName,
+                        quantity: qty
+                    });
+                }
+            });
+            return components;
+        }
+
+        function addItemToGroup() {
+            const product = document.getElementById('newItemProduct').value;
+            if (!product) {
+                alert('Выберите изделие');
+                return;
+            }
+
+            const sizeName = document.getElementById('newItemSize').value;
+            if (!sizeName) {
+                alert('Выберите размер');
+                return;
+            }
+
+            const brackets = tempBrackets.filter(b => b.type && b.quantity > 0);
+            const lyres = tempLyres.filter(l => l.type && l.quantity > 0);
+
+            const newItem = {
+                product: product,
+                size: {
+                    name: sizeName,
+                    quantity: parseInt(document.getElementById('newItemSizeQuantity').value) || 1
+                },
+                profileLength: {
+                    meters: parseFloat(document.getElementById('newItemProfileMeters').value) || 0,
+                    quantity: parseInt(document.getElementById('newItemProfileQuantity').value) || 1
+                },
+                brackets: brackets,
+                lyres: lyres,
+                ral: document.getElementById('newItemRal').value || '',
+                texture: document.getElementById('newItemTexture').value || '',
+                components: collectComponentsFromForm()
+            };
+
+            tempItemsList.push(newItem);
+            updateItemsListDisplay();
+            
+            resetAddItemForm();
+            populateNewItemSelects();
+        }
+
+        function createGroupOrder() {
+            const groupName = document.getElementById('groupNameInput').value.trim();
+            if (!groupName) {
+                alert('Введите название группы');
+                return;
+            }
+            if (tempItemsList.length === 0) {
+                alert('Добавьте хотя бы одно изделие');
+                return;
+            }
+
+            const orders = loadOrdersFromStorage();
+            const newOrder = {
+                id: Date.now(),
+                groupName: groupName,
+                date: new Date().toISOString().split('T')[0],
+                number: generateOrderNumber(orders.length + 1),
+                items: tempItemsList,
+                status: 'active',
+                tasks: {},
+                extraTasks: []
+            };
+
+            orders.push(newOrder);
+            saveOrdersToStorage(orders);
+            
+            if (typeof createTasksForOrder === 'function') {
+                createTasksForOrder(newOrder);
+            }
+            
+            closeGroupModal();
+            loadOrders();
+            updateStatistics();
+            alert(`✅ Группа "${groupName}" успешно создана!`);
+        }
+
+        function generateOrderNumber(index) {
+            const date = new Date();
+            const year = date.getFullYear().toString().slice(-2);
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `Г-${year}${month}${day}-${index.toString().padStart(3, '0')}`;
+        }
+
         function escapeHtml(str) {
             if (!str) return '';
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-        }
-
-        function getSiteDisplayName(siteKey) {
-            const names = { 'tokarniy': 'Токарный', 'slesarniy': 'Слесарный', 'frezerniy': 'Фрезерный', 'lazerno': 'Лазерно-гибочный', 'polimerniy': 'Полимерный' };
-            return names[siteKey] || siteKey;
-        }
-
-        function getOperationNames(productName, siteKey) {
-            const ops = window.TASK_OPERATIONS || {};
-            const siteOps = ops[siteKey] || {};
-            if (siteOps[productName]) return siteOps[productName];
-            for (let key in siteOps) {
-                if (productName && productName.includes(key)) return siteOps[key];
-            }
-            return [];
-        }
-
-        // ============== ОСНОВНАЯ ФУНКЦИЯ - ДОБАВЛЕНИЕ/УДАЛЕНИЕ ОПЕРАЦИИ ==============
-        window.toggleSiteOperation = function(button, orderId, siteKey, itemIndex, opIndex, operationName) {
-            const orders = loadOrdersFromStorage();
-            const order = orders.find(o => o.id == orderId);
-            if (!order) { alert('Заказ не найден'); return; }
-
-            const dateStr = order.date;
-            const storageKey = `tasks_${siteKey}_${dateStr}`;
-            const taskId = `${order.id}_${siteKey}_${itemIndex}_${opIndex}`;
-            
-            let existingTasks = [];
-            try {
-                existingTasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            } catch(e) { console.error(e); }
-            
-            const taskExists = existingTasks.some(t => t.id === taskId);
-            const squareDiv = button.parentElement?.querySelector('.square');
-            
-            if (taskExists) {
-                if (confirm(`Удалить операцию "${operationName}" с участка ${getSiteDisplayName(siteKey)}?`)) {
-                    const filteredTasks = existingTasks.filter(t => t.id !== taskId);
-                    localStorage.setItem(storageKey, JSON.stringify(filteredTasks));
-                    
-                    button.style.background = '#2ecc71';
-                    button.textContent = '+';
-                    
-                    if (squareDiv) squareDiv.classList.remove('orange', 'green');
-                    
-                    if (order.tasks && order.tasks[taskId]) {
-                        delete order.tasks[taskId];
-                        const orderIndex = orders.findIndex(o => o.id == orderId);
-                        orders[orderIndex] = order;
-                        saveOrdersToStorage(orders);
-                    }
-                    alert(`✅ Операция "${operationName}" удалена`);
-                }
-            } else {
-                const item = order.items[itemIndex];
-                const newTask = {
-                    id: taskId,
-                    orderId: order.id,
-                    orderNumber: order.number,
-                    product: item.product,
-                    size: item.size?.name || 'Стандартный',
-                    totalQuantity: item.size?.quantity || 1,
-                    completedQuantity: 0,
-                    operation: operationName,
-                    index: opIndex,
-                    status: 'pending',
-                    executors: [],
-                    date: dateStr,
-                    isExtra: false
-                };
-                
-                existingTasks.push(newTask);
-                localStorage.setItem(storageKey, JSON.stringify(existingTasks));
-                
-                button.style.background = '#e74c3c';
-                button.textContent = '✕';
-                
-                if (squareDiv) squareDiv.classList.add('orange');
-                
-                if (!order.tasks) order.tasks = {};
-                order.tasks[taskId] = 'orange';
-                const orderIndex = orders.findIndex(o => o.id == orderId);
-                orders[orderIndex] = order;
-                saveOrdersToStorage(orders);
-                
-                alert(`✅ Операция "${operationName}" добавлена`);
-            }
-            
-            renderOrdersList();
-            updateStatistics();
-        };
-
-        // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА С КНОПКАМИ ==============
-        function createSiteRow(name, order, itemIndex, siteKey) {
-            const item = order.items[itemIndex];
-            if (!item) return '<div>Нет данных</div>';
-
-            const operations = getOperationNames(item.product, siteKey);
-
-            if (!operations || operations.length === 0) {
-                return `
-                    <div class="site-item">
-                        <span class="site-name">${name}</span>
-                        <div class="squares">
-                            <div class="square red" title="Нет операций"></div>
-                        </div>
-                        <span>0/0</span>
-                        <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕ Доп.</button>
-                    </div>
-                `;
-            }
-
-            let squaresHtml = '';
-            let completedCount = 0;
-
-            for (let i = 0; i < operations.length; i++) {
-                const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
-                const operationName = operations[i];
-                let taskStatus = '';
-                let isAdded = false;
-                
-                if (order.tasks && order.tasks[taskId]) {
-                    taskStatus = order.tasks[taskId];
-                    if (taskStatus === 'green') completedCount++;
-                    if (taskStatus === 'orange' || taskStatus === 'green') isAdded = true;
-                }
-                
-                if (!isAdded) {
-                    try {
-                        const dateStr = order.date;
-                        const storageKey = `tasks_${siteKey}_${dateStr}`;
-                        const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
-                        isAdded = tasks.some(t => t.id === taskId);
-                        if (isAdded && order.tasks) order.tasks[taskId] = 'orange';
-                    } catch(e) {}
-                }
-
-                squaresHtml += `
-                    <div class="operation-wrapper">
-                        <button class="op-toggle-btn" 
-                                onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}')"
-                                style="background: ${isAdded ? '#e74c3c' : '#2ecc71'};">
-                            ${isAdded ? '✕' : '+'}
-                        </button>
-                        <div class="square ${taskStatus}" title="${escapeHtml(operationName)}"></div>
-                        <div class="operation-name-small">${escapeHtml(operationName)}</div>
-                    </div>
-                `;
-            }
-
-            return `
-                <div class="site-item">
-                    <span class="site-name">${name}</span>
-                    <div class="squares">${squaresHtml}</div>
-                    <div>
-                        <span>${completedCount}/${operations.length}</span>
-                        <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')" style="margin-left: 10px;">➕ Доп.</button>
-                    </div>
-                </div>
-            `;
         }
 
         // ============== ОТОБРАЖЕНИЕ СПИСКА ГРУПП ==============
@@ -896,18 +1194,21 @@
             if (!ordersList) return;
 
             const orders = loadOrdersFromStorage() || [];
-            const searchText = document.getElementById('searchInput')?.value?.toLowerCase() || '';
+            const searchText = document.getElementById('searchInput')?.value.toLowerCase() || '';
             const statusFilter = document.getElementById('statusFilter')?.value || 'all';
-
+            
             let filteredOrders = orders.filter(order => {
-                if (!order.groupName) return false;
                 const matchSearch = order.groupName.toLowerCase().includes(searchText) ||
-                    (order.items && order.items.some(item => item.product && item.product.toLowerCase().includes(searchText)));
+                    order.items.some(item => item.product.toLowerCase().includes(searchText));
                 if (!matchSearch) return false;
                 
                 const groupStatus = getGroupStatus(order);
-                if (statusFilter === 'active') return groupStatus === 'orange' || groupStatus === 'gray';
-                if (statusFilter === 'completed') return groupStatus === 'green';
+                if (statusFilter === 'active') {
+                    return groupStatus === 'orange' || groupStatus === 'gray';
+                }
+                if (statusFilter === 'completed') {
+                    return groupStatus === 'green';
+                }
                 return true;
             });
 
@@ -931,9 +1232,9 @@
                 header.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                         <div>
-                            <h3>📁 ${escapeHtml(order.groupName || 'Без названия')}</h3>
+                            <h3>📁 ${escapeHtml(order.groupName)}</h3>
                             <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
-                                Изделий: ${order.items ? order.items.length : 0} | №${order.number || '---'}
+                                Изделий: ${order.items.length} | №${order.number}
                                 ${groupStatus === 'green' ? ' | ✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? ' | ⚡ В РАБОТЕ' : ' | ⏳ ОЖИДАЕТ')}
                             </div>
                         </div>
@@ -948,68 +1249,69 @@
                 content.className = 'order-content';
                 content.style.display = 'none';
 
-                if (order.items && order.items.length > 0) {
-                    order.items.forEach((item, itemIndex) => {
-                        const itemDiv = document.createElement('div');
-                        itemDiv.style.marginBottom = '20px';
-                        itemDiv.style.border = '1px solid #2a2f38';
-                        itemDiv.style.borderRadius = '8px';
-                        itemDiv.style.overflow = 'hidden';
+                order.items.forEach((item, itemIndex) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.style.marginBottom = '20px';
+                    itemDiv.style.border = '1px solid #2a2f38';
+                    itemDiv.style.borderRadius = '8px';
+                    itemDiv.style.overflow = 'hidden';
 
-                        const itemHeader = document.createElement('div');
-                        itemHeader.style.padding = '10px 15px';
-                        itemHeader.style.background = '#232830';
-                        itemHeader.style.cursor = 'pointer';
-                        itemHeader.style.display = 'flex';
-                        itemHeader.style.justifyContent = 'space-between';
-                        itemHeader.innerHTML = `
-                            <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
-                            <span>▼</span>
-                        `;
+                    const itemHeader = document.createElement('div');
+                    itemHeader.style.padding = '10px 15px';
+                    itemHeader.style.background = '#232830';
+                    itemHeader.style.cursor = 'pointer';
+                    itemHeader.style.display = 'flex';
+                    itemHeader.style.justifyContent = 'space-between';
+                    itemHeader.innerHTML = `
+                        <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product)}</span>
+                        <span>▼</span>
+                    `;
 
-                        const itemContent = document.createElement('div');
-                        itemContent.style.padding = '15px';
-                        itemContent.style.display = 'none';
+                    const itemContent = document.createElement('div');
+                    itemContent.style.padding = '15px';
+                    itemContent.style.display = 'none';
 
-                        let bracketsHtml = item.brackets && item.brackets.length > 0 ? 
-                            item.brackets.map(b => `<span>${b.type}: ${b.quantity} шт</span>`).join(', ') : 'нет';
-                        let lyresHtml = item.lyres && item.lyres.length > 0 ? 
-                            item.lyres.map(l => `<span>${l.type}: ${l.quantity} шт</span>`).join(', ') : 'нет';
+                    let bracketsHtml = item.brackets && item.brackets.length > 0 ? 
+                        item.brackets.map(b => `<span>${b.type}: ${b.quantity} шт</span>`).join(', ') : 'нет';
+                    
+                    let lyresHtml = item.lyres && item.lyres.length > 0 ? 
+                        item.lyres.map(l => `<span>${l.type}: ${l.quantity} шт</span>`).join(', ') : 'нет';
 
-                        itemContent.innerHTML = `
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #2a2f38;">
-                                <div>📏 Размер: ${escapeHtml(item.size?.name || '-')} x ${item.size?.quantity || 0} шт</div>
-                                <div>📐 Профиль: ${item.profileLength?.meters || 0} м x ${item.profileLength?.quantity || 0} шт</div>
-                                <div>🔧 Кронштейны: ${bracketsHtml}</div>
-                                <div>🎸 Лиры: ${lyresHtml}</div>
-                                <div>🎨 RAL: ${item.ral || '-'} / ${item.texture || '-'}</div>
+                    itemContent.innerHTML = `
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #2a2f38;">
+                            <div>📏 Размер: ${escapeHtml(item.size?.name)} x ${item.size?.quantity} шт</div>
+                            <div>📐 Профиль: ${item.profileLength?.meters} м x ${item.profileLength?.quantity} шт</div>
+                            <div>🔧 Кронштейны: ${bracketsHtml}</div>
+                            <div>🎸 Лиры: ${lyresHtml}</div>
+                            <div>🎨 RAL: ${item.ral || '-'} / ${item.texture || '-'}</div>
+                        </div>
+                        <div id="sites-${order.id}-${itemIndex}" class="sites-section">
+                            <h4 style="margin-bottom: 10px;">🏭 Производственные участки</h4>
+                            <div class="sites-grid">
+                                ${createSiteRow('🔧 Токарный', order, itemIndex, 'tokarniy')}
+                                ${createSiteRow('🔨 Слесарный', order, itemIndex, 'slesarniy')}
+                                ${createSiteRow('⚙️ Фрезерный', order, itemIndex, 'frezerniy')}
+                                ${createSiteRow('✨ Лазерно-гибочный', order, itemIndex, 'lazerno')}
+                                ${createSiteRow('🧪 Полимерный', order, itemIndex, 'polimerniy')}
                             </div>
-                            <div id="sites-${order.id}-${itemIndex}" class="sites-section">
-                                <div class="sites-grid">
-                                    ${createSiteRow('🔧 Токарный', order, itemIndex, 'tokarniy')}
-                                    ${createSiteRow('🔨 Слесарный', order, itemIndex, 'slesarniy')}
-                                    ${createSiteRow('⚙️ Фрезерный', order, itemIndex, 'frezerniy')}
-                                    ${createSiteRow('✨ Лазерно-гибочный', order, itemIndex, 'lazerno')}
-                                    ${createSiteRow('🧪 Полимерный', order, itemIndex, 'polimerniy')}
-                                </div>
-                            </div>
-                        `;
+                        </div>
+                    `;
 
-                        itemHeader.onclick = () => {
-                            const isVisible = itemContent.style.display !== 'none';
-                            itemContent.style.display = isVisible ? 'none' : 'block';
-                            itemHeader.querySelector('span:last-child').textContent = isVisible ? '▼' : '▲';
-                        };
+                    itemHeader.onclick = () => {
+                        const isVisible = itemContent.style.display !== 'none';
+                        itemContent.style.display = isVisible ? 'none' : 'block';
+                        itemHeader.querySelector('span:last-child').textContent = isVisible ? '▼' : '▲';
+                    };
 
-                        itemDiv.appendChild(itemHeader);
-                        itemDiv.appendChild(itemContent);
-                        content.appendChild(itemDiv);
-                    });
-                }
+                    itemDiv.appendChild(itemHeader);
+                    itemDiv.appendChild(itemContent);
+                    content.appendChild(itemDiv);
+                });
 
                 header.onclick = (e) => {
                     if (e.target.tagName === 'BUTTON') return;
                     content.style.display = content.style.display === 'none' ? 'block' : 'none';
+                    header.classList.toggle('collapsed');
                 };
 
                 card.appendChild(header);
@@ -1018,26 +1320,67 @@
             });
         }
 
-        // ============== ОСТАЛЬНЫЕ ФУНКЦИИ ==============
-        function getGroupStatus(order) {
-            if (!order.tasks || Object.keys(order.tasks).length === 0) return 'gray';
-            let hasInProgress = false, allCompleted = true;
-            Object.values(order.tasks).forEach(status => {
-                if (status === 'orange') { hasInProgress = true; allCompleted = false; }
-                if (status !== 'green') allCompleted = false;
-            });
-            if (allCompleted && Object.keys(order.tasks).length > 0) return 'green';
-            if (hasInProgress) return 'orange';
-            return 'gray';
+        function createSiteRow(name, order, itemIndex, siteKey) {
+            const item = order.items[itemIndex];
+            if (!item) return '<div>Нет данных</div>';
+
+            const operations = getOperationNames(item.product, siteKey);
+
+            if (operations.length === 0) {
+                return `
+                    <div class="site-item">
+                        <span class="site-name">${name}</span>
+                        <div class="squares">
+                            <div class="square red" title="Нет операций"></div>
+                        </div>
+                        <span>0/0</span>
+                        <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
+                    </div>
+                `;
+            }
+
+            let squares = '';
+            let completedCount = 0;
+
+            for (let i = 0; i < operations.length; i++) {
+                const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
+                let status = '';
+                if (order.tasks && order.tasks[taskId]) {
+                    status = order.tasks[taskId];
+                    if (status === 'green') completedCount++;
+                }
+                squares += `<div class="square ${status}" data-task="${taskId}" title="${operations[i]}"></div>`;
+            }
+
+            return `
+                <div class="site-item">
+                    <span class="site-name">${name}</span>
+                    <div class="squares">${squares}</div>
+                    <span>${completedCount}/${operations.length}</span>
+                    <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
+                </div>
+            `;
         }
 
+        function getOperationNames(productName, siteKey) {
+            const ops = window.TASK_OPERATIONS || {};
+            const siteOps = ops[siteKey] || {};
+            if (siteOps[productName]) return siteOps[productName];
+            for (let key in siteOps) {
+                if (productName.includes(key)) return siteOps[key];
+            }
+            return [];
+        }
+
+        // ============== СТАТИСТИКА ==============
         function updateStatistics() {
             const orders = loadOrdersFromStorage() || [];
-            document.getElementById('totalOrders').textContent = orders.length;
-            const totalItems = orders.reduce((sum, o) => sum + (o.items ? o.items.length : 0), 0);
-            document.getElementById('totalItems').textContent = totalItems;
+            const totalOrders = orders.length;
+            const totalItems = orders.reduce((sum, order) => sum + order.items.length, 0);
             
-            let activeTasks = 0, completedTasks = 0;
+            let activeTasks = 0;
+            let completedTasks = 0;
+            
             orders.forEach(order => {
                 if (order.tasks) {
                     Object.values(order.tasks).forEach(status => {
@@ -1046,51 +1389,158 @@
                     });
                 }
             });
+            
+            document.getElementById('totalOrders').textContent = totalOrders;
+            document.getElementById('totalItems').textContent = totalItems;
             document.getElementById('activeTasks').textContent = activeTasks;
             document.getElementById('completedTasks').textContent = completedTasks;
         }
 
-        function generateOrderNumber(index) {
+        // ============== ЭКСПОРТ/ИМПОРТ ==============
+        function exportOrders() {
+            const orders = loadOrdersFromStorage() || [];
+            if (orders.length === 0) {
+                alert('Нет групп для экспорта');
+                return;
+            }
+            const exportData = { exportDate: new Date().toISOString(), version: '1.0', orders: orders };
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
             const date = new Date();
-            return `Г-${date.getFullYear().toString().slice(-2)}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}-${index.toString().padStart(3,'0')}`;
+            const fileName = `masterx_groups_${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')}.json`;
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', fileName);
+            linkElement.click();
+            alert(`✅ Экспортировано ${orders.length} групп`);
         }
 
-        window.createGroupOrder = function() {
-            const groupName = document.getElementById('groupNameInput').value.trim();
-            if (!groupName) { alert('Введите название группы'); return; }
-            if (tempItemsList.length === 0) { alert('Добавьте хотя бы одно изделие'); return; }
-            
-            const orders = loadOrdersFromStorage();
-            const newOrder = {
-                id: Date.now(),
-                groupName: groupName,
-                date: currentFilterDate,
-                number: generateOrderNumber(orders.length + 1),
-                items: JSON.parse(JSON.stringify(tempItemsList)),
-                status: 'active',
-                tasks: {},
-                extraTasks: []
+        function importOrders() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                try {
+                    const text = await file.text();
+                    const data = JSON.parse(text);
+                    
+                    if (!data.orders || !Array.isArray(data.orders)) {
+                        alert('❌ Неверный формат файла');
+                        return;
+                    }
+                    
+                    let existingOrders = loadOrdersFromStorage();
+                    const existingIds = new Set(existingOrders.map(o => o.id));
+                    
+                    let importedCount = 0;
+                    let skippedCount = 0;
+                    
+                    for (const importedOrder of data.orders) {
+                        if (existingIds.has(importedOrder.id)) {
+                            if (confirm(`Группа "${importedOrder.groupName}" уже существует. Перезаписать?`)) {
+                                existingOrders = existingOrders.filter(o => o.id !== importedOrder.id);
+                                existingOrders.push(importedOrder);
+                                importedCount++;
+                            } else {
+                                skippedCount++;
+                            }
+                        } else {
+                            existingOrders.push(importedOrder);
+                            importedCount++;
+                        }
+                    }
+                    
+                    saveOrdersToStorage(existingOrders);
+                    renderOrdersList();
+                    updateStatistics();
+                    
+                    alert(`✅ Импорт завершён!\n📦 Импортировано: ${importedCount} групп\n⏭️ Пропущено: ${skippedCount}`);
+                    
+                } catch (error) {
+                    console.error('❌ Ошибка импорта:', error);
+                    alert('❌ Ошибка при импорте файла');
+                }
             };
-            orders.push(newOrder);
+            input.click();
+        }
+
+        function showMaterialsReport(orderId) {
+            const orders = loadOrdersFromStorage() || [];
+            const order = orders.find(o => o.id === orderId);
+            if (!order) {
+                alert('Группа не найдена');
+                return;
+            }
+            if (!window.materialsReport) {
+                alert('Отчет по материалам не доступен');
+                return;
+            }
+            const modal = document.getElementById('materialsModal');
+            const reportDiv = document.getElementById('materialsReport');
+            if (!modal || !reportDiv) return;
+            
+            reportDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Загрузка отчета...</p></div>';
+            modal.style.display = 'block';
+            window.materialsReport.generateReport(order).then(html => {
+                reportDiv.innerHTML = html;
+            }).catch(err => {
+                console.error(err);
+                reportDiv.innerHTML = '<div class="error">Ошибка загрузки отчета</div>';
+            });
+        }
+
+        function closeMaterialsModal() {
+            document.getElementById('materialsModal').style.display = 'none';
+        }
+
+        function addExtraTask(orderId, siteKey) {
+            const taskDescription = prompt('Введите описание дополнительной задачи:');
+            if (!taskDescription) return;
+
+            let orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            
+            if (!order) {
+                alert('Группа не найдена');
+                return;
+            }
+
+            if (!order.extraTasks) order.extraTasks = [];
+
+            order.extraTasks.push({
+                title: taskDescription,
+                description: taskDescription,
+                site: siteKey,
+                createdAt: new Date().toISOString()
+            });
+
             saveOrdersToStorage(orders);
-            closeGroupModal();
             renderOrdersList();
             updateStatistics();
-            alert(`✅ Группа "${groupName}" создана!`);
-        };
+            alert('✅ Дополнительная задача добавлена');
+        }
 
-        window.deleteOrder = function(orderId) {
-            if (!confirm('Удалить группу?')) return;
+        function deleteOrder(orderId) {
+            if (!confirm('Удалить группу? Все связанные задачи также будут удалены.')) return;
+            
             let orders = loadOrdersFromStorage();
             orders = orders.filter(o => o.id !== orderId);
             saveOrdersToStorage(orders);
             
             const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+            const dates = [];
+            const today = new Date();
             for (let i = -30; i <= 30; i++) {
-                const d = new Date();
-                d.setDate(d.getDate() + i);
-                const date = d.toISOString().split('T')[0];
-                sites.forEach(site => {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                dates.push(date.toISOString().split('T')[0]);
+            }
+            
+            sites.forEach(site => {
+                dates.forEach(date => {
                     const key = `tasks_${site}_${date}`;
                     const tasks = localStorage.getItem(key);
                     if (tasks) {
@@ -1099,198 +1549,60 @@
                         localStorage.setItem(key, JSON.stringify(tasksArr));
                     }
                 });
-            }
+            });
+            
             renderOrdersList();
             updateStatistics();
             alert('✅ Группа удалена');
-        };
+        }
 
-        window.exportOrders = function() {
-            const orders = loadOrdersFromStorage();
-            if (orders.length === 0) { alert('Нет групп'); return; }
-            const data = JSON.stringify({ exportDate: new Date().toISOString(), orders }, null, 2);
-            const blob = new Blob([data], { type: 'application/json' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `masterx_export_${new Date().toISOString().slice(0,10)}.json`;
-            link.click();
-        };
-
-        window.importOrders = function() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const text = await file.text();
-                const data = JSON.parse(text);
-                if (!data.orders) { alert('Неверный формат'); return; }
-                let orders = loadOrdersFromStorage();
-                data.orders.forEach(imported => {
-                    const existingIndex = orders.findIndex(o => o.id === imported.id);
-                    if (existingIndex !== -1) orders[existingIndex] = imported;
-                    else orders.push(imported);
-                });
-                saveOrdersToStorage(orders);
-                renderOrdersList();
-                updateStatistics();
-                alert('Импорт завершён');
-            };
-            input.click();
-        };
-
-        window.showMaterialsReport = function(orderId) { alert('Отчет в разработке'); };
-        window.closeMaterialsModal = function() { document.getElementById('materialsModal').style.display = 'none'; };
-        window.addExtraTask = function(orderId, siteKey) { alert('Дополнительная задача будет доступна позже'); };
-
-        window.filterOrdersByDate = function(action) {
-            const today = new Date();
-            let newDate = new Date(currentFilterDate);
-            if (action === 'prev') newDate.setDate(newDate.getDate() - 1);
-            if (action === 'next') newDate.setDate(newDate.getDate() + 1);
-            if (action === 'today') newDate = new Date();
-            currentFilterDate = newDate.toISOString().split('T')[0];
-            document.getElementById('currentFilterDate').textContent = currentFilterDate;
-            renderOrdersList();
-        };
-
-        // ============== ФУНКЦИИ ДЛЯ МОДАЛЬНОГО ОКНА ==============
-        window.openGroupModal = function() { document.getElementById('groupModal').style.display = 'block'; };
-        window.closeGroupModal = function() { document.getElementById('groupModal').style.display = 'none'; };
-        
-        function addBracketField() { tempBrackets.push({ type: '', quantity: 0 }); renderBracketsFields(); }
-        function addLyreField() { tempLyres.push({ type: '', quantity: 0 }); renderLyresFields(); }
-        
-        function renderBracketsFields() {
-            const container = document.getElementById('bracketsListContainer');
-            if (!container) return;
-            if (tempBrackets.length === 0) { container.innerHTML = '<div style="color:#a0a0a0;">Нет кронштейнов</div>'; return; }
-            let html = '';
-            tempBrackets.forEach((b, idx) => {
-                html += `<div class="position-item"><select class="bracket-select" data-bracket-index="${idx}"><option value="">Выберите</option>${bracketsList.map(b => `<option value="${b.name}">${b.name}</option>`).join('')}</select><input type="number" class="bracket-quantity" data-bracket-index="${idx}" value="${b.quantity || 0}" min="0"><button class="remove-position" onclick="removeBracketField(${idx})">✕</button></div>`;
-            });
-            container.innerHTML = html;
-            document.querySelectorAll('.bracket-select').forEach(s => s.addEventListener('change', (e) => { const idx = e.target.dataset.bracketIndex; if (tempBrackets[idx]) tempBrackets[idx].type = e.target.value; }));
-            document.querySelectorAll('.bracket-quantity').forEach(i => i.addEventListener('change', (e) => { const idx = i.dataset.bracketIndex; if (tempBrackets[idx]) tempBrackets[idx].quantity = parseInt(e.target.value) || 0; }));
-        }
-        
-        function renderLyresFields() {
-            const container = document.getElementById('lyresListContainer');
-            if (!container) return;
-            if (tempLyres.length === 0) { container.innerHTML = '<div style="color:#a0a0a0;">Нет лир</div>'; return; }
-            let html = '';
-            tempLyres.forEach((l, idx) => {
-                html += `<div class="position-item"><select class="lyre-select" data-lyre-index="${idx}"><option value="">Выберите</option>${lyresList.map(l => `<option value="${l.name}">${l.name}</option>`).join('')}</select><input type="number" class="lyre-quantity" data-lyre-index="${idx}" value="${l.quantity || 0}" min="0"><button class="remove-position" onclick="removeLyreField(${idx})">✕</button></div>`;
-            });
-            container.innerHTML = html;
-            document.querySelectorAll('.lyre-select').forEach(s => s.addEventListener('change', (e) => { const idx = e.target.dataset.lyreIndex; if (tempLyres[idx]) tempLyres[idx].type = e.target.value; }));
-            document.querySelectorAll('.lyre-quantity').forEach(i => i.addEventListener('change', (e) => { const idx = i.dataset.lyreIndex; if (tempLyres[idx]) tempLyres[idx].quantity = parseInt(e.target.value) || 0; }));
-        }
-        
-        function removeBracketField(index) { tempBrackets.splice(index, 1); renderBracketsFields(); }
-        function removeLyreField(index) { tempLyres.splice(index, 1); renderLyresFields(); }
-        
-        function updateItemsListDisplay() {
-            const container = document.getElementById('itemsListContainer');
-            if (!container) return;
-            if (tempItemsList.length === 0) { container.innerHTML = '<div class="empty-items">📭 Нет добавленных изделий</div>'; document.getElementById('itemsCount').textContent = '0'; return; }
-            document.getElementById('itemsCount').textContent = tempItemsList.length;
-            let html = '';
-            tempItemsList.forEach((item, idx) => {
-                html += `<div class="item-card"><div class="item-card-header"><span class="item-card-title">📦 ${escapeHtml(item.product || 'Изделие')}</span><button class="remove-item-btn" onclick="removeItemFromGroup(${idx})">✕</button></div><div class="item-card-content"><div>Размер: ${escapeHtml(item.size?.name || '-')} x ${item.size?.quantity || 0} шт</div><div>Профиль: ${item.profileLength?.meters || 0} м x ${item.profileLength?.quantity || 0} шт</div><div>Кронштейны: ${item.brackets?.map(b => `${b.type}: ${b.quantity}шт`).join(', ') || 'нет'}</div><div>Лиры: ${item.lyres?.map(l => `${l.type}: ${l.quantity}шт`).join(', ') || 'нет'}</div><div>RAL: ${item.ral || '-'} / ${item.texture || '-'}</div></div></div>`;
-            });
-            container.innerHTML = html;
-        }
-        
-        function removeItemFromGroup(index) { tempItemsList.splice(index, 1); updateItemsListDisplay(); }
-        
-        function addItemToGroup() {
-            const product = document.getElementById('newItemProduct').value;
-            if (!product) { alert('Выберите изделие'); return; }
-            const sizeName = document.getElementById('newItemSize').value;
-            if (!sizeName) { alert('Выберите размер'); return; }
-            tempItemsList.push({
-                product: product,
-                size: { name: sizeName, quantity: parseInt(document.getElementById('newItemSizeQuantity').value) || 1 },
-                profileLength: { meters: parseFloat(document.getElementById('newItemProfileMeters').value) || 0, quantity: parseInt(document.getElementById('newItemProfileQuantity').value) || 1 },
-                brackets: tempBrackets.filter(b => b.type && b.quantity > 0),
-                lyres: tempLyres.filter(l => l.type && l.quantity > 0),
-                ral: document.getElementById('newItemRal').value || '',
-                texture: document.getElementById('newItemTexture').value || '',
-                components: []
-            });
-            updateItemsListDisplay();
-            tempBrackets = [];
-            tempLyres = [];
-            renderBracketsFields();
-            renderLyresFields();
-            document.getElementById('newItemProduct').value = '';
-            document.getElementById('newItemSize').innerHTML = '<option value="">Сначала выберите изделие</option>';
-            document.getElementById('newItemSizeQuantity').value = '1';
-            document.getElementById('newItemProfileMeters').value = '0';
-            document.getElementById('newItemProfileQuantity').value = '1';
-            document.getElementById('newItemRal').value = '';
-            document.getElementById('newItemTexture').value = '';
-        }
-        
-        function onNewItemProductChange() {
-            const productName = document.getElementById('newItemProduct').value;
-            const product = productsList.find(p => p.name === productName);
-            const sizeSelect = document.getElementById('newItemSize');
-            if (product && product.sizes && product.sizes.length > 0) {
-                sizeSelect.innerHTML = '<option value="">Выберите размер</option>' + product.sizes.map(s => `<option value="${s}">${s}</option>`).join('');
-            } else {
-                sizeSelect.innerHTML = '<option value="">Нет размеров</option>';
-            }
-        }
-        
-        function populateNewItemSelects() {
-            const productSelect = document.getElementById('newItemProduct');
-            if (productSelect && productsList.length) {
-                productSelect.innerHTML = '<option value="">Выберите изделие</option>' + productsList.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
-            }
-        }
-        
-        function initThemeToggle() {
-            const toggle = document.getElementById('themeToggle');
-            if (!toggle) return;
-            const saved = localStorage.getItem('masterx_theme');
-            if (saved === 'light') { document.body.classList.add('light-theme'); toggle.checked = true; }
-            toggle.addEventListener('change', () => {
-                document.body.classList.toggle('light-theme');
-                localStorage.setItem('masterx_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
-            });
-        }
-        
+        // ============== ИНИЦИАЛИЗАЦИЯ ==============
         async function initMainPage() {
             productsList = await loadProducts() || [];
             bracketsList = await loadBrackets() || [];
             lyresList = await loadLyres() || [];
             await loadComponents();
             componentsData = window.componentsData || {};
+            
             populateNewItemSelects();
             initThemeToggle();
-            document.getElementById('currentFilterDate').textContent = currentFilterDate;
-            
-            document.getElementById('createGroupBtn').onclick = () => openGroupModal();
-            document.getElementById('prevDateBtn').onclick = () => filterOrdersByDate('prev');
-            document.getElementById('todayDateBtn').onclick = () => filterOrdersByDate('today');
-            document.getElementById('nextDateBtn').onclick = () => filterOrdersByDate('next');
-            document.getElementById('exportBtn').onclick = () => exportOrders();
-            document.getElementById('importBtn').onclick = () => importOrders();
-            document.getElementById('addBracketBtn').onclick = () => addBracketField();
-            document.getElementById('addLyreBtn').onclick = () => addLyreField();
-            document.getElementById('addItemBtn').onclick = () => addItemToGroup();
-            document.getElementById('createGroupOrderBtn').onclick = () => createGroupOrder();
-            document.getElementById('newItemProduct').onchange = () => onNewItemProductChange();
             
             renderOrdersList();
             updateStatistics();
-            document.getElementById('searchInput')?.addEventListener('input', () => renderOrdersList());
-            document.getElementById('statusFilter')?.addEventListener('change', () => renderOrdersList());
+            
+            // Обработчики фильтров
+            document.getElementById('searchInput')?.addEventListener('input', function() {
+                renderOrdersList();
+                updateStatistics();
+            });
+            document.getElementById('statusFilter')?.addEventListener('change', function() {
+                renderOrdersList();
+                updateStatistics();
+            });
+            
+            // Слушаем изменения в localStorage
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'masterx_orders') {
+                    renderOrdersList();
+                    updateStatistics();
+                }
+            });
         }
-        
+
+        // Глобальные функции
+        window.openGroupModal = openGroupModal;
+        window.closeGroupModal = closeGroupModal;
+        window.addBracketField = addBracketField;
+        window.addLyreField = addLyreField;
+        window.addItemToGroup = addItemToGroup;
+        window.createGroupOrder = createGroupOrder;
+        window.exportOrders = exportOrders;
+        window.importOrders = importOrders;
+        window.showMaterialsReport = showMaterialsReport;
+        window.closeMaterialsModal = closeMaterialsModal;
+        window.addExtraTask = addExtraTask;
+        window.deleteOrder = deleteOrder;
+
         document.addEventListener('DOMContentLoaded', initMainPage);
     </script>
 </body>
