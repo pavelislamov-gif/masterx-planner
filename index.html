@@ -930,53 +930,55 @@
     const storageKey = `tasks_${siteKey}_${dateStr}`;
     const taskId = `${order.id}_${siteKey}_${itemIndex}_${opIndex}`;
     
+    // ПРИНУДИТЕЛЬНО УДАЛЯЕМ ЛЮБУЮ СУЩЕСТВУЮЩУЮ ЗАДАЧУ С ЭТИМ ID
     let existingTasks = [];
     try {
         const saved = localStorage.getItem(storageKey);
-        if (saved) existingTasks = JSON.parse(saved);
+        if (saved) {
+            existingTasks = JSON.parse(saved);
+            // Удаляем задачу, если она есть
+            const filtered = existingTasks.filter(t => t.id !== taskId);
+            if (filtered.length !== existingTasks.length) {
+                localStorage.setItem(storageKey, JSON.stringify(filtered));
+                existingTasks = filtered;
+                console.log('🗑️ Принудительно удалили старую задачу');
+            }
+        }
     } catch(e) { console.error(e); }
     
-    const taskExists = existingTasks.some(t => t.id === taskId);
+    // ТЕПЕРЬ ДОБАВЛЯЕМ НОВУЮ ЗАДАЧУ
+    const item = order.items[itemIndex];
+    const newTask = {
+        id: taskId,
+        orderId: order.id,
+        orderNumber: order.number,
+        product: item.product,
+        size: item.size?.name || 'Стандартный',
+        totalQuantity: item.size?.quantity || 1,
+        completedQuantity: 0,
+        operation: operationName,
+        index: opIndex,
+        status: 'pending',
+        executors: [],
+        date: dateStr,
+        isExtra: false
+    };
     
-    if (taskExists) {
-        // ========== УДАЛЕНИЕ задачи с участка ==========
-        if (confirm(`Удалить операцию "${operationName}" с участка?`)) {
-            const filteredTasks = existingTasks.filter(t => t.id !== taskId);
-            localStorage.setItem(storageKey, JSON.stringify(filteredTasks));
-            
-            // Квадратик НЕ МЕНЯЕМ! Он остаётся с текущим статусом
-            // (если был оранжевый/зелёный, то после удаления задачи с участка 
-            // нужно обновить статус на странице участка)
-            
-            alert(`✅ Операция "${operationName}" удалена с участка`);
-        }
-    } else {
-        // ========== ДОБАВЛЕНИЕ задачи на участок ==========
-        const item = order.items[itemIndex];
-        const newTask = {
-            id: taskId,
-            orderId: order.id,
-            orderNumber: order.number,
-            product: item.product,
-            size: item.size?.name || 'Стандартный',
-            totalQuantity: item.size?.quantity || 1,
-            completedQuantity: 0,
-            operation: operationName,
-            index: opIndex,
-            status: 'pending',  // начальный статус
-            executors: [],
-            date: dateStr,
-            isExtra: false
-        };
-        
-        existingTasks.push(newTask);
-        localStorage.setItem(storageKey, JSON.stringify(existingTasks));
-        
-        // Квадратик НЕ МЕНЯЕМ! Остаётся серым
-        // Статус на участке покажет "ОЖИДАЕТ"
-        
-        alert(`✅ Операция "${operationName}" добавлена на участок`);
+    existingTasks.push(newTask);
+    localStorage.setItem(storageKey, JSON.stringify(existingTasks));
+    
+    const squareDiv = button.parentElement?.querySelector('.square');
+    if (squareDiv) {
+        // Не меняем цвет квадратика! Только обновляем данные
     }
+    
+    if (!order.tasks) order.tasks = {};
+    order.tasks[taskId] = 'pending';
+    const orderIndex = orders.findIndex(o => o.id == orderId);
+    orders[orderIndex] = order;
+    saveOrdersToStorage(orders);
+    
+    alert(`✅ Операция "${operationName}" добавлена на участок`);
     
     renderOrdersList();
     updateStatistics();
