@@ -591,6 +591,75 @@
             border: 2px dashed #e2e8f0 !important;
             color: #64748b !important;
         }
+
+        /* Стили для кнопок над квадратиками */
+        .operation-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 5px;
+        }
+
+        .op-toggle-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .square {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: #1e232b;
+            border: 2px solid #3a404b;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .square.orange {
+            background-color: #ff9800;
+            border-color: #e65100;
+        }
+
+        .operation-name-small {
+            font-size: 10px;
+            margin-top: 4px;
+            color: #a0a0a0;
+            text-align: center;
+            max-width: 60px;
+            word-break: break-word;
+        }
+
+        .squares {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .site-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: #1a1e24;
+            border-radius: 8px;
+            border: 1px solid #2a2f38;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
     </style>
 </head>
 <body>
@@ -837,6 +906,107 @@
         let componentsData = {};
         let tempBrackets = [];
         let tempLyres = [];
+
+        // ============== ФУНКЦИЯ ДЛЯ ПОЛУЧЕНИЯ НАЗВАНИЯ УЧАСТКА ==============
+        function getSiteDisplayName(siteKey) {
+            const names = { 
+                'tokarniy': 'Токарный', 
+                'slesarniy': 'Слесарный', 
+                'frezerniy': 'Фрезерный', 
+                'lazerno': 'Лазерно-гибочный', 
+                'polimerniy': 'Полимерный' 
+            };
+            return names[siteKey] || siteKey;
+        }
+
+        // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ НА УЧАСТКЕ ==============
+        function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) { alert('Заказ не найден'); return; }
+
+            const dateStr = order.date;
+            const storageKey = `tasks_${siteKey}_${dateStr}`;
+            const taskId = `${order.id}_${siteKey}_${itemIndex}_${opIndex}`;
+            
+            let existingTasks = [];
+            try {
+                existingTasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            } catch(e) { console.error(e); }
+            
+            const taskExists = existingTasks.some(t => t.id === taskId);
+            const squareDiv = button.parentElement?.querySelector('.square');
+            
+            if (taskExists) {
+                // УДАЛЕНИЕ - меняем с красного крестика на зелёный плюс
+                if (confirm(`Удалить операцию "${operationName}" с участка ${getSiteDisplayName(siteKey)}?`)) {
+                    const filteredTasks = existingTasks.filter(t => t.id !== taskId);
+                    localStorage.setItem(storageKey, JSON.stringify(filteredTasks));
+                    
+                    // Обновляем кнопку
+                    button.style.background = '#2ecc71';
+                    button.textContent = '+';
+                    
+                    // Обновляем квадратик
+                    if (squareDiv) {
+                        squareDiv.classList.remove('orange', 'green');
+                    }
+                    
+                    // Обновляем статус в заказе
+                    if (order.tasks && order.tasks[taskId]) {
+                        delete order.tasks[taskId];
+                        const orderIndex = orders.findIndex(o => o.id == orderId);
+                        orders[orderIndex] = order;
+                        saveOrdersToStorage(orders);
+                    }
+                    
+                    alert(`✅ Операция "${operationName}" удалена`);
+                }
+            } else {
+                // ДОБАВЛЕНИЕ - меняем с зелёного плюса на красный крестик
+                const item = order.items[itemIndex];
+                const newTask = {
+                    id: taskId,
+                    orderId: order.id,
+                    orderNumber: order.number,
+                    product: item.product,
+                    size: item.size?.name || 'Стандартный',
+                    totalQuantity: item.size?.quantity || 1,
+                    completedQuantity: 0,
+                    operation: operationName,
+                    index: opIndex,
+                    status: 'pending',
+                    executors: [],
+                    date: dateStr,
+                    isExtra: false
+                };
+                
+                existingTasks.push(newTask);
+                localStorage.setItem(storageKey, JSON.stringify(existingTasks));
+                
+                // Обновляем кнопку
+                button.style.background = '#e74c3c';
+                button.textContent = '✕';
+                
+                // Обновляем квадратик
+                if (squareDiv) {
+                    squareDiv.classList.add('orange');
+                }
+                
+                // Обновляем статус в заказе
+                if (!order.tasks) order.tasks = {};
+                order.tasks[taskId] = 'orange';
+                const orderIndex = orders.findIndex(o => o.id == orderId);
+                orders[orderIndex] = order;
+                saveOrdersToStorage(orders);
+                
+                alert(`✅ Операция "${operationName}" добавлена`);
+            }
+            
+            // Обновляем отображение
+            renderOrdersList();
+            updateStatistics();
+        }
 
         // ============== ОТКРЫТИЕ/ЗАКРЫТИЕ МОДАЛЬНОГО ОКНА ==============
         function openGroupModal() {
@@ -1320,6 +1490,7 @@
             });
         }
 
+        // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА С КНОПКАМИ НАД КВАДРАТИКАМИ ==============
         function createSiteRow(name, order, itemIndex, siteKey) {
             const item = order.items[itemIndex];
             if (!item) return '<div>Нет данных</div>';
@@ -1339,25 +1510,52 @@
                 `;
             }
 
-            let squares = '';
+            let squaresHtml = '';
             let completedCount = 0;
 
             for (let i = 0; i < operations.length; i++) {
                 const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
-                let status = '';
+                const operationName = operations[i];
+                let taskStatus = '';
+                let isAdded = false;
+                
                 if (order.tasks && order.tasks[taskId]) {
-                    status = order.tasks[taskId];
-                    if (status === 'green') completedCount++;
+                    taskStatus = order.tasks[taskId];
+                    if (taskStatus === 'green') completedCount++;
+                    if (taskStatus === 'orange' || taskStatus === 'green') isAdded = true;
                 }
-                squares += `<div class="square ${status}" data-task="${taskId}" title="${operations[i]}"></div>`;
+                
+                if (!isAdded) {
+                    try {
+                        const dateStr = order.date;
+                        const storageKey = `tasks_${siteKey}_${dateStr}`;
+                        const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                        isAdded = tasks.some(t => t.id === taskId);
+                        if (isAdded && order.tasks) order.tasks[taskId] = 'orange';
+                    } catch(e) {}
+                }
+
+                squaresHtml += `
+                    <div class="operation-wrapper">
+                        <button class="op-toggle-btn" 
+                                onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}')"
+                                style="background: ${isAdded ? '#e74c3c' : '#2ecc71'};">
+                            ${isAdded ? '✕' : '+'}
+                        </button>
+                        <div class="square ${taskStatus}" title="${escapeHtml(operationName)}"></div>
+                        <div class="operation-name-small">${escapeHtml(operationName)}</div>
+                    </div>
+                `;
             }
 
             return `
                 <div class="site-item">
                     <span class="site-name">${name}</span>
-                    <div class="squares">${squares}</div>
-                    <span>${completedCount}/${operations.length}</span>
-                    <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕</button>
+                    <div class="squares">${squaresHtml}</div>
+                    <div>
+                        <span>${completedCount}/${operations.length}</span>
+                        <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')" style="margin-left: 10px;">➕ Доп.</button>
+                    </div>
                 </div>
             `;
         }
@@ -1602,6 +1800,7 @@
         window.closeMaterialsModal = closeMaterialsModal;
         window.addExtraTask = addExtraTask;
         window.deleteOrder = deleteOrder;
+        window.toggleSiteOperation = toggleSiteOperation;
 
         document.addEventListener('DOMContentLoaded', initMainPage);
     </script>
