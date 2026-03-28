@@ -930,30 +930,31 @@
     const storageKey = `tasks_${siteKey}_${dateStr}`;
     const taskId = `${order.id}_${siteKey}_${itemIndex}_${opIndex}`;
     
+    // Загружаем существующие задачи
     let existingTasks = [];
     try {
-        existingTasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+            existingTasks = JSON.parse(saved);
+        }
     } catch(e) { console.error(e); }
     
+    // Проверяем, есть ли задача
     const taskExists = existingTasks.some(t => t.id === taskId);
     const squareDiv = button.parentElement?.querySelector('.square');
     
     if (taskExists) {
-        // УДАЛЕНИЕ задачи
+        // ========== ЗАДАЧА ЕСТЬ → УДАЛЯЕМ ==========
         if (confirm(`Удалить операцию "${operationName}" с участка ${getSiteDisplayName(siteKey)}?`)) {
             const filteredTasks = existingTasks.filter(t => t.id !== taskId);
             localStorage.setItem(storageKey, JSON.stringify(filteredTasks));
             
-            // Кнопка остается зелёной с плюсом
-            button.style.background = '#2ecc71';
-            button.textContent = '+';
-            
-            // Квадратик становится серым
+            // Обновляем квадратик
             if (squareDiv) {
                 squareDiv.classList.remove('orange', 'green');
             }
             
-            // Обновляем статус в заказе
+            // Удаляем из order.tasks
             if (order.tasks && order.tasks[taskId]) {
                 delete order.tasks[taskId];
                 const orderIndex = orders.findIndex(o => o.id == orderId);
@@ -964,7 +965,7 @@
             alert(`✅ Операция "${operationName}" удалена с участка`);
         }
     } else {
-        // ДОБАВЛЕНИЕ задачи
+        // ========== ЗАДАЧИ НЕТ → ДОБАВЛЯЕМ ==========
         const item = order.items[itemIndex];
         const newTask = {
             id: taskId,
@@ -985,16 +986,12 @@
         existingTasks.push(newTask);
         localStorage.setItem(storageKey, JSON.stringify(existingTasks));
         
-        // Кнопка остается зелёной с плюсом
-        button.style.background = '#2ecc71';
-        button.textContent = '+';
-        
-        // Квадратик становится оранжевым
+        // Обновляем квадратик
         if (squareDiv) {
             squareDiv.classList.add('orange');
         }
         
-        // Обновляем статус в заказе
+        // Сохраняем в order.tasks
         if (!order.tasks) order.tasks = {};
         order.tasks[taskId] = 'orange';
         const orderIndex = orders.findIndex(o => o.id == orderId);
