@@ -940,17 +940,17 @@
     const squareDiv = button.parentElement?.querySelector('.square');
     
     if (taskExists) {
-        // ========== УДАЛЕНИЕ (повторное нажатие) ==========
+        // ========== УДАЛЕНИЕ ==========
         if (confirm(`❓ Удалить операцию "${operationName}" с участка?`)) {
             const filteredTasks = existingTasks.filter(t => t.id !== taskId);
             localStorage.setItem(storageKey, JSON.stringify(filteredTasks));
             
-            // Меняем кнопку: красная ✓ → зелёная +
+            // МЕНЯЕМ КНОПКУ ПРЯМО СЕЙЧАС
             button.style.background = '#2ecc71';
             button.textContent = '+';
             button.classList.remove('added');
             
-            // Квадратик становится серым
+            // Меняем квадратик
             if (squareDiv) {
                 squareDiv.classList.remove('orange', 'green');
             }
@@ -964,12 +964,12 @@
             }
             
             alert(`✅ Операция "${operationName}" удалена с участка`);
-        } else {
-            // Пользователь отменил удаление
-            console.log('❌ Удаление отменено');
+            
+            // Обновляем статистику и счётчик
+            updateStatistics();
         }
     } else {
-        // ========== ДОБАВЛЕНИЕ (первое нажатие) ==========
+        // ========== ДОБАВЛЕНИЕ ==========
         const item = order.items[itemIndex];
         const newTask = {
             id: taskId,
@@ -990,15 +990,12 @@
         existingTasks.push(newTask);
         localStorage.setItem(storageKey, JSON.stringify(existingTasks));
         
-        // Меняем кнопку: зелёная + → красная ✓
+        // МЕНЯЕМ КНОПКУ ПРЯМО СЕЙЧАС
         button.style.background = '#e74c3c';
         button.textContent = '✓';
         button.classList.add('added');
         
-        // Квадратик НЕ МЕНЯЕМ! Остаётся серым
-        // Цвет изменится только когда на участке нажмут "В РАБОТЕ"
-        
-        // Сохраняем в order.tasks начальный статус
+        // Сохраняем в order.tasks
         if (!order.tasks) order.tasks = {};
         order.tasks[taskId] = 'pending';
         const orderIndex = orders.findIndex(o => o.id == orderId);
@@ -1006,10 +1003,10 @@
         saveOrdersToStorage(orders);
         
         alert(`✅ Операция "${operationName}" добавлена на участок`);
+        
+        // Обновляем статистику
+        updateStatistics();
     }
-    
-    renderOrdersList();
-    updateStatistics();
 }
 
         // ============== ОТКРЫТИЕ/ЗАКРЫТИЕ МОДАЛЬНОГО ОКНА ==============
@@ -1531,28 +1528,44 @@
         const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
         const operationName = operations[i];
         let taskStatus = '';
+        let isAdded = false;
         
-        // Получаем статус из order.tasks (который обновляется со страницы участка)
+        // Получаем статус из order.tasks (цвет квадратика)
         if (order.tasks && order.tasks[taskId]) {
             taskStatus = order.tasks[taskId];
             if (taskStatus === 'green') completedCount++;
         }
         
         // Проверяем, есть ли задача на участке (добавлена ли кнопкой "+")
-        let isOnSite = false;
         try {
             const dateStr = order.date;
             const storageKey = `tasks_${siteKey}_${dateStr}`;
             const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            isOnSite = tasks.some(t => t.id === taskId);
+            isAdded = tasks.some(t => t.id === taskId);
         } catch(e) {}
 
         squaresHtml += `
             <div class="operation-wrapper">
-                <button class="op-toggle-btn" 
+                <button class="op-toggle-btn ${isAdded ? 'added' : ''}" 
                         onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}')"
-                        style="background: #2ecc71; color: white; width: 32px; height: 32px; border-radius: 50%; border: none; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
-                    +
+                        style="
+                            width: 32px;
+                            height: 32px;
+                            border-radius: 50%;
+                            border: none;
+                            font-size: 18px;
+                            font-weight: bold;
+                            cursor: pointer;
+                            margin-bottom: 6px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            transition: all 0.2s;
+                            background: ${isAdded ? '#e74c3c' : '#2ecc71'};
+                            color: white;
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+                        ">
+                    ${isAdded ? '✓' : '+'}
                 </button>
                 <div class="square ${taskStatus}" title="${escapeHtml(operationName)}"></div>
                 <div class="operation-name-small">${escapeHtml(operationName)}</div>
