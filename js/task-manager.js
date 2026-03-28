@@ -46,159 +46,47 @@ class TaskManager {
     
     generateTasks() {
         console.log('generateTasks начата для участка:', this.siteType);
-        this.tasks = [];
-        const dateStr = this.formatDate(this.currentDate);
         
-        let historyTasks = [];
+        const dateStr = this.formatDate(this.currentDate);
+        const storageKey = `tasks_${this.siteType}_${dateStr}`;
+        
+        // ========== ЗАГРУЖАЕМ ТОЛЬКО ЗАДАЧИ ИЗ LOCALSTORAGE ==========
+        let tasksFromStorage = [];
         try {
-            const historyKey = `tasks_${this.siteType}_${dateStr}`;
-            const history = localStorage.getItem(historyKey);
-            if (history) {
-                historyTasks = JSON.parse(history);
-                console.log(`📋 Загружено ${historyTasks.length} задач из истории для ${dateStr}`);
+            const saved = localStorage.getItem(storageKey);
+            if (saved) {
+                tasksFromStorage = JSON.parse(saved);
+                console.log(`📋 Загружено ${tasksFromStorage.length} задач из localStorage для ${dateStr}`);
+            } else {
+                console.log(`📭 Нет сохранённых задач для ${dateStr}`);
             }
         } catch (error) {
             console.error('Ошибка загрузки истории:', error);
         }
         
-        if (!this.orders || this.orders.length === 0) {
-            this.tasks = historyTasks;
-            return;
-        }
+        // Фильтруем задачи по дате
+        this.tasks = tasksFromStorage.filter(task => task.date === dateStr);
         
-        const ordersForDate = this.orders.filter(order => order.date === dateStr);
+        // ========== ОБНОВЛЯЕМ СТАТУСЫ ИЗ ORDER.TASKS (ДЛЯ ЦВЕТА КВАДРАТИКОВ) ==========
+        const orders = typeof window.loadOrdersFromStorage === 'function' 
+            ? window.loadOrdersFromStorage() || [] 
+            : [];
         
-        if (ordersForDate.length === 0) {
-            this.tasks = historyTasks;
-            return;
-        }
-        
-        const historyTasksMap = new Map();
-        historyTasks.forEach(task => {
-            historyTasksMap.set(task.id, task);
-        });
-        
-        const newTasks = [];
-        
-        ordersForDate.forEach(order => {
-            if (order.status !== 'active') return;
-            
-            if (order.items && Array.isArray(order.items)) {
-                order.items.forEach((item, itemIndex) => {
-                    const productName = item.product || 'Изделие';
-                    const itemQuantity = parseInt(item.size?.quantity) || parseInt(item.quantity) || 1;
-                    
-                    const operations = this.getOperationsForProduct(productName);
-                    
-                    if (operations && operations.length > 0) {
-                        operations.forEach((op, opIndex) => {
-                            let operationName = '';
-                            let plannedQuantity = itemQuantity;
-                            
-                            if (typeof op === 'object' && op.name) {
-                                operationName = op.name;
-                            } else {
-                                operationName = op;
-                            }
-                            
-                            const taskId = `${order.id}_${this.siteType}_${itemIndex}_${opIndex}`;
-                            const taskStatus = order.tasks?.[taskId];
-                            const historyTask = historyTasksMap.get(taskId);
-                            
-                            const task = {
-                                id: taskId,
-                                orderId: order.id,
-                                orderNumber: order.number || order.id,
-                                product: productName,
-                                size: item.size?.name || 'Стандартный',
-                                operation: operationName,
-                                plannedQuantity: plannedQuantity,
-                                completedQuantity: historyTask?.completedQuantity || 0,
-                                totalQuantity: plannedQuantity,
-                                index: opIndex,
-                                status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
-                                executors: historyTask?.executors || [],
-                                date: dateStr,
-                                isExtra: false
-                            };
-                            
-                            newTasks.push(task);
-                            console.log(`📌 Создана задача: ${operationName} (${plannedQuantity} шт) для ${productName}`);
-                        });
-                    }
-                    
-                    // ============== ОБНОВЛЯЕМ ПЛАН ИЗ КОМПЛЕКТУЮЩИХ ==============
-                    if (item.components && item.components.length > 0) {
-                        item.components.forEach((comp) => {
-                            const plannedQty = comp.quantity || 1;
-                            
-                            const existingTask = newTasks.find(task => 
-                                this.isMatchingByKeywords(task.operation, comp.name)
-                            );
-                            
-                            if (existingTask) {
-                                existingTask.plannedQuantity = plannedQty;
-                                existingTask.totalQuantity = plannedQty;
-                                existingTask.isFromComponent = true;
-                                console.log(`📊 ОБНОВЛЕН ПЛАН: "${existingTask.operation}" → ${plannedQty} шт (из комплектующей "${comp.name}")`);
-                            } else {
-                                const matchedOperation = this.findMatchingOperation(comp.name);
-                                if (matchedOperation) {
-                                    const taskId = `${order.id}_${this.siteType}_comp_${itemIndex}_${Date.now()}_${Math.random()}`;
-                                    const task = {
-                                        id: taskId,
-                                        orderId: order.id,
-                                        orderNumber: order.number || order.id,
-                                        product: comp.name,
-                                        component: true,
-                                        operation: matchedOperation.name,
-                                        plannedQuantity: plannedQty,
-                                        completedQuantity: 0,
-                                        totalQuantity: plannedQty,
-                                        isComponent: true,
-                                        status: 'pending',
-                                        executors: [],
-                                        date: dateStr
-                                    };
-                                    newTasks.push(task);
-                                    console.log(`🔧 Создана задача для комплектующей: "${matchedOperation.name}" (${plannedQty} шт)`);
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-            
-            if (order.extraTasks && Array.isArray(order.extraTasks)) {
-                order.extraTasks.forEach((extra, index) => {
-                    if (extra.site !== this.siteType) return;
-                    
-                    const taskId = `${order.id}_extra_${index}`;
-                    const taskStatus = order.tasks?.[taskId];
-                    const historyTask = historyTasksMap.get(taskId);
-                    
-                    const task = {
-                        id: taskId,
-                        orderId: order.id,
-                        orderNumber: order.number || order.id,
-                        product: extra.title || 'Доп. задача',
-                        description: extra.description || '',
-                        operation: extra.title || 'Доп. операция',
-                        plannedQuantity: 1,
-                        completedQuantity: historyTask?.completedQuantity || 0,
-                        totalQuantity: 1,
-                        isExtra: true,
-                        status: historyTask?.status || this.convertSquareStatus(taskStatus) || 'pending',
-                        executors: historyTask?.executors || [],
-                        date: dateStr
-                    };
-                    
-                    newTasks.push(task);
-                });
+        this.tasks.forEach(task => {
+            const order = orders.find(o => o.id == task.orderId);
+            if (order && order.tasks && order.tasks[task.id]) {
+                const taskStatus = order.tasks[task.id];
+                if (taskStatus === 'orange') {
+                    task.status = 'in_progress';
+                } else if (taskStatus === 'green') {
+                    task.status = 'completed';
+                }
             }
         });
         
-        this.tasks = newTasks;
+        console.log(`✅ Итоговое количество задач для отображения: ${this.tasks.length}`);
+        
+        // Сохраняем в историю (для синхронизации)
         this._saveTasksToHistoryInternal(dateStr);
     }
     
