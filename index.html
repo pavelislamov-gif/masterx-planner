@@ -196,55 +196,6 @@
             font-size: 10px;
         }
 
-        .components-section {
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px solid #2a2f38;
-        }
-
-        .components-title {
-            color: #ff3b3b;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .component-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 6px 8px;
-            margin-bottom: 5px;
-            background: #1e232b;
-            border-radius: 4px;
-        }
-
-        .component-name {
-            font-size: 12px;
-            flex: 1;
-        }
-
-        .component-qty-input {
-            width: 70px;
-            padding: 4px;
-            background: #15191f;
-            border: 1px solid #2a2f38;
-            border-radius: 4px;
-            color: #fff;
-            text-align: center;
-        }
-
-        .component-remove {
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
-            cursor: pointer;
-            font-size: 10px;
-            margin-left: 8px;
-        }
-
         .empty-items {
             text-align: center;
             padding: 40px;
@@ -793,7 +744,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Размер:</label>
+                            <label>Размер и количество:</label>
                             <div class="size-quantity-row">
                                 <select id="newItemSize">
                                     <option value="">Сначала выберите изделие</option>
@@ -802,48 +753,43 @@
                             </div>
                         </div>
 
-                        <!-- БЛОК ПРОФИЛЕЙ -->
+                        <!-- ПРОФИЛИ (с длиной в мм и количеством) -->
                         <div id="profilesContainer" style="display: none;">
                             <div class="components-title">📐 ПРОФИЛИ:</div>
                             <div id="profilesList"></div>
                             <button type="button" class="btn-outline" onclick="addCustomProfile()" style="margin-top: 5px; width: 100%;">+ Добавить профиль</button>
                         </div>
 
-                        <!-- Блок с деталями из техкарты -->
-                        <div id="detailsContainer" class="details-container" style="display: none;">
+                        <!-- ДЕТАЛИ (заглушки, вставки, корпуса и т.д.) -->
+                        <div id="detailsContainer" style="display: none;">
                             <div class="components-title">🔧 ДЕТАЛИ:</div>
                             <div id="detailsList"></div>
                         </div>
 
+                        <!-- КРОНШТЕЙНЫ И ЛИРЫ В ОДНУ СТРОКУ -->
                         <div class="form-group">
-                            <label>Профиль (метры):</label>
-                            <div style="display: flex; gap: 8px;">
-                                <input type="number" id="newItemProfileMeters" placeholder="метры" step="0.1" min="0" value="0" style="flex: 1;">
-                                <input type="number" id="newItemProfileQuantity" placeholder="кол-во" min="1" value="1" style="flex: 1;">
+                            <label>Кронштейны и лиры:</label>
+                            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 10px;">
+                                <div style="flex: 1;">
+                                    <div id="bracketsListContainer" style="margin-bottom: 5px;"></div>
+                                    <button type="button" class="btn-outline" onclick="addBracketField()" style="width: 100%;">+ Кронштейн</button>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div id="lyresListContainer" style="margin-bottom: 5px;"></div>
+                                    <button type="button" class="btn-outline" onclick="addLyreField()" style="width: 100%;">+ Лира</button>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Кронштейны:</label>
-                            <div id="bracketsListContainer"></div>
-                            <button type="button" class="btn-outline" onclick="addBracketField()">+ Добавить кронштейн</button>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Лиры:</label>
-                            <div id="lyresListContainer"></div>
-                            <button type="button" class="btn-outline" onclick="addLyreField()">+ Добавить лиру</button>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                             <div class="form-group">
                                 <label>RAL:</label>
-                                <input type="text" id="newItemRal" placeholder="Например: RAL 9003">
+                                <input type="text" id="newItemRal" placeholder="RAL 9003">
                             </div>
                             <div class="form-group">
                                 <label>Текстура:</label>
                                 <select id="newItemTexture">
-                                    <option value="">Выберите текстуру</option>
+                                    <option value="">Выберите</option>
                                     <option value="матовая">Матовая</option>
                                     <option value="глянцевая">Глянцевая</option>
                                     <option value="сатиновая">Муар</option>
@@ -851,13 +797,8 @@
                             </div>
                         </div>
 
-                        <div id="newItemComponentsContainer" class="components-section" style="display: none;">
-                            <div class="components-title">🔧 Комплектующие:</div>
-                            <div id="newItemComponentsList"></div>
-                        </div>
-
                         <button type="button" class="btn btn-success" onclick="addItemToGroup()" style="width: 100%; margin-top: 15px;">
-                            ✅ Добавить изделие в группу
+                            ✅ Добавить изделие
                         </button>
                     </div>
 
@@ -956,7 +897,6 @@
         let productsList = [];
         let bracketsList = [];
         let lyresList = [];
-        let componentsData = {};
         let productDetailsData = {};
         let tempBrackets = [];
         let tempLyres = [];
@@ -1201,9 +1141,6 @@
             const detailsContainer = document.getElementById('detailsContainer');
             const detailsList = document.getElementById('detailsList');
             const profilesContainer = document.getElementById('profilesContainer');
-            const profilesList = document.getElementById('profilesList');
-            const componentsContainer = document.getElementById('newItemComponentsContainer');
-            const componentsList = document.getElementById('newItemComponentsList');
 
             // Загружаем размеры
             const product = productsList.find(p => p.name === productName);
@@ -1281,26 +1218,6 @@
             } else {
                 profilesContainer.style.display = 'none';
             }
-
-            // Загружаем комплектующие
-            const comps = componentsData[productName] || [];
-            if (comps.length > 0) {
-                componentsContainer.style.display = 'block';
-                let compsHtml = '';
-                comps.forEach((comp) => {
-                    compsHtml += `
-                        <div class="component-item">
-                            <span class="component-name">${escapeHtml(comp.name)}</span>
-                            <input type="number" class="component-qty-input" data-comp-name="${comp.name}" placeholder="кол-во" min="0" value="0">
-                            <button class="component-remove" onclick="removeComponentField(this)">✕</button>
-                        </div>
-                    `;
-                });
-                componentsList.innerHTML = compsHtml;
-            } else {
-                componentsContainer.style.display = 'none';
-                componentsList.innerHTML = '';
-            }
         }
 
         // ============== СБОР ДЕТАЛЕЙ ИЗ ФОРМЫ ==============
@@ -1356,16 +1273,12 @@
             document.getElementById('newItemProduct').value = '';
             document.getElementById('newItemSize').innerHTML = '<option value="">Сначала выберите изделие</option>';
             document.getElementById('newItemSizeQuantity').value = '1';
-            document.getElementById('newItemProfileMeters').value = '0';
-            document.getElementById('newItemProfileQuantity').value = '1';
             document.getElementById('newItemRal').value = '';
             document.getElementById('newItemTexture').value = '';
             document.getElementById('detailsContainer').style.display = 'none';
             document.getElementById('detailsList').innerHTML = '';
             document.getElementById('profilesContainer').style.display = 'none';
             document.getElementById('profilesList').innerHTML = '';
-            document.getElementById('newItemComponentsContainer').style.display = 'none';
-            document.getElementById('newItemComponentsList').innerHTML = '';
             
             tempBrackets = [];
             tempLyres = [];
@@ -1379,20 +1292,20 @@
             if (!container) return;
             
             if (tempBrackets.length === 0) {
-                container.innerHTML = '<div style="color: #a0a0a0; font-size: 12px; padding: 5px;">Нет кронштейнов</div>';
+                container.innerHTML = '<div style="color: #a0a0a0; font-size: 12px; padding: 5px; text-align: center;">—</div>';
                 return;
             }
             
             let html = '';
             tempBrackets.forEach((bracket, idx) => {
                 html += `
-                    <div class="position-item">
-                        <select data-bracket-index="${idx}" class="bracket-select">
-                            <option value="">Выберите кронштейн</option>
+                    <div class="position-item" style="margin-bottom: 5px;">
+                        <select data-bracket-index="${idx}" class="bracket-select" style="flex: 2; font-size: 12px;">
+                            <option value="">Выберите</option>
                             ${bracketsList.map(b => `<option value="${b.name}" ${bracket.type === b.name ? 'selected' : ''}>${b.name}</option>`).join('')}
                         </select>
-                        <input type="number" class="bracket-quantity" data-bracket-index="${idx}" value="${bracket.quantity || 0}" min="0" placeholder="кол-во">
-                        <button class="remove-position" onclick="removeBracketField(${idx})">✕</button>
+                        <input type="number" class="bracket-quantity" data-bracket-index="${idx}" value="${bracket.quantity || 0}" min="0" placeholder="шт" style="width: 60px;">
+                        <button class="remove-position" onclick="removeBracketField(${idx})" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 2px 6px;">✕</button>
                     </div>
                 `;
             });
@@ -1431,20 +1344,20 @@
             if (!container) return;
             
             if (tempLyres.length === 0) {
-                container.innerHTML = '<div style="color: #a0a0a0; font-size: 12px; padding: 5px;">Нет лир</div>';
+                container.innerHTML = '<div style="color: #a0a0a0; font-size: 12px; padding: 5px; text-align: center;">—</div>';
                 return;
             }
             
             let html = '';
             tempLyres.forEach((lyre, idx) => {
                 html += `
-                    <div class="position-item">
-                        <select data-lyre-index="${idx}" class="lyre-select">
-                            <option value="">Выберите лиру</option>
+                    <div class="position-item" style="margin-bottom: 5px;">
+                        <select data-lyre-index="${idx}" class="lyre-select" style="flex: 2; font-size: 12px;">
+                            <option value="">Выберите</option>
                             ${lyresList.map(l => `<option value="${l.name}" ${lyre.type === l.name ? 'selected' : ''}>${l.name}</option>`).join('')}
                         </select>
-                        <input type="number" class="lyre-quantity" data-lyre-index="${idx}" value="${lyre.quantity || 0}" min="0" placeholder="кол-во">
-                        <button class="remove-position" onclick="removeLyreField(${idx})">✕</button>
+                        <input type="number" class="lyre-quantity" data-lyre-index="${idx}" value="${lyre.quantity || 0}" min="0" placeholder="шт" style="width: 60px;">
+                        <button class="remove-position" onclick="removeLyreField(${idx})" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 2px 6px;">✕</button>
                     </div>
                 `;
             });
@@ -1514,9 +1427,6 @@
                 
                 let profilesHtml = profiles.length > 0 ? 
                     profiles.map(p => `<span>${p.name}: ${p.lengthMm}мм x ${p.quantity} шт</span>`).join('') : '';
-                
-                let componentsHtml = item.components && item.components.length > 0 ? 
-                    item.components.map(comp => `<span>${comp.name}: ${comp.quantity} шт</span>`).join('') : '';
 
                 html += `
                     <div class="item-card">
@@ -1531,7 +1441,6 @@
                             <div>🎨 RAL: ${item.ral || '-'} / ${item.texture || '-'}</div>
                             ${regularDetailsHtml ? `<div>🔩 Детали: ${regularDetailsHtml}</div>` : ''}
                             ${profilesHtml ? `<div>📐 Профили: ${profilesHtml}</div>` : ''}
-                            ${componentsHtml ? `<div>🔩 Комплектующие: ${componentsHtml}</div>` : ''}
                         </div>
                     </div>
                 `;
@@ -1556,24 +1465,6 @@
                 });
             }
         }
-        
-        function removeComponentField(btn) {
-            btn.closest('.component-item').remove();
-        }
-
-        function collectComponentsFromForm() {
-            const components = [];
-            document.querySelectorAll('#newItemComponentsList .component-qty-input').forEach(input => {
-                const qty = parseInt(input.value) || 0;
-                if (qty > 0) {
-                    components.push({
-                        name: input.dataset.compName,
-                        quantity: qty
-                    });
-                }
-            });
-            return components;
-        }
 
         function addItemToGroup() {
             const product = document.getElementById('newItemProduct').value;
@@ -1591,7 +1482,6 @@
             const brackets = tempBrackets.filter(b => b.type && b.quantity > 0);
             const lyres = tempLyres.filter(l => l.type && l.quantity > 0);
             const details = collectDetailsFromForm();
-            const components = collectComponentsFromForm();
 
             const newItem = {
                 product: product,
@@ -1602,7 +1492,6 @@
                 brackets: brackets,
                 lyres: lyres,
                 details: details,
-                components: components,
                 ral: document.getElementById('newItemRal').value || '',
                 texture: document.getElementById('newItemTexture').value || ''
             };
@@ -2087,9 +1976,7 @@
             productsList = await loadProducts() || [];
             bracketsList = await loadBrackets() || [];
             lyresList = await loadLyres() || [];
-            await loadComponents();
             await loadProductDetails();
-            componentsData = window.componentsData || {};
             
             populateNewItemSelects();
             initThemeToggle();
