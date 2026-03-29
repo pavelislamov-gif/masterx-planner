@@ -926,29 +926,135 @@
             }
         }
 
-        // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ДЛЯ УЧАСТКА ==============
-        // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ДЛЯ УЧАСТКА ==============
-function getOperationNames(productName, siteKey) {
-    const productOps = taskOperationsData[productName];
-    if (!productOps) return [];
-    
-    const siteMap = {
-        'tokarniy': 'токарно-фрезерный',
-        'frezerniy': 'фрезерный',
-        'slesarniy': 'слесарный',
-        'lazerno': 'лазерно-гибочный',
-        'polimerniy': 'полимерный'
-    };
-    
-    const siteColumn = siteMap[siteKey];
-    if (!siteColumn) return [];
-    
-    const operations = productOps[siteColumn] || [];
-    
-    console.log(`🔧 getOperationNames: ${productName} -> ${siteKey} -> ${operations.length} операций`);
-    
-    return operations;
-}
+        // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ДЛЯ УЧАСТКА (с деталями) ==============
+        function getOperationNamesWithDetails(productName, siteKey) {
+            const productOps = taskOperationsData[productName];
+            if (!productOps) return [];
+            
+            const siteMap = {
+                'tokarniy': 'токарно-фрезерный',
+                'frezerniy': 'фрезерный',
+                'slesarniy': 'слесарный',
+                'lazerno': 'лазерно-гибочный',
+                'polimerniy': 'полимерный'
+            };
+            
+            const siteColumn = siteMap[siteKey];
+            if (!siteColumn) return [];
+            
+            return productOps[siteColumn] || [];
+        }
+
+        // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ДЛЯ ОТОБРАЖЕНИЯ (только названия) ==============
+        function getOperationNames(productName, siteKey) {
+            const ops = getOperationNamesWithDetails(productName, siteKey);
+            return ops.map(op => op.operation);
+        }
+
+        // ============== ФУНКЦИЯ СОЗДАНИЯ ЗАДАЧ С ПЛАНОМ ==============
+        function createTasksForOrder(order) {
+            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+            const orderDate = order.date;
+            
+            console.log(`📅 Создание задач для заказа №${order.number} на дату ${orderDate}`);
+            
+            const item = order.items[0];
+            const details = item.details || [];
+            
+            // Создаём карту: название детали -> количество
+            const detailQuantityMap = {};
+            
+            // Обычные детали и профили
+            details.forEach(detail => {
+                if (detail.quantity > 0) {
+                    detailQuantityMap[detail.name] = detail.quantity;
+                }
+            });
+            
+            // Кронштейны
+            if (item.brackets && item.brackets.length > 0) {
+                item.brackets.forEach(b => {
+                    if (b.type && b.type !== 'отсутствует' && b.quantity > 0) {
+                        detailQuantityMap[`Кронштейн ${b.type}`] = b.quantity;
+                    }
+                });
+            }
+            
+            // Лиры
+            if (item.lyres && item.lyres.length > 0) {
+                item.lyres.forEach(l => {
+                    if (l.type && l.type !== 'отсутствует' && l.quantity > 0) {
+                        detailQuantityMap[`Лира ${l.type}`] = l.quantity;
+                    }
+                });
+            }
+            
+            console.log('📊 Карта деталей:', detailQuantityMap);
+            
+            sites.forEach(siteKey => {
+                const operations = getOperationNamesWithDetails(item.product, siteKey);
+                
+                if (!operations || operations.length === 0) {
+                    console.log(`⏭️ Нет операций для ${siteKey} на ${item.product}`);
+                    return;
+                }
+                
+                const storageKey = `tasks_${siteKey}_${orderDate}`;
+                
+                let existingTasks = [];
+                try {
+                    const saved = localStorage.getItem(storageKey);
+                    if (saved) {
+                        existingTasks = JSON.parse(saved);
+                    }
+                } catch (e) {
+                    console.error('Ошибка загрузки задач:', e);
+                }
+                
+                const newTasks = [];
+                
+                operations.forEach((op, index) => {
+                    const taskId = `${order.id}_${siteKey}_0_${index}`;
+                    const exists = existingTasks.some(t => t.id === taskId);
+                    
+                    if (!exists) {
+                        let plannedQuantity = 1;
+                        if (op.detail && detailQuantityMap[op.detail]) {
+                            plannedQuantity = detailQuantityMap[op.detail];
+                        } else {
+                            console.log(`⚠️ Не найдена деталь "${op.detail}" для операции "${op.operation}", план = 1`);
+                        }
+                        
+                        newTasks.push({
+                            id: taskId,
+                            orderId: order.id,
+                            orderNumber: order.number,
+                            product: item.product,
+                            size: item.size?.name || 'Стандартный',
+                            totalQuantity: plannedQuantity,
+                            completedQuantity: 0,
+                            operation: op.operation,
+                            detail: op.detail,
+                            index: index,
+                            status: 'pending',
+                            executors: [],
+                            date: orderDate,
+                            isExtra: false
+                        });
+                        
+                        console.log(`📋 Создана задача: ${op.operation} → план: ${plannedQuantity} шт (деталь: ${op.detail})`);
+                    }
+                });
+                
+                if (newTasks.length > 0) {
+                    const updatedTasks = [...existingTasks, ...newTasks];
+                    localStorage.setItem(storageKey, JSON.stringify(updatedTasks));
+                    console.log(`✅ ${siteKey}: добавлено ${newTasks.length} задач на ${orderDate}`);
+                }
+            });
+            
+            console.log(`🎉 Задачи для заказа №${order.number} созданы!`);
+        }
 
         // ============== ФУНКЦИИ ДЛЯ ПРОФИЛЕЙ ==============
         function addCustomProfile() {
@@ -1454,6 +1560,9 @@ function getOperationNames(productName, siteKey) {
             orders.push(newOrder);
             saveOrdersToStorage(orders);
             
+            // Создаём задачи для нового заказа
+            createTasksForOrder(newOrder);
+            
             closeGroupModal();
             renderOrdersList();
             updateStatistics();
@@ -1582,13 +1691,28 @@ function getOperationNames(productName, siteKey) {
                 }
             } else {
                 const item = order.items[itemIndex];
+                // Пытаемся найти задачу с правильным планом
+                let plannedQuantity = 1;
+                
+                // Ищем в сохранённых задачах
+                try {
+                    const savedTasks = localStorage.getItem(storageKey);
+                    if (savedTasks) {
+                        const tasks = JSON.parse(savedTasks);
+                        const existingTask = tasks.find(t => t.id === taskId);
+                        if (existingTask && existingTask.totalQuantity) {
+                            plannedQuantity = existingTask.totalQuantity;
+                        }
+                    }
+                } catch(e) {}
+                
                 const newTask = {
                     id: taskId,
                     orderId: order.id,
                     orderNumber: order.number,
                     product: item.product,
                     size: item.size?.name || 'Стандартный',
-                    totalQuantity: item.size?.quantity || 1,
+                    totalQuantity: plannedQuantity,
                     completedQuantity: 0,
                     operation: operationName,
                     index: opIndex,
@@ -1717,86 +1841,72 @@ function getOperationNames(productName, siteKey) {
                             profiles.map(p => `<span>${p.name}: ${p.lengthMm}мм x ${p.quantity} шт</span>`).join(', ') : '';
 
                         itemContent.innerHTML = `
-    <!-- ОСНОВНАЯ СЕТКА: 3 КОЛОНКИ -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 25px; margin-bottom: 20px;">
-        
-        <!-- ЛЕВАЯ КОЛОНКА: РАЗМЕР + ПОКРЫТИЕ -->
-        <div>
-            <div style="margin-bottom: 12px;">
-                <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">РАЗМЕР</div>
-                <div><strong>${escapeHtml(item.size?.name || '-')}</strong> <span style="color: #4cd964;">× ${item.size?.quantity || 0} шт</span></div>
-            </div>
-            <div style="margin-bottom: 12px;">
-                <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">ПОКРЫТИЕ</div>
-                <div><strong>${escapeHtml(item.ral || '-')}</strong> / ${escapeHtml(item.texture || '-')}</div>
-            </div>
-        </div>
-        
-        <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: ПРОФИЛИ -->
-        <div>
-            <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">ПРОФИЛИ</div>
-            ${profiles.length > 0 ? 
-                profiles.map(p => `
-                    <div style="margin-bottom: 8px;">
-                        <div>• ${escapeHtml(p.name)}</div>
-                        <div style="margin-left: 12px; color: #a0a0a0; font-size: 12px;">
-                            <span style="color: #ff9800;">${p.lengthMm} мм</span> <span style="color: #4cd964;">× ${p.quantity} шт</span>
-                        </div>
-                    </div>
-                `).join('') : 
-                '<div style="color: #6c757d;">— нет —</div>'}
-        </div>
-        
-        <!-- ПРАВАЯ КОЛОНКА: ДЕТАЛИ (включая кронштейны и лиры) -->
-        <div>
-            <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">ДЕТАЛИ</div>
-            ${(() => {
-                const allDetails = [];
-                
-                // Добавляем кронштейны
-                if (item.brackets && item.brackets.length > 0) {
-                    item.brackets.forEach(b => {
-                        allDetails.push({ name: `Кронштейн ${b.type}`, quantity: b.quantity });
-                    });
-                }
-                
-                // Добавляем лиры
-                if (item.lyres && item.lyres.length > 0) {
-                    item.lyres.forEach(l => {
-                        allDetails.push({ name: `Лира ${l.type}`, quantity: l.quantity });
-                    });
-                }
-                
-                // Добавляем обычные детали
-                if (regularDetails.length > 0) {
-                    regularDetails.forEach(d => {
-                        allDetails.push({ name: d.name, quantity: d.quantity });
-                    });
-                }
-                
-                return allDetails.length > 0 ? 
-                    allDetails.map(d => `
-                        <div style="margin-bottom: 6px;">
-                            • ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span>
-                        </div>
-                    `).join('') : 
-                    '<div style="color: #6c757d;">— нет —</div>';
-            })()}
-        </div>
-    </div>
-    
-    <!-- УЧАСТКИ -->
-    <div id="sites-${order.id}-${itemIndex}" class="sites-section">
-        <h4 style="margin-bottom: 12px;">ПРОИЗВОДСТВЕННЫЕ УЧАСТКИ</h4>
-        <div class="sites-grid">
-            ${createSiteRow('Токарный', order, itemIndex, 'tokarniy')}
-            ${createSiteRow('Слесарный', order, itemIndex, 'slesarniy')}
-            ${createSiteRow('Фрезерный', order, itemIndex, 'frezerniy')}
-            ${createSiteRow('Лазерно-гибочный', order, itemIndex, 'lazerno')}
-            ${createSiteRow('Полимерный', order, itemIndex, 'polimerniy')}
-        </div>
-    </div>
-`;
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 25px; margin-bottom: 20px;">
+                                <div>
+                                    <div style="margin-bottom: 12px;">
+                                        <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">РАЗМЕР</div>
+                                        <div><strong>${escapeHtml(item.size?.name || '-')}</strong> <span style="color: #4cd964;">× ${item.size?.quantity || 0} шт</span></div>
+                                    </div>
+                                    <div style="margin-bottom: 12px;">
+                                        <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">ПОКРЫТИЕ</div>
+                                        <div><strong>${escapeHtml(item.ral || '-')}</strong> / ${escapeHtml(item.texture || '-')}</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">ПРОФИЛИ</div>
+                                    ${profiles.length > 0 ? 
+                                        profiles.map(p => `
+                                            <div style="margin-bottom: 8px;">
+                                                <div>• ${escapeHtml(p.name)}</div>
+                                                <div style="margin-left: 12px; color: #a0a0a0; font-size: 12px;">
+                                                    <span style="color: #ff9800;">${p.lengthMm} мм</span> <span style="color: #4cd964;">× ${p.quantity} шт</span>
+                                                </div>
+                                            </div>
+                                        `).join('') : 
+                                        '<div style="color: #6c757d;">— нет —</div>'}
+                                </div>
+                                <div>
+                                    <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">ДЕТАЛИ</div>
+                                    ${(() => {
+                                        const allDetails = [];
+                                        if (item.brackets && item.brackets.length > 0) {
+                                            item.brackets.forEach(b => {
+                                                allDetails.push({ name: `Кронштейн ${b.type}`, quantity: b.quantity });
+                                            });
+                                        }
+                                        if (item.lyres && item.lyres.length > 0) {
+                                            item.lyres.forEach(l => {
+                                                allDetails.push({ name: `Лира ${l.type}`, quantity: l.quantity });
+                                            });
+                                        }
+                                        if (regularDetails.length > 0) {
+                                            regularDetails.forEach(d => {
+                                                allDetails.push({ name: d.name, quantity: d.quantity });
+                                            });
+                                        }
+                                        return allDetails.length > 0 ? 
+                                            allDetails.map(d => `
+                                                <div style="margin-bottom: 6px;">
+                                                    • ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span>
+                                                </div>
+                                            `).join('') : 
+                                            '<div style="color: #6c757d;">— нет —</div>';
+                                    })()}
+                                </div>
+                            </div>
+                            
+                            <div id="sites-${order.id}-${itemIndex}" class="sites-section">
+                                <h4 style="margin-bottom: 12px;">ПРОИЗВОДСТВЕННЫЕ УЧАСТКИ</h4>
+                                <div class="sites-grid">
+                                    ${createSiteRow('Токарный', order, itemIndex, 'tokarniy')}
+                                    ${createSiteRow('Слесарный', order, itemIndex, 'slesarniy')}
+                                    ${createSiteRow('Фрезерный', order, itemIndex, 'frezerniy')}
+                                    ${createSiteRow('Лазерно-гибочный', order, itemIndex, 'lazerno')}
+                                    ${createSiteRow('Полимерный', order, itemIndex, 'polimerniy')}
+                                </div>
+                            </div>
+                        `;
+                        
                         itemHeader.onclick = () => {
                             const isVisible = itemContent.style.display !== 'none';
                             itemContent.style.display = isVisible ? 'none' : 'block';
