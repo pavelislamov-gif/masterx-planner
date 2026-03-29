@@ -473,10 +473,13 @@
                 
                 var planQuantity = task.totalQuantity || getTaskPlanFromDetails(task, fullOrder);
                 
-                // Убеждаемся, что operation — строка
+                // ПРЕОБРАЗОВАНИЕ operation В СТРОКУ
                 var operationName = task.operation;
-                if (typeof operationName === 'object' && operationName.operation) {
-                    operationName = operationName.operation;
+                if (typeof operationName === 'object' && operationName !== null) {
+                    operationName = operationName.operation || JSON.stringify(operationName);
+                }
+                if (typeof operationName !== 'string') {
+                    operationName = String(operationName);
                 }
                 
                 var header = document.createElement('div');
@@ -646,7 +649,13 @@
                 var task = taskManager.tasks.find(t => t.id === taskId);
                 if (!task) return;
                 var totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
-                if (confirm('Завершить задачу?\nОперация: ' + task.operation + '\nВыполнено: ' + totalAssigned + ' шт')) {
+                
+                var operationName = task.operation;
+                if (typeof operationName === 'object' && operationName !== null) {
+                    operationName = operationName.operation || JSON.stringify(operationName);
+                }
+                
+                if (confirm('Завершить задачу?\nОперация: ' + operationName + '\nВыполнено: ' + totalAssigned + ' шт')) {
                     taskManager.completeTask(taskId);
                     var taskCard = document.querySelector('.task-card[data-task-id="' + taskId + '"]');
                     if (taskCard) {
@@ -669,8 +678,8 @@
                     const planQuantity = task.totalQuantity || getTaskPlanFromDetails(task, fullOrder);
                     
                     var operationName = task.operation;
-                    if (typeof operationName === 'object' && operationName.operation) {
-                        operationName = operationName.operation;
+                    if (typeof operationName === 'object' && operationName !== null) {
+                        operationName = operationName.operation || JSON.stringify(operationName);
                     }
                     
                     if (task.executors && task.executors.length > 0) {
