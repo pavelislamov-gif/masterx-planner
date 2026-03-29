@@ -948,7 +948,7 @@
         // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ДЛЯ ОТОБРАЖЕНИЯ (только названия) ==============
         function getOperationNames(productName, siteKey) {
             const ops = getOperationNamesWithDetails(productName, siteKey);
-            return ops.map(op => op.operation);
+            return ops.map(op => typeof op === 'object' ? op.operation : op);
         }
 
         // ============== ФУНКЦИЯ СОЗДАНИЯ ЗАДАЧ С ПЛАНОМ ==============
