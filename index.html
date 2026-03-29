@@ -930,7 +930,8 @@
         }
 
         // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ДЛЯ УЧАСТКА (с деталями) ==============
-        const productOps = taskOperationsData[productName];
+        function getOperationNamesWithDetails(productName, siteKey) {
+            const productOps = taskOperationsData[productName];
             if (!productOps) return [];
             
             const siteMap = {
@@ -950,10 +951,12 @@
         // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ДЛЯ ОТОБРАЖЕНИЯ (только названия) ==============
         function getOperationNames(productName, siteKey) {
             const ops = getOperationNamesWithDetails(productName, siteKey);
-            // Извлекаем только operation из объектов
-            if (ops.length > 0 && typeof ops[0] === 'object') {
-                return ops.map(op => op.operation);
+            if (ops.length === 0) return [];
+            
+            if (typeof ops[0] === 'object' && ops[0].operation) {
+                return ops.map(function(op) { return op.operation; });
             }
+            
             return ops;
         }
 
