@@ -217,10 +217,6 @@
                 if (isLoadingTasks) return;
                 isLoadingTasks = true;
                 
-                // Сохраняем текущие открытые карточки перед перерисовкой
-                saveOpenCardsState();
-                saveOpenOrderState();
-                
                 var tasksList = document.getElementById('tasksList');
                 taskManager.loadData();
                 var tasks = taskManager.getTasksByStatus(currentFilter);
@@ -239,14 +235,18 @@
                 }
                 
                 var byOrder = {};
-                tasks.forEach(task => {
+                tasks.forEach(function(task) {
                     if (!byOrder[task.orderId]) {
-                        byOrder[task.orderId] = { number: task.orderNumber, orderId: task.orderId, tasks: [] };
+                        byOrder[task.orderId] = {
+                            number: task.orderNumber,
+                            orderId: task.orderId,
+                            tasks: []
+                        };
                     }
                     byOrder[task.orderId].tasks.push(task);
                 });
                 
-                Object.values(byOrder).forEach(order => {
+                Object.values(byOrder).forEach(function(order) {
                     var orderDiv = document.createElement('div');
                     orderDiv.className = 'order-card';
                     orderDiv.dataset.orderId = order.orderId;
@@ -261,26 +261,50 @@
                     var fullOrder = null;
                     try {
                         var allOrders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
-                        fullOrder = allOrders.find(o => o.id == order.orderId);
+                        fullOrder = allOrders.find(function(o) { return o.id == order.orderId; });
                     } catch (e) {}
 
-                    var productQty = (fullOrder?.items?.[0]?.size?.quantity) || 1;
-                    var productName = fullOrder?.items?.[0]?.product || '';
-                    var productSize = fullOrder?.items?.[0]?.size?.name || '-';
-                    var bracket = fullOrder?.items?.[0]?.brackets || [];
-                    var lyre = fullOrder?.items?.[0]?.lyres || [];
-                    var ral = fullOrder?.items?.[0]?.ral || '';
-                    var texture = fullOrder?.items?.[0]?.texture || '';
-                    var components = fullOrder?.components || [];
-                    var details = fullOrder?.items?.[0]?.details || [];
+                    var productQty = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].size?.quantity || 1) : 1;
+                    var productName = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].product || '') : '';
+                    var productSize = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].size?.name || '-') : '-';
+                    var bracket = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].brackets || []) : [];
+                    var lyre = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].lyres || []) : [];
+                    var ral = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].ral || '') : '';
+                    var texture = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].texture || '') : '';
+                    var components = (fullOrder && fullOrder.components) ? fullOrder.components : [];
+                    var details = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].details || []) : [];
                     
                     var allDetails = [];
-                    bracket.forEach(b => { if (b.type && b.type !== 'отсутствует' && b.quantity > 0) allDetails.push({ name: 'Кронштейн ' + b.type, quantity: b.quantity }); });
-                    lyre.forEach(l => { if (l.type && l.type !== 'отсутствует' && l.quantity > 0) allDetails.push({ name: 'Лира ' + l.type, quantity: l.quantity }); });
-                    details.forEach(d => { if (d.type !== 'profile' && d.quantity > 0) allDetails.push({ name: d.name, quantity: d.quantity }); });
+                    if (bracket && bracket.length > 0) {
+                        bracket.forEach(function(b) {
+                            if (b.type && b.type !== 'отсутствует' && b.quantity > 0) {
+                                allDetails.push({ name: 'Кронштейн ' + b.type, quantity: b.quantity });
+                            }
+                        });
+                    }
+                    if (lyre && lyre.length > 0) {
+                        lyre.forEach(function(l) {
+                            if (l.type && l.type !== 'отсутствует' && l.quantity > 0) {
+                                allDetails.push({ name: 'Лира ' + l.type, quantity: l.quantity });
+                            }
+                        });
+                    }
+                    if (details && details.length > 0) {
+                        details.forEach(function(d) {
+                            if (d.type !== 'profile' && d.quantity > 0) {
+                                allDetails.push({ name: d.name, quantity: d.quantity });
+                            }
+                        });
+                    }
                     
                     var profiles = [];
-                    details.forEach(d => { if (d.type === 'profile' && d.quantity > 0) profiles.push({ name: d.name, lengthMm: d.lengthMm, quantity: d.quantity }); });
+                    if (details && details.length > 0) {
+                        details.forEach(function(d) {
+                            if (d.type === 'profile' && d.quantity > 0) {
+                                profiles.push({ name: d.name, lengthMm: d.lengthMm, quantity: d.quantity });
+                            }
+                        });
+                    }
                     
                     var productInfoDiv = document.createElement('div');
                     productInfoDiv.className = 'product-info';
@@ -311,7 +335,9 @@
                             </div>
                             <div>
                                 <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 8px;">ДЕТАЛИ</div>
-                                ${allDetails.map(d => `<div style="margin-bottom: 6px; font-size: 16px;">• ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span></div>`).join('') || '<div style="color: #6c757d;">— нет —</div>'}
+                                ${allDetails.map(d => `
+                                    <div style="margin-bottom: 6px; font-size: 16px;">• ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span></div>
+                                `).join('') || '<div style="color: #6c757d;">— нет —</div>'}
                             </div>
                         </div>
                     `;
@@ -327,13 +353,14 @@
                     productInfoDiv.innerHTML = infoHtml;
                     content.appendChild(productInfoDiv);
                     
-                    order.tasks.forEach(task => { content.appendChild(createTaskCard(task)); });
+                    order.tasks.forEach(function(task) {
+                        content.appendChild(createTaskCard(task));
+                    });
                     
                     header.addEventListener('click', function(e) {
                         if (e.target.tagName === 'BUTTON') return;
                         content.classList.toggle('collapsed');
                         header.classList.toggle('collapsed');
-                        // Сохраняем состояние после клика
                         saveOpenCardsState();
                     });
                     
@@ -342,12 +369,10 @@
                     tasksList.appendChild(orderDiv);
                 });
                 
-                // Восстанавливаем состояние ПОСЛЕ того, как все карточки добавлены в DOM
-                setTimeout(function() {
-                    restoreOpenCardsState();
-                    restoreOpenOrderState();
-                    isLoadingTasks = false;
-                }, 50);
+                // Восстанавливаем состояние ПОСЛЕ того, как все карточки добавлены
+                restoreOpenCardsState();
+                
+                isLoadingTasks = false;
             }
             
             function createTaskCard(task) {
