@@ -88,6 +88,7 @@
                 <button class="btn btn-success" style="padding: 6px 12px; font-size: 12px;" onclick="changeDate('today')">Сегодня</button>
                 <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="changeDate('next')">Завтра →</button>
                 <button class="btn btn-info" style="padding: 6px 12px; font-size: 12px;" onclick="exportToExcel()">📊 Excel</button>
+                <button class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="clearAllTasks()">🗑️ Очистить задачи</button>
             </div>
         </div>
 
@@ -245,6 +246,22 @@
                 }
             });
         }
+
+        // ============== ОЧИСТКА ВСЕХ ЗАДАЧ ==============
+        window.clearAllTasks = function() {
+            if (confirm('❗ ВНИМАНИЕ! Это удалит ВСЕ задачи на лазерно-гибочном участке. Продолжить?')) {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('tasks_lazerno_')) {
+                        localStorage.removeItem(key);
+                        console.log('🗑️ Удалено:', key);
+                    }
+                }
+                localStorage.removeItem(LAZERNO_STORAGE_KEY);
+                alert('✅ Все задачи лазерно-гибочного участка удалены');
+                location.reload();
+            }
+        };
 
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         if (typeof TaskManager === 'undefined') {
