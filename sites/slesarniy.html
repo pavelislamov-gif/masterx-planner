@@ -33,6 +33,11 @@
         .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .task-title { font-size: 14px; font-weight: 600; color: #fff; }
         .task-plan { color: #ff9800; font-size: 12px; margin-bottom: 10px; padding: 4px 8px; background: #1e232b; border-radius: 4px; display: inline-block; }
+        .profile-info { margin-bottom: 10px; padding: 6px 10px; background: #232830; border-radius: 6px; font-size: 12px; border-left: 3px solid #ff9800; }
+        .profile-info span { margin-right: 15px; }
+        .profile-info .profile-name { color: #ff9800; }
+        .profile-info .profile-length { color: #00d4ff; }
+        .profile-info .profile-qty { color: #4cd964; }
         .executor-header { display: flex; gap: 10px; padding: 0 10px; margin-bottom: 6px; font-size: 11px; color: #a0a0a0; }
         .executor-header span:nth-child(1) { width: 140px; }
         .executor-header span:nth-child(2) { width: 70px; text-align: center; }
@@ -75,7 +80,7 @@
                 <img src="../images/logo.png" alt="MasterX Logo" class="logo-img" onerror="this.style.display='none'">
                 <div class="logo-text">Master<span class="x-red">X</span></div>
             </div>
-            <h1 style="margin:0; color: white; font-size:18px;"> Слесарный участок</h1>
+            <h1 style="margin:0; color: white; font-size:18px;">🔧 Слесарный участок</h1>
         </header>
 
         <div class="date-navigation">
@@ -158,6 +163,43 @@
             }
             
             return ops;
+        }
+        
+        // ============== ПОЛУЧЕНИЕ ПРОФИЛЯ ПО ОПЕРАЦИИ ==============
+        function getProfileForOperation(operationName, details) {
+            if (!details || details.length === 0) return null;
+            
+            // Извлекаем название профиля из операции
+            const profileKeywords = ['профиль', 'Профиль', 'НПС', 'МП', 'КП', 'ABA'];
+            let profileNameFromOp = null;
+            
+            for (const keyword of profileKeywords) {
+                const regex = new RegExp(`${keyword}\\s+([А-Яа-я0-9\\s\\-]+)`, 'i');
+                const match = operationName.match(regex);
+                if (match) {
+                    profileNameFromOp = match[1].trim();
+                    break;
+                }
+            }
+            
+            // Если не нашли по ключевым словам, пробуем искать прямые совпадения
+            if (!profileNameFromOp) {
+                for (const detail of details) {
+                    if (detail.type === 'profile' && operationName.includes(detail.name)) {
+                        return detail;
+                    }
+                }
+                return null;
+            }
+            
+            // Ищем профиль в деталях
+            for (const detail of details) {
+                if (detail.type === 'profile' && detail.name.includes(profileNameFromOp)) {
+                    return detail;
+                }
+            }
+            
+            return null;
         }
         
         function getTaskPlanFromDetails(task, fullOrder) {
@@ -491,6 +533,23 @@
                 planDiv.className = 'task-plan';
                 planDiv.innerHTML = '📋 План: ' + planQuantity + ' шт';
                 card.appendChild(planDiv);
+                
+                // ============== ДОБАВЛЯЕМ ИНФОРМАЦИЮ О ПРОФИЛЕ ==============
+                if (fullOrder && fullOrder.items && fullOrder.items[0]) {
+                    var details = fullOrder.items[0].details || [];
+                    var profileInfo = getProfileForOperation(operationName, details);
+                    
+                    if (profileInfo) {
+                        var profileDiv = document.createElement('div');
+                        profileDiv.className = 'profile-info';
+                        profileDiv.innerHTML = `
+                            <span class="profile-name">📐 ${escapeHtml(profileInfo.name)}</span>
+                            <span class="profile-length">📏 Длина: ${profileInfo.lengthMm || 0} мм</span>
+                            <span class="profile-qty">× ${profileInfo.quantity} шт</span>
+                        `;
+                        card.appendChild(profileDiv);
+                    }
+                }
                 
                 if (task.isExtra && task.description) {
                     var desc = document.createElement('div');
