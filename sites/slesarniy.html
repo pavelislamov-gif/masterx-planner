@@ -71,7 +71,6 @@
         }
         
         .product-info {
-            padding: 10px 15px;
             background: #15191f;
             border-bottom: 1px solid #2a2f38;
             color: #a0a0a0;
@@ -472,66 +471,6 @@
         .executor-item input:disabled {
             opacity: 0.6;
         }
-
-        /* Стили для новой шапки 3 колонки */
-        .product-header {
-            font-size: 18px;
-            font-weight: 600;
-            color: #ff3b3b;
-            margin-bottom: 15px;
-        }
-        
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 25px;
-        }
-        
-        .info-col {
-            background: #15191f;
-            border-radius: 8px;
-            padding: 12px;
-        }
-        
-        .info-label {
-            color: #a0a0a0;
-            font-size: 11px;
-            margin-bottom: 6px;
-        }
-        
-        .info-value {
-            font-size: 14px;
-        }
-        
-        .profile-item {
-            margin-bottom: 8px;
-        }
-        
-        .profile-name {
-            font-weight: 500;
-        }
-        
-        .profile-details {
-            margin-left: 12px;
-            color: #a0a0a0;
-            font-size: 11px;
-        }
-        
-        .detail-item {
-            margin-bottom: 4px;
-        }
-        
-        .detail-quantity {
-            color: #4cd964;
-        }
-        
-        .size-quantity {
-            color: #4cd964;
-        }
-        
-        .length-value {
-            color: #ff9800;
-        }
     </style>
 </head>
 <body>
@@ -611,6 +550,40 @@
                 .replace(/'/g, '&#39;');
         }
 
+        // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
+        function saveOpenCardsState() {
+            const openCards = [];
+            document.querySelectorAll('.order-card').forEach(card => {
+                const content = card.querySelector('.order-content');
+                if (content && !content.classList.contains('collapsed')) {
+                    openCards.push(card.dataset.orderId);
+                }
+            });
+            localStorage.setItem('slesarniy_open_cards', JSON.stringify(openCards));
+            console.log('💾 Сохранены открытые карточки:', openCards);
+        }
+
+        function restoreOpenCardsState() {
+            const savedOpenCards = localStorage.getItem('slesarniy_open_cards');
+            if (!savedOpenCards) return;
+            
+            const openCardsIds = JSON.parse(savedOpenCards);
+            console.log('📂 Восстанавливаем открытые карточки:', openCardsIds);
+            
+            openCardsIds.forEach(orderId => {
+                const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
+                if (card) {
+                    const header = card.querySelector('.order-header');
+                    const content = card.querySelector('.order-content');
+                    if (header && content) {
+                        header.classList.remove('collapsed');
+                        content.classList.remove('collapsed');
+                        console.log('✅ Восстановлена карточка:', orderId);
+                    }
+                }
+            });
+        }
+
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         if (typeof TaskManager === 'undefined') {
             console.error('❌ TaskManager не загружен! Проверьте подключение task-manager.js');
@@ -676,6 +649,11 @@
                 updateDateDisplay();
                 loadTasks();
                 
+                // Сохраняем состояние перед закрытием страницы
+                window.addEventListener('beforeunload', function() {
+                    saveOpenCardsState();
+                });
+                
                 window.addEventListener('taskStatusChanged', function() {
                     if (_loadTimer) clearTimeout(_loadTimer);
                     _loadTimer = setTimeout(function() {}, 100);
@@ -739,6 +717,8 @@
                 isLoadingTasks = true;
                 console.log('loadTasks вызвана');
                 
+                // Сохраняем состояние открытых карточек перед перерисовкой
+                saveOpenCardsState();
                 saveOpenOrderState();
                 
                 var tasksList = document.getElementById('tasksList');
@@ -858,219 +838,77 @@
                     
                     // НОВАЯ ШАПКА (3 КОЛОНКИ)
                     var productInfoDiv = document.createElement('div');
-productInfoDiv.className = 'product-info';
-productInfoDiv.style.marginBottom = '4px';
-productInfoDiv.style.padding = '8px 12px 8px 12px';
-productInfoDiv.style.background = '#15191f';
-productInfoDiv.style.borderRadius = '6px';
-productInfoDiv.style.border = '1px solid #2a2f38';
-productInfoDiv.style.width = '100%';
-productInfoDiv.style.boxSizing = 'border-box';
+                    productInfoDiv.className = 'product-info';
+                    productInfoDiv.style.marginBottom = '0px';
+                    productInfoDiv.style.padding = '8px 12px 8px 12px';
+                    productInfoDiv.style.background = '#15191f';
+                    productInfoDiv.style.borderRadius = '0px';
+                    productInfoDiv.style.border = 'none';
+                    productInfoDiv.style.borderBottom = '1px solid #2a2f38';
+                    productInfoDiv.style.width = '100%';
+                    productInfoDiv.style.boxSizing = 'border-box';
 
-var infoHtml = `
-    <div style="font-size: 20px; font-weight: 600; color: #ff3b3b; margin: 0 0 8px 0; padding: 0;">
-        📦 ${escapeHtml(productName)}
-    </div>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; align-items: center;">
-        
-        <!-- ЛЕВАЯ КОЛОНКА: РАЗМЕР + ПОКРЫТИЕ -->
-        <div style="align-self: center;">
-            <div style="margin-bottom: 8px;">
-                <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 4px;">РАЗМЕР</div>
-                <div style="font-size: 20px;"><strong>${escapeHtml(productSize)}</strong> <span style="color: #4cd964; font-size: 18px; font-weight: 500;">× ${productQty} шт</span></div>
-            </div>
-            <div>
-                <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 4px;">ПОКРЫТИЕ</div>
-                <div style="font-size: 18px;"><strong>${escapeHtml(ral || '-')}</strong> / ${escapeHtml(texture || '-')}</div>
-            </div>
-        </div>
-        
-        <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: ПРОФИЛИ -->
-        <div style="align-self: center;">
-            <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 8px;">ПРОФИЛИ</div>
-            ${profiles.length > 0 ? 
-                profiles.map(function(p) {
-                    return '<div style="margin-bottom: 8px;">' +
-                        '<div style="font-size: 16px;">• ' + escapeHtml(p.name) + '</div>' +
-                        '<div style="margin-left: 18px; color: #a0a0a0; font-size: 13px;">' +
-                            '<span style="color: #ff9800; font-size: 14px; font-weight: 500;">' + p.lengthMm + ' мм</span> <span style="color: #4cd964; font-size: 14px; font-weight: 500;">× ' + p.quantity + ' шт</span>' +
-                        '</div>' +
-                    '</div>';
-                }).join('') : 
-                '<div style="color: #6c757d; font-size: 14px;">— нет —</div>'}
-        </div>
-        
-        <!-- ПРАВАЯ КОЛОНКА: ДЕТАЛИ -->
-        <div style="align-self: center;">
-            <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 8px;">ДЕТАЛИ</div>
-            ${allDetails.length > 0 ? 
-                allDetails.map(function(d) {
-                    return '<div style="margin-bottom: 6px; font-size: 16px;">' +
-                        '• ' + escapeHtml(d.name) + ' <span style="color: #4cd964; font-size: 16px; font-weight: 500;">' + d.quantity + ' шт</span>' +
-                    '</div>';
-                }).join('') : 
-                '<div style="color: #6c757d; font-size: 14px;">— нет —</div>'}
-        </div>
-    </div>
-`;
+                    var infoHtml = `
+                        <div style="font-size: 20px; font-weight: 600; color: #ff3b3b; margin: 0 0 8px 0; padding: 0;">
+                            📦 ${escapeHtml(productName)}
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; align-items: center;">
+                            
+                            <!-- ЛЕВАЯ КОЛОНКА: РАЗМЕР + ПОКРЫТИЕ -->
+                            <div style="align-self: center;">
+                                <div style="margin-bottom: 8px;">
+                                    <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 4px;">РАЗМЕР</div>
+                                    <div style="font-size: 20px;"><strong>${escapeHtml(productSize)}</strong> <span style="color: #4cd964; font-size: 18px; font-weight: 500;">× ${productQty} шт</span></div>
+                                </div>
+                                <div>
+                                    <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 4px;">ПОКРЫТИЕ</div>
+                                    <div style="font-size: 18px;"><strong>${escapeHtml(ral || '-')}</strong> / ${escapeHtml(texture || '-')}</div>
+                                </div>
+                            </div>
+                            
+                            <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: ПРОФИЛИ -->
+                            <div style="align-self: center;">
+                                <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 8px;">ПРОФИЛИ</div>
+                                ${profiles.length > 0 ? 
+                                    profiles.map(function(p) {
+                                        return '<div style="margin-bottom: 8px;">' +
+                                            '<div style="font-size: 16px;">• ' + escapeHtml(p.name) + '</div>' +
+                                            '<div style="margin-left: 18px; color: #a0a0a0; font-size: 13px;">' +
+                                                '<span style="color: #ff9800; font-size: 14px; font-weight: 500;">' + p.lengthMm + ' мм</span> <span style="color: #4cd964; font-size: 14px; font-weight: 500;">× ' + p.quantity + ' шт</span>' +
+                                            '</div>' +
+                                        '</div>';
+                                    }).join('') : 
+                                    '<div style="color: #6c757d; font-size: 14px;">— нет —</div>'}
+                            </div>
+                            
+                            <!-- ПРАВАЯ КОЛОНКА: ДЕТАЛИ -->
+                            <div style="align-self: center;">
+                                <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 8px;">ДЕТАЛИ</div>
+                                ${allDetails.length > 0 ? 
+                                    allDetails.map(function(d) {
+                                        return '<div style="margin-bottom: 6px; font-size: 16px;">' +
+                                            '• ' + escapeHtml(d.name) + ' <span style="color: #4cd964; font-size: 16px; font-weight: 500;">' + d.quantity + ' шт</span>' +
+                                        '</div>';
+                                    }).join('') : 
+                                    '<div style="color: #6c757d; font-size: 14px;">— нет —</div>'}
+                            </div>
+                        </div>
+                    `;
 
-// Добавляем комплектующие если есть
-if (components && components.length > 0) {
-    var compsHtml = '';
-    for (var i = 0; i < components.length; i++) {
-        var comp = components[i];
-        compsHtml += '<span style="background: #1e232b; padding: 4px 10px; border-radius: 14px; font-size: 12px; border: 1px solid #2a2f38; margin-right: 6px; margin-bottom: 3px; display: inline-block;">' + escapeHtml(comp.name) + ': <strong style="color: #4cd964; font-size: 13px;">' + comp.quantityPerProduct + '</strong> шт/изд</span>';
-    }
-    infoHtml += '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #2a2f38;">' +
-        '<strong style="color: #ff3b3b; font-size: 12px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>' +
-        '<div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px;">' + compsHtml + '</div>' +
-    '</div>';
-}
+                    // Добавляем комплектующие если есть
+                    if (components && components.length > 0) {
+                        var compsHtml = '';
+                        for (var i = 0; i < components.length; i++) {
+                            var comp = components[i];
+                            compsHtml += '<span style="background: #1e232b; padding: 4px 10px; border-radius: 14px; font-size: 12px; border: 1px solid #2a2f38; margin-right: 6px; margin-bottom: 3px; display: inline-block;">' + escapeHtml(comp.name) + ': <strong style="color: #4cd964; font-size: 13px;">' + comp.quantityPerProduct + '</strong> шт/изд</span>';
+                        }
+                        infoHtml += '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #2a2f38;">' +
+                            '<strong style="color: #ff3b3b; font-size: 12px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>' +
+                            '<div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px;">' + compsHtml + '</div>' +
+                        '</div>';
+                    }
 
-// Добавляем комплектующие если есть
-if (components && components.length > 0) {
-    var compsHtml = '';
-    for (var i = 0; i < components.length; i++) {
-        var comp = components[i];
-        compsHtml += '<span style="background: #1e232b; padding: 4px 10px; border-radius: 14px; font-size: 12px; border: 1px solid #2a2f38; margin-right: 6px; margin-bottom: 3px; display: inline-block;">' + escapeHtml(comp.name) + ': <strong style="color: #4cd964;">' + comp.quantityPerProduct + '</strong> шт/изд</span>';
-    }
-    infoHtml += '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #2a2f38;">' +
-        '<strong style="color: #ff3b3b; font-size: 12px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>' +
-        '<div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px;">' + compsHtml + '</div>' +
-    '</div>';
-}
-
-// Добавляем комплектующие если есть
-if (components && components.length > 0) {
-    var compsHtml = '';
-    for (var i = 0; i < components.length; i++) {
-        var comp = components[i];
-        compsHtml += '<span style="background: #1e232b; padding: 2px 6px; border-radius: 12px; font-size: 10px; border: 1px solid #2a2f38; margin-right: 5px; margin-bottom: 2px; display: inline-block; line-height: 1.2;">' + escapeHtml(comp.name) + ': <strong style="color: #4cd964;">' + comp.quantityPerProduct + '</strong> шт/изд</span>';
-    }
-    infoHtml += '<div style="margin-top: 4px; padding-top: 3px; border-top: 1px solid #2a2f38;">' +
-        '<strong style="color: #ff3b3b; font-size: 10px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>' +
-        '<div style="margin-top: 2px; display: flex; flex-wrap: wrap; gap: 4px;">' + compsHtml + '</div>' +
-    '</div>';
-}
-
-// Добавляем комплектующие если есть
-if (components && components.length > 0) {
-    var compsHtml = '';
-    for (var i = 0; i < components.length; i++) {
-        var comp = components[i];
-        compsHtml += '<span style="background: #1e232b; padding: 2px 6px; border-radius: 12px; font-size: 10px; border: 1px solid #2a2f38; margin-right: 5px; margin-bottom: 2px; display: inline-block; line-height: 1.2;">' + escapeHtml(comp.name) + ': <strong style="color: #4cd964;">' + comp.quantityPerProduct + '</strong> шт/изд</span>';
-    }
-    infoHtml += '<div style="margin-top: 4px; padding-top: 3px; border-top: 1px solid #2a2f38;">' +
-        '<strong style="color: #ff3b3b; font-size: 10px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>' +
-        '<div style="margin-top: 2px; display: flex; flex-wrap: wrap; gap: 4px;">' + compsHtml + '</div>' +
-    '</div>';
-}
-
-// Добавляем комплектующие если есть
-if (components && components.length > 0) {
-    var compsHtml = '';
-    for (var i = 0; i < components.length; i++) {
-        var comp = components[i];
-        compsHtml += '<span style="background: #1e232b; padding: 4px 8px; border-radius: 14px; font-size: 12px; border: 1px solid #2a2f38; margin-right: 6px; margin-bottom: 3px; display: inline-block;">' + escapeHtml(comp.name) + ': <strong style="color: #4cd964;">' + comp.quantityPerProduct + '</strong> шт/изд</span>';
-    }
-    infoHtml += '<div style="margin-top: 8px; padding-top: 6px; border-top: 1px solid #2a2f38;">' +
-        '<strong style="color: #ff3b3b; font-size: 12px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>' +
-        '<div style="margin-top: 4px; display: flex; flex-wrap: wrap; gap: 5px;">' + compsHtml + '</div>' +
-    '</div>';
-}
-
-// Добавляем комплектующие если есть
-if (components && components.length > 0) {
-    var compsHtml = '';
-    for (var i = 0; i < components.length; i++) {
-        var comp = components[i];
-        compsHtml += '<span style="background: #1e232b; padding: 1px 4px; border-radius: 10px; font-size: 9px; border: 1px solid #2a2f38; margin-right: 4px; margin-bottom: 1px; display: inline-block;">' + escapeHtml(comp.name) + ': <strong style="color: #4cd964;">' + comp.quantityPerProduct + '</strong> шт/изд</span>';
-    }
-    infoHtml += '<div style="margin-top: 3px; padding-top: 2px; border-top: 1px solid #2a2f38;">' +
-        '<strong style="color: #ff3b3b; font-size: 9px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>' +
-        '<div style="margin-top: 1px; display: flex; flex-wrap: wrap; gap: 3px;">' + compsHtml + '</div>' +
-    '</div>';
-}
-
-// Добавляем комплектующие если есть
-if (components && components.length > 0) {
-    var compsHtml = '';
-    for (var i = 0; i < components.length; i++) {
-        var comp = components[i];
-        compsHtml += '<span style="background: #1e232b; padding: 2px 6px; border-radius: 12px; font-size: 11px; border: 1px solid #2a2f38; margin-right: 5px; margin-bottom: 2px; display: inline-block;">' + escapeHtml(comp.name) + ': <strong style="color: #4cd964; font-size: 12px;">' + comp.quantityPerProduct + '</strong> шт/изд</span>';
-    }
-    infoHtml += '<div style="margin-top: 4px; padding-top: 3px; border-top: 1px solid #2a2f38;">' +
-        '<strong style="color: #ff3b3b; font-size: 11px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>' +
-        '<div style="margin-top: 2px; display: flex; flex-wrap: wrap; gap: 4px;">' + compsHtml + '</div>' +
-    '</div>';
-}
-
-// Добавляем комплектующие если есть
-if (components && components.length > 0) {
-    var compsHtml = '';
-    for (var i = 0; i < components.length; i++) {
-        var comp = components[i];
-        compsHtml += '<span style="background: #1e232b; padding: 2px 6px; border-radius: 12px; font-size: 10px; border: 1px solid #2a2f38; margin-right: 5px; margin-bottom: 2px; display: inline-block;">' + escapeHtml(comp.name) + ': <strong style="color: #4cd964;">' + comp.quantityPerProduct + '</strong> шт/изд</span>';
-    }
-    infoHtml += '<div style="margin-top: 6px; padding-top: 4px; border-top: 1px solid #2a2f38;">' +
-        '<strong style="color: #ff3b3b; font-size: 10px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>' +
-        '<div style="margin-top: 2px; display: flex; flex-wrap: wrap; gap: 4px;">' + compsHtml + '</div>' +
-    '</div>';
-}
-
-// Добавляем комплектующие если есть
-if (components && components.length > 0) {
-    var compsHtml = '';
-    for (var i = 0; i < components.length; i++) {
-        var comp = components[i];
-        compsHtml += '<span style="background: #1e232b; padding: 3px 8px; border-radius: 14px; font-size: 11px; border: 1px solid #2a2f38; margin-right: 6px; margin-bottom: 3px; display: inline-block;">' + escapeHtml(comp.name) + ': <strong style="color: #4cd964;">' + comp.quantityPerProduct + '</strong> шт/изд</span>';
-    }
-    infoHtml += '<div style="margin-top: 8px; padding-top: 6px; border-top: 1px solid #2a2f38;">' +
-        '<strong style="color: #ff3b3b; font-size: 11px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>' +
-        '<div style="margin-top: 4px; display: flex; flex-wrap: wrap; gap: 5px;">' + compsHtml + '</div>' +
-    '</div>';
-}
-
-// Добавляем комплектующие если есть
-if (components && components.length > 0) {
-    var compsHtml = '';
-    for (var i = 0; i < components.length; i++) {
-        var comp = components[i];
-        compsHtml += '<span style="background: #1e232b; padding: 5px 12px; border-radius: 18px; font-size: 12px; border: 1px solid #2a2f38; margin-right: 8px; margin-bottom: 5px; display: inline-block;">' + escapeHtml(comp.name) + ': <strong style="color: #4cd964; font-size: 13px;">' + comp.quantityPerProduct + '</strong> шт/изд</span>';
-    }
-    infoHtml += '<div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #2a2f38;">' +
-        '<strong style="color: #ff3b3b; font-size: 13px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>' +
-        '<div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;">' + compsHtml + '</div>' +
-    '</div>';
-}
-
-// Добавляем комплектующие если есть
-if (components && components.length > 0) {
-    var compsHtml = '';
-    for (var i = 0; i < components.length; i++) {
-        var comp = components[i];
-        compsHtml += '<span style="background: #1e232b; padding: 4px 10px; border-radius: 16px; font-size: 11px; border: 1px solid #2a2f38; margin-right: 8px; display: inline-block;">' + escapeHtml(comp.name) + ': <strong style="color: #4cd964;">' + comp.quantityPerProduct + '</strong> шт/изд</span>';
-    }
-    infoHtml += '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #2a2f38;">' +
-        '<strong style="color: #ff3b3b; font-size: 12px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>' +
-        '<div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px;">' + compsHtml + '</div>' +
-    '</div>';
-}
-
-// Добавляем комплектующие если есть
-if (components && components.length > 0) {
-    var compsHtml = '';
-    for (var i = 0; i < components.length; i++) {
-        var comp = components[i];
-        compsHtml += '<span style="background: #1e232b; padding: 4px 10px; border-radius: 16px; font-size: 11px; border: 1px solid #2a2f38; margin-right: 8px; display: inline-block;">' + escapeHtml(comp.name) + ': <strong style="color: #4cd964;">' + comp.quantityPerProduct + '</strong> шт/изд</span>';
-    }
-    infoHtml += '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #2a2f38;">' +
-        '<strong style="color: #ff3b3b; font-size: 12px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>' +
-        '<div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px;">' + compsHtml + '</div>' +
-    '</div>';
-}
-                    
                     productInfoDiv.innerHTML = infoHtml;
                     content.appendChild(productInfoDiv);
                     
@@ -1093,6 +931,11 @@ if (components && components.length > 0) {
                             currentlyOpenOrderId = null;
                         }
                         
+                        // Сохраняем состояние после клика
+                        setTimeout(function() {
+                            saveOpenCardsState();
+                        }, 50);
+                        
                         console.log('👆 Открыта карточка:', currentlyOpenOrderId);
                     });
                     
@@ -1102,6 +945,7 @@ if (components && components.length > 0) {
                 });
                 
                 setTimeout(function() {
+                    restoreOpenCardsState();
                     restoreOpenOrderState();
                     isLoadingTasks = false;
                 }, 50);
