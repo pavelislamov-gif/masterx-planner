@@ -6,7 +6,6 @@
     <title>MasterX - Слесарный участок</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        /* ========== СТИЛИ ДЛЯ СТРАНИЦЫ СЛЕСАРНОГО УЧАСТКА ========== */
         .date-navigation {
             background: linear-gradient(135deg, #1a1e24, #0f1217);
             padding: 15px 25px;
@@ -19,458 +18,53 @@
             flex-wrap: wrap;
             gap: 15px;
         }
-        
-        .nav-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .order-card {
-            background: #1a1e24;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #2a2f38;
-            overflow: hidden;
-        }
-        
-        .order-header {
-            padding: 12px 20px;
-            background: #232830;
-            border-bottom: 1px solid #2a2f38;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .order-header h3 {
-            color: #fff;
-            font-size: 16px;
-            font-weight: 500;
-            margin: 0;
-        }
-        
-        .order-header .collapse-icon {
-            color: #a0a0a0;
-            font-size: 14px;
-            transition: transform 0.2s;
-        }
-        
-        .order-header.collapsed .collapse-icon {
-            transform: rotate(-90deg);
-        }
-        
-        .order-content {
-            padding: 15px 20px;
-            transition: all 0.2s;
-        }
-        
-        .order-content.collapsed {
-            display: none;
-        }
-        
-        .product-info {
-            background: #15191f;
-            border-bottom: 1px solid #2a2f38;
-            color: #a0a0a0;
-            font-size: 13px;
-        }
-        
-        .product-info strong {
-            color: #ff3b3b;
-        }
-        
-        .task-card {
-            padding: 12px 15px;
-            border-bottom: 1px solid #2a2f38;
-            transition: all 0.3s;
-        }
-        
-        .task-card:last-child {
-            border-bottom: none;
-        }
-        
-        .task-card.completed {
-            opacity: 0.8;
-            background: #1a2a1a;
-            border-left: 3px solid #2ecc71;
-        }
-        
-        .task-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        
-        .task-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #fff;
-        }
-        
-        .task-progress {
-            font-size: 12px;
-            color: #4cd964;
-            margin-bottom: 10px;
-            padding: 4px 8px;
-            background: #1e232b;
-            border-radius: 20px;
-            display: inline-block;
-        }
-        
-        .executor-header {
-            display: flex;
-            gap: 10px;
-            padding: 0 10px;
-            margin-bottom: 6px;
-            font-size: 11px;
-            color: #a0a0a0;
-        }
-        
+        .nav-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .order-card { background: #1a1e24; border-radius: 12px; margin-bottom: 15px; border: 1px solid #2a2f38; overflow: hidden; }
+        .order-header { padding: 12px 20px; background: #232830; border-bottom: 1px solid #2a2f38; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .order-header h3 { color: #fff; font-size: 16px; font-weight: 500; margin: 0; }
+        .order-header .collapse-icon { color: #a0a0a0; font-size: 14px; transition: transform 0.2s; }
+        .order-header.collapsed .collapse-icon { transform: rotate(-90deg); }
+        .order-content { padding: 15px 20px; transition: all 0.2s; }
+        .order-content.collapsed { display: none; }
+        .product-info { background: #15191f; border-bottom: 1px solid #2a2f38; color: #a0a0a0; font-size: 13px; }
+        .task-card { padding: 12px 15px; border-bottom: 1px solid #2a2f38; transition: all 0.3s; }
+        .task-card:last-child { border-bottom: none; }
+        .task-card.completed { opacity: 0.8; background: #1a2a1a; border-left: 3px solid #2ecc71; }
+        .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .task-title { font-size: 14px; font-weight: 600; color: #fff; }
+        .executor-header { display: flex; gap: 10px; padding: 0 10px; margin-bottom: 6px; font-size: 11px; color: #a0a0a0; }
         .executor-header span:nth-child(1) { width: 140px; }
         .executor-header span:nth-child(2) { width: 70px; text-align: center; }
         .executor-header span:nth-child(3) { width: 80px; text-align: center; }
         .executor-header span:nth-child(4) { width: 30px; }
-        
-        .executor-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 6px 10px;
-            background: #15191f;
-            border-radius: 6px;
-            margin-bottom: 4px;
-            border: 1px solid #2a2f38;
-        }
-        
-        .executor-name {
-            width: 140px;
-            padding: 4px 8px;
-            background: #1e232b;
-            border: 1px solid #2a2f38;
-            border-radius: 4px;
-            color: #fff;
-            font-size: 12px;
-        }
-        
-        .executor-quantity {
-            width: 70px;
-            padding: 4px;
-            background: #1e232b;
-            border: 1px solid #2a2f38;
-            border-radius: 4px;
-            color: #fff;
-            text-align: center;
-            font-size: 12px;
-        }
-        
-        .btn-work {
-            background: #ffc107;
-            color: #000;
-            padding: 4px 8px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 11px;
-            transition: all 0.3s;
-            width: 70px;
-            font-weight: 600;
-        }
-        
-        .btn-work.active {
-            background: #fd7e14;
-            color: white;
-        }
-        
-        .btn-work.completed {
-            background: #28a745;
-            color: white;
-            cursor: not-allowed;
-        }
-        
-        .btn-work:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .btn-add-executor {
-            background: #6c757d;
-            color: white;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 11px;
-            margin: 8px 0;
-            width: 140px;
-        }
-        
-        .btn-add-executor:hover {
-            background: #5a6268;
-        }
-        
-        .action-container {
-            margin: 8px 0;
-        }
-        
-        .new-executor-form {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 8px;
-            padding: 8px;
-            background: #15191f;
-            border: 1px solid #2a2f38;
-            border-radius: 6px;
-            flex-wrap: wrap;
-        }
-        
-        .new-executor-form input {
-            width: 160px;
-            flex: none;
-            padding: 5px 8px;
-            background: #1e232b;
-            border: 1px solid #2a2f38;
-            border-radius: 4px;
-            color: #fff;
-            font-size: 12px;
-        }
-        
-        .new-executor-form .btn {
-            padding: 5px 12px;
-            font-size: 12px;
-            white-space: nowrap;
-        }
-        
-        .btn-ready {
-            background: #28a745;
-            color: white;
-            padding: 5px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            margin: 10px 0 0 0;
-            width: auto;
-            min-width: 100px;
-            display: inline-block;
-            transition: all 0.3s;
-        }
-        
-        .btn-ready:hover:not(:disabled) {
-            background: #218838;
-        }
-        
-        .btn-ready:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .extra-task-badge {
-            background: #ff3b3b;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 20px;
-            font-size: 10px;
-            margin-left: 8px;
-        }
-        
-        .task-description {
-            color: #a0a0a0;
-            font-size: 11px;
-            margin: 5px 0 8px 0;
-            padding: 6px;
-            background: #15191f;
-            border-radius: 4px;
-            border-left: 3px solid #ff3b3b;
-        }
-        
-        .no-tasks {
-            text-align: center;
-            padding: 40px;
-            background: #1a1e24;
-            border-radius: 12px;
-            color: #a0a0a0;
-            border: 1px solid #2a2f38;
-        }
-        
-        .history-indicator {
-            font-size: 12px;
-            color: #a0a0a0;
-            margin-left: 10px;
-        }
-        
-        .warning-message {
-            background: #ff3b3b20;
-            border: 1px solid #ff3b3b;
-            color: #ff3b3b;
-            padding: 6px;
-            border-radius: 4px;
-            margin: 8px 0;
-            font-size: 11px;
-        }
-        
-        .filter-section {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .search-box {
-            padding: 6px 12px;
-            background: #1a1e24;
-            border: 1px solid #2a2f38;
-            border-radius: 6px;
-            font-size: 12px;
-            color: #e0e0e0;
-        }
-        
-        .order-stats {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            padding: 12px 15px;
-            background: linear-gradient(135deg, #1a1e24, #0f1217);
-            border-radius: 10px;
-            border: 1px solid #2a2f38;
-        }
-        
-        .stat-item {
-            flex: 1;
-            text-align: center;
-            padding: 8px;
-            background: #15191f;
-            border-radius: 6px;
-            border: 1px solid #2a2f38;
-        }
-        
-        .stat-value {
-            font-size: 22px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #00d4ff, #0077ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 2px;
-        }
-        
-        .stat-label {
-            font-size: 11px;
-            color: #a0a0a0;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 30px;
-            color: #a0a0a0;
-        }
-        
-        .spinner {
-            width: 30px;
-            height: 30px;
-            margin: 0 auto 10px;
-            border: 2px solid #2a2f38;
-            border-top: 2px solid #ff3b3b;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .btn-sm {
-            padding: 3px 6px;
-            font-size: 10px;
-        }
-        
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 3px 6px;
-            font-size: 10px;
-        }
-        
-        .btn-danger:hover {
-            background: #c82333;
-        }
-        
-        .btn-success {
-            background: #28a745;
-            color: white;
-            border: none;
-        }
-        
-        .btn-success:hover {
-            background: #218838;
-        }
-        
-        .btn-warning {
-            background: #ffc107;
-            color: #000;
-            border: none;
-        }
-        
-        .btn-warning:hover {
-            background: #e0a800;
-        }
-        
-        .btn-info {
-            background: #17a2b8;
-            color: white;
-            border: none;
-        }
-        
-        .btn-info:hover {
-            background: #138496;
-        }
-        
-        /* ========== КНОПКА ЗАКРЫТИЯ СМЕНЫ ========== */
-        .btn-end-shift {
-            background: #ff9800;
-            color: white;
-            padding: 4px 8px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 11px;
-            transition: all 0.3s;
-            width: 95px;
-            font-weight: 600;
-            margin-left: 5px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 3px;
-        }
-        
-        .btn-end-shift:hover:not(:disabled) {
-            background: #f57c00;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        
-        .btn-end-shift:disabled {
-            background: #4caf50;
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-        
-        .btn-end-shift.completed {
-            background: #4caf50;
-        }
-        
-        .executor-item .btn-work:disabled,
-        .executor-item .btn-end-shift:disabled,
-        .executor-item input:disabled {
-            opacity: 0.6;
-        }
+        .executor-item { display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: #15191f; border-radius: 6px; margin-bottom: 4px; border: 1px solid #2a2f38; }
+        .executor-name { width: 140px; padding: 4px 8px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; font-size: 12px; }
+        .executor-quantity { width: 70px; padding: 4px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center; font-size: 12px; }
+        .btn-work { background: #ffc107; color: #000; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; width: 70px; font-weight: 600; }
+        .btn-work.active { background: #fd7e14; color: white; }
+        .btn-work:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-add-executor { background: #6c757d; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; margin: 8px 0; width: 140px; }
+        .action-container { margin: 8px 0; }
+        .new-executor-form { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 8px; background: #15191f; border: 1px solid #2a2f38; border-radius: 6px; flex-wrap: wrap; }
+        .new-executor-form input { width: 160px; padding: 5px 8px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; font-size: 12px; }
+        .btn-ready { background: #28a745; color: white; padding: 5px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; margin: 10px 0 0 0; min-width: 100px; }
+        .btn-ready:disabled { opacity: 0.5; cursor: not-allowed; }
+        .extra-task-badge { background: #ff3b3b; color: white; padding: 2px 6px; border-radius: 20px; font-size: 10px; margin-left: 8px; }
+        .task-description { color: #a0a0a0; font-size: 11px; margin: 5px 0 8px 0; padding: 6px; background: #15191f; border-radius: 4px; border-left: 3px solid #ff3b3b; }
+        .no-tasks { text-align: center; padding: 40px; background: #1a1e24; border-radius: 12px; color: #a0a0a0; border: 1px solid #2a2f38; }
+        .filter-section { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+        .search-box { padding: 6px 12px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 6px; font-size: 12px; color: #e0e0e0; }
+        .order-stats { display: flex; gap: 15px; margin-bottom: 20px; padding: 12px 15px; background: linear-gradient(135deg, #1a1e24, #0f1217); border-radius: 10px; border: 1px solid #2a2f38; }
+        .stat-item { flex: 1; text-align: center; padding: 8px; background: #15191f; border-radius: 6px; border: 1px solid #2a2f38; }
+        .stat-value { font-size: 22px; font-weight: 700; background: linear-gradient(135deg, #00d4ff, #0077ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2px; }
+        .stat-label { font-size: 11px; color: #a0a0a0; }
+        .loading { text-align: center; padding: 30px; color: #a0a0a0; }
+        .spinner { width: 30px; height: 30px; margin: 0 auto 10px; border: 2px solid #2a2f38; border-top: 2px solid #ff3b3b; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .btn-sm { padding: 3px 6px; font-size: 10px; }
+        .btn-danger { background: #dc3545; color: white; border: none; padding: 3px 6px; font-size: 10px; }
+        .btn-end-shift { background: #ff9800; color: white; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; width: 95px; font-weight: 600; margin-left: 5px; }
+        .btn-end-shift:disabled { background: #4caf50; cursor: not-allowed; opacity: 0.7; }
     </style>
 </head>
 <body>
@@ -478,9 +72,7 @@
         <header>
             <div class="logo-container">
                 <img src="../images/logo.png" alt="MasterX Logo" class="logo-img" onerror="this.style.display='none'">
-                <div class="logo-text">
-                    Master<span class="x-red">X</span>
-                </div>
+                <div class="logo-text">Master<span class="x-red">X</span></div>
             </div>
             <h1 style="margin:0; color: white; font-size:18px;">🔧 Слесарный участок</h1>
         </header>
@@ -505,26 +97,12 @@
         </div>
 
         <div class="order-stats">
-            <div class="stat-item">
-                <div class="stat-value" id="totalTasks">0</div>
-                <div class="stat-label">Всего задач</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="tasksInProgress">0</div>
-                <div class="stat-label">В работе</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="tasksCompleted">0</div>
-                <div class="stat-label">Выполнено</div>
-            </div>
+            <div class="stat-item"><div class="stat-value" id="totalTasks">0</div><div class="stat-label">Всего задач</div></div>
+            <div class="stat-item"><div class="stat-value" id="tasksInProgress">0</div><div class="stat-label">В работе</div></div>
+            <div class="stat-item"><div class="stat-value" id="tasksCompleted">0</div><div class="stat-label">Выполнено</div></div>
         </div>
 
-        <div id="tasksList" class="tasks-list">
-            <div class="loading">
-                <div class="spinner"></div>
-                <p>Загрузка задач...</p>
-            </div>
-        </div>
+        <div id="tasksList" class="tasks-list"><div class="loading"><div class="spinner"></div><p>Загрузка задач...</p></div></div>
     </div>
 
     <script src="../js/storage.js"></script>
@@ -535,12 +113,7 @@
     <script>
         function escapeHtml(str) {
             if (!str) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
         // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
@@ -555,16 +128,12 @@
                 }
             });
             localStorage.setItem(SLESARNIY_STORAGE_KEY, JSON.stringify(openCards));
-            console.log('💾 Сохранены открытые карточки:', openCards);
         }
 
         function restoreOpenCardsState() {
             const savedOpenCards = localStorage.getItem(SLESARNIY_STORAGE_KEY);
             if (!savedOpenCards) return;
-            
             const openCardsIds = JSON.parse(savedOpenCards);
-            console.log('📂 Восстанавливаем открытые карточки:', openCardsIds);
-            
             openCardsIds.forEach(orderId => {
                 const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
                 if (card) {
@@ -573,7 +142,6 @@
                     if (header && content) {
                         header.classList.remove('collapsed');
                         content.classList.remove('collapsed');
-                        console.log('✅ Восстановлена карточка:', orderId);
                     }
                 }
             });
@@ -592,7 +160,7 @@
             function saveOpenOrderState() {
                 const allContents = document.querySelectorAll('.order-content');
                 let foundOpenId = null;
-                allContents.forEach((content) => {
+                allContents.forEach(content => {
                     const card = content.closest('.order-card');
                     if (card && !content.classList.contains('collapsed')) {
                         foundOpenId = card.dataset.orderId;
@@ -649,6 +217,7 @@
                 if (isLoadingTasks) return;
                 isLoadingTasks = true;
                 
+                // Сохраняем текущие открытые карточки перед перерисовкой
                 saveOpenCardsState();
                 saveOpenOrderState();
                 
@@ -670,18 +239,14 @@
                 }
                 
                 var byOrder = {};
-                tasks.forEach(function(task) {
+                tasks.forEach(task => {
                     if (!byOrder[task.orderId]) {
-                        byOrder[task.orderId] = {
-                            number: task.orderNumber,
-                            orderId: task.orderId,
-                            tasks: []
-                        };
+                        byOrder[task.orderId] = { number: task.orderNumber, orderId: task.orderId, tasks: [] };
                     }
                     byOrder[task.orderId].tasks.push(task);
                 });
                 
-                Object.values(byOrder).forEach(function(order) {
+                Object.values(byOrder).forEach(order => {
                     var orderDiv = document.createElement('div');
                     orderDiv.className = 'order-card';
                     orderDiv.dataset.orderId = order.orderId;
@@ -696,50 +261,26 @@
                     var fullOrder = null;
                     try {
                         var allOrders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
-                        fullOrder = allOrders.find(function(o) { return o.id == order.orderId; });
+                        fullOrder = allOrders.find(o => o.id == order.orderId);
                     } catch (e) {}
 
-                    var productQty = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].size?.quantity || 1) : 1;
-                    var productName = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].product || '') : '';
-                    var productSize = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].size?.name || '-') : '-';
-                    var bracket = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].brackets || []) : [];
-                    var lyre = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].lyres || []) : [];
-                    var ral = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].ral || '') : '';
-                    var texture = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].texture || '') : '';
-                    var components = (fullOrder && fullOrder.components) ? fullOrder.components : [];
-                    var details = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].details || []) : [];
+                    var productQty = (fullOrder?.items?.[0]?.size?.quantity) || 1;
+                    var productName = fullOrder?.items?.[0]?.product || '';
+                    var productSize = fullOrder?.items?.[0]?.size?.name || '-';
+                    var bracket = fullOrder?.items?.[0]?.brackets || [];
+                    var lyre = fullOrder?.items?.[0]?.lyres || [];
+                    var ral = fullOrder?.items?.[0]?.ral || '';
+                    var texture = fullOrder?.items?.[0]?.texture || '';
+                    var components = fullOrder?.components || [];
+                    var details = fullOrder?.items?.[0]?.details || [];
                     
                     var allDetails = [];
-                    if (bracket && bracket.length > 0) {
-                        bracket.forEach(function(b) {
-                            if (b.type && b.type !== 'отсутствует' && b.quantity > 0) {
-                                allDetails.push({ name: 'Кронштейн ' + b.type, quantity: b.quantity });
-                            }
-                        });
-                    }
-                    if (lyre && lyre.length > 0) {
-                        lyre.forEach(function(l) {
-                            if (l.type && l.type !== 'отсутствует' && l.quantity > 0) {
-                                allDetails.push({ name: 'Лира ' + l.type, quantity: l.quantity });
-                            }
-                        });
-                    }
-                    if (details && details.length > 0) {
-                        details.forEach(function(d) {
-                            if (d.type !== 'profile' && d.quantity > 0) {
-                                allDetails.push({ name: d.name, quantity: d.quantity });
-                            }
-                        });
-                    }
+                    bracket.forEach(b => { if (b.type && b.type !== 'отсутствует' && b.quantity > 0) allDetails.push({ name: 'Кронштейн ' + b.type, quantity: b.quantity }); });
+                    lyre.forEach(l => { if (l.type && l.type !== 'отсутствует' && l.quantity > 0) allDetails.push({ name: 'Лира ' + l.type, quantity: l.quantity }); });
+                    details.forEach(d => { if (d.type !== 'profile' && d.quantity > 0) allDetails.push({ name: d.name, quantity: d.quantity }); });
                     
                     var profiles = [];
-                    if (details && details.length > 0) {
-                        details.forEach(function(d) {
-                            if (d.type === 'profile' && d.quantity > 0) {
-                                profiles.push({ name: d.name, lengthMm: d.lengthMm, quantity: d.quantity });
-                            }
-                        });
-                    }
+                    details.forEach(d => { if (d.type === 'profile' && d.quantity > 0) profiles.push({ name: d.name, lengthMm: d.lengthMm, quantity: d.quantity }); });
                     
                     var productInfoDiv = document.createElement('div');
                     productInfoDiv.className = 'product-info';
@@ -770,9 +311,7 @@
                             </div>
                             <div>
                                 <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 8px;">ДЕТАЛИ</div>
-                                ${allDetails.map(d => `
-                                    <div style="margin-bottom: 6px; font-size: 16px;">• ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span></div>
-                                `).join('') || '<div style="color: #6c757d;">— нет —</div>'}
+                                ${allDetails.map(d => `<div style="margin-bottom: 6px; font-size: 16px;">• ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span></div>`).join('') || '<div style="color: #6c757d;">— нет —</div>'}
                             </div>
                         </div>
                     `;
@@ -788,15 +327,14 @@
                     productInfoDiv.innerHTML = infoHtml;
                     content.appendChild(productInfoDiv);
                     
-                    order.tasks.forEach(function(task) {
-                        content.appendChild(createTaskCard(task));
-                    });
+                    order.tasks.forEach(task => { content.appendChild(createTaskCard(task)); });
                     
                     header.addEventListener('click', function(e) {
                         if (e.target.tagName === 'BUTTON') return;
                         content.classList.toggle('collapsed');
                         header.classList.toggle('collapsed');
-                        setTimeout(function() { saveOpenCardsState(); }, 50);
+                        // Сохраняем состояние после клика
+                        saveOpenCardsState();
                     });
                     
                     orderDiv.appendChild(header);
@@ -804,11 +342,12 @@
                     tasksList.appendChild(orderDiv);
                 });
                 
+                // Восстанавливаем состояние ПОСЛЕ того, как все карточки добавлены в DOM
                 setTimeout(function() {
                     restoreOpenCardsState();
                     restoreOpenOrderState();
                     isLoadingTasks = false;
-                }, 100);
+                }, 50);
             }
             
             function createTaskCard(task) {
@@ -838,9 +377,7 @@
                 executorList.id = 'executors-' + task.id;
                 
                 if (task.executors && task.executors.length > 0) {
-                    task.executors.forEach(function(executor) {
-                        executorList.appendChild(createExecutorItem(task, executor));
-                    });
+                    task.executors.forEach(executor => { executorList.appendChild(createExecutorItem(task, executor)); });
                 } else {
                     var noExecutors = document.createElement('p');
                     noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 12px;';
@@ -920,9 +457,7 @@
                             executorList.innerHTML = '';
                             var updatedTask = taskManager.tasks.find(t => t.id === task.id);
                             if (updatedTask && updatedTask.executors) {
-                                updatedTask.executors.forEach(exec => {
-                                    executorList.appendChild(createExecutorItem(updatedTask, exec));
-                                });
+                                updatedTask.executors.forEach(exec => { executorList.appendChild(createExecutorItem(updatedTask, exec)); });
                             }
                         }
                     }
@@ -963,9 +498,7 @@
                             executorList.innerHTML = '';
                             var updatedTask = taskManager.tasks.find(t => t.id === task.id);
                             if (updatedTask && updatedTask.executors) {
-                                updatedTask.executors.forEach(exec => {
-                                    executorList.appendChild(createExecutorItem(updatedTask, exec));
-                                });
+                                updatedTask.executors.forEach(exec => { executorList.appendChild(createExecutorItem(updatedTask, exec)); });
                             }
                         }
                     } else { alert('Исполнитель уже существует'); }
