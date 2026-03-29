@@ -559,7 +559,45 @@
         card.appendChild(desc);
     }
     
-    // ... остальной код (executor-header, executor-list, action-container, btn-ready)
+    // ============== ЭТА ЧАСТЬ ОБЯЗАТЕЛЬНА ДЛЯ РАБОТЫ С ИСПОЛНИТЕЛЯМИ ==============
+    var headersDiv = document.createElement('div');
+    headersDiv.className = 'executor-header';
+    headersDiv.innerHTML = '<span>ФИО</span><span>Кол-во</span><span>Статус</span><span></span>';
+    card.appendChild(headersDiv);
+    
+    var executorList = document.createElement('div');
+    executorList.className = 'executor-list';
+    executorList.id = 'executors-' + task.id;
+    
+    if (task.executors && task.executors.length > 0) {
+        task.executors.forEach(function(executor) { 
+            executorList.appendChild(createExecutorItem(task, executor)); 
+        });
+    } else {
+        var noExecutors = document.createElement('p');
+        noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 12px;';
+        noExecutors.textContent = 'Нет исполнителей';
+        executorList.appendChild(noExecutors);
+    }
+    card.appendChild(executorList);
+    
+    var actionContainer = document.createElement('div');
+    actionContainer.className = 'action-container';
+    if (task.status !== 'completed') {
+        var addBtn = document.createElement('button');
+        addBtn.className = 'btn-add-executor';
+        addBtn.textContent = '+ Добавить исполнителя';
+        addBtn.onclick = function() { showAddExecutorForm(task, actionContainer); };
+        actionContainer.appendChild(addBtn);
+    }
+    card.appendChild(actionContainer);
+    
+    var readyBtn = document.createElement('button');
+    readyBtn.className = 'btn-ready';
+    readyBtn.textContent = '✅ ГОТОВО';
+    readyBtn.disabled = task.status === 'completed';
+    readyBtn.onclick = function() { completeTask(task.id); };
+    card.appendChild(readyBtn);
     
     return card;
 }
