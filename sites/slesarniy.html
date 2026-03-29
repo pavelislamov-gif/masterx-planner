@@ -472,6 +472,66 @@
         .executor-item input:disabled {
             opacity: 0.6;
         }
+
+        /* Стили для новой шапки 3 колонки */
+        .product-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ff3b3b;
+            margin-bottom: 15px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 25px;
+        }
+        
+        .info-col {
+            background: #15191f;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        
+        .info-label {
+            color: #a0a0a0;
+            font-size: 11px;
+            margin-bottom: 6px;
+        }
+        
+        .info-value {
+            font-size: 14px;
+        }
+        
+        .profile-item {
+            margin-bottom: 8px;
+        }
+        
+        .profile-name {
+            font-weight: 500;
+        }
+        
+        .profile-details {
+            margin-left: 12px;
+            color: #a0a0a0;
+            font-size: 11px;
+        }
+        
+        .detail-item {
+            margin-bottom: 4px;
+        }
+        
+        .detail-quantity {
+            color: #4cd964;
+        }
+        
+        .size-quantity {
+            color: #4cd964;
+        }
+        
+        .length-value {
+            color: #ff9800;
+        }
     </style>
 </head>
 <body>
@@ -484,7 +544,7 @@
                     Master<span class="x-red">X</span>
                 </div>
             </div>
-            <h1 style="margin:0; color: white; font-size:18px;"> Слесарный участок</h1>
+            <h1 style="margin:0; color: white; font-size:18px;">🔧 Слесарный участок</h1>
         </header>
 
         <!-- НАВИГАЦИЯ ПО ДАТАМ -->
@@ -500,7 +560,7 @@
 
         <!-- ФИЛЬТРЫ -->
         <div class="filter-section">
-            <select id="statusFilter" class="search-box" style="width: auto; padding: 6px 10px;">
+            <select id="statusFilter" class="search-box" style="width: auto; padding: 6px 10px;" onchange="applyFilters()">
                 <option value="all">Все задачи</option>
                 <option value="pending">Ожидают</option>
                 <option value="in_progress">В работе</option>
@@ -583,10 +643,7 @@
             }
             
             function restoreOpenOrderState() {
-                if (!currentlyOpenOrderId) {
-                    console.log('📂 Нет открытой карточки для восстановления');
-                    return;
-                }
+                if (!currentlyOpenOrderId) return;
                 
                 console.log('📂 Восстанавливаем открытую карточку:', currentlyOpenOrderId);
                 
@@ -749,30 +806,57 @@
                         console.error('Ошибка получения заказа:', e);
                     }
 
-                    var productQty = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].quantity || 1) : 1;
+                    var productQty = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].size?.quantity || 1) : 1;
                     var productName = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].product || '') : '';
-                    var productSize = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].size || '') : '';
-                    var bracket = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].bracket || { type: 'отсутствует', quantity: 0 }) : { type: 'отсутствует', quantity: 0 };
-                    var lyre = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].lyre || { type: 'отсутствует', quantity: 0 }) : { type: 'отсутствует', quantity: 0 };
+                    var productSize = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].size?.name || '-') : '-';
+                    var bracket = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].brackets || []) : [];
+                    var lyre = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].lyres || []) : [];
                     var ral = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].ral || '') : '';
                     var texture = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].texture || '') : '';
-                    var additional = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].additional || '') : '';
                     var components = (fullOrder && fullOrder.components) ? fullOrder.components : [];
-
-                    var bracketDisplay = '';
-                    if (bracket.type === 'отсутствует' || bracket.quantity === 0) {
-                        bracketDisplay = '<span style="color: #fff; margin-left: 8px;">отсутствует</span><span style="color: #ff9800; margin-left: 5px;">(0 шт)</span>';
-                    } else {
-                        bracketDisplay = '<span style="color: #fff; margin-left: 8px;">' + escapeHtml(bracket.type) + '</span><span style="color: #ff9800; margin-left: 5px;">(' + bracket.quantity + ' шт)</span>';
+                    var details = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].details || []) : [];
+                    
+                    // Собираем детали для правой колонки
+                    var allDetails = [];
+                    
+                    // Кронштейны
+                    if (bracket && bracket.length > 0) {
+                        bracket.forEach(function(b) {
+                            if (b.type && b.type !== 'отсутствует' && b.quantity > 0) {
+                                allDetails.push({ name: 'Кронштейн ' + b.type, quantity: b.quantity });
+                            }
+                        });
                     }
-
-                    var lyreDisplay = '';
-                    if (lyre.type === 'отсутствует' || lyre.quantity === 0) {
-                        lyreDisplay = '<span style="color: #fff; margin-left: 8px;">отсутствует</span><span style="color: #ff9800; margin-left: 5px;">(0 шт)</span>';
-                    } else {
-                        lyreDisplay = '<span style="color: #fff; margin-left: 8px;">' + escapeHtml(lyre.type) + '</span><span style="color: #ff9800; margin-left: 5px;">(' + lyre.quantity + ' шт)</span>';
+                    
+                    // Лиры
+                    if (lyre && lyre.length > 0) {
+                        lyre.forEach(function(l) {
+                            if (l.type && l.type !== 'отсутствует' && l.quantity > 0) {
+                                allDetails.push({ name: 'Лира ' + l.type, quantity: l.quantity });
+                            }
+                        });
                     }
-
+                    
+                    // Обычные детали
+                    if (details && details.length > 0) {
+                        details.forEach(function(d) {
+                            if (d.type !== 'profile' && d.quantity > 0) {
+                                allDetails.push({ name: d.name, quantity: d.quantity });
+                            }
+                        });
+                    }
+                    
+                    // Профили
+                    var profiles = [];
+                    if (details && details.length > 0) {
+                        details.forEach(function(d) {
+                            if (d.type === 'profile' && d.quantity > 0) {
+                                profiles.push({ name: d.name, lengthMm: d.lengthMm, quantity: d.quantity });
+                            }
+                        });
+                    }
+                    
+                    // НОВАЯ ШАПКА (3 КОЛОНКИ)
                     var productInfoDiv = document.createElement('div');
                     productInfoDiv.className = 'product-info';
                     productInfoDiv.style.marginBottom = '15px';
@@ -780,43 +864,65 @@
                     productInfoDiv.style.background = '#15191f';
                     productInfoDiv.style.borderRadius = '8px';
                     productInfoDiv.style.borderLeft = '3px solid #ffba3b';
-                    productInfoDiv.style.fontSize = '20px';
-
-                    var infoHtml = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">' +
-                        '<div>' +
-                            '<div style="margin-bottom: 8px;"><strong style="color: #ff3b3b;">📦 ИЗДЕЛИЕ:</strong><span style="color: #fff; margin-left: 8px;">' + escapeHtml(productName) + '</span></div>' +
-                            '<div style="margin-bottom: 8px;"><strong> РАЗМЕР:</strong><span style="color: #fff; margin-left: 8px;">' + (escapeHtml(productSize) || 'Стандартный') + '</span></div>' +
-                            '<div><strong> КОЛИЧЕСТВО:</strong><span style="color: #4cd964; margin-left: 8px; font-weight: 600;">' + productQty + ' шт</span></div>' +
-                        '</div>' +
-                        '<div>' +
-                            '<div style="margin-bottom: 8px;"><strong> КРОНШТЕЙН:</strong>' + bracketDisplay + '</div>' +
-                            '<div><strong> ЛИРА:</strong>' + lyreDisplay + '</div>' +
-                        '</div>' +
-                        '<div>' +
-                            '<div style="margin-bottom: 8px;"><strong> RAL:</strong><span style="color: #fff; margin-left: 8px;">' + (escapeHtml(ral) || '-') + '</span></div>' +
-                            '<div><strong> ТЕКСТУРА:</strong><span style="color: #fff; margin-left: 8px;">' + (escapeHtml(texture) || '-') + '</span></div>' +
-                        '</div>' +
-                    '</div>';
-
+                    
+                    var infoHtml = `
+                        <div class="product-header">📦 ${escapeHtml(productName)}</div>
+                        
+                        <div class="info-grid">
+                            <!-- ЛЕВАЯ КОЛОНКА: РАЗМЕР + ПОКРЫТИЕ -->
+                            <div class="info-col">
+                                <div style="margin-bottom: 12px;">
+                                    <div class="info-label">РАЗМЕР</div>
+                                    <div class="info-value"><strong>${escapeHtml(productSize)}</strong> <span class="size-quantity">× ${productQty} шт</span></div>
+                                </div>
+                                <div>
+                                    <div class="info-label">ПОКРЫТИЕ</div>
+                                    <div class="info-value"><strong>${escapeHtml(ral || '-')}</strong> / ${escapeHtml(texture || '-')}</div>
+                                </div>
+                            </div>
+                            
+                            <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: ПРОФИЛИ -->
+                            <div class="info-col">
+                                <div class="info-label">ПРОФИЛИ</div>
+                                ${profiles.length > 0 ? 
+                                    profiles.map(function(p) {
+                                        return '<div class="profile-item">' +
+                                            '<div class="profile-name">• ' + escapeHtml(p.name) + '</div>' +
+                                            '<div class="profile-details">' +
+                                                '<span class="length-value">' + p.lengthMm + ' мм</span> <span class="detail-quantity">× ' + p.quantity + ' шт</span>' +
+                                            '</div>' +
+                                        '</div>';
+                                    }).join('') : 
+                                    '<div style="color: #6c757d; font-size: 12px;">— нет —</div>'}
+                            </div>
+                            
+                            <!-- ПРАВАЯ КОЛОНКА: ДЕТАЛИ -->
+                            <div class="info-col">
+                                <div class="info-label">ДЕТАЛИ</div>
+                                ${allDetails.length > 0 ? 
+                                    allDetails.map(function(d) {
+                                        return '<div class="detail-item">' +
+                                            '• ' + escapeHtml(d.name) + ' <span class="detail-quantity">' + d.quantity + ' шт</span>' +
+                                        '</div>';
+                                    }).join('') : 
+                                    '<div style="color: #6c757d; font-size: 12px;">— нет —</div>'}
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Добавляем комплектующие если есть
                     if (components && components.length > 0) {
                         var compsHtml = '';
                         for (var i = 0; i < components.length; i++) {
                             var comp = components[i];
-                            compsHtml += '<span style="background: #1e232b; padding: 4px 12px; border-radius: 20px; font-size: 15px; border: 1px solid #2a2f38;">' + escapeHtml(comp.name) + ': <strong style="color: #4cd964;">' + comp.quantityPerProduct + '</strong> шт/изд</span>';
+                            compsHtml += '<span style="background: #1e232b; padding: 4px 12px; border-radius: 20px; font-size: 12px; border: 1px solid #2a2f38; margin-right: 8px; margin-bottom: 5px; display: inline-block;">' + escapeHtml(comp.name) + ': <strong style="color: #4cd964;">' + comp.quantityPerProduct + '</strong> шт/изд</span>';
                         }
                         infoHtml += '<div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #2a2f38;">' +
-                            '<strong style="color: #ff3b3b;"> КОМПЛЕКТУЮЩИЕ:</strong>' +
+                            '<strong style="color: #ff3b3b;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>' +
                             '<div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;">' + compsHtml + '</div>' +
                         '</div>';
                     }
-
-                    if (additional) {
-                        infoHtml += '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #2a2f38;">' +
-                            '<strong>📝 ДОПОЛНИТЕЛЬНО:</strong>' +
-                            '<div style="margin-top: 6px; padding: 8px 12px; background: #1e232b; border-radius: 6px; color: #a0a0a0; font-size: 12px; border-left: 2px solid #ff3b3b;">' + escapeHtml(additional) + '</div>' +
-                        '</div>';
-                    }
-
+                    
                     productInfoDiv.innerHTML = infoHtml;
                     content.appendChild(productInfoDiv);
                     
@@ -1132,79 +1238,71 @@
             };
 
             window.exportToExcel = function() {
-    const tasks = taskManager.tasks;
-    const dateStr = taskManager.formatDate(taskManager.currentDate);
-    
-    // Форматирование даты и времени
-    const formatDateTime = (isoString) => {
-        if (!isoString) return '';
-        const date = new Date(isoString);
-        return date.toLocaleString('ru-RU', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-    };
-    
-    // Получаем название статуса на русском
-    const getStatusText = (status) => {
-        switch(status) {
-            case 'pending': return 'Ожидает';
-            case 'in_progress': return 'В работе';
-            case 'shift_ended': return 'Смена закрыта';
-            case 'completed': return 'Завершено';
-            default: return status;
-        }
-    };
-    
-    // Группируем задачи по заказам
-    const ordersMap = new Map();
-    
-    tasks.forEach(task => {
-        if (!ordersMap.has(task.orderId)) {
-            ordersMap.set(task.orderId, {
-                orderNumber: task.orderNumber,
-                product: task.product,
-                tasks: []
-            });
-        }
-        ordersMap.get(task.orderId).tasks.push(task);
-    });
-    
-    // Формируем CSV
-    let csv = "Заказ,Изделие,Операция,Исполнитель,Количество,Статус,Начало работы,Закрытие смены,Завершение задачи\n";
-    
-    ordersMap.forEach(order => {
-        order.tasks.forEach(task => {
-            if (task.executors && task.executors.length > 0) {
-                task.executors.forEach(executor => {
-                    // Пытаемся получить время из существующих полей
-                    // Если в executor нет полей времени, они будут пустыми
-                    const startTime = formatDateTime(executor.startTime);
-                    const shiftEndTime = formatDateTime(executor.shiftEndTime);
-                    const endTime = formatDateTime(executor.endTime);
-                    const statusText = getStatusText(executor.status);
-                    
-                    csv += `"${order.orderNumber}","${order.product}","${task.operation}","${executor.name}",${executor.quantity || 0},"${statusText}","${startTime}","${shiftEndTime}","${endTime}"\n`;
+                const tasks = taskManager.tasks;
+                const dateStr = taskManager.formatDate(taskManager.currentDate);
+                
+                const formatDateTime = (isoString) => {
+                    if (!isoString) return '';
+                    const date = new Date(isoString);
+                    return date.toLocaleString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+                };
+                
+                const getStatusText = (status) => {
+                    switch(status) {
+                        case 'pending': return 'Ожидает';
+                        case 'in_progress': return 'В работе';
+                        case 'shift_ended': return 'Смена закрыта';
+                        case 'completed': return 'Завершено';
+                        default: return status;
+                    }
+                };
+                
+                const ordersMap = new Map();
+                
+                tasks.forEach(task => {
+                    if (!ordersMap.has(task.orderId)) {
+                        ordersMap.set(task.orderId, {
+                            orderNumber: task.orderNumber,
+                            product: task.product,
+                            tasks: []
+                        });
+                    }
+                    ordersMap.get(task.orderId).tasks.push(task);
                 });
-            } else {
-                const statusText = getStatusText(task.status);
-                csv += `"${order.orderNumber}","${order.product}","${task.operation}","Нет",0,"${statusText}","","",""\n`;
-            }
-        });
-    });
-    
-    // Скачиваем файл
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `${taskManager.siteType}_${dateStr}.csv`;
-    link.click();
-};
-
+                
+                let csv = "Заказ,Изделие,Операция,Исполнитель,Количество,Статус,Начало работы,Закрытие смены,Завершение задачи\n";
+                
+                ordersMap.forEach(order => {
+                    order.tasks.forEach(task => {
+                        if (task.executors && task.executors.length > 0) {
+                            task.executors.forEach(executor => {
+                                const startTime = formatDateTime(executor.startTime);
+                                const shiftEndTime = formatDateTime(executor.shiftEndTime);
+                                const endTime = formatDateTime(executor.endTime);
+                                const statusText = getStatusText(executor.status);
+                                
+                                csv += `"${order.orderNumber}","${order.product}","${task.operation}","${executor.name}",${executor.quantity || 0},"${statusText}","${startTime}","${shiftEndTime}","${endTime}"\n`;
+                            });
+                        } else {
+                            const statusText = getStatusText(task.status);
+                            csv += `"${order.orderNumber}","${order.product}","${task.operation}","Нет",0,"${statusText}","","",""\n`;
+                        }
+                    });
+                });
+                
+                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${taskManager.siteType}_${dateStr}.csv`;
+                link.click();
+            };
         }
     </script>
 </body>
