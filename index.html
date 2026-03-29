@@ -959,8 +959,6 @@
 
         // ============== ФУНКЦИЯ СОЗДАНИЯ ЗАДАЧ (НЕ СОЗДАЁТ АВТОМАТИЧЕСКИ) ==============
         function createTasksForOrder(order) {
-            // ========== НЕ СОЗДАЁМ ЗАДАЧИ АВТОМАТИЧЕСКИ ==========
-            // Задачи будут создаваться только при нажатии на кнопку + на странице участка
             console.log(`📅 Заказ №${order.number} создан. Задачи не созданы автоматически.`);
             console.log(`📋 Для создания задач нажмите кнопку + на нужной операции в карточке заказа.`);
         }
@@ -1469,7 +1467,6 @@
             orders.push(newOrder);
             saveOrdersToStorage(orders);
             
-            // НЕ СОЗДАЁМ ЗАДАЧИ АВТОМАТИЧЕСКИ!
             console.log(`✅ Группа "${groupName}" успешно создана! Задачи не созданы автоматически.`);
             
             closeGroupModal();
@@ -1600,37 +1597,59 @@
                 }
             } else {
                 const item = order.items[itemIndex];
-                // Определяем план задачи из количества детали
+                
+                // ========== ОПРЕДЕЛЯЕМ ПЛАН ИЗ taskOperationsData ==========
                 let plannedQuantity = 1;
                 
-                // Ищем в деталях заказа
-                const details = item.details || [];
-                for (const detail of details) {
-                    if (operationName.includes(detail.name) || detail.name.includes(operationName)) {
-                        plannedQuantity = detail.quantity;
-                        break;
-                    }
-                }
+                const siteColumnMap = {
+                    'tokarniy': 'токарно-фрезерный',
+                    'frezerniy': 'фрезерный',
+                    'slesarniy': 'слесарный',
+                    'lazerno': 'лазерно-гибочный',
+                    'polimerniy': 'полимерный'
+                };
                 
-                // Проверяем кронштейны
-                if (item.brackets) {
-                    for (const b of item.brackets) {
-                        if (operationName.includes(b.type)) {
-                            plannedQuantity = b.quantity;
-                            break;
+                const siteColumn = siteColumnMap[siteKey];
+                const productOps = taskOperationsData[item.product];
+                
+                if (productOps && siteColumn && productOps[siteColumn]) {
+                    const opData = productOps[siteColumn].find(op => op.operation === operationName);
+                    
+                    if (opData && opData.detail) {
+                        console.log(`🔍 Привязка: "${operationName}" → деталь "${opData.detail}"`);
+                        
+                        const details = item.details || [];
+                        for (const detail of details) {
+                            if (detail.name === opData.detail) {
+                                plannedQuantity = detail.quantity;
+                                console.log(`📦 Найдено в деталях: ${detail.name} = ${plannedQuantity} шт`);
+                                break;
+                            }
+                        }
+                        
+                        if (plannedQuantity === 1 && item.brackets) {
+                            for (const b of item.brackets) {
+                                if (`Кронштейн ${b.type}` === opData.detail) {
+                                    plannedQuantity = b.quantity;
+                                    console.log(`🔧 Найдено в кронштейнах: ${b.type} = ${plannedQuantity} шт`);
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (plannedQuantity === 1 && item.lyres) {
+                            for (const l of item.lyres) {
+                                if (`Лира ${l.type}` === opData.detail) {
+                                    plannedQuantity = l.quantity;
+                                    console.log(`🎸 Найдено в лирах: ${l.type} = ${plannedQuantity} шт`);
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
                 
-                // Проверяем лиры
-                if (item.lyres) {
-                    for (const l of item.lyres) {
-                        if (operationName.includes(l.type)) {
-                            plannedQuantity = l.quantity;
-                            break;
-                        }
-                    }
-                }
+                console.log(`📋 Операция: "${operationName}" → план: ${plannedQuantity} шт`);
                 
                 const newTask = {
                     id: taskId,
@@ -1660,7 +1679,7 @@
                 orders[orderIndex] = order;
                 saveOrdersToStorage(orders);
                 
-                alert(`✅ Операция "${operationName}" добавлена на участок`);
+                alert(`✅ Операция "${operationName}" добавлена на участок с планом ${plannedQuantity} шт`);
                 updateStatistics();
                 renderOrdersList();
             }
