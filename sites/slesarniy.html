@@ -878,7 +878,7 @@ var infoHtml = `
         <div style="align-self: center;">
             <div style="margin-bottom: 8px;">
                 <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 4px;">РАЗМЕР</div>
-                <div style="font-size: 20px;"><strong>${escapeHtml(productSize)}</strong> <span style="color: #4cd964; font-size: 18px;">× ${productQty} шт</span></div>
+                <div style="font-size: 20px;"><strong>${escapeHtml(productSize)}</strong> <span style="color: #4cd964; font-size: 18px; font-weight: 500;">× ${productQty} шт</span></div>
             </div>
             <div>
                 <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 4px;">ПОКРЫТИЕ</div>
@@ -894,7 +894,7 @@ var infoHtml = `
                     return '<div style="margin-bottom: 8px;">' +
                         '<div style="font-size: 16px;">• ' + escapeHtml(p.name) + '</div>' +
                         '<div style="margin-left: 18px; color: #a0a0a0; font-size: 13px;">' +
-                            '<span style="color: #ff9800;">' + p.lengthMm + ' мм</span> <span style="color: #4cd964;">× ' + p.quantity + ' шт</span>' +
+                            '<span style="color: #ff9800; font-size: 14px; font-weight: 500;">' + p.lengthMm + ' мм</span> <span style="color: #4cd964; font-size: 14px; font-weight: 500;">× ' + p.quantity + ' шт</span>' +
                         '</div>' +
                     '</div>';
                 }).join('') : 
@@ -907,13 +907,26 @@ var infoHtml = `
             ${allDetails.length > 0 ? 
                 allDetails.map(function(d) {
                     return '<div style="margin-bottom: 6px; font-size: 16px;">' +
-                        '• ' + escapeHtml(d.name) + ' <span style="color: #4cd964;">' + d.quantity + ' шт</span>' +
+                        '• ' + escapeHtml(d.name) + ' <span style="color: #4cd964; font-size: 16px; font-weight: 500;">' + d.quantity + ' шт</span>' +
                     '</div>';
                 }).join('') : 
                 '<div style="color: #6c757d; font-size: 14px;">— нет —</div>'}
         </div>
     </div>
 `;
+
+// Добавляем комплектующие если есть
+if (components && components.length > 0) {
+    var compsHtml = '';
+    for (var i = 0; i < components.length; i++) {
+        var comp = components[i];
+        compsHtml += '<span style="background: #1e232b; padding: 4px 10px; border-radius: 14px; font-size: 12px; border: 1px solid #2a2f38; margin-right: 6px; margin-bottom: 3px; display: inline-block;">' + escapeHtml(comp.name) + ': <strong style="color: #4cd964; font-size: 13px;">' + comp.quantityPerProduct + '</strong> шт/изд</span>';
+    }
+    infoHtml += '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #2a2f38;">' +
+        '<strong style="color: #ff3b3b; font-size: 12px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>' +
+        '<div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px;">' + compsHtml + '</div>' +
+    '</div>';
+}
 
 // Добавляем комплектующие если есть
 if (components && components.length > 0) {
