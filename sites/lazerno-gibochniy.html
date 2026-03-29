@@ -66,9 +66,6 @@
         .btn-danger { background: #dc3545; color: white; border: none; padding: 3px 6px; font-size: 10px; }
         .btn-end-shift { background: #ff9800; color: white; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; width: 95px; font-weight: 600; margin-left: 5px; }
         .btn-end-shift:disabled { background: #4caf50; cursor: not-allowed; opacity: 0.7; }
-        .order-header.status-green { background: linear-gradient(135deg, #1a3a1a, #0f2a0f); border-left: 4px solid #2ecc71; }
-        .order-header.status-orange { background: linear-gradient(135deg, #3a2a1a, #2a1f0f); border-left: 4px solid #ff9800; }
-        .order-header.status-gray { background: linear-gradient(135deg, #2a2a2a, #1f1f1f); border-left: 4px solid #6c757d; }
     </style>
 </head>
 <body>
@@ -78,7 +75,7 @@
                 <img src="../images/logo.png" alt="MasterX Logo" class="logo-img" onerror="this.style.display='none'">
                 <div class="logo-text">Master<span class="x-red">X</span></div>
             </div>
-            <h1 style="margin:0; color: white; font-size:18px;">✨ Лазерно-гибочный участок</h1>
+            <h1 style="margin:0; color: white; font-size:18px;"> Лазерно-гибочный участок</h1>
         </header>
 
         <div class="date-navigation">
@@ -88,7 +85,6 @@
                 <button class="btn btn-success" style="padding: 6px 12px; font-size: 12px;" onclick="changeDate('today')">Сегодня</button>
                 <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="changeDate('next')">Завтра →</button>
                 <button class="btn btn-info" style="padding: 6px 12px; font-size: 12px;" onclick="exportToExcel()">📊 Excel</button>
-                <button class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="clearAllTasks()">🗑️ Очистить задачи</button>
             </div>
         </div>
 
@@ -213,7 +209,7 @@
         }
 
         // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
-        const LAZERNO_STORAGE_KEY = 'lazerno_open_cards';
+        const FREZERNIY_STORAGE_KEY = 'frezerniy_open_cards';
         
         function saveOpenCardsState() {
             const openCards = [];
@@ -223,12 +219,12 @@
                     openCards.push(card.dataset.orderId);
                 }
             });
-            localStorage.setItem(LAZERNO_STORAGE_KEY, JSON.stringify(openCards));
+            localStorage.setItem(FREZERNIY_STORAGE_KEY, JSON.stringify(openCards));
             console.log('💾 Сохранены открытые карточки:', openCards);
         }
 
         function restoreOpenCardsState() {
-            const savedOpenCards = localStorage.getItem(LAZERNO_STORAGE_KEY);
+            const savedOpenCards = localStorage.getItem(FREZERNIY_STORAGE_KEY);
             if (!savedOpenCards) return;
             const openCardsIds = JSON.parse(savedOpenCards);
             console.log('📂 Восстанавливаем открытые карточки:', openCardsIds);
@@ -247,28 +243,12 @@
             });
         }
 
-        // ============== ОЧИСТКА ВСЕХ ЗАДАЧ ==============
-        window.clearAllTasks = function() {
-            if (confirm('❗ ВНИМАНИЕ! Это удалит ВСЕ задачи на лазерно-гибочном участке. Продолжить?')) {
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (key && key.startsWith('tasks_lazerno_')) {
-                        localStorage.removeItem(key);
-                        console.log('🗑️ Удалено:', key);
-                    }
-                }
-                localStorage.removeItem(LAZERNO_STORAGE_KEY);
-                alert('✅ Все задачи лазерно-гибочного участка удалены');
-                location.reload();
-            }
-        };
-
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         if (typeof TaskManager === 'undefined') {
             console.error('❌ TaskManager не загружен!');
             document.getElementById('tasksList').innerHTML = '<div class="no-tasks"><p>❌ Ошибка загрузки</p></div>';
         } else {
-            const taskManager = new TaskManager('lazerno', window.TASK_OPERATIONS.lazerno || {});
+            const taskManager = new TaskManager('frezerniy', window.TASK_OPERATIONS.frezerniy || {});
             let currentFilter = 'all';
             let currentlyOpenOrderId = null;
             let isLoadingTasks = false;
@@ -333,9 +313,6 @@
             function loadTasks() {
                 if (isLoadingTasks) return;
                 isLoadingTasks = true;
-                
-                saveOpenCardsState();
-                saveOpenOrderState();
                 
                 var tasksList = document.getElementById('tasksList');
                 taskManager.loadData();
@@ -489,6 +466,7 @@
                     tasksList.appendChild(orderDiv);
                 });
                 
+                // Восстанавливаем состояние открытых карточек после отрисовки
                 setTimeout(function() {
                     restoreOpenCardsState();
                     isLoadingTasks = false;
@@ -721,7 +699,7 @@
                 const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = `lazerno_${dateStr}.csv`;
+                link.download = `frezerniy_${dateStr}.csv`;
                 link.click();
             };
         }
