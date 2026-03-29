@@ -220,12 +220,15 @@
                 }
             });
             localStorage.setItem(FREZERNIY_STORAGE_KEY, JSON.stringify(openCards));
+            console.log('💾 Сохранены открытые карточки:', openCards);
         }
 
         function restoreOpenCardsState() {
             const savedOpenCards = localStorage.getItem(FREZERNIY_STORAGE_KEY);
             if (!savedOpenCards) return;
             const openCardsIds = JSON.parse(savedOpenCards);
+            console.log('📂 Восстанавливаем открытые карточки:', openCardsIds);
+            
             openCardsIds.forEach(orderId => {
                 const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
                 if (card) {
@@ -234,6 +237,7 @@
                     if (header && content) {
                         header.classList.remove('collapsed');
                         content.classList.remove('collapsed');
+                        console.log('✅ Восстановлена карточка:', orderId);
                     }
                 }
             });
