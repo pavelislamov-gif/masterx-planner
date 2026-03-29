@@ -167,30 +167,48 @@
         
         // ============== ПОЛУЧЕНИЕ ПРОФИЛЯ ПО ОПЕРАЦИИ ==============
         function getProfileForOperation(operationName, details) {
-            if (!details || details.length === 0) return null;
-            
-            // Извлекаем название профиля из операции
-            const profileKeywords = ['профиль', 'Профиль', 'НПС', 'МП', 'КП', 'ABA'];
-            let profileNameFromOp = null;
-            
-            for (const keyword of profileKeywords) {
-                const regex = new RegExp(`${keyword}\\s+([А-Яа-я0-9\\s\\-]+)`, 'i');
-                const match = operationName.match(regex);
-                if (match) {
-                    profileNameFromOp = match[1].trim();
-                    break;
-                }
+    if (!details || details.length === 0) return null;
+    
+    // Удаляем "Покраска профиля " из начала операции, оставляем только название профиля
+    let searchName = operationName;
+    
+    // Убираем префикс "Покраска профиля " если есть
+    if (searchName.startsWith('Покраска профиля ')) {
+        searchName = searchName.replace('Покраска профиля ', '');
+    }
+    // Убираем префикс "Раскрой профиля " если есть (для слесарного)
+    if (searchName.startsWith('Раскрой профиля ')) {
+        searchName = searchName.replace('Раскрой профиля ', '');
+    }
+    
+    console.log('🔍 Ищем профиль по названию:', searchName);
+    
+    // Ищем профиль в деталях
+    for (const detail of details) {
+        if (detail.type === 'profile') {
+            // Проверяем, содержит ли название детали искомое название
+            if (detail.name.includes(searchName) || searchName.includes(detail.name)) {
+                console.log('✅ Найден профиль:', detail.name);
+                return detail;
             }
-            
-            // Если не нашли по ключевым словам, пробуем искать прямые совпадения
-            if (!profileNameFromOp) {
-                for (const detail of details) {
-                    if (detail.type === 'profile' && operationName.includes(detail.name)) {
-                        return detail;
-                    }
-                }
-                return null;
+        }
+    }
+    
+    // Если не нашли, пробуем поискать без учёта регистра
+    const searchLower = searchName.toLowerCase();
+    for (const detail of details) {
+        if (detail.type === 'profile') {
+            const detailLower = detail.name.toLowerCase();
+            if (detailLower.includes(searchLower) || searchLower.includes(detailLower)) {
+                console.log('✅ Найден профиль (без учёта регистра):', detail.name);
+                return detail;
             }
+        }
+    }
+    
+    console.log('❌ Профиль не найден для:', searchName);
+    return null;
+}
             
             // Ищем профиль в деталях
             for (const detail of details) {
