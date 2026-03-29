@@ -1490,6 +1490,7 @@
 
         // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК НА ГЛАВНОЙ ==============
         const MAIN_STORAGE_KEY = 'main_open_cards';
+        const MAIN_ITEMS_STORAGE_KEY = 'main_open_items';
         
         function saveMainOpenCardsState() {
             const openCards = [];
@@ -1517,6 +1518,40 @@
                     if (header && content) {
                         content.style.display = 'block';
                         console.log('✅ Восстановлена карточка:', orderId);
+                    }
+                }
+            });
+        }
+        
+        function saveMainOpenItemsState() {
+            const openItems = [];
+            document.querySelectorAll('.order-card').forEach(card => {
+                const orderId = card.dataset.orderId;
+                card.querySelectorAll('.item-content').forEach((itemContent, idx) => {
+                    if (itemContent.style.display !== 'none') {
+                        openItems.push({ orderId, itemIndex: idx });
+                    }
+                });
+            });
+            localStorage.setItem(MAIN_ITEMS_STORAGE_KEY, JSON.stringify(openItems));
+            console.log('💾 Сохранены открытые изделия:', openItems);
+        }
+
+        function restoreMainOpenItemsState() {
+            const savedOpenItems = localStorage.getItem(MAIN_ITEMS_STORAGE_KEY);
+            if (!savedOpenItems) return;
+            const openItemsIds = JSON.parse(savedOpenItems);
+            console.log('📂 Восстанавливаем открытые изделия:', openItemsIds);
+            
+            openItemsIds.forEach(({ orderId, itemIndex }) => {
+                const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
+                if (card) {
+                    const itemHeader = card.querySelectorAll('.item-header')[itemIndex];
+                    const itemContent = card.querySelectorAll('.item-content')[itemIndex];
+                    if (itemHeader && itemContent) {
+                        itemContent.style.display = 'block';
+                        const arrowSpan = itemHeader.querySelector('span:last-child');
+                        if (arrowSpan) arrowSpan.textContent = '▲';
                     }
                 }
             });
@@ -1890,7 +1925,7 @@
                             const isVisible = itemContent.style.display !== 'none';
                             itemContent.style.display = isVisible ? 'none' : 'block';
                             itemHeader.querySelector('span:last-child').textContent = isVisible ? '▼' : '▲';
-                            saveMainOpenCardsState();
+                            saveMainOpenItemsState();
                         };
 
                         itemDiv.appendChild(itemHeader);
@@ -1911,8 +1946,9 @@
                 ordersList.appendChild(card);
             });
             
-            // Восстанавливаем состояние открытых карточек
+            // Восстанавливаем состояние открытых карточек и изделий
             restoreMainOpenCardsState();
+            restoreMainOpenItemsState();
         }
 
         // ============== СТАТИСТИКА ==============
@@ -2000,6 +2036,7 @@
                     renderOrdersList();
                     updateStatistics();
                     saveMainOpenCardsState();
+                    saveMainOpenItemsState();
                     
                     alert(`✅ Импорт завершён!\n📦 Импортировано: ${importedCount} групп\n⏭️ Пропущено: ${skippedCount}`);
                     
@@ -2096,6 +2133,7 @@
             });
             
             saveMainOpenCardsState();
+            saveMainOpenItemsState();
             renderOrdersList();
             updateStatistics();
             alert('✅ Группа удалена');
@@ -2117,6 +2155,7 @@
             
             window.addEventListener('beforeunload', function() {
                 saveMainOpenCardsState();
+                saveMainOpenItemsState();
             });
             
             document.getElementById('searchInput')?.addEventListener('input', function() {
