@@ -927,35 +927,28 @@
         }
 
         // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ДЛЯ УЧАСТКА ==============
-        function getOperationNames(productName, siteKey) {
-            const productOps = taskOperationsData[productName];
-            if (!productOps || !productOps.детали) return [];
-            
-            const siteMap = {
-                'tokarniy': 'токарно-фрезерный',
-                'frezerniy': 'фрезерный',
-                'slesarniy': 'слесарный',
-                'lazerno': 'лазерно-гибочный',
-                'polimerniy': 'полимерный'
-            };
-            
-            const siteColumn = siteMap[siteKey];
-            if (!siteColumn) return [];
-            
-            const operations = [];
-            productOps.детали.forEach(detail => {
-                const ops = detail[siteColumn];
-                if (ops && Array.isArray(ops)) {
-                    ops.forEach(op => {
-                        if (op && !operations.includes(op)) {
-                            operations.push(op);
-                        }
-                    });
-                }
-            });
-            
-            return operations;
-        }
+        // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ДЛЯ УЧАСТКА ==============
+function getOperationNames(productName, siteKey) {
+    const productOps = taskOperationsData[productName];
+    if (!productOps) return [];
+    
+    const siteMap = {
+        'tokarniy': 'токарно-фрезерный',
+        'frezerniy': 'фрезерный',
+        'slesarniy': 'слесарный',
+        'lazerno': 'лазерно-гибочный',
+        'polimerniy': 'полимерный'
+    };
+    
+    const siteColumn = siteMap[siteKey];
+    if (!siteColumn) return [];
+    
+    const operations = productOps[siteColumn] || [];
+    
+    console.log(`🔧 getOperationNames: ${productName} -> ${siteKey} -> ${operations.length} операций`);
+    
+    return operations;
+}
 
         // ============== ФУНКЦИИ ДЛЯ ПРОФИЛЕЙ ==============
         function addCustomProfile() {
