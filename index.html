@@ -893,24 +893,24 @@
 
         // ============== ЗАГРУЗКА ДАННЫХ ==============
         async function loadTaskOperations() {
-            try {
-                const response = await fetch('data/taskOperations.json');
-                if (response.ok) {
-                    const data = await response.json();
-                    taskOperationsData = data.operations || {};
-                    // Сохраняем в глобальную область для отладки
-                    window.taskOperationsData = taskOperationsData;
-                    console.log('✅ Загружены операции из taskOperations.json');
-                    console.log('📋 Доступные изделия:', Object.keys(taskOperationsData));
-                } else {
-                    console.warn('taskOperations.json не найден');
-                    taskOperationsData = {};
-                }
-            } catch(e) {
-                console.error('Ошибка загрузки taskOperations.json:', e);
-                taskOperationsData = {};
-            }
+    try {
+        // Для главной страницы (index.html) путь data/taskOperations.json правильный
+        const response = await fetch('data/taskOperations.json');
+        if (response.ok) {
+            const data = await response.json();
+            taskOperationsData = data.operations || {};
+            window.taskOperationsData = taskOperationsData;
+            console.log('✅ Загружены операции из taskOperations.json');
+            console.log('📋 Доступные изделия:', Object.keys(taskOperationsData));
+        } else {
+            console.warn('taskOperations.json не найден по пути data/taskOperations.json');
+            taskOperationsData = {};
         }
+    } catch(e) {
+        console.error('Ошибка загрузки taskOperations.json:', e);
+        taskOperationsData = {};
+    }
+}
 
         async function loadProductDetails() {
             try {
