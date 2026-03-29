@@ -216,6 +216,14 @@ function displayTasks() {
     const order = orders.find(o => o.id == firstTask.orderId);
     const item = order?.items?.[0];
     
+    console.log('=== ОТЛАДКА ШАПКИ ===');
+    console.log('firstTask:', firstTask);
+    console.log('order:', order);
+    console.log('item:', item);
+    console.log('item?.product:', item?.product);
+    console.log('item?.size:', item?.size);
+    console.log('item?.details:', item?.details);
+    
     // Собираем детали для шапки
     const allDetails = [];
     
@@ -242,6 +250,9 @@ function displayTasks() {
     // Профили
     const profiles = (item?.details || []).filter(d => d.type === 'profile');
     
+    console.log('allDetails:', allDetails);
+    console.log('profiles:', profiles);
+    
     // СТАТИСТИКА
     const stats = getStats();
 
@@ -255,7 +266,7 @@ function displayTasks() {
             margin-bottom: 20px;
         ">
             <div style="font-size: 18px; font-weight: 600; color: #ff3b3b; margin-bottom: 15px;">
-                📦 ${escapeHtml(item?.product || '')}
+                📦 ${escapeHtml(item?.product || 'Нет данных')}
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 25px;">
