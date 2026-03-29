@@ -551,6 +551,8 @@
         }
 
         // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
+        const STORAGE_KEY = 'slesarniy_open_cards';
+        
         function saveOpenCardsState() {
             const openCards = [];
             document.querySelectorAll('.order-card').forEach(card => {
@@ -559,12 +561,12 @@
                     openCards.push(card.dataset.orderId);
                 }
             });
-            localStorage.setItem('slesarniy_open_cards', JSON.stringify(openCards));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(openCards));
             console.log('💾 Сохранены открытые карточки:', openCards);
         }
 
         function restoreOpenCardsState() {
-            const savedOpenCards = localStorage.getItem('slesarniy_open_cards');
+            const savedOpenCards = localStorage.getItem(STORAGE_KEY);
             if (!savedOpenCards) return;
             
             const openCardsIds = JSON.parse(savedOpenCards);
@@ -619,13 +621,6 @@
                 if (!currentlyOpenOrderId) return;
                 
                 console.log('📂 Восстанавливаем открытую карточку:', currentlyOpenOrderId);
-                
-                document.querySelectorAll('.order-content').forEach(content => {
-                    content.classList.add('collapsed');
-                });
-                document.querySelectorAll('.order-header').forEach(header => {
-                    header.classList.add('collapsed');
-                });
                 
                 const openCard = document.querySelector(`.order-card[data-order-id="${currentlyOpenOrderId}"]`);
                 if (openCard) {
@@ -944,11 +939,12 @@
                     tasksList.appendChild(orderDiv);
                 });
                 
+                // Восстанавливаем состояние после отрисовки
                 setTimeout(function() {
                     restoreOpenCardsState();
                     restoreOpenOrderState();
                     isLoadingTasks = false;
-                }, 50);
+                }, 100);
             }
             
             function createTaskCard(task) {
