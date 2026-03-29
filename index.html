@@ -898,7 +898,10 @@
                 if (response.ok) {
                     const data = await response.json();
                     taskOperationsData = data.operations || {};
+                    // Сохраняем в глобальную область для отладки
+                    window.taskOperationsData = taskOperationsData;
                     console.log('✅ Загружены операции из taskOperations.json');
+                    console.log('📋 Доступные изделия:', Object.keys(taskOperationsData));
                 } else {
                     console.warn('taskOperations.json не найден');
                     taskOperationsData = {};
