@@ -927,8 +927,7 @@
         }
 
         // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ДЛЯ УЧАСТКА (с деталями) ==============
-        function getOperationNamesWithDetails(productName, siteKey) {
-            const productOps = taskOperationsData[productName];
+        const productOps = taskOperationsData[productName];
             if (!productOps) return [];
             
             const siteMap = {
@@ -948,7 +947,11 @@
         // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ДЛЯ ОТОБРАЖЕНИЯ (только названия) ==============
         function getOperationNames(productName, siteKey) {
             const ops = getOperationNamesWithDetails(productName, siteKey);
-            return ops.map(op => typeof op === 'object' ? op.operation : op);
+            // Извлекаем только operation из объектов
+            if (ops.length > 0 && typeof ops[0] === 'object') {
+                return ops.map(op => op.operation);
+            }
+            return ops;
         }
 
         // ============== ФУНКЦИЯ СОЗДАНИЯ ЗАДАЧ С ПЛАНОМ ==============
