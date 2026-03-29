@@ -209,7 +209,7 @@
         }
 
         // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
-        const FREZERNIY_STORAGE_KEY = 'frezerniy_open_cards';
+        const POLIMERNIY_STORAGE_KEY = 'frezerniy_open_cards';
         
         function saveOpenCardsState() {
             const openCards = [];
@@ -219,12 +219,12 @@
                     openCards.push(card.dataset.orderId);
                 }
             });
-            localStorage.setItem(FREZERNIY_STORAGE_KEY, JSON.stringify(openCards));
+            localStorage.setItem(POLIMERNIY_STORAGE_KEY, JSON.stringify(openCards));
             console.log('💾 Сохранены открытые карточки:', openCards);
         }
 
         function restoreOpenCardsState() {
-            const savedOpenCards = localStorage.getItem(FREZERNIY_STORAGE_KEY);
+            const savedOpenCards = localStorage.getItem(POLIMERNIY_STORAGE_KEY);
             if (!savedOpenCards) return;
             const openCardsIds = JSON.parse(savedOpenCards);
             console.log('📂 Восстанавливаем открытые карточки:', openCardsIds);
