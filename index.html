@@ -1718,80 +1718,57 @@ function getOperationNames(productName, siteKey) {
 
                         itemContent.innerHTML = `
     <!-- НАЗВАНИЕ ИЗДЕЛИЯ -->
-    <div style="font-size: 20px; font-weight: 700; color: #ff3b3b; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #ff3b3b;">
+    <div style="font-size: 18px; font-weight: 600; color: #ff3b3b; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #2a2f38;">
         ${escapeHtml(item.product)}
     </div>
     
-    <!-- ВЕРХНЯЯ СЕТКА: 3 КОЛОНКИ (РАЗМЕР, ПОКРЫТИЕ, КРОНШТЕЙНЫ/ЛИРЫ) -->
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
-        <!-- РАЗМЕР -->
-        <div style="background: #1e232b; border-radius: 8px; padding: 12px; text-align: center;">
-            <div style="color: #a0a0a0; font-size: 11px;">📏 РАЗМЕР</div>
-            <div style="font-size: 18px; font-weight: 600; color: #fff;">${escapeHtml(item.size?.name || '-')}</div>
-            <div style="color: #4cd964; font-size: 14px;">${item.size?.quantity || 0} шт</div>
+    <!-- СТРОКА 1: РАЗМЕР + ПОКРЫТИЕ -->
+    <div style="display: flex; gap: 30px; margin-bottom: 10px; flex-wrap: wrap;">
+        <div><span style="color: #a0a0a0;">Размер:</span> <strong>${escapeHtml(item.size?.name || '-')}</strong> <span style="color: #4cd964;">× ${item.size?.quantity || 0} шт</span></div>
+        <div><span style="color: #a0a0a0;">Покрытие:</span> <strong>${escapeHtml(item.ral || '-')}</strong> / ${escapeHtml(item.texture || '-')}</div>
+    </div>
+    
+    <!-- СТРОКА 2: КРОНШТЕЙНЫ + ЛИРЫ -->
+    <div style="display: flex; gap: 30px; margin-bottom: 10px; flex-wrap: wrap;">
+        <div>
+            <span style="color: #a0a0a0;">Кронштейны:</span> 
+            ${item.brackets && item.brackets.length > 0 ? 
+                item.brackets.map(b => `${escapeHtml(b.type)} <span style="color: #4cd964;">${b.quantity} шт</span>`).join(', ') : 
+                '<span style="color: #6c757d;">нет</span>'}
         </div>
-        
-        <!-- ПОКРЫТИЕ -->
-        <div style="background: #1e232b; border-radius: 8px; padding: 12px; text-align: center;">
-            <div style="color: #a0a0a0; font-size: 11px;">🎨 ПОКРЫТИЕ</div>
-            <div style="color: #fff;">${escapeHtml(item.ral || '-')}</div>
-            <div style="color: #fff; font-size: 12px;">${escapeHtml(item.texture || '-')}</div>
-        </div>
-        
-        <!-- КРОНШТЕЙНЫ + ЛИРЫ -->
-        <div style="background: #1e232b; border-radius: 8px; padding: 12px;">
-            <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 5px;">🔧 КРОНШТЕЙНЫ / 🎸 ЛИРЫ</div>
-            <div style="display: flex; justify-content: space-between;">
-                <div>
-                    ${item.brackets && item.brackets.length > 0 ? 
-                        item.brackets.map(b => `<div><span style="color: #fff;">${escapeHtml(b.type)}</span> <span style="color: #4cd964;">${b.quantity} шт</span></div>`).join('') : 
-                        '<span style="color: #6c757d;">— нет —</span>'}
-                </div>
-                <div>
-                    ${item.lyres && item.lyres.length > 0 ? 
-                        item.lyres.map(l => `<div><span style="color: #fff;">${escapeHtml(l.type)}</span> <span style="color: #4cd964;">${l.quantity} шт</span></div>`).join('') : 
-                        '<span style="color: #6c757d;">— нет —</span>'}
-                </div>
-            </div>
+        <div>
+            <span style="color: #a0a0a0;">Лиры:</span> 
+            ${item.lyres && item.lyres.length > 0 ? 
+                item.lyres.map(l => `${escapeHtml(l.type)} <span style="color: #4cd964;">${l.quantity} шт</span>`).join(', ') : 
+                '<span style="color: #6c757d;">нет</span>'}
         </div>
     </div>
     
-    <!-- СРЕДНЯЯ СЕТКА: ДЕТАЛИ (2-3 колонки) -->
-    <div style="margin-bottom: 20px;">
-        <div style="color: #ff3b3b; font-size: 12px; margin-bottom: 10px; border-left: 3px solid #ff3b3b; padding-left: 10px;">🔩 ДЕТАЛИ</div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px;">
+    <!-- СТРОКА 3: ДЕТАЛИ (несколько столбцов текстом) -->
+    <div style="margin-bottom: 10px;">
+        <div style="color: #a0a0a0; margin-bottom: 5px;">Детали:</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 4px;">
             ${regularDetails.length > 0 ? 
                 regularDetails.map(d => `
-                    <div style="background: #1e232b; border-radius: 6px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="color: #fff;">${escapeHtml(d.name)}</span>
-                        <span style="color: #4cd964; font-weight: 500;">${d.quantity} шт</span>
-                    </div>
+                    <div>• ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span></div>
                 `).join('') : 
-                '<div style="color: #6c757d; padding: 10px; text-align: center;">— нет —</div>'}
+                '<div style="color: #6c757d;">— нет —</div>'}
         </div>
     </div>
     
-    <!-- НИЖНЯЯ СЕТКА: ПРОФИЛИ (2 колонки) -->
-    <div style="margin-bottom: 20px;">
-        <div style="color: #ff3b3b; font-size: 12px; margin-bottom: 10px; border-left: 3px solid #ff3b3b; padding-left: 10px;">📐 ПРОФИЛИ</div>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-            ${profiles.length > 0 ? 
-                profiles.map(p => `
-                    <div style="background: #1e232b; border-radius: 6px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="color: #fff; font-size: 13px;">${escapeHtml(p.name)}</span>
-                        <div>
-                            <span style="color: #ff9800;">${p.lengthMm} мм</span>
-                            <span style="color: #4cd964; margin-left: 8px;">× ${p.quantity} шт</span>
-                        </div>
-                    </div>
-                `).join('') : 
-                '<div style="color: #6c757d; padding: 10px; text-align: center;">— нет —</div>'}
-        </div>
+    <!-- СТРОКА 4: ПРОФИЛИ (каждый на новой строке) -->
+    <div style="margin-bottom: 15px;">
+        <div style="color: #a0a0a0; margin-bottom: 5px;">Профили:</div>
+        ${profiles.length > 0 ? 
+            profiles.map(p => `
+                <div style="margin-bottom: 3px;">• ${escapeHtml(p.name)} — <span style="color: #ff9800;">${p.lengthMm} мм</span> <span style="color: #4cd964;">× ${p.quantity} шт</span></div>
+            `).join('') : 
+            '<div style="color: #6c757d;">— нет —</div>'}
     </div>
     
     <!-- УЧАСТКИ -->
     <div id="sites-${order.id}-${itemIndex}" class="sites-section">
-        <h4 style="margin-bottom: 15px;">🏭 Производственные участки</h4>
+        <h4 style="margin-bottom: 12px;">🏭 Производственные участки</h4>
         <div class="sites-grid">
             ${createSiteRow('🔧 Токарный', order, itemIndex, 'tokarniy')}
             ${createSiteRow('🔨 Слесарный', order, itemIndex, 'slesarniy')}
