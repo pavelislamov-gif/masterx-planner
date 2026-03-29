@@ -1488,6 +1488,40 @@
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
+        // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК НА ГЛАВНОЙ ==============
+        const MAIN_STORAGE_KEY = 'main_open_cards';
+        
+        function saveMainOpenCardsState() {
+            const openCards = [];
+            document.querySelectorAll('.order-card').forEach(card => {
+                const content = card.querySelector('.order-content');
+                if (content && content.style.display !== 'none') {
+                    openCards.push(card.dataset.orderId);
+                }
+            });
+            localStorage.setItem(MAIN_STORAGE_KEY, JSON.stringify(openCards));
+            console.log('💾 Сохранены открытые карточки на главной:', openCards);
+        }
+
+        function restoreMainOpenCardsState() {
+            const savedOpenCards = localStorage.getItem(MAIN_STORAGE_KEY);
+            if (!savedOpenCards) return;
+            const openCardsIds = JSON.parse(savedOpenCards);
+            console.log('📂 Восстанавливаем открытые карточки на главной:', openCardsIds);
+            
+            openCardsIds.forEach(orderId => {
+                const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
+                if (card) {
+                    const header = card.querySelector('.order-header');
+                    const content = card.querySelector('.order-content');
+                    if (header && content) {
+                        content.style.display = 'block';
+                        console.log('✅ Восстановлена карточка:', orderId);
+                    }
+                }
+            });
+        }
+
         // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА ==============
         function createSiteRow(name, order, itemIndex, siteKey) {
             const item = order.items[itemIndex];
@@ -1856,6 +1890,7 @@
                             const isVisible = itemContent.style.display !== 'none';
                             itemContent.style.display = isVisible ? 'none' : 'block';
                             itemHeader.querySelector('span:last-child').textContent = isVisible ? '▼' : '▲';
+                            saveMainOpenCardsState();
                         };
 
                         itemDiv.appendChild(itemHeader);
@@ -1866,13 +1901,18 @@
 
                 header.onclick = (e) => {
                     if (e.target.tagName === 'BUTTON') return;
-                    content.style.display = content.style.display === 'none' ? 'block' : 'none';
+                    const isVisible = content.style.display !== 'none';
+                    content.style.display = isVisible ? 'none' : 'block';
+                    saveMainOpenCardsState();
                 };
 
                 card.appendChild(header);
                 card.appendChild(content);
                 ordersList.appendChild(card);
             });
+            
+            // Восстанавливаем состояние открытых карточек
+            restoreMainOpenCardsState();
         }
 
         // ============== СТАТИСТИКА ==============
@@ -1959,6 +1999,7 @@
                     saveOrdersToStorage(existingOrders);
                     renderOrdersList();
                     updateStatistics();
+                    saveMainOpenCardsState();
                     
                     alert(`✅ Импорт завершён!\n📦 Импортировано: ${importedCount} групп\n⏭️ Пропущено: ${skippedCount}`);
                     
@@ -2054,6 +2095,7 @@
                 });
             });
             
+            saveMainOpenCardsState();
             renderOrdersList();
             updateStatistics();
             alert('✅ Группа удалена');
@@ -2072,6 +2114,10 @@
             
             renderOrdersList();
             updateStatistics();
+            
+            window.addEventListener('beforeunload', function() {
+                saveMainOpenCardsState();
+            });
             
             document.getElementById('searchInput')?.addEventListener('input', function() {
                 renderOrdersList();
