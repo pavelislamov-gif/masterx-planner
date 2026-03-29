@@ -544,7 +544,7 @@
         }
 
         // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
-        const STORAGE_KEY = 'slesarniy_open_cards';
+        const SLESARNIY_STORAGE_KEY = 'slesarniy_open_cards';
         
         function saveOpenCardsState() {
             const openCards = [];
@@ -554,12 +554,12 @@
                     openCards.push(card.dataset.orderId);
                 }
             });
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(openCards));
+            localStorage.setItem(SLESARNIY_STORAGE_KEY, JSON.stringify(openCards));
             console.log('💾 Сохранены открытые карточки:', openCards);
         }
 
         function restoreOpenCardsState() {
-            const savedOpenCards = localStorage.getItem(STORAGE_KEY);
+            const savedOpenCards = localStorage.getItem(SLESARNIY_STORAGE_KEY);
             if (!savedOpenCards) return;
             
             const openCardsIds = JSON.parse(savedOpenCards);
