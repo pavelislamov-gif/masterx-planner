@@ -32,6 +32,7 @@
         .task-card.completed { opacity: 0.8; background: #1a2a1a; border-left: 3px solid #2ecc71; }
         .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .task-title { font-size: 14px; font-weight: 600; color: #fff; }
+        .task-plan { color: #ff9800; font-size: 12px; margin-bottom: 10px; padding: 4px 8px; background: #1e232b; border-radius: 4px; display: inline-block; }
         .executor-header { display: flex; gap: 10px; padding: 0 10px; margin-bottom: 6px; font-size: 11px; color: #a0a0a0; }
         .executor-header span:nth-child(1) { width: 140px; }
         .executor-header span:nth-child(2) { width: 70px; text-align: center; }
@@ -116,6 +117,81 @@
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
+        // ============== ЗАГРУЗКА ОПЕРАЦИЙ ИЗ taskOperations.json ==============
+        let taskOperationsData = {};
+        
+        async function loadTaskOperationsData() {
+            try {
+                const response = await fetch('../data/taskOperations.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    taskOperationsData = data.operations || {};
+                    console.log('✅ Загружены операции из taskOperations.json');
+                    console.log('📋 Доступные изделия:', Object.keys(taskOperationsData));
+                } else {
+                    console.warn('taskOperations.json не найден по пути ../data/taskOperations.json');
+                    taskOperationsData = {};
+                }
+            } catch(e) {
+                console.error('Ошибка загрузки taskOperations.json:', e);
+                taskOperationsData = {};
+            }
+        }
+        
+        // Получение плана задачи из количества детали
+        function getTaskPlanFromDetails(task, fullOrder) {
+            if (!fullOrder || !fullOrder.items || !fullOrder.items[0]) return 1;
+            
+            const item = fullOrder.items[0];
+            const details = item.details || [];
+            const productName = item.product;
+            
+            // Находим операцию в taskOperationsData
+            const productOps = taskOperationsData[productName];
+            if (!productOps) return item.size?.quantity || 1;
+            
+            // Ищем операцию во всех участках
+            let foundDetail = null;
+            for (const siteOps of Object.values(productOps)) {
+                for (const op of siteOps) {
+                    if (op.operation === task.operation) {
+                        foundDetail = op.detail;
+                        break;
+                    }
+                }
+                if (foundDetail) break;
+            }
+            
+            if (!foundDetail) return item.size?.quantity || 1;
+            
+            // Ищем деталь с таким названием
+            for (const detail of details) {
+                if (detail.name === foundDetail) {
+                    return detail.quantity;
+                }
+            }
+            
+            // Проверяем кронштейны
+            if (item.brackets) {
+                for (const b of item.brackets) {
+                    if (`Кронштейн ${b.type}` === foundDetail) {
+                        return b.quantity;
+                    }
+                }
+            }
+            
+            // Проверяем лиры
+            if (item.lyres) {
+                for (const l of item.lyres) {
+                    if (`Лира ${l.type}` === foundDetail) {
+                        return l.quantity;
+                    }
+                }
+            }
+            
+            return item.size?.quantity || 1;
+        }
+
         // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
         const SLESARNIY_STORAGE_KEY = 'slesarniy_open_cards';
         
@@ -184,7 +260,8 @@
             
             window.taskManager = taskManager;
             
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', async function() {
+                await loadTaskOperationsData();
                 updateDateDisplay();
                 loadTasks();
                 window.addEventListener('beforeunload', function() { saveOpenCardsState(); });
@@ -354,7 +431,7 @@
                     content.appendChild(productInfoDiv);
                     
                     order.tasks.forEach(function(task) {
-                        content.appendChild(createTaskCard(task));
+                        content.appendChild(createTaskCard(task, fullOrder));
                     });
                     
                     header.addEventListener('click', function(e) {
@@ -369,21 +446,28 @@
                     tasksList.appendChild(orderDiv);
                 });
                 
-                // Восстанавливаем состояние ПОСЛЕ того, как все карточки добавлены
                 restoreOpenCardsState();
-                
                 isLoadingTasks = false;
             }
             
-            function createTaskCard(task) {
+            function createTaskCard(task, fullOrder) {
                 var card = document.createElement('div');
                 card.className = 'task-card ' + (task.status === 'completed' ? 'completed' : '');
                 card.dataset.taskId = task.id;
+                
+                // Получаем план из количества детали
+                var planQuantity = task.totalQuantity || getTaskPlanFromDetails(task, fullOrder);
                 
                 var header = document.createElement('div');
                 header.className = 'task-header';
                 header.innerHTML = '<span class="task-title">' + escapeHtml(task.operation) + (task.isExtra ? '<span class="extra-task-badge">Доп.</span>' : '') + '</span>';
                 card.appendChild(header);
+                
+                // Отображаем план задачи
+                var planDiv = document.createElement('div');
+                planDiv.className = 'task-plan';
+                planDiv.innerHTML = '📋 План: ' + planQuantity + ' шт';
+                card.appendChild(planDiv);
                 
                 if (task.isExtra && task.description) {
                     var desc = document.createElement('div');
@@ -555,14 +639,22 @@
             window.exportToExcel = function() {
                 const tasks = taskManager.tasks;
                 const dateStr = taskManager.formatDate(taskManager.currentDate);
-                let csv = "Заказ,Изделие,Операция,Исполнитель,Количество,Статус\n";
+                let csv = "Заказ,Изделие,Операция,Исполнитель,Количество,Статус,План\n";
                 tasks.forEach(task => {
+                    // Получаем план
+                    let fullOrder = null;
+                    try {
+                        const allOrders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
+                        fullOrder = allOrders.find(o => o.id == task.orderId);
+                    } catch(e) {}
+                    const planQuantity = task.totalQuantity || getTaskPlanFromDetails(task, fullOrder);
+                    
                     if (task.executors && task.executors.length > 0) {
                         task.executors.forEach(exec => {
-                            csv += `"${task.orderNumber}","${task.product}","${task.operation}","${exec.name}",${exec.quantity || 0},"${exec.status}"\n`;
+                            csv += `"${task.orderNumber}","${task.product}","${task.operation}","${exec.name}",${exec.quantity || 0},"${exec.status}",${planQuantity}\n`;
                         });
                     } else {
-                        csv += `"${task.orderNumber}","${task.product}","${task.operation}","Нет",0,"${task.status}"\n`;
+                        csv += `"${task.orderNumber}","${task.product}","${task.operation}","Нет",0,"${task.status}",${planQuantity}\n`;
                     }
                 });
                 const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
