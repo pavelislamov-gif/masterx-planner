@@ -1725,33 +1725,21 @@ function getOperationNames(productName, siteKey) {
     <!-- ОСНОВНАЯ СЕТКА: 3 КОЛОНКИ -->
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 25px; margin-bottom: 20px;">
         
-        <!-- ЛЕВАЯ КОЛОНКА: ОСНОВНАЯ ИНФОРМАЦИЯ -->
+        <!-- ЛЕВАЯ КОЛОНКА: РАЗМЕР + ПОКРЫТИЕ -->
         <div>
             <div style="margin-bottom: 12px;">
-                <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">📏 РАЗМЕР</div>
+                <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">РАЗМЕР</div>
                 <div><strong>${escapeHtml(item.size?.name || '-')}</strong> <span style="color: #4cd964;">× ${item.size?.quantity || 0} шт</span></div>
             </div>
             <div style="margin-bottom: 12px;">
-                <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">🎨 ПОКРЫТИЕ</div>
+                <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">ПОКРЫТИЕ</div>
                 <div><strong>${escapeHtml(item.ral || '-')}</strong> / ${escapeHtml(item.texture || '-')}</div>
-            </div>
-            <div style="margin-bottom: 12px;">
-                <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">🔧 КРОНШТЕЙНЫ</div>
-                <div>${item.brackets && item.brackets.length > 0 ? 
-                    item.brackets.map(b => `<div>• ${escapeHtml(b.type)} <span style="color: #4cd964;">${b.quantity} шт</span></div>`).join('') : 
-                    '<span style="color: #6c757d;">нет</span>'}</div>
-            </div>
-            <div>
-                <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">🎸 ЛИРЫ</div>
-                <div>${item.lyres && item.lyres.length > 0 ? 
-                    item.lyres.map(l => `<div>• ${escapeHtml(l.type)} <span style="color: #4cd964;">${l.quantity} шт</span></div>`).join('') : 
-                    '<span style="color: #6c757d;">нет</span>'}</div>
             </div>
         </div>
         
         <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: ПРОФИЛИ -->
         <div>
-            <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">📐 ПРОФИЛИ</div>
+            <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">ПРОФИЛИ</div>
             ${profiles.length > 0 ? 
                 profiles.map(p => `
                     <div style="margin-bottom: 8px;">
@@ -1764,28 +1752,53 @@ function getOperationNames(productName, siteKey) {
                 '<div style="color: #6c757d;">— нет —</div>'}
         </div>
         
-        <!-- ПРАВАЯ КОЛОНКА: ДЕТАЛИ -->
+        <!-- ПРАВАЯ КОЛОНКА: ДЕТАЛИ (включая кронштейны и лиры) -->
         <div>
-            <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">🔩 ДЕТАЛИ</div>
-            ${regularDetails.length > 0 ? 
-                regularDetails.map(d => `
-                    <div style="margin-bottom: 6px;">
-                        • ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span>
-                    </div>
-                `).join('') : 
-                '<div style="color: #6c757d;">— нет —</div>'}
+            <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">ДЕТАЛИ</div>
+            ${(() => {
+                const allDetails = [];
+                
+                // Добавляем кронштейны
+                if (item.brackets && item.brackets.length > 0) {
+                    item.brackets.forEach(b => {
+                        allDetails.push({ name: `Кронштейн ${b.type}`, quantity: b.quantity });
+                    });
+                }
+                
+                // Добавляем лиры
+                if (item.lyres && item.lyres.length > 0) {
+                    item.lyres.forEach(l => {
+                        allDetails.push({ name: `Лира ${l.type}`, quantity: l.quantity });
+                    });
+                }
+                
+                // Добавляем обычные детали
+                if (regularDetails.length > 0) {
+                    regularDetails.forEach(d => {
+                        allDetails.push({ name: d.name, quantity: d.quantity });
+                    });
+                }
+                
+                return allDetails.length > 0 ? 
+                    allDetails.map(d => `
+                        <div style="margin-bottom: 6px;">
+                            • ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span>
+                        </div>
+                    `).join('') : 
+                    '<div style="color: #6c757d;">— нет —</div>';
+            })()}
         </div>
     </div>
     
     <!-- УЧАСТКИ -->
     <div id="sites-${order.id}-${itemIndex}" class="sites-section">
-        <h4 style="margin-bottom: 12px;">🏭 Производственные участки</h4>
+        <h4 style="margin-bottom: 12px;">ПРОИЗВОДСТВЕННЫЕ УЧАСТКИ</h4>
         <div class="sites-grid">
-            ${createSiteRow('🔧 Токарный', order, itemIndex, 'tokarniy')}
-            ${createSiteRow('🔨 Слесарный', order, itemIndex, 'slesarniy')}
-            ${createSiteRow('⚙️ Фрезерный', order, itemIndex, 'frezerniy')}
-            ${createSiteRow('✨ Лазерно-гибочный', order, itemIndex, 'lazerno')}
-            ${createSiteRow('🧪 Полимерный', order, itemIndex, 'polimerniy')}
+            ${createSiteRow('Токарный', order, itemIndex, 'tokarniy')}
+            ${createSiteRow('Слесарный', order, itemIndex, 'slesarniy')}
+            ${createSiteRow('Фрезерный', order, itemIndex, 'frezerniy')}
+            ${createSiteRow('Лазерно-гибочный', order, itemIndex, 'lazerno')}
+            ${createSiteRow('Полимерный', order, itemIndex, 'polimerniy')}
         </div>
     </div>
 `;
