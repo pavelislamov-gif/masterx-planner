@@ -8,6 +8,17 @@ const currentSite = document.querySelector('.site-page')?.dataset?.site || 'unkn
 // Глобальный экземпляр TaskManager
 let taskManager;
 
+// ============== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ БЕЗОПАСНОГО ВЫВОДА ==============
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('site-page.js загружен, участок:', currentSite);
@@ -21,7 +32,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Загружаем данные на сегодня
     taskManager.today();
 
-    // Находим контейнер для задач (если его нет, создаем)
     // Обновляем отображение даты
     updateDateDisplay();
     
@@ -45,7 +55,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 // ============== ФУНКЦИИ ДЛЯ ONCLICK КНОПОК ==============
 
-// Эти функции будут доступны глобально
 window.changeDate = function(direction) {
     console.log('changeDate:', direction);
     
@@ -63,11 +72,9 @@ window.changeDate = function(direction) {
 
 window.exportToExcel = function() {
     console.log('exportToExcel');
-    // Здесь будет функция экспорта в Excel
     alert('Экспорт в Excel будет доступен позже');
 };
 
-// Обновление отображения даты
 function updateDateDisplay() {
     const dateDisplay = document.getElementById('currentDateDisplay');
     if (dateDisplay) {
@@ -75,7 +82,6 @@ function updateDateDisplay() {
     }
 }
 
-// Загрузка кастомных операций для участка
 async function loadCustomOperations(site) {
     try {
         const response = await fetch('../data/norms.json');
@@ -108,7 +114,6 @@ async function loadCustomOperations(site) {
 // ============== НАСТРОЙКА КНОПОК НАВИГАЦИИ ==============
 
 function setupNavigationButtons() {
-    // Кнопка "Вчера"
     const yesterdayBtn = document.getElementById('yesterdayBtn') || 
                          document.querySelector('[data-action="yesterday"]') ||
                          document.querySelector('.yesterday-btn');
@@ -122,7 +127,6 @@ function setupNavigationButtons() {
         });
     }
     
-    // Кнопка "Сегодня"
     const todayBtn = document.getElementById('todayBtn') || 
                      document.querySelector('[data-action="today"]') ||
                      document.querySelector('.today-btn');
@@ -136,7 +140,6 @@ function setupNavigationButtons() {
         });
     }
     
-    // Кнопка "Завтра"
     const tomorrowBtn = document.getElementById('tomorrowBtn') || 
                         document.querySelector('[data-action="tomorrow"]') ||
                         document.querySelector('.tomorrow-btn');
@@ -150,20 +153,16 @@ function setupNavigationButtons() {
         });
     }
     
-    // Если кнопки найдены по ID, добавляем класс active на сегодня
     if (todayBtn) {
         todayBtn.classList.add('active');
     }
 }
 
-// Подсветка активной кнопки
 function updateActiveButton(clickedBtn) {
-    // Убираем active у всех
     document.querySelectorAll('.nav-btn, .yesterday-btn, .today-btn, .tomorrow-btn, [data-action]').forEach(btn => {
         btn.classList.remove('active');
     });
     
-    // Добавляем active нажатой кнопке
     if (clickedBtn) {
         clickedBtn.classList.add('active');
     }
@@ -172,10 +171,8 @@ function updateActiveButton(clickedBtn) {
 // ============== СОЗДАНИЕ КОНТЕЙНЕРА ДЛЯ ЗАДАЧ ==============
 
 function ensureTasksContainer() {
-    // Проверяем, есть ли контейнер для задач
     let tasksContainer = document.getElementById('tasksContainer');
 
-    // Если нет - создаем
     if (!tasksContainer) {
         const main = document.querySelector('main') || document.body;
         tasksContainer = document.createElement('div');
@@ -183,9 +180,8 @@ function ensureTasksContainer() {
         tasksContainer.style.cssText = `
             margin-top: 20px;
             padding: 20px;
-            background: white;
+            background: #1a1e24;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         `;
         main.appendChild(tasksContainer);
     }
@@ -197,18 +193,16 @@ function displayTasks() {
     const tasksContainer = document.getElementById('tasksContainer');
     if (!tasksContainer) return;
 
-    // Обновляем заголовок с датой
     updatePageTitle();
     
     if (!taskManager.tasks || taskManager.tasks.length === 0) {
         tasksContainer.innerHTML = `
             <div style="text-align: center; padding: 60px 20px;">
                 <div style="font-size: 3rem; margin-bottom: 15px;">📋</div>
-                <p style="color: #999; font-size: 1.2rem;">
+                <p style="color: #a0a0a0; font-size: 1.2rem;">
                     Нет задач на ${formatDateDisplay(taskManager.currentDate)}
                 </p>
-                <p style="color: #bbb; font-size: 0.95rem; margin-top: 10px;">
-                    Выберите другой день или создайте новую задачу
+                <p style="color: #6c757d; font-size: 0.95rem; margin-top: 10px;">
                     Выберите другой день с помощью кнопок выше
                 </p>
             </div>
@@ -216,23 +210,113 @@ function displayTasks() {
         return;
     }
 
-    // Считаем статистику
+    // ========== ПОЛУЧАЕМ ДАННЫЕ ДЛЯ ШАПКИ ИЗ ПЕРВОЙ ЗАДАЧИ ==========
+    const firstTask = taskManager.tasks[0];
+    const orders = loadOrdersFromStorage() || [];
+    const order = orders.find(o => o.id == firstTask.orderId);
+    const item = order?.items?.[0];
+    
+    // Собираем детали для шапки
+    const allDetails = [];
+    
+    // Кронштейны
+    if (item?.brackets && item.brackets.length > 0) {
+        item.brackets.forEach(b => {
+            allDetails.push({ name: `Кронштейн ${b.type}`, quantity: b.quantity });
+        });
+    }
+    
+    // Лиры
+    if (item?.lyres && item.lyres.length > 0) {
+        item.lyres.forEach(l => {
+            allDetails.push({ name: `Лира ${l.type}`, quantity: l.quantity });
+        });
+    }
+    
+    // Обычные детали
+    const regularDetails = (item?.details || []).filter(d => d.type !== 'profile');
+    regularDetails.forEach(d => {
+        allDetails.push({ name: d.name, quantity: d.quantity });
+    });
+    
+    // Профили
+    const profiles = (item?.details || []).filter(d => d.type === 'profile');
+    
+    // СТАТИСТИКА
     const stats = getStats();
 
-    let html = `
+    // ШАПКА С ИНФОРМАЦИЕЙ ОБ ИЗДЕЛИИ (3 колонки)
+    const headerHtml = `
+        <div style="
+            background: #1a1e24;
+            border: 1px solid #2a2f38;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        ">
+            <div style="font-size: 18px; font-weight: 600; color: #ff3b3b; margin-bottom: 15px;">
+                📦 ${escapeHtml(item?.product || '')}
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 25px;">
+                
+                <!-- ЛЕВАЯ КОЛОНКА: РАЗМЕР + ПОКРЫТИЕ -->
+                <div>
+                    <div style="margin-bottom: 12px;">
+                        <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 4px;">РАЗМЕР</div>
+                        <div><strong>${escapeHtml(item?.size?.name || '-')}</strong> <span style="color: #4cd964;">× ${item?.size?.quantity || 1} шт</span></div>
+                    </div>
+                    <div>
+                        <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 4px;">ПОКРЫТИЕ</div>
+                        <div><strong>${escapeHtml(item?.ral || '-')}</strong> / ${escapeHtml(item?.texture || '-')}</div>
+                    </div>
+                </div>
+                
+                <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: ПРОФИЛИ -->
+                <div>
+                    <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 8px;">ПРОФИЛИ</div>
+                    ${profiles.length > 0 ? 
+                        profiles.map(p => `
+                            <div style="margin-bottom: 8px;">
+                                <div>• ${escapeHtml(p.name)}</div>
+                                <div style="margin-left: 12px; color: #a0a0a0; font-size: 11px;">
+                                    <span style="color: #ff9800;">${p.lengthMm} мм</span> <span style="color: #4cd964;">× ${p.quantity} шт</span>
+                                </div>
+                            </div>
+                        `).join('') : 
+                        '<div style="color: #6c757d; font-size: 12px;">— нет —</div>'}
+                </div>
+                
+                <!-- ПРАВАЯ КОЛОНКА: ДЕТАЛИ -->
+                <div>
+                    <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 8px;">ДЕТАЛИ</div>
+                    ${allDetails.length > 0 ? 
+                        allDetails.map(d => `
+                            <div style="margin-bottom: 4px;">
+                                • ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span>
+                            </div>
+                        `).join('') : 
+                        '<div style="color: #6c757d; font-size: 12px;">— нет —</div>'}
+                </div>
+            </div>
+        </div>
+    `;
+
+    // ОСНОВНОЙ КОНТЕНТ (заголовок задач и список)
+    const contentHtml = `
         <div class="tasks-header" style="
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
+            border-bottom: 2px solid #2a2f38;
         ">
-            <h3 style="margin: 0; color: #333;">
+            <h3 style="margin: 0; color: #fff;">
                 Задачи на ${formatDateDisplay(taskManager.currentDate)}
             </h3>
-            <div class="stats" style="color: #666; font-size: 0.95rem;">
-                <span style="margin-right: 15px;">📊 Всего: <strong>${stats.total}</strong></span>
+            <div class="stats" style="color: #a0a0a0; font-size: 0.95rem;">
+                <span style="margin-right: 15px;">📊 Всего: <strong style="color: #fff;">${stats.total}</strong></span>
                 <span style="margin-right: 15px; color: #ff9800;">⚡ В работе: <strong>${stats.inProgress}</strong></span>
                 <span style="color: #4caf50;">✅ Завершено: <strong>${stats.completed}</strong></span>
             </div>
@@ -240,41 +324,42 @@ function displayTasks() {
         <div class="tasks-list"></div>
     `;
 
-    tasksContainer.innerHTML = html;
+    // Собираем всё вместе
+    tasksContainer.innerHTML = headerHtml + contentHtml;
 
     const tasksList = tasksContainer.querySelector('.tasks-list');
 
+    // ОТОБРАЖАЕМ ЗАДАЧИ
     taskManager.tasks.forEach(task => {
         const progress = task.totalQuantity ? 
             Math.round((task.completedQuantity / task.totalQuantity) * 100) : 0;
 
         tasksList.innerHTML += `
             <div class="task-card" data-task-id="${task.id}" style="
-                background: white;
-                border: 1px solid #eee;
+                background: #1a1e24;
+                border: 1px solid #2a2f38;
                 border-left: 4px solid ${getStatusColor(task.status)};
                 border-radius: 8px;
                 padding: 16px;
                 margin-bottom: 12px;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
                 transition: all 0.2s;
             ">
                 <div style="display: flex; justify-content: space-between;">
                     <div style="flex: 1;">
                         <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
                             <span style="
-                                background: #f5f5f5;
+                                background: #2a2f38;
                                 padding: 4px 10px;
                                 border-radius: 16px;
                                 font-size: 0.8rem;
-                                color: #666;
+                                color: #a0a0a0;
                             ">
                                 Заказ ${task.orderNumber || 'б/н'}
                             </span>
-                            <h4 style="margin: 0; color: #333;">${task.product || 'Изделие'}</h4>
+                            <h4 style="margin: 0; color: #ff3b3b;">${task.product || 'Изделие'}</h4>
                         </div>
                         
-                        <p style="margin: 5px 0; color: #555;">
+                        <p style="margin: 5px 0; color: #a0a0a0;">
                             <strong>Операция:</strong> ${task.operation}
                         </p>
                         
@@ -286,13 +371,13 @@ function displayTasks() {
                         
                         <div style="margin: 12px 0;">
                             <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 4px;">
-                                <span>Прогресс</span>
-                                <span>${task.completedQuantity || 0} / ${task.totalQuantity || 1}</span>
+                                <span style="color: #a0a0a0;">Прогресс</span>
+                                <span style="color: #fff;">${task.completedQuantity || 0} / ${task.totalQuantity || 1}</span>
                             </div>
                             <div style="
                                 width: 100%;
                                 height: 6px;
-                                background: #f0f0f0;
+                                background: #2a2f38;
                                 border-radius: 3px;
                                 overflow: hidden;
                             ">
@@ -332,15 +417,16 @@ function renderExecutors(task) {
 
     return `
         <div style="margin-top: 10px;">
-            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Исполнители:</div>
+            <div style="font-size: 0.85rem; color: #a0a0a0; margin-bottom: 5px;">Исполнители:</div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 ${task.executors.map(exec => `
                     <span style="
-                        background: ${exec.status === 'completed' ? '#e8f5e9' : '#f5f5f5'};
+                        background: ${exec.status === 'completed' ? '#1a3a1a' : '#2a2f38'};
                         padding: 4px 12px;
                         border-radius: 20px;
                         font-size: 0.85rem;
-                        border: 1px solid ${exec.status === 'completed' ? '#c8e6c9' : '#e0e0e0'};
+                        border: 1px solid ${exec.status === 'completed' ? '#2e7d32' : '#3a404b'};
+                        color: #fff;
                     ">
                         ${exec.displayName || exec.name}
                         ${task.totalQuantity > 1 ? ` (${exec.quantity || 0})` : ''}
@@ -372,7 +458,6 @@ function updatePageTitle() {
     }
 }
 
-// ============== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==============
 // ============== ФОРМАТИРОВАНИЕ ДАТЫ ==============
 
 function formatDateDisplay(date) {
@@ -387,23 +472,16 @@ function formatDateDisplay(date) {
     const tomorrowStr = tomorrow.toDateString();
     const yesterdayStr = yesterday.toDateString();
 
-    let prefix = '';
     if (dateStr === todayStr) {
         return 'сегодня';
-        prefix = 'Сегодня, ';
     } else if (dateStr === tomorrowStr) {
         return 'завтра';
-        prefix = 'Завтра, ';
     } else if (dateStr === yesterdayStr) {
         return 'вчера';
     } else {
-        const options = { day: 'numeric', month: 'long' };
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
         return date.toLocaleDateString('ru-RU', options);
-        prefix = 'Вчера, ';
     }
-    
-    const options = { day: 'numeric', month: 'long', year: 'numeric' };
-    return prefix + date.toLocaleDateString('ru-RU', options);
 }
 
 function getSiteName(site) {
@@ -411,34 +489,36 @@ function getSiteName(site) {
         'frezerniy': 'Фрезерный',
         'tokarniy': 'Токарный',
         'slesarniy': 'Слесарный',
+        'lazerno': 'Лазерно-гибочный',
         'lazerno-gibochniy': 'Лазерно-гибочный',
         'polimerniy': 'Полимерный'
     };
     return names[site] || site;
 }
-// ============== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==============
+
+// ============== ЦВЕТА СТАТУСОВ ==============
 
 function getStatusColor(status) {
     switch(status) {
         case 'completed': return '#4caf50';
         case 'in_progress': return '#ff9800';
-        default: return '#9e9e9e';
+        default: return '#6c757d';
     }
 }
 
 function getStatusBackground(status) {
     switch(status) {
-        case 'completed': return '#e8f5e9';
-        case 'in_progress': return '#fff3e0';
-        default: return '#f5f5f5';
+        case 'completed': return '#1a3a1a';
+        case 'in_progress': return '#3a2a1a';
+        default: return '#2a2f38';
     }
 }
 
 function getStatusTextColor(status) {
     switch(status) {
-        case 'completed': return '#2e7d32';
-        case 'in_progress': return '#e65100';
-        default: return '#757575';
+        case 'completed': return '#4caf50';
+        case 'in_progress': return '#ff9800';
+        default: return '#a0a0a0';
     }
 }
 
