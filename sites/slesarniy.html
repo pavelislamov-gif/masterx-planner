@@ -127,16 +127,14 @@
                     const data = await response.json();
                     taskOperationsData = data.operations || {};
                     console.log('✅ Загружены операции из taskOperations.json');
-                    console.log('📋 Доступные изделия:', Object.keys(taskOperationsData));
                 } else {
-                    console.warn('taskOperations.json не найден по пути ../data/taskOperations.json');
+                    console.warn('taskOperations.json не найден');
                 }
             } catch(e) {
                 console.error('Ошибка загрузки taskOperations.json:', e);
             }
         }
         
-        // Получение плана задачи из количества детали (по привязке из taskOperations.json)
         function getTaskPlanFromDetails(task, fullOrder) {
             if (!fullOrder || !fullOrder.items || !fullOrder.items[0]) return 1;
             
@@ -144,11 +142,9 @@
             const details = item.details || [];
             const productName = item.product;
             
-            // Находим операцию в taskOperationsData
             const productOps = taskOperationsData[productName];
             if (!productOps) return item.size?.quantity || 1;
             
-            // Ищем операцию во всех участках
             let foundDetail = null;
             for (const siteOps of Object.values(productOps)) {
                 for (const op of siteOps) {
@@ -162,14 +158,12 @@
             
             if (!foundDetail) return item.size?.quantity || 1;
             
-            // Ищем деталь с таким названием в details
             for (const detail of details) {
                 if (detail.name === foundDetail) {
                     return detail.quantity;
                 }
             }
             
-            // Проверяем кронштейны
             if (item.brackets) {
                 for (const b of item.brackets) {
                     if (`Кронштейн ${b.type}` === foundDetail) {
@@ -178,7 +172,6 @@
                 }
             }
             
-            // Проверяем лиры
             if (item.lyres) {
                 for (const l of item.lyres) {
                     if (`Лира ${l.type}` === foundDetail) {
@@ -453,7 +446,6 @@
                 card.className = 'task-card ' + (task.status === 'completed' ? 'completed' : '');
                 card.dataset.taskId = task.id;
                 
-                // Получаем план из количества детали
                 var planQuantity = task.totalQuantity || getTaskPlanFromDetails(task, fullOrder);
                 
                 var header = document.createElement('div');
@@ -461,7 +453,6 @@
                 header.innerHTML = '<span class="task-title">' + escapeHtml(task.operation) + (task.isExtra ? '<span class="extra-task-badge">Доп.</span>' : '') + '</span>';
                 card.appendChild(header);
                 
-                // Отображаем план задачи
                 var planDiv = document.createElement('div');
                 planDiv.className = 'task-plan';
                 planDiv.innerHTML = '📋 План: ' + planQuantity + ' шт';
