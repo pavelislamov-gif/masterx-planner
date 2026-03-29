@@ -376,7 +376,7 @@
             background-color: #fff;
         }
 
-        /* СВЕТЛАЯ ТЕМА - ШАПКА ОСТАЁТСЯ ТЁМНОЙ */
+        /* СВЕТЛАЯ ТЕМА */
         body.light-theme {
             background-color: #f0f2f5 !important;
             color: #1e293b !important;
@@ -413,11 +413,6 @@
 
         body.light-theme .btn-danger {
             background: linear-gradient(135deg, #b33c3c, #8b2e2e) !important;
-            color: white !important;
-        }
-
-        body.light-theme .btn-info {
-            background: linear-gradient(135deg, #1f8a9c, #146b7a) !important;
             color: white !important;
         }
 
@@ -480,10 +475,6 @@
             border: 1px solid #e2e8f0 !important;
         }
 
-        body.light-theme .sites-navigation h3 {
-            color: #1e293b !important;
-        }
-
         body.light-theme .site-link {
             background: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
@@ -496,11 +487,7 @@
             color: #1e293b !important;
         }
 
-        body.light-theme .add-item-panel {
-            background: #f8fafc !important;
-            border: 1px solid #e2e8f0 !important;
-        }
-
+        body.light-theme .add-item-panel,
         body.light-theme .items-list-panel {
             background: #f8fafc !important;
             border: 1px solid #e2e8f0 !important;
@@ -516,10 +503,6 @@
             color: #1e293b !important;
         }
 
-        body.light-theme .form-group label {
-            color: #64748b !important;
-        }
-
         body.light-theme .form-group input,
         body.light-theme .form-group select {
             background: #ffffff !important;
@@ -530,17 +513,6 @@
         body.light-theme .modal-content {
             background: linear-gradient(135deg, #ffffff, #fefefe) !important;
             border: 1px solid #e2e8f0 !important;
-        }
-
-        body.light-theme .close {
-            background: #f8fafc !important;
-            color: #64748b !important;
-        }
-
-        body.light-theme .empty-state {
-            background: #ffffff !important;
-            border: 2px dashed #e2e8f0 !important;
-            color: #64748b !important;
         }
 
         /* Стили для кнопок над квадратиками */
@@ -559,13 +531,18 @@
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s;
             margin-bottom: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s;
+            background: #2ecc71;
             color: white;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .op-toggle-btn.added {
+            background: #e74c3c;
         }
 
         .square {
@@ -581,6 +558,16 @@
         .square.orange {
             background-color: #ff9800;
             border-color: #e65100;
+        }
+
+        .square.green {
+            background-color: #4caf50;
+            border-color: #2e7d32;
+        }
+
+        .square.red {
+            background-color: #ff3b3b;
+            border-color: #cc2e2e;
         }
 
         .operation-name-small {
@@ -613,12 +600,6 @@
         }
         
         /* Стили для деталей */
-        .details-container {
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px solid #2a2f38;
-        }
-        
         .detail-item {
             display: flex;
             align-items: center;
@@ -630,7 +611,6 @@
             border: 1px solid #2a2f38;
         }
 
-        /* Стили для профилей */
         .profile-item {
             display: flex;
             align-items: center;
@@ -649,6 +629,16 @@
             border: 1px solid #2a2f38;
             border-radius: 4px;
             color: #fff;
+        }
+
+        .components-title {
+            margin-top: 20px;
+            margin-bottom: 12px;
+            color: #ff3b3b;
+            font-size: 14px;
+            font-weight: 600;
+            border-left: 3px solid #ff3b3b;
+            padding-left: 10px;
         }
     </style>
 </head>
@@ -684,7 +674,7 @@
                 <a href="sites/tokarniy.html" class="site-link">Токарный</a>
                 <a href="sites/slesarniy.html" class="site-link">Слесарный</a>
                 <a href="sites/frezerniy.html" class="site-link">Фрезерный</a>
-                <a href="sites/lazerno-gibochniy.html" class="site-link">Лазерно-гибочный</a>
+                <a href="sites/lazerno.html" class="site-link">Лазерно-гибочный</a>
                 <a href="sites/polimerniy.html" class="site-link">Полимерный</a>
             </div>
         </div>
@@ -766,7 +756,7 @@
                             <div id="detailsList"></div>
                         </div>
 
-                        <!-- КРОНШТЕЙНЫ И ЛИРЫ В ОДНУ СТРОКУ -->
+                        <!-- КРОНШТЕЙНЫ И ЛИРЫ -->
                         <div class="form-group">
                             <label>Кронштейны и лиры:</label>
                             <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 10px;">
@@ -841,10 +831,19 @@
     <script src="js/task-operations.js"></script>
     <script src="js/materials-report.js"></script>
     <script src="js/task-manager.js"></script>
-    <!-- app.js отключен, так как он дублирует функциональность -->
-    <!-- <script src="js/app.js"></script> -->
 
     <script>
+        // ============== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==============
+        let tempItemsList = [];
+        let productsList = [];
+        let bracketsList = [];
+        let lyresList = [];
+        let productDetailsData = {};
+        let tempBrackets = [];
+        let tempLyres = [];
+        let tempProfiles = [];
+        let taskOperationsData = {};
+
         // ============== ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ==============
         function initThemeToggle() {
             const toggle = document.getElementById('themeToggle');
@@ -892,131 +891,74 @@
             return 'gray';
         }
 
-        // ============== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==============
-        let tempItemsList = [];
-        let productsList = [];
-        let bracketsList = [];
-        let lyresList = [];
-        let productDetailsData = {};
-        let tempBrackets = [];
-        let tempLyres = [];
-        let tempProfiles = [];
+        // ============== ЗАГРУЗКА ДАННЫХ ==============
+        async function loadTaskOperations() {
+            try {
+                const response = await fetch('data/taskOperations.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    taskOperationsData = data.operations || {};
+                    console.log('✅ Загружены операции из taskOperations.json');
+                } else {
+                    console.warn('taskOperations.json не найден');
+                    taskOperationsData = {};
+                }
+            } catch(e) {
+                console.error('Ошибка загрузки taskOperations.json:', e);
+                taskOperationsData = {};
+            }
+        }
 
-        // ============== ЗАГРУЗКА ДАННЫХ О ДЕТАЛЯХ ==============
         async function loadProductDetails() {
             try {
                 const response = await fetch('data/productDetails.json');
                 if (response.ok) {
-                    productDetailsData = await response.json();
+                    const data = await response.json();
+                    productDetailsData = data.products || {};
                     console.log('✅ Загружены данные о деталях');
                 } else {
-                    console.warn('productDetails.json не найден, использую пустые данные');
-                    productDetailsData = { products: {} };
+                    console.warn('productDetails.json не найден');
+                    productDetailsData = {};
                 }
             } catch(e) {
                 console.error('Ошибка загрузки productDetails.json:', e);
-                productDetailsData = { products: {} };
+                productDetailsData = {};
             }
         }
 
-        // ============== ФУНКЦИЯ ДЛЯ ПОЛУЧЕНИЯ НАЗВАНИЯ УЧАСТКА ==============
-        function getSiteDisplayName(siteKey) {
-            const names = { 
-                'tokarniy': 'Токарный', 
-                'slesarniy': 'Слесарный', 
-                'frezerniy': 'Фрезерный', 
-                'lazerno': 'Лазерно-гибочный', 
-                'polimerniy': 'Полимерный' 
+        // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ДЛЯ УЧАСТКА ==============
+        function getOperationNames(productName, siteKey) {
+            const productOps = taskOperationsData[productName];
+            if (!productOps || !productOps.детали) return [];
+            
+            const siteMap = {
+                'tokarniy': 'токарно-фрезерный',
+                'frezerniy': 'фрезерный',
+                'slesarniy': 'слесарный',
+                'lazerno': 'лазерно-гибочный',
+                'polimerniy': 'полимерный'
             };
-            return names[siteKey] || siteKey;
-        }
-
-        // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ НА УЧАСТКЕ ==============
-        function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName) {
-            const orders = loadOrdersFromStorage();
-            const order = orders.find(o => o.id == orderId);
-            if (!order) { alert('Заказ не найден'); return; }
-
-            const dateStr = order.date;
-            const storageKey = `tasks_${siteKey}_${dateStr}`;
-            const taskId = `${order.id}_${siteKey}_${itemIndex}_${opIndex}`;
             
-            let existingTasks = [];
-            try {
-                const saved = localStorage.getItem(storageKey);
-                if (saved) existingTasks = JSON.parse(saved);
-            } catch(e) { console.error(e); }
+            const siteColumn = siteMap[siteKey];
+            if (!siteColumn) return [];
             
-            const taskExists = existingTasks.some(t => t.id === taskId);
-            const squareDiv = button.parentElement?.querySelector('.square');
-            
-            if (taskExists) {
-                // ========== УДАЛЕНИЕ ==========
-                if (confirm(`❓ Удалить операцию "${operationName}" с участка?`)) {
-                    const filteredTasks = existingTasks.filter(t => t.id !== taskId);
-                    localStorage.setItem(storageKey, JSON.stringify(filteredTasks));
-                    
-                    button.style.background = '#2ecc71';
-                    button.textContent = '+';
-                    button.classList.remove('added');
-                    
-                    if (squareDiv) {
-                        squareDiv.classList.remove('orange', 'green');
-                    }
-                    
-                    if (order.tasks && order.tasks[taskId]) {
-                        delete order.tasks[taskId];
-                        const orderIndex = orders.findIndex(o => o.id == orderId);
-                        orders[orderIndex] = order;
-                        saveOrdersToStorage(orders);
-                    }
-                    
-                    alert(`✅ Операция "${operationName}" удалена с участка`);
-                    updateStatistics();
+            const operations = [];
+            productOps.детали.forEach(detail => {
+                const ops = detail[siteColumn];
+                if (ops && Array.isArray(ops)) {
+                    ops.forEach(op => {
+                        if (op && !operations.includes(op)) {
+                            operations.push(op);
+                        }
+                    });
                 }
-            } else {
-                // ========== ДОБАВЛЕНИЕ ==========
-                const item = order.items[itemIndex];
-                const newTask = {
-                    id: taskId,
-                    orderId: order.id,
-                    orderNumber: order.number,
-                    product: item.product,
-                    size: item.size?.name || 'Стандартный',
-                    totalQuantity: item.size?.quantity || 1,
-                    completedQuantity: 0,
-                    operation: operationName,
-                    index: opIndex,
-                    status: 'pending',
-                    executors: [],
-                    date: dateStr,
-                    isExtra: false
-                };
-                
-                existingTasks.push(newTask);
-                localStorage.setItem(storageKey, JSON.stringify(existingTasks));
-                
-                button.style.background = '#e74c3c';
-                button.textContent = '✓';
-                button.classList.add('added');
-                
-                if (!order.tasks) order.tasks = {};
-                order.tasks[taskId] = 'pending';
-                const orderIndex = orders.findIndex(o => o.id == orderId);
-                orders[orderIndex] = order;
-                saveOrdersToStorage(orders);
-                
-                alert(`✅ Операция "${operationName}" добавлена на участок`);
-                updateStatistics();
-            }
+            });
+            
+            return operations;
         }
 
-        // ============== ФУНКЦИИ ДЛЯ РАБОТЫ С ПРОФИЛЯМИ ==============
+        // ============== ФУНКЦИИ ДЛЯ ПРОФИЛЕЙ ==============
         function addCustomProfile() {
-            const profilesList = document.getElementById('profilesList');
-            if (!profilesList) return;
-            
-            const idx = tempProfiles.length;
             tempProfiles.push({
                 name: '',
                 material: 'алюминий',
@@ -1024,7 +966,6 @@
                 quantity: 1,
                 isCustom: true
             });
-            
             renderProfilesList();
         }
 
@@ -1105,7 +1046,6 @@
             
             profilesList.innerHTML = profilesHtml;
             
-            // Добавляем обработчики
             document.querySelectorAll('#profilesList .profile-length, #profilesList .profile-length-custom').forEach(input => {
                 const profileIdx = parseInt(input.dataset.profileIndex);
                 input.addEventListener('change', function() {
@@ -1142,7 +1082,6 @@
             const detailsList = document.getElementById('detailsList');
             const profilesContainer = document.getElementById('profilesContainer');
 
-            // Загружаем размеры
             const product = productsList.find(p => p.name === productName);
             if (product && product.sizes) {
                 sizeSelect.innerHTML = '<option value="">Выберите размер</option>';
@@ -1156,10 +1095,8 @@
                 sizeSelect.innerHTML = '<option value="">Нет доступных размеров</option>';
             }
 
-            // Загружаем детали из productDetails.json
-            const productDetails = productDetailsData.products?.[productName]?.details || [];
+            const productDetails = productDetailsData[productName]?.details || [];
             
-            // Разделяем детали и профили
             const regularDetails = productDetails.filter(d => 
                 !d.name.includes('Профиль') && 
                 !d.name.includes('профиль') &&
@@ -1176,7 +1113,6 @@
                 d.name.includes('КП')
             );
             
-            // Обычные детали
             if (regularDetails.length > 0) {
                 detailsContainer.style.display = 'block';
                 let detailsHtml = '';
@@ -1202,7 +1138,6 @@
                 detailsContainer.style.display = 'none';
             }
             
-            // Профили
             tempProfiles = [];
             if (profilesFromDetails.length > 0) {
                 profilesFromDetails.forEach(profile => {
@@ -1220,11 +1155,10 @@
             }
         }
 
-        // ============== СБОР ДЕТАЛЕЙ ИЗ ФОРМЫ ==============
+        // ============== СБОР ДЕТАЛЕЙ ==============
         function collectDetailsFromForm() {
             const details = [];
             
-            // Обычные детали
             document.querySelectorAll('#detailsList .detail-qty').forEach(input => {
                 const qty = parseInt(input.value) || 0;
                 if (qty > 0) {
@@ -1237,7 +1171,6 @@
                 }
             });
             
-            // Профили
             tempProfiles.forEach(profile => {
                 if (profile.name && profile.quantity > 0) {
                     details.push({
@@ -1253,7 +1186,7 @@
             return details;
         }
 
-        // ============== ОТКРЫТИЕ/ЗАКРЫТИЕ МОДАЛЬНОГО ОКНА ==============
+        // ============== МОДАЛЬНОЕ ОКНО ==============
         function openGroupModal() {
             tempItemsList = [];
             tempBrackets = [];
@@ -1418,7 +1351,6 @@
                 let lyresHtml = item.lyres && item.lyres.length > 0 ? 
                     item.lyres.map(l => `<span>${l.type}: ${l.quantity} шт</span>`).join('') : '<span>нет</span>';
                 
-                // Разделяем детали и профили
                 const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
                 const profiles = (item.details || []).filter(d => d.type === 'profile');
                 
@@ -1548,15 +1480,147 @@
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
-        // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ДЛЯ УЧАСТКА ==============
-        function getOperationNames(productName, siteKey) {
-            const ops = window.TASK_OPERATIONS || {};
-            const siteOps = ops[siteKey] || {};
-            if (siteOps[productName]) return siteOps[productName];
-            for (let key in siteOps) {
-                if (productName && productName.includes(key)) return siteOps[key];
+        // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА ==============
+        function createSiteRow(name, order, itemIndex, siteKey) {
+            const item = order.items[itemIndex];
+            if (!item) return '<div>Нет данных</div>';
+
+            const operations = getOperationNames(item.product, siteKey);
+
+            if (!operations || operations.length === 0) {
+                return `
+                    <div class="site-item">
+                        <span class="site-name">${name}</span>
+                        <div class="squares">
+                            <div class="square red" title="Нет операций"></div>
+                        </div>
+                        <span>0/0</span>
+                        <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕ Доп.</button>
+                    </div>
+                `;
             }
-            return [];
+
+            let squaresHtml = '';
+            let completedCount = 0;
+
+            for (let i = 0; i < operations.length; i++) {
+                const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
+                const operationName = operations[i];
+                let taskStatus = '';
+                let isAdded = false;
+                
+                if (order.tasks && order.tasks[taskId]) {
+                    taskStatus = order.tasks[taskId];
+                    if (taskStatus === 'green') completedCount++;
+                }
+                
+                try {
+                    const dateStr = order.date;
+                    const storageKey = `tasks_${siteKey}_${dateStr}`;
+                    const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                    isAdded = tasks.some(t => t.id === taskId);
+                } catch(e) {}
+
+                squaresHtml += `
+                    <div class="operation-wrapper">
+                        <button class="op-toggle-btn ${isAdded ? 'added' : ''}" 
+                                onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}')">
+                            ${isAdded ? '✓' : '+'}
+                        </button>
+                        <div class="square ${taskStatus}" title="${escapeHtml(operationName)}"></div>
+                        <div class="operation-name-small">${escapeHtml(operationName)}</div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="site-item">
+                    <span class="site-name">${name}</span>
+                    <div class="squares">${squaresHtml}</div>
+                    <div>
+                        <span>${completedCount}/${operations.length}</span>
+                        <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')" style="margin-left: 10px;">➕ Доп.</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ ==============
+        function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) { alert('Заказ не найден'); return; }
+
+            const dateStr = order.date;
+            const storageKey = `tasks_${siteKey}_${dateStr}`;
+            const taskId = `${order.id}_${siteKey}_${itemIndex}_${opIndex}`;
+            
+            let existingTasks = [];
+            try {
+                const saved = localStorage.getItem(storageKey);
+                if (saved) existingTasks = JSON.parse(saved);
+            } catch(e) { console.error(e); }
+            
+            const taskExists = existingTasks.some(t => t.id === taskId);
+            
+            if (taskExists) {
+                if (confirm(`❓ Удалить операцию "${operationName}" с участка?`)) {
+                    const filteredTasks = existingTasks.filter(t => t.id !== taskId);
+                    localStorage.setItem(storageKey, JSON.stringify(filteredTasks));
+                    
+                    button.classList.remove('added');
+                    button.textContent = '+';
+                    
+                    const squareDiv = button.parentElement?.querySelector('.square');
+                    if (squareDiv) {
+                        squareDiv.classList.remove('orange', 'green');
+                    }
+                    
+                    if (order.tasks && order.tasks[taskId]) {
+                        delete order.tasks[taskId];
+                        const orderIndex = orders.findIndex(o => o.id == orderId);
+                        orders[orderIndex] = order;
+                        saveOrdersToStorage(orders);
+                    }
+                    
+                    alert(`✅ Операция "${operationName}" удалена с участка`);
+                    updateStatistics();
+                    renderOrdersList();
+                }
+            } else {
+                const item = order.items[itemIndex];
+                const newTask = {
+                    id: taskId,
+                    orderId: order.id,
+                    orderNumber: order.number,
+                    product: item.product,
+                    size: item.size?.name || 'Стандартный',
+                    totalQuantity: item.size?.quantity || 1,
+                    completedQuantity: 0,
+                    operation: operationName,
+                    index: opIndex,
+                    status: 'pending',
+                    executors: [],
+                    date: dateStr,
+                    isExtra: false
+                };
+                
+                existingTasks.push(newTask);
+                localStorage.setItem(storageKey, JSON.stringify(existingTasks));
+                
+                button.classList.add('added');
+                button.textContent = '✓';
+                
+                if (!order.tasks) order.tasks = {};
+                order.tasks[taskId] = 'pending';
+                const orderIndex = orders.findIndex(o => o.id == orderId);
+                orders[orderIndex] = order;
+                saveOrdersToStorage(orders);
+                
+                alert(`✅ Операция "${operationName}" добавлена на участок`);
+                updateStatistics();
+                renderOrdersList();
+            }
         }
 
         // ============== ОТОБРАЖЕНИЕ СПИСКА ГРУПП ==============
@@ -1650,7 +1714,6 @@
                         let lyresHtml = item.lyres && item.lyres.length > 0 ? 
                             item.lyres.map(l => `<span>${l.type}: ${l.quantity} шт</span>`).join(', ') : 'нет';
                         
-                        // Разделяем детали и профили
                         const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
                         const profiles = (item.details || []).filter(d => d.type === 'profile');
                         
@@ -1696,95 +1759,12 @@
                 header.onclick = (e) => {
                     if (e.target.tagName === 'BUTTON') return;
                     content.style.display = content.style.display === 'none' ? 'block' : 'none';
-                    header.classList.toggle('collapsed');
                 };
 
                 card.appendChild(header);
                 card.appendChild(content);
                 ordersList.appendChild(card);
             });
-        }
-
-        // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА С КНОПКАМИ НАД КВАДРАТИКАМИ ==============
-        function createSiteRow(name, order, itemIndex, siteKey) {
-            const item = order.items[itemIndex];
-            if (!item) return '<div>Нет данных</div>';
-
-            const operations = getOperationNames(item.product, siteKey);
-
-            if (!operations || operations.length === 0) {
-                return `
-                    <div class="site-item">
-                        <span class="site-name">${name}</span>
-                        <div class="squares">
-                            <div class="square red" title="Нет операций"></div>
-                        </div>
-                        <span>0/0</span>
-                        <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕ Доп.</button>
-                    </div>
-                `;
-            }
-
-            let squaresHtml = '';
-            let completedCount = 0;
-
-            for (let i = 0; i < operations.length; i++) {
-                const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
-                const operationName = operations[i];
-                let taskStatus = '';
-                let isAdded = false;
-                
-                if (order.tasks && order.tasks[taskId]) {
-                    taskStatus = order.tasks[taskId];
-                    if (taskStatus === 'green') completedCount++;
-                }
-                
-                try {
-                    const dateStr = order.date;
-                    const storageKey = `tasks_${siteKey}_${dateStr}`;
-                    const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
-                    isAdded = tasks.some(t => t.id === taskId);
-                } catch(e) {}
-
-                squaresHtml += `
-                    <div class="operation-wrapper">
-                        <button class="op-toggle-btn ${isAdded ? 'added' : ''}" 
-                                onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}')"
-                                style="
-                                    width: 32px;
-                                    height: 32px;
-                                    border-radius: 50%;
-                                    border: none;
-                                    font-size: 18px;
-                                    font-weight: bold;
-                                    cursor: pointer;
-                                    margin-bottom: 6px;
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    transition: all 0.2s;
-                                    background: ${isAdded ? '#e74c3c' : '#2ecc71'};
-                                    color: white;
-                                    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-                                ">
-                            ${isAdded ? '✓' : '+'}
-                        </button>
-                        <div class="square ${taskStatus}" title="${escapeHtml(operationName)}"></div>
-                        <div class="operation-name-small">${escapeHtml(operationName)}</div>
-                    </div>
-                `;
-            }
-
-            return `
-                <div class="site-item">
-                    <span class="site-name">${name}</span>
-                    <div class="squares">${squaresHtml}</div>
-                    <div>
-                        <span>${completedCount}/${operations.length}</span>
-                        <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')" style="margin-left: 10px;">➕ Доп.</button>
-                    </div>
-                </div>
-            `;
         }
 
         // ============== СТАТИСТИКА ==============
@@ -1977,6 +1957,7 @@
             bracketsList = await loadBrackets() || [];
             lyresList = await loadLyres() || [];
             await loadProductDetails();
+            await loadTaskOperations();
             
             populateNewItemSelects();
             initThemeToggle();
@@ -2017,6 +1998,7 @@
         window.toggleSiteOperation = toggleSiteOperation;
         window.addCustomProfile = addCustomProfile;
         window.removeCustomProfile = removeCustomProfile;
+        window.onNewItemProductChange = onNewItemProductChange;
 
         document.addEventListener('DOMContentLoaded', initMainPage);
     </script>
