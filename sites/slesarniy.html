@@ -859,61 +859,74 @@
                     // НОВАЯ ШАПКА (3 КОЛОНКИ)
                     var productInfoDiv = document.createElement('div');
 productInfoDiv.className = 'product-info';
-productInfoDiv.style.marginBottom = '15px';
-productInfoDiv.style.padding = '15px 18px';
+productInfoDiv.style.marginBottom = '12px';
+productInfoDiv.style.padding = '10px 15px';
 productInfoDiv.style.background = '#15191f';
-productInfoDiv.style.borderRadius = '8px';
+productInfoDiv.style.borderRadius = '6px';
 productInfoDiv.style.border = '1px solid #2a2f38';
 productInfoDiv.style.width = '100%';
 productInfoDiv.style.boxSizing = 'border-box';
 
 var infoHtml = `
-    <div style="font-size: 20px; font-weight: 600; color: #ff3b3b; margin-bottom: 15px;">
+    <div style="font-size: 18px; font-weight: 600; color: #ff3b3b; margin-bottom: 8px;">
         📦 ${escapeHtml(productName)}
     </div>
     
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 25px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
         
         <!-- ЛЕВАЯ КОЛОНКА: РАЗМЕР + ПОКРЫТИЕ -->
         <div>
-            <div style="margin-bottom: 12px;">
-                <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px; letter-spacing: 0.5px;">РАЗМЕР</div>
-                <div style="font-size: 18px;"><strong>${escapeHtml(productSize)}</strong> <span style="color: #4cd964; font-size: 17px;">× ${productQty} шт</span></div>
+            <div style="margin-bottom: 6px;">
+                <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 2px;">РАЗМЕР</div>
+                <div style="font-size: 16px;"><strong>${escapeHtml(productSize)}</strong> <span style="color: #4cd964; font-size: 15px;">× ${productQty} шт</span></div>
             </div>
             <div>
-                <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px; letter-spacing: 0.5px;">ПОКРЫТИЕ</div>
-                <div style="font-size: 16px;"><strong>${escapeHtml(ral || '-')}</strong> <span style="color: #a0a0a0;">/</span> ${escapeHtml(texture || '-')}</div>
+                <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 2px;">ПОКРЫТИЕ</div>
+                <div style="font-size: 14px;"><strong>${escapeHtml(ral || '-')}</strong> / ${escapeHtml(texture || '-')}</div>
             </div>
         </div>
         
         <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: ПРОФИЛИ -->
         <div>
-            <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 12px; letter-spacing: 0.5px;">ПРОФИЛИ</div>
+            <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 6px;">ПРОФИЛИ</div>
             ${profiles.length > 0 ? 
                 profiles.map(function(p) {
-                    return '<div style="margin-bottom: 12px;">' +
-                        '<div style="font-size: 15px; font-weight: 500;">• ' + escapeHtml(p.name) + '</div>' +
-                        '<div style="margin-left: 20px; color: #a0a0a0; font-size: 13px; margin-top: 2px;">' +
-                            '<span style="color: #ff9800; font-size: 14px;">' + p.lengthMm + ' мм</span> <span style="color: #4cd964;">× ' + p.quantity + ' шт</span>' +
+                    return '<div style="margin-bottom: 6px;">' +
+                        '<div style="font-size: 13px;">• ' + escapeHtml(p.name) + '</div>' +
+                        '<div style="margin-left: 18px; color: #a0a0a0; font-size: 11px;">' +
+                            '<span style="color: #ff9800;">' + p.lengthMm + ' мм</span> <span style="color: #4cd964;">× ' + p.quantity + ' шт</span>' +
                         '</div>' +
                     '</div>';
                 }).join('') : 
-                '<div style="color: #6c757d; font-size: 14px;">— нет —</div>'}
+                '<div style="color: #6c757d; font-size: 12px;">— нет —</div>'}
         </div>
         
         <!-- ПРАВАЯ КОЛОНКА: ДЕТАЛИ -->
         <div>
-            <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 12px; letter-spacing: 0.5px;">ДЕТАЛИ</div>
+            <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 6px;">ДЕТАЛИ</div>
             ${allDetails.length > 0 ? 
                 allDetails.map(function(d) {
-                    return '<div style="margin-bottom: 8px; font-size: 15px;">' +
-                        '• ' + escapeHtml(d.name) + ' <span style="color: #4cd964; font-size: 15px;">' + d.quantity + ' шт</span>' +
+                    return '<div style="margin-bottom: 4px; font-size: 13px;">' +
+                        '• ' + escapeHtml(d.name) + ' <span style="color: #4cd964;">' + d.quantity + ' шт</span>' +
                     '</div>';
                 }).join('') : 
-                '<div style="color: #6c757d; font-size: 14px;">— нет —</div>'}
+                '<div style="color: #6c757d; font-size: 12px;">— нет —</div>'}
         </div>
     </div>
 `;
+
+// Добавляем комплектующие если есть
+if (components && components.length > 0) {
+    var compsHtml = '';
+    for (var i = 0; i < components.length; i++) {
+        var comp = components[i];
+        compsHtml += '<span style="background: #1e232b; padding: 3px 8px; border-radius: 14px; font-size: 11px; border: 1px solid #2a2f38; margin-right: 6px; margin-bottom: 3px; display: inline-block;">' + escapeHtml(comp.name) + ': <strong style="color: #4cd964;">' + comp.quantityPerProduct + '</strong> шт/изд</span>';
+    }
+    infoHtml += '<div style="margin-top: 8px; padding-top: 6px; border-top: 1px solid #2a2f38;">' +
+        '<strong style="color: #ff3b3b; font-size: 11px;">🔧 КОМПЛЕКТУЮЩИЕ:</strong>' +
+        '<div style="margin-top: 4px; display: flex; flex-wrap: wrap; gap: 5px;">' + compsHtml + '</div>' +
+    '</div>';
+}
 
 // Добавляем комплектующие если есть
 if (components && components.length > 0) {
