@@ -135,6 +135,31 @@
             }
         }
         
+        // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ (только названия) ==============
+        function getOperationNames(productName, siteKey) {
+            const productOps = taskOperationsData[productName];
+            if (!productOps) return [];
+            
+            const siteMap = {
+                'tokarniy': 'токарно-фрезерный',
+                'frezerniy': 'фрезерный',
+                'slesarniy': 'слесарный',
+                'lazerno': 'лазерно-гибочный',
+                'polimerniy': 'полимерный'
+            };
+            
+            const siteColumn = siteMap[siteKey];
+            if (!siteColumn) return [];
+            
+            const ops = productOps[siteColumn] || [];
+            
+            if (ops.length > 0 && typeof ops[0] === 'object' && ops[0].operation) {
+                return ops.map(op => op.operation);
+            }
+            
+            return ops;
+        }
+        
         function getTaskPlanFromDetails(task, fullOrder) {
             if (!fullOrder || !fullOrder.items || !fullOrder.items[0]) return 1;
             
@@ -448,9 +473,15 @@
                 
                 var planQuantity = task.totalQuantity || getTaskPlanFromDetails(task, fullOrder);
                 
+                // Убеждаемся, что operation — строка
+                var operationName = task.operation;
+                if (typeof operationName === 'object' && operationName.operation) {
+                    operationName = operationName.operation;
+                }
+                
                 var header = document.createElement('div');
                 header.className = 'task-header';
-                header.innerHTML = '<span class="task-title">' + escapeHtml(task.operation) + (task.isExtra ? '<span class="extra-task-badge">Доп.</span>' : '') + '</span>';
+                header.innerHTML = '<span class="task-title">' + escapeHtml(operationName) + (task.isExtra ? '<span class="extra-task-badge">Доп.</span>' : '') + '</span>';
                 card.appendChild(header);
                 
                 var planDiv = document.createElement('div');
@@ -637,12 +668,17 @@
                     } catch(e) {}
                     const planQuantity = task.totalQuantity || getTaskPlanFromDetails(task, fullOrder);
                     
+                    var operationName = task.operation;
+                    if (typeof operationName === 'object' && operationName.operation) {
+                        operationName = operationName.operation;
+                    }
+                    
                     if (task.executors && task.executors.length > 0) {
                         task.executors.forEach(exec => {
-                            csv += `"${task.orderNumber}","${task.product}","${task.operation}","${exec.name}",${exec.quantity || 0},"${exec.status}",${planQuantity}\n`;
+                            csv += `"${task.orderNumber}","${task.product}","${operationName}","${exec.name}",${exec.quantity || 0},"${exec.status}",${planQuantity}\n`;
                         });
                     } else {
-                        csv += `"${task.orderNumber}","${task.product}","${task.operation}","Нет",0,"${task.status}",${planQuantity}\n`;
+                        csv += `"${task.orderNumber}","${task.product}","${operationName}","Нет",0,"${task.status}",${planQuantity}\n`;
                     }
                 });
                 const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
