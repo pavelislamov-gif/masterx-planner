@@ -1718,18 +1718,18 @@ function getOperationNames(productName, siteKey) {
 
                         itemContent.innerHTML = `
     <!-- НАЗВАНИЕ ИЗДЕЛИЯ -->
-    <div style="font-size: 18px; font-weight: 600; color: #ff3b3b; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #2a2f38;">
+    <div style="font-size: 18px; font-weight: 600; color: #ff3b3b; margin-bottom: 15px; padding-bottom: 6px; border-bottom: 1px solid #2a2f38;">
         ${escapeHtml(item.product)}
     </div>
     
-    <!-- СТРОКА 1: РАЗМЕР + ПОКРЫТИЕ -->
-    <div style="display: flex; gap: 30px; margin-bottom: 10px; flex-wrap: wrap;">
+    <!-- СЕТКА 2x2: РАЗМЕР | ПОКРЫТИЕ -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 12px;">
         <div><span style="color: #a0a0a0;">Размер:</span> <strong>${escapeHtml(item.size?.name || '-')}</strong> <span style="color: #4cd964;">× ${item.size?.quantity || 0} шт</span></div>
         <div><span style="color: #a0a0a0;">Покрытие:</span> <strong>${escapeHtml(item.ral || '-')}</strong> / ${escapeHtml(item.texture || '-')}</div>
     </div>
     
-    <!-- СТРОКА 2: КРОНШТЕЙНЫ + ЛИРЫ -->
-    <div style="display: flex; gap: 30px; margin-bottom: 10px; flex-wrap: wrap;">
+    <!-- СЕТКА 2x2: КРОНШТЕЙНЫ | ЛИРЫ -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
         <div>
             <span style="color: #a0a0a0;">Кронштейны:</span> 
             ${item.brackets && item.brackets.length > 0 ? 
@@ -1744,10 +1744,10 @@ function getOperationNames(productName, siteKey) {
         </div>
     </div>
     
-    <!-- СТРОКА 3: ДЕТАЛИ (несколько столбцов текстом) -->
-    <div style="margin-bottom: 10px;">
-        <div style="color: #a0a0a0; margin-bottom: 5px;">Детали:</div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 4px;">
+    <!-- ДЕТАЛИ (сетка 2 колонки) -->
+    <div style="margin-bottom: 15px;">
+        <div style="color: #a0a0a0; margin-bottom: 8px;">Детали:</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
             ${regularDetails.length > 0 ? 
                 regularDetails.map(d => `
                     <div>• ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span></div>
@@ -1756,12 +1756,12 @@ function getOperationNames(productName, siteKey) {
         </div>
     </div>
     
-    <!-- СТРОКА 4: ПРОФИЛИ (каждый на новой строке) -->
-    <div style="margin-bottom: 15px;">
-        <div style="color: #a0a0a0; margin-bottom: 5px;">Профили:</div>
+    <!-- ПРОФИЛИ (каждый на отдельной строке) -->
+    <div style="margin-bottom: 20px;">
+        <div style="color: #a0a0a0; margin-bottom: 8px;">Профили:</div>
         ${profiles.length > 0 ? 
             profiles.map(p => `
-                <div style="margin-bottom: 3px;">• ${escapeHtml(p.name)} — <span style="color: #ff9800;">${p.lengthMm} мм</span> <span style="color: #4cd964;">× ${p.quantity} шт</span></div>
+                <div style="margin-bottom: 4px;">• ${escapeHtml(p.name)} — <span style="color: #ff9800;">${p.lengthMm} мм</span> <span style="color: #4cd964;">× ${p.quantity} шт</span></div>
             `).join('') : 
             '<div style="color: #6c757d;">— нет —</div>'}
     </div>
