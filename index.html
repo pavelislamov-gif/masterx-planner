@@ -893,24 +893,22 @@
 
         // ============== ЗАГРУЗКА ДАННЫХ ==============
         async function loadTaskOperations() {
-    try {
-        // Для главной страницы (index.html) путь data/taskOperations.json правильный
-        const response = await fetch('data/taskOperations.json');
-        if (response.ok) {
-            const data = await response.json();
-            taskOperationsData = data.operations || {};
-            window.taskOperationsData = taskOperationsData;
-            console.log('✅ Загружены операции из taskOperations.json');
-            console.log('📋 Доступные изделия:', Object.keys(taskOperationsData));
-        } else {
-            console.warn('taskOperations.json не найден по пути data/taskOperations.json');
-            taskOperationsData = {};
+            try {
+                const response = await fetch('data/taskOperations.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    taskOperationsData = data.operations || {};
+                    window.taskOperationsData = taskOperationsData;
+                    console.log('✅ Загружены операции из taskOperations.json');
+                } else {
+                    console.warn('taskOperations.json не найден');
+                    taskOperationsData = {};
+                }
+            } catch(e) {
+                console.error('Ошибка загрузки taskOperations.json:', e);
+                taskOperationsData = {};
+            }
         }
-    } catch(e) {
-        console.error('Ошибка загрузки taskOperations.json:', e);
-        taskOperationsData = {};
-    }
-}
 
         async function loadProductDetails() {
             try {
@@ -954,115 +952,17 @@
             if (ops.length === 0) return [];
             
             if (typeof ops[0] === 'object' && ops[0].operation) {
-                return ops.map(function(op) { return op.operation; });
+                return ops.map(op => op.operation);
             }
-            
             return ops;
         }
 
-        // ============== ФУНКЦИЯ СОЗДАНИЯ ЗАДАЧ С ПЛАНОМ ==============
+        // ============== ФУНКЦИЯ СОЗДАНИЯ ЗАДАЧ (НЕ СОЗДАЁТ АВТОМАТИЧЕСКИ) ==============
         function createTasksForOrder(order) {
-            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
-            const orderDate = order.date;
-            
-            console.log(`📅 Создание задач для заказа №${order.number} на дату ${orderDate}`);
-            
-            const item = order.items[0];
-            const details = item.details || [];
-            
-            // Создаём карту: название детали -> количество
-            const detailQuantityMap = {};
-            
-            // Обычные детали и профили
-            details.forEach(detail => {
-                if (detail.quantity > 0) {
-                    detailQuantityMap[detail.name] = detail.quantity;
-                }
-            });
-            
-            // Кронштейны
-            if (item.brackets && item.brackets.length > 0) {
-                item.brackets.forEach(b => {
-                    if (b.type && b.type !== 'отсутствует' && b.quantity > 0) {
-                        detailQuantityMap[`Кронштейн ${b.type}`] = b.quantity;
-                    }
-                });
-            }
-            
-            // Лиры
-            if (item.lyres && item.lyres.length > 0) {
-                item.lyres.forEach(l => {
-                    if (l.type && l.type !== 'отсутствует' && l.quantity > 0) {
-                        detailQuantityMap[`Лира ${l.type}`] = l.quantity;
-                    }
-                });
-            }
-            
-            console.log('📊 Карта деталей:', detailQuantityMap);
-            
-            sites.forEach(siteKey => {
-                const operations = getOperationNamesWithDetails(item.product, siteKey);
-                
-                if (!operations || operations.length === 0) {
-                    console.log(`⏭️ Нет операций для ${siteKey} на ${item.product}`);
-                    return;
-                }
-                
-                const storageKey = `tasks_${siteKey}_${orderDate}`;
-                
-                let existingTasks = [];
-                try {
-                    const saved = localStorage.getItem(storageKey);
-                    if (saved) {
-                        existingTasks = JSON.parse(saved);
-                    }
-                } catch (e) {
-                    console.error('Ошибка загрузки задач:', e);
-                }
-                
-                const newTasks = [];
-                
-                operations.forEach((op, index) => {
-                    const taskId = `${order.id}_${siteKey}_0_${index}`;
-                    const exists = existingTasks.some(t => t.id === taskId);
-                    
-                    if (!exists) {
-                        let plannedQuantity = 1;
-                        if (op.detail && detailQuantityMap[op.detail]) {
-                            plannedQuantity = detailQuantityMap[op.detail];
-                        } else {
-                            console.log(`⚠️ Не найдена деталь "${op.detail}" для операции "${op.operation}", план = 1`);
-                        }
-                        
-                        newTasks.push({
-                            id: taskId,
-                            orderId: order.id,
-                            orderNumber: order.number,
-                            product: item.product,
-                            size: item.size?.name || 'Стандартный',
-                            totalQuantity: plannedQuantity,
-                            completedQuantity: 0,
-                            operation: op.operation,
-                            detail: op.detail,
-                            index: index,
-                            status: 'pending',
-                            executors: [],
-                            date: orderDate,
-                            isExtra: false
-                        });
-                        
-                        console.log(`📋 Создана задача: ${op.operation} → план: ${plannedQuantity} шт (деталь: ${op.detail})`);
-                    }
-                });
-                
-                if (newTasks.length > 0) {
-                    const updatedTasks = [...existingTasks, ...newTasks];
-                    localStorage.setItem(storageKey, JSON.stringify(updatedTasks));
-                    console.log(`✅ ${siteKey}: добавлено ${newTasks.length} задач на ${orderDate}`);
-                }
-            });
-            
-            console.log(`🎉 Задачи для заказа №${order.number} созданы!`);
+            // ========== НЕ СОЗДАЁМ ЗАДАЧИ АВТОМАТИЧЕСКИ ==========
+            // Задачи будут создаваться только при нажатии на кнопку + на странице участка
+            console.log(`📅 Заказ №${order.number} создан. Задачи не созданы автоматически.`);
+            console.log(`📋 Для создания задач нажмите кнопку + на нужной операции в карточке заказа.`);
         }
 
         // ============== ФУНКЦИИ ДЛЯ ПРОФИЛЕЙ ==============
@@ -1569,8 +1469,8 @@
             orders.push(newOrder);
             saveOrdersToStorage(orders);
             
-            // Создаём задачи для нового заказа
-            createTasksForOrder(newOrder);
+            // НЕ СОЗДАЁМ ЗАДАЧИ АВТОМАТИЧЕСКИ!
+            console.log(`✅ Группа "${groupName}" успешно создана! Задачи не созданы автоматически.`);
             
             closeGroupModal();
             renderOrdersList();
@@ -1616,8 +1516,7 @@
 
             for (let i = 0; i < operations.length; i++) {
                 const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
-                // Убеждаемся, что operationName — это строка
-                const operationName = typeof operations[i] === 'object' ? operations[i].operation : operations[i];
+                const operationName = operations[i];
                 let taskStatus = '';
                 let isAdded = false;
                 
@@ -1701,20 +1600,37 @@
                 }
             } else {
                 const item = order.items[itemIndex];
-                // Пытаемся найти задачу с правильным планом
+                // Определяем план задачи из количества детали
                 let plannedQuantity = 1;
                 
-                // Ищем в сохранённых задачах
-                try {
-                    const savedTasks = localStorage.getItem(storageKey);
-                    if (savedTasks) {
-                        const tasks = JSON.parse(savedTasks);
-                        const existingTask = tasks.find(t => t.id === taskId);
-                        if (existingTask && existingTask.totalQuantity) {
-                            plannedQuantity = existingTask.totalQuantity;
+                // Ищем в деталях заказа
+                const details = item.details || [];
+                for (const detail of details) {
+                    if (operationName.includes(detail.name) || detail.name.includes(operationName)) {
+                        plannedQuantity = detail.quantity;
+                        break;
+                    }
+                }
+                
+                // Проверяем кронштейны
+                if (item.brackets) {
+                    for (const b of item.brackets) {
+                        if (operationName.includes(b.type)) {
+                            plannedQuantity = b.quantity;
+                            break;
                         }
                     }
-                } catch(e) {}
+                }
+                
+                // Проверяем лиры
+                if (item.lyres) {
+                    for (const l of item.lyres) {
+                        if (operationName.includes(l.type)) {
+                            plannedQuantity = l.quantity;
+                            break;
+                        }
+                    }
+                }
                 
                 const newTask = {
                     id: taskId,
