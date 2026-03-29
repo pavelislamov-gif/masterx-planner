@@ -130,15 +130,13 @@
                     console.log('📋 Доступные изделия:', Object.keys(taskOperationsData));
                 } else {
                     console.warn('taskOperations.json не найден по пути ../data/taskOperations.json');
-                    taskOperationsData = {};
                 }
             } catch(e) {
                 console.error('Ошибка загрузки taskOperations.json:', e);
-                taskOperationsData = {};
             }
         }
         
-        // Получение плана задачи из количества детали
+        // Получение плана задачи из количества детали (по привязке из taskOperations.json)
         function getTaskPlanFromDetails(task, fullOrder) {
             if (!fullOrder || !fullOrder.items || !fullOrder.items[0]) return 1;
             
@@ -164,7 +162,7 @@
             
             if (!foundDetail) return item.size?.quantity || 1;
             
-            // Ищем деталь с таким названием
+            // Ищем деталь с таким названием в details
             for (const detail of details) {
                 if (detail.name === foundDetail) {
                     return detail.quantity;
@@ -641,7 +639,6 @@
                 const dateStr = taskManager.formatDate(taskManager.currentDate);
                 let csv = "Заказ,Изделие,Операция,Исполнитель,Количество,Статус,План\n";
                 tasks.forEach(task => {
-                    // Получаем план
                     let fullOrder = null;
                     try {
                         const allOrders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
