@@ -248,7 +248,7 @@
             console.error('❌ TaskManager не загружен!');
             document.getElementById('tasksList').innerHTML = '<div class="no-tasks"><p>❌ Ошибка загрузки</p></div>';
         } else {
-            const taskManager = new TaskManager('frezerniy', window.TASK_OPERATIONS.frezerniy || {});
+            const taskManager = new TaskManager('lazerno', window.TASK_OPERATIONS.lazerno || {});
             let currentFilter = 'all';
             let currentlyOpenOrderId = null;
             let isLoadingTasks = false;
@@ -699,7 +699,7 @@
                 const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = `frezerniy_${dateStr}.csv`;
+                link.download = `lazerno_${dateStr}.csv`;
                 link.click();
             };
         }
