@@ -314,9 +314,6 @@
                 if (isLoadingTasks) return;
                 isLoadingTasks = true;
                 
-                saveOpenCardsState();
-                saveOpenOrderState();
-                
                 var tasksList = document.getElementById('tasksList');
                 taskManager.loadData();
                 var tasks = taskManager.getTasksByStatus(currentFilter);
@@ -469,8 +466,11 @@
                     tasksList.appendChild(orderDiv);
                 });
                 
-                restoreOpenCardsState();
-                isLoadingTasks = false;
+                // Восстанавливаем состояние открытых карточек после отрисовки
+                setTimeout(function() {
+                    restoreOpenCardsState();
+                    isLoadingTasks = false;
+                }, 100);
             }
             
             function createTaskCard(task, fullOrder) {
