@@ -1491,12 +1491,12 @@ body.light-theme .order-header.status-gray {
         }
 
         function generateOrderNumber(index) {
-            const date = new Date();
-            const year = date.getFullYear().toString().slice(-2);
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const day = date.getDate().toString().padStart(2, '0');
-            return `Г-${year}${month}${day}-${index.toString().padStart(3, '0')}`;
-        }
+    const date = new Date();
+    const year = date.getFullYear().toString().slice(-2);
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${day}.${month}.${year}`;
+}
 
         function escapeHtml(str) {
             if (!str) return '';
