@@ -167,39 +167,44 @@
         
         // ============== ПОЛУЧЕНИЕ ПРОФИЛЯ ПО ОПЕРАЦИИ ==============
         function getProfileForOperation(operationName, details) {
-            if (!details || details.length === 0) return null;
-            
-            let searchName = operationName;
-            
-            if (searchName.startsWith('Покраска профиля ')) {
-                searchName = searchName.replace('Покраска профиля ', '');
+    if (!details || details.length === 0) return null;
+    
+    let searchName = operationName;
+    
+    // Убираем префикс "Раскрой профиля " если есть
+    if (searchName.startsWith('Раскрой профиля ')) {
+        searchName = searchName.replace('Раскрой профиля ', '');
+    }
+    
+    console.log('🔍 Ищем профиль по названию:', searchName);
+    
+    // Ищем профиль в деталях
+    for (let i = 0; i < details.length; i++) {
+        const detail = details[i];
+        if (detail.type === 'profile') {
+            if (detail.name.includes(searchName) || searchName.includes(detail.name)) {
+                console.log('✅ Найден профиль:', detail.name);
+                return detail;
             }
-            if (searchName.startsWith('Раскрой профиля ')) {
-                searchName = searchName.replace('Раскрой профиля ', '');
-            }
-            
-            for (let i = 0; i < details.length; i++) {
-                const detail = details[i];
-                if (detail.type === 'profile') {
-                    if (detail.name.includes(searchName) || searchName.includes(detail.name)) {
-                        return detail;
-                    }
-                }
-            }
-            
-            const searchLower = searchName.toLowerCase();
-            for (let i = 0; i < details.length; i++) {
-                const detail = details[i];
-                if (detail.type === 'profile') {
-                    const detailLower = detail.name.toLowerCase();
-                    if (detailLower.includes(searchLower) || searchLower.includes(detailLower)) {
-                        return detail;
-                    }
-                }
-            }
-            
-            return null;
         }
+    }
+    
+    // Если не нашли, пробуем без учёта регистра
+    const searchLower = searchName.toLowerCase();
+    for (let i = 0; i < details.length; i++) {
+        const detail = details[i];
+        if (detail.type === 'profile') {
+            const detailLower = detail.name.toLowerCase();
+            if (detailLower.includes(searchLower) || searchLower.includes(detailLower)) {
+                console.log('✅ Найден профиль (без учёта регистра):', detail.name);
+                return detail;
+            }
+        }
+    }
+    
+    console.log('❌ Профиль не найден для:', searchName);
+    return null;
+}
         
         function getTaskPlanFromDetails(task, fullOrder) {
             if (!fullOrder || !fullOrder.items || !fullOrder.items[0]) return 1;
@@ -511,21 +516,21 @@
                 
                 // ДОБАВЛЯЕМ ИНФОРМАЦИЮ О ПРОФИЛЕ (только для Раскрой профиля)
                 if (fullOrder && fullOrder.items && fullOrder.items[0]) {
-                    var details = fullOrder.items[0].details || [];
-                    if (operationName && operationName.trim().startsWith('Раскрой профиля')) {
-                        var profileInfo = getProfileForOperation(operationName, details);
-                        if (profileInfo) {
-                            var profileDiv = document.createElement('div');
-                            profileDiv.className = 'profile-info';
-                            profileDiv.innerHTML = `
-                                <span class="profile-name">📐 ${escapeHtml(profileInfo.name)}</span>
-                                <span class="profile-length">📏 Длина: ${profileInfo.lengthMm || 0} мм</span>
-                                <span class="profile-qty">× ${profileInfo.quantity} шт</span>
-                            `;
-                            card.appendChild(profileDiv);
-                        }
-                    }
-                }
+    var details = fullOrder.items[0].details || [];
+    if (operationName && operationName.trim().startsWith('Раскрой профиля')) {
+        var profileInfo = getProfileForOperation(operationName, details);
+        if (profileInfo) {
+            var profileDiv = document.createElement('div');
+            profileDiv.className = 'profile-info';
+            profileDiv.innerHTML = `
+                <span class="profile-name">📐 ${escapeHtml(profileInfo.name)}</span>
+                <span class="profile-length">📏 Длина: ${profileInfo.lengthMm || 0} мм</span>
+                <span class="profile-qty">× ${profileInfo.quantity} шт</span>
+            `;
+            card.appendChild(profileDiv);
+        }
+    }
+}
                 
                 if (task.isExtra && task.description) {
                     var desc = document.createElement('div');
