@@ -26,34 +26,42 @@
         .order-header.collapsed .collapse-icon { transform: rotate(-90deg); }
         .order-content { padding: 15px 20px; transition: all 0.2s; }
         .order-content.collapsed { display: none; }
-        .product-info { background: #15191f; border-bottom: 1px solid #2a2f38; color: #a0a0a0; font-size: 13px; }
-        .task-card { padding: 12px 15px; border-bottom: 1px solid #2a2f38; transition: all 0.3s; }
-        .task-card:last-child { border-bottom: none; }
+        .item-header {
+            padding: 10px 15px;
+            background: #1e232b;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2a2f38;
+        }
+        .item-header:hover { background: #232830; }
+        .item-title { font-weight: 600; color: #ff9800; font-size: 14px; }
+        .item-content { padding: 15px; }
+        .item-content.collapsed { display: none; }
+        .task-card { padding: 12px 15px; border-bottom: 1px solid #2a2f38; transition: all 0.3s; margin-bottom: 10px; background: #15191f; border-radius: 8px; }
+        .task-card:last-child { border-bottom: none; margin-bottom: 0; }
         .task-card.completed { opacity: 0.8; background: #1a2a1a; border-left: 3px solid #2ecc71; }
         .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .task-title { font-size: 14px; font-weight: 600; color: #fff; }
-        .task-plan { color: #ff9800; font-size: 12px; margin-bottom: 10px; padding: 4px 8px; background: #1e232b; border-radius: 4px; display: inline-block; }
-        .profile-info { margin-bottom: 10px; padding: 6px 10px; background: #232830; border-radius: 6px; font-size: 12px; border-left: 3px solid #ff9800; }
-        .profile-info span { margin-right: 15px; }
-        .profile-info .profile-name { color: #ff9800; }
-        .profile-info .profile-length { color: #00d4ff; }
-        .profile-info .profile-qty { color: #4cd964; }
-        .executor-header { display: flex; gap: 10px; padding: 0 10px; margin-bottom: 6px; font-size: 11px; color: #a0a0a0; }
-        .executor-header span:nth-child(1) { width: 140px; }
-        .executor-header span:nth-child(2) { width: 70px; text-align: center; }
-        .executor-header span:nth-child(3) { width: 80px; text-align: center; }
+        .task-title { font-size: 13px; font-weight: 600; color: #fff; }
+        .task-plan { color: #ff9800; font-size: 11px; margin-bottom: 8px; padding: 2px 6px; background: #1e232b; border-radius: 4px; display: inline-block; }
+        .profile-info { margin-bottom: 8px; padding: 4px 8px; background: #232830; border-radius: 4px; font-size: 11px; border-left: 2px solid #ff9800; }
+        .executor-header { display: flex; gap: 8px; padding: 0 8px; margin-bottom: 4px; font-size: 10px; color: #a0a0a0; }
+        .executor-header span:nth-child(1) { width: 120px; }
+        .executor-header span:nth-child(2) { width: 60px; text-align: center; }
+        .executor-header span:nth-child(3) { width: 70px; text-align: center; }
         .executor-header span:nth-child(4) { width: 30px; }
-        .executor-item { display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: #15191f; border-radius: 6px; margin-bottom: 4px; border: 1px solid #2a2f38; }
-        .executor-name { width: 140px; padding: 4px 8px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; font-size: 12px; }
-        .executor-quantity { width: 70px; padding: 4px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center; font-size: 12px; }
-        .btn-work { background: #ffc107; color: #000; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; width: 70px; font-weight: 600; }
+        .executor-item { display: flex; align-items: center; gap: 8px; padding: 4px 8px; background: #15191f; border-radius: 4px; margin-bottom: 4px; border: 1px solid #2a2f38; }
+        .executor-name { width: 120px; padding: 3px 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; font-size: 11px; }
+        .executor-quantity { width: 60px; padding: 3px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center; font-size: 11px; }
+        .btn-work { background: #ffc107; color: #000; padding: 3px 6px; border: none; border-radius: 4px; cursor: pointer; font-size: 10px; width: 65px; font-weight: 600; }
         .btn-work.active { background: #fd7e14; color: white; }
         .btn-work:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-add-executor { background: #6c757d; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; margin: 8px 0; width: 140px; }
-        .action-container { margin: 8px 0; }
-        .new-executor-form { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 8px; background: #15191f; border: 1px solid #2a2f38; border-radius: 6px; flex-wrap: wrap; }
-        .new-executor-form input { width: 160px; padding: 5px 8px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; font-size: 12px; }
-        .btn-ready { background: #28a745; color: white; padding: 5px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; margin: 10px 0 0 0; min-width: 100px; }
+        .btn-add-executor { background: #6c757d; color: white; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 10px; margin: 6px 0; width: 120px; }
+        .action-container { margin: 6px 0; }
+        .new-executor-form { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding: 6px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; flex-wrap: wrap; }
+        .new-executor-form input { width: 130px; padding: 4px 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; font-size: 11px; }
+        .btn-ready { background: #28a745; color: white; padding: 4px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; margin: 8px 0 0 0; min-width: 80px; }
         .btn-ready:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-report-header {
             background: #ff9800;
@@ -68,8 +76,8 @@
             transition: all 0.2s;
         }
         .btn-report-header:hover { background: #e68900; transform: scale(1.02); }
-        .extra-task-badge { background: #ff3b3b; color: white; padding: 2px 6px; border-radius: 20px; font-size: 10px; margin-left: 8px; }
-        .task-description { color: #a0a0a0; font-size: 11px; margin: 5px 0 8px 0; padding: 6px; background: #15191f; border-radius: 4px; border-left: 3px solid #ff3b3b; }
+        .extra-task-badge { background: #ff3b3b; color: white; padding: 2px 4px; border-radius: 10px; font-size: 9px; margin-left: 6px; }
+        .task-description { color: #a0a0a0; font-size: 10px; margin: 4px 0 6px 0; padding: 4px; background: #15191f; border-radius: 4px; border-left: 2px solid #ff3b3b; }
         .no-tasks { text-align: center; padding: 40px; background: #1a1e24; border-radius: 12px; color: #a0a0a0; border: 1px solid #2a2f38; }
         .filter-section { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
         .search-box { padding: 6px 12px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 6px; font-size: 12px; color: #e0e0e0; }
@@ -82,7 +90,7 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .btn-sm { padding: 3px 6px; font-size: 10px; }
         .btn-danger { background: #dc3545; color: white; border: none; padding: 3px 6px; font-size: 10px; }
-        .btn-end-shift { background: #ff9800; color: white; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; width: 95px; font-weight: 600; margin-left: 5px; }
+        .btn-end-shift { background: #ff9800; color: white; padding: 3px 6px; border: none; border-radius: 4px; cursor: pointer; font-size: 10px; width: 85px; font-weight: 600; margin-left: 4px; }
         .btn-end-shift:disabled { background: #4caf50; cursor: not-allowed; opacity: 0.7; }
 
         /* ПРАВАЯ МОДАЛЬНАЯ ПАНЕЛЬ */
@@ -122,22 +130,6 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1999; display: none;
         }
         .right-modal-overlay.show { display: block; }
-
-        /* СВЕТЛАЯ ТЕМА */
-        body.light-theme .right-modal {
-            background: linear-gradient(135deg, #ffffff, #f8fafc);
-            border-left: 2px solid #ff9800;
-        }
-        body.light-theme .right-modal-header {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            border-bottom: 1px solid #e2e8f0;
-        }
-        body.light-theme .report-row input,
-        body.light-theme .report-row textarea {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            color: #1e293b;
-        }
         .report-row {
             background: #15191f;
             border-radius: 8px;
@@ -225,7 +217,7 @@
     <div id="rightModalOverlay" class="right-modal-overlay" onclick="closeRightModal()"></div>
     <div id="rightModal" class="right-modal">
         <div class="right-modal-header">
-            <h3>📝 Отчёт по операции</h3>
+            <h3>📝 Отчёт по заказу</h3>
             <button class="right-modal-close" onclick="closeRightModal()">&times;</button>
         </div>
         <div id="rightModalContent" class="right-modal-content"></div>
@@ -329,6 +321,8 @@
 
         // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
         const POLIMERNIY_STORAGE_KEY = 'polimerniy_open_cards';
+        const POLIMERNIY_ITEMS_STORAGE_KEY = 'polimerniy_open_items';
+        
         function saveOpenCardsState() {
             const openCards = [];
             document.querySelectorAll('.order-card').forEach(card => {
@@ -338,22 +332,53 @@
                 }
             });
             localStorage.setItem(POLIMERNIY_STORAGE_KEY, JSON.stringify(openCards));
+            
+            const openItems = [];
+            document.querySelectorAll('.order-card').forEach(card => {
+                const orderId = card.dataset.orderId;
+                card.querySelectorAll('.item-content').forEach((itemContent, idx) => {
+                    if (itemContent && !itemContent.classList.contains('collapsed')) {
+                        openItems.push({ orderId, itemIndex: idx });
+                    }
+                });
+            });
+            localStorage.setItem(POLIMERNIY_ITEMS_STORAGE_KEY, JSON.stringify(openItems));
         }
+        
         function restoreOpenCardsState() {
             const savedOpenCards = localStorage.getItem(POLIMERNIY_STORAGE_KEY);
-            if (!savedOpenCards) return;
-            const openCardsIds = JSON.parse(savedOpenCards);
-            openCardsIds.forEach(orderId => {
-                const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
-                if (card) {
-                    const header = card.querySelector('.order-header');
-                    const content = card.querySelector('.order-content');
-                    if (header && content) {
-                        header.classList.remove('collapsed');
-                        content.classList.remove('collapsed');
+            if (savedOpenCards) {
+                const openCardsIds = JSON.parse(savedOpenCards);
+                openCardsIds.forEach(orderId => {
+                    const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
+                    if (card) {
+                        const header = card.querySelector('.order-header');
+                        const content = card.querySelector('.order-content');
+                        if (header && content) {
+                            header.classList.remove('collapsed');
+                            content.classList.remove('collapsed');
+                        }
                     }
-                }
-            });
+                });
+            }
+            
+            const savedOpenItems = localStorage.getItem(POLIMERNIY_ITEMS_STORAGE_KEY);
+            if (savedOpenItems) {
+                const openItemsIds = JSON.parse(savedOpenItems);
+                openItemsIds.forEach(({ orderId, itemIndex }) => {
+                    const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
+                    if (card) {
+                        const itemHeader = card.querySelectorAll('.item-header')[itemIndex];
+                        const itemContent = card.querySelectorAll('.item-content')[itemIndex];
+                        if (itemHeader && itemContent) {
+                            itemHeader.classList.remove('collapsed');
+                            itemContent.classList.remove('collapsed');
+                            const arrowSpan = itemHeader.querySelector('.collapse-icon-item');
+                            if (arrowSpan) arrowSpan.textContent = '▲';
+                        }
+                    }
+                });
+            }
         }
 
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
@@ -417,12 +442,27 @@
                     return;
                 }
                 
+                // Группируем задачи по заказу, а внутри по изделию
                 var byOrder = {};
                 tasks.forEach(function(task) {
                     if (!byOrder[task.orderId]) {
-                        byOrder[task.orderId] = { number: task.orderNumber, orderId: task.orderId, tasks: [] };
+                        byOrder[task.orderId] = {
+                            number: task.orderNumber,
+                            orderId: task.orderId,
+                            items: {}
+                        };
                     }
-                    byOrder[task.orderId].tasks.push(task);
+                    // Группируем по изделию (используем product как ключ)
+                    var itemKey = task.product + '_' + (task.size || '');
+                    if (!byOrder[task.orderId].items[itemKey]) {
+                        byOrder[task.orderId].items[itemKey] = {
+                            product: task.product,
+                            size: task.size,
+                            totalQuantity: task.totalQuantity,
+                            tasks: []
+                        };
+                    }
+                    byOrder[task.orderId].items[itemKey].tasks.push(task);
                 });
                 
                 Object.values(byOrder).forEach(function(order) {
@@ -451,104 +491,54 @@
                         var allOrders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
                         fullOrder = allOrders.find(function(o) { return o.id == order.orderId; });
                     } catch (e) {}
-
-                    var productQty = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].size?.quantity || 1) : 1;
-                    var productName = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].product || '') : '';
-                    var productSize = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].size?.name || '-') : '-';
-                    var bracket = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].brackets || []) : [];
-                    var lyre = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].lyres || []) : [];
-                    var ral = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].ral || '') : '';
-                    var texture = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].texture || '') : '';
-                    var components = (fullOrder && fullOrder.components) ? fullOrder.components : [];
-                    var details = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].details || []) : [];
                     
-                    var allDetails = [];
-                    if (bracket && bracket.length > 0) {
-                        bracket.forEach(function(b) {
-                            if (b.type && b.type !== 'отсутствует' && b.quantity > 0) {
-                                allDetails.push({ name: 'Кронштейн ' + b.type, quantity: b.quantity });
-                            }
+                    // Отображаем каждое изделие в заказе
+                    var itemIndex = 0;
+                    for (var itemKey in order.items) {
+                        var item = order.items[itemKey];
+                        
+                        var itemDiv = document.createElement('div');
+                        itemDiv.style.marginBottom = '15px';
+                        itemDiv.style.border = '1px solid #2a2f38';
+                        itemDiv.style.borderRadius = '8px';
+                        itemDiv.style.overflow = 'hidden';
+                        
+                        var itemHeader = document.createElement('div');
+                        itemHeader.className = 'item-header collapsed';
+                        itemHeader.innerHTML = `
+                            <span class="item-title">📦 ${escapeHtml(item.product)} ${item.size ? ' (' + escapeHtml(item.size) + ')' : ''} x ${item.totalQuantity} шт</span>
+                            <span class="collapse-icon-item">▼</span>
+                        `;
+                        
+                        var itemContent = document.createElement('div');
+                        itemContent.className = 'item-content collapsed';
+                        
+                        // Отображаем задачи этого изделия
+                        item.tasks.forEach(function(task) {
+                            itemContent.appendChild(createTaskCard(task, fullOrder));
                         });
-                    }
-                    if (lyre && lyre.length > 0) {
-                        lyre.forEach(function(l) {
-                            if (l.type && l.type !== 'отсутствует' && l.quantity > 0) {
-                                allDetails.push({ name: 'Лира ' + l.type, quantity: l.quantity });
+                        
+                        itemHeader.onclick = function(e) {
+                            e.stopPropagation();
+                            itemHeader.classList.toggle('collapsed');
+                            itemContent.classList.toggle('collapsed');
+                            var arrowSpan = itemHeader.querySelector('.collapse-icon-item');
+                            if (arrowSpan) {
+                                arrowSpan.textContent = itemHeader.classList.contains('collapsed') ? '▼' : '▲';
                             }
-                        });
+                            saveOpenCardsState();
+                        };
+                        
+                        itemDiv.appendChild(itemHeader);
+                        itemDiv.appendChild(itemContent);
+                        content.appendChild(itemDiv);
+                        itemIndex++;
                     }
-                    if (details && details.length > 0) {
-                        details.forEach(function(d) {
-                            if (d.type !== 'profile' && d.quantity > 0) {
-                                allDetails.push({ name: d.name, quantity: d.quantity });
-                            }
-                        });
-                    }
-                    
-                    var profiles = [];
-                    if (details && details.length > 0) {
-                        details.forEach(function(d) {
-                            if (d.type === 'profile' && d.quantity > 0) {
-                                profiles.push({ name: d.name, lengthMm: d.lengthMm, quantity: d.quantity });
-                            }
-                        });
-                    }
-                    
-                    var productInfoDiv = document.createElement('div');
-                    productInfoDiv.className = 'product-info';
-                    productInfoDiv.style.padding = '8px 12px';
-                    productInfoDiv.style.borderBottom = '1px solid #2a2f38';
-                    
-                    var infoHtml = `
-                        <div style="font-size: 20px; font-weight: 600; color: #ff3b3b; margin: 0 0 8px 0;">📦 ${escapeHtml(productName)}</div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
-                            <div>
-                                <div style="color: #a0a0a0; font-size: 11px;">РАЗМЕР</div>
-                                <div style="font-size: 20px;"><strong>${escapeHtml(productSize)}</strong> <span style="color: #4cd964;">× ${productQty} шт</span></div>
-                                <div style="margin-top: 8px;">
-                                    <div style="color: #a0a0a0; font-size: 11px;">ПОКРЫТИЕ</div>
-                                    <div style="font-size: 18px;"><strong>${escapeHtml(ral || '-')}</strong> / ${escapeHtml(texture || '-')}</div>
-                                </div>
-                            </div>
-                            <div>
-                                <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 8px;">ПРОФИЛИ</div>
-                                ${profiles.map(p => `
-                                    <div style="margin-bottom: 8px;">
-                                        <div style="font-size: 16px;">• ${escapeHtml(p.name)}</div>
-                                        <div style="margin-left: 18px; color: #a0a0a0; font-size: 13px;">
-                                            <span style="color: #ff9800;">${p.lengthMm} мм</span> <span style="color: #4cd964;">× ${p.quantity} шт</span>
-                                        </div>
-                                    </div>
-                                `).join('') || '<div style="color: #6c757d;">— нет —</div>'}
-                            </div>
-                            <div>
-                                <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 8px;">ДЕТАЛИ</div>
-                                ${allDetails.map(d => `
-                                    <div style="margin-bottom: 6px; font-size: 16px;">• ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span></div>
-                                `).join('') || '<div style="color: #6c757d;">— нет —</div>'}
-                            </div>
-                        </div>
-                    `;
-                    
-                    if (components && components.length > 0) {
-                        var compsHtml = '';
-                        for (var i = 0; i < components.length; i++) {
-                            compsHtml += '<span style="background: #1e232b; padding: 4px 10px; border-radius: 14px; font-size: 12px; border: 1px solid #2a2f38; margin-right: 6px; display: inline-block;">' + escapeHtml(components[i].name) + ': <strong style="color: #4cd964;">' + components[i].quantityPerProduct + '</strong> шт/изд</span>';
-                        }
-                        infoHtml += '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #2a2f38;"><strong style="color: #ff3b3b;">🔧 КОМПЛЕКТУЮЩИЕ:</strong><div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px;">' + compsHtml + '</div></div>';
-                    }
-                    
-                    productInfoDiv.innerHTML = infoHtml;
-                    content.appendChild(productInfoDiv);
-                    
-                    order.tasks.forEach(function(task) {
-                        content.appendChild(createTaskCard(task, fullOrder));
-                    });
                     
                     header.addEventListener('click', function(e) {
                         if (e.target.tagName === 'BUTTON') return;
-                        content.classList.toggle('collapsed');
                         header.classList.toggle('collapsed');
+                        content.classList.toggle('collapsed');
                         saveOpenCardsState();
                     });
                     
@@ -628,7 +618,7 @@
                     });
                 } else {
                     var noExecutors = document.createElement('p');
-                    noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 12px;';
+                    noExecutors.style.cssText = 'color: #a0a0a0; padding: 6px; text-align: center; font-style: italic; font-size: 11px;';
                     noExecutors.textContent = 'Нет исполнителей';
                     executorList.appendChild(noExecutors);
                 }
@@ -651,8 +641,6 @@
                 readyBtn.disabled = task.status === 'completed';
                 readyBtn.onclick = function() { completeTask(task.id); };
                 card.appendChild(readyBtn);
-                
-                // КНОПКА ОТЧЁТ УДАЛЕНА - ПЕРЕНЕСЕНА В ШАПКУ ЗАКАЗА
                 
                 return card;
             }
@@ -809,7 +797,7 @@
         }
         
         // ============== ПРАВАЯ МОДАЛЬНАЯ ПАНЕЛЬ ДЛЯ ОТЧЁТА ==============
-        let currentReportTask = null;
+        let currentReportOrderId = null;
         let currentReportFullOrder = null;
         let reportRows = [];
 
@@ -821,19 +809,7 @@
                 return;
             }
             
-            // Создаём виртуальную задачу для отчёта по всему заказу
-            const virtualTask = {
-                id: `order_${orderId}`,
-                orderId: orderId,
-                orderNumber: fullOrder.number || '---',
-                product: fullOrder.groupName || 'Заказ',
-                operation: 'Все операции',
-                size: 'Группа',
-                totalQuantity: 1,
-                isExtra: false
-            };
-            
-            currentReportTask = virtualTask;
+            currentReportOrderId = orderId;
             currentReportFullOrder = fullOrder;
             
             const modal = document.getElementById('rightModal');
@@ -848,7 +824,7 @@
                 reportRows = [{ расход: 0, количество: 0, комментарий: '' }];
             }
             
-            renderReportForm(contentDiv);
+            renderReportForm(contentDiv, fullOrder);
             modal.classList.add('open');
             overlay.classList.add('show');
         }
@@ -872,27 +848,7 @@
             };
         }
 
-        function openRightModal(task, fullOrder) {
-            currentReportTask = task;
-            currentReportFullOrder = fullOrder;
-            
-            const modal = document.getElementById('rightModal');
-            const overlay = document.getElementById('rightModalOverlay');
-            const contentDiv = document.getElementById('rightModalContent');
-            
-            const savedData = getSavedReportData(task.id);
-            if (savedData && savedData.rows) {
-                reportRows = [...savedData.rows];
-            } else {
-                reportRows = [{ расход: 0, количество: 0, комментарий: '' }];
-            }
-            
-            renderReportForm(contentDiv);
-            modal.classList.add('open');
-            overlay.classList.add('show');
-        }
-
-        function renderReportForm(container) {
+        function renderReportForm(container, fullOrder) {
             let rowsHtml = '';
             
             reportRows.forEach((row, index) => {
@@ -920,39 +876,20 @@
                 `;
             });
             
-            let title = 'Отчёт по операции';
-            let infoText = '';
-            
-            if (currentReportTask && currentReportTask.id.toString().startsWith('order_')) {
-                title = '📝 Отчёт по заказу';
-                infoText = `
+            let orderInfo = '';
+            if (fullOrder) {
+                orderInfo = `
                     <div style="margin-bottom: 20px; padding: 12px; background: #15191f; border-radius: 8px; border-left: 3px solid #ff9800;">
-                        <div style="font-size: 12px; color: #a0a0a0;">Заказ: ${escapeHtml(currentReportTask.orderNumber)}</div>
-                        <div style="font-size: 16px; font-weight: bold; color: #ff9800; margin: 5px 0;">${escapeHtml(currentReportTask.product)}</div>
-                        <div style="font-size: 12px;">📋 Все операции по заказу</div>
-                    </div>
-                `;
-            } else {
-                let operationName = currentReportTask?.operation || '';
-                if (typeof operationName === 'object' && operationName !== null) {
-                    operationName = operationName.operation || JSON.stringify(operationName);
-                }
-                infoText = `
-                    <div style="margin-bottom: 20px; padding: 12px; background: #15191f; border-radius: 8px; border-left: 3px solid #ff9800;">
-                        <div style="font-size: 12px; color: #a0a0a0;">Заказ: ${escapeHtml(currentReportTask?.orderNumber)}</div>
-                        <div style="font-size: 16px; font-weight: bold; color: #ff9800; margin: 5px 0;">${escapeHtml(currentReportTask?.product)}</div>
-                        <div style="font-size: 12px;">🔧 Операция: ${escapeHtml(operationName)}</div>
+                        <div style="font-size: 12px; color: #a0a0a0;">Заказ: ${escapeHtml(fullOrder.number)}</div>
+                        <div style="font-size: 16px; font-weight: bold; color: #ff9800; margin: 5px 0;">${escapeHtml(fullOrder.groupName)}</div>
+                        <div style="font-size: 12px;">📋 Изделий в заказе: ${fullOrder.items?.length || 0}</div>
                     </div>
                 `;
             }
             
             container.innerHTML = `
-                <div class="right-modal-header" style="margin: -20px -20px 0 -20px; padding: 15px 20px;">
-                    <h3>${title}</h3>
-                    <button class="right-modal-close" onclick="closeRightModal()">&times;</button>
-                </div>
                 <div style="padding: 20px 0;">
-                    ${infoText}
+                    ${orderInfo}
                     
                     <div id="reportRowsContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
                         ${rowsHtml}
@@ -963,18 +900,13 @@
                     </div>
                     
                     <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button type="button" class="btn btn-success" onclick="saveReportData()" style="flex: 1;">💾 Сохранить</button>
+                        <button type="button" class="btn btn-success" onclick="saveReportDataForOrder()" style="flex: 1;">💾 Сохранить</button>
                         <button type="button" class="btn btn-danger" onclick="closeRightModal()" style="flex: 1;">✖️ Закрыть</button>
                     </div>
                     
-                    ${getSavedReportDataForOrder(currentReportTask?.orderId)?.savedAt && currentReportTask?.id.toString().startsWith('order_') ? `
+                    ${getSavedReportDataForOrder(currentReportOrderId)?.savedAt ? `
                     <div style="margin-top: 15px; padding: 8px; background: #15191f; border-radius: 6px; font-size: 11px; color: #4cd964;">
-                        ✅ Последнее сохранение: ${new Date(getSavedReportDataForOrder(currentReportTask.orderId).savedAt).toLocaleString()}
-                    </div>
-                    ` : ''}
-                    ${!currentReportTask?.id.toString().startsWith('order_') && getSavedReportData(currentReportTask?.id)?.savedAt ? `
-                    <div style="margin-top: 15px; padding: 8px; background: #15191f; border-radius: 6px; font-size: 11px; color: #4cd964;">
-                        ✅ Последнее сохранение: ${new Date(getSavedReportData(currentReportTask.id).savedAt).toLocaleString()}
+                        ✅ Последнее сохранение: ${new Date(getSavedReportDataForOrder(currentReportOrderId).savedAt).toLocaleString()}
                     </div>
                     ` : ''}
                 </div>
@@ -1009,7 +941,7 @@
         function addReportRow() {
             reportRows.push({ расход: 0, количество: 0, комментарий: '' });
             const container = document.getElementById('rightModalContent');
-            renderReportForm(container);
+            renderReportForm(container, currentReportFullOrder);
         }
 
         function removeReportRow(rowIndex) {
@@ -1020,11 +952,11 @@
                 reportRows.splice(rowIndex, 1);
             }
             const container = document.getElementById('rightModalContent');
-            renderReportForm(container);
+            renderReportForm(container, currentReportFullOrder);
         }
 
-        function saveReportData() {
-            if (!currentReportTask) return;
+        function saveReportDataForOrder() {
+            if (!currentReportOrderId || !currentReportFullOrder) return;
             
             document.querySelectorAll('.report-expense').forEach(input => {
                 const rowIndex = parseInt(input.dataset.row);
@@ -1045,69 +977,27 @@
                 }
             });
             
-            const isOrderReport = currentReportTask.id.toString().startsWith('order_');
+            const reportData = {
+                orderId: currentReportOrderId,
+                orderNumber: currentReportFullOrder.number,
+                product: currentReportFullOrder.groupName,
+                siteKey: 'polimerniy',
+                rows: reportRows.map(row => ({
+                    расход: row.расход || 0,
+                    количество: row.количество || 0,
+                    комментарий: row.комментарий || ''
+                })),
+                savedAt: new Date().toISOString(),
+                isOrderReport: true
+            };
             
-            let reportData;
-            if (isOrderReport) {
-                reportData = {
-                    orderId: currentReportTask.orderId,
-                    orderNumber: currentReportTask.orderNumber,
-                    product: currentReportTask.product,
-                    siteKey: 'polimerniy',
-                    rows: reportRows.map(row => ({
-                        расход: row.расход || 0,
-                        количество: row.количество || 0,
-                        комментарий: row.комментарий || ''
-                    })),
-                    savedAt: new Date().toISOString(),
-                    isOrderReport: true
-                };
-                
-                let allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-                allReports = allReports.filter(r => !(r.orderId == currentReportTask.orderId && r.isOrderReport === true));
-                allReports.push(reportData);
-                localStorage.setItem('material_reports', JSON.stringify(allReports));
-            } else {
-                let operationName = currentReportTask.operation;
-                if (typeof operationName === 'object' && operationName !== null) {
-                    operationName = operationName.operation || JSON.stringify(operationName);
-                }
-                
-                reportData = {
-                    taskId: currentReportTask.id,
-                    orderId: currentReportTask.orderId,
-                    orderNumber: currentReportTask.orderNumber,
-                    product: currentReportTask.product,
-                    operation: operationName,
-                    size: currentReportTask.size,
-                    siteKey: 'polimerniy',
-                    rows: reportRows.map(row => ({
-                        расход: row.расход || 0,
-                        количество: row.количество || 0,
-                        комментарий: row.комментарий || ''
-                    })),
-                    savedAt: new Date().toISOString()
-                };
-                
-                const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-                const existingIndex = allReports.findIndex(r => r.taskId === currentReportTask.id);
-                
-                if (existingIndex >= 0) {
-                    allReports[existingIndex] = reportData;
-                } else {
-                    allReports.push(reportData);
-                }
-                
-                localStorage.setItem('material_reports', JSON.stringify(allReports));
-            }
+            let allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+            allReports = allReports.filter(r => !(r.orderId == currentReportOrderId && r.isOrderReport === true));
+            allReports.push(reportData);
+            localStorage.setItem('material_reports', JSON.stringify(allReports));
             
             alert('✅ Отчёт сохранён!');
             closeRightModal();
-        }
-
-        function getSavedReportData(taskId) {
-            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-            return allReports.find(r => r.taskId === taskId);
         }
 
         function closeRightModal() {
@@ -1115,18 +1005,17 @@
             const overlay = document.getElementById('rightModalOverlay');
             modal.classList.remove('open');
             overlay.classList.remove('show');
-            currentReportTask = null;
+            currentReportOrderId = null;
             currentReportFullOrder = null;
             reportRows = [];
         }
 
         // Глобальные функции
-        window.openRightModal = openRightModal;
         window.openRightModalForOrder = openRightModalForOrder;
         window.closeRightModal = closeRightModal;
-        window.saveReportData = saveReportData;
         window.addReportRow = addReportRow;
         window.removeReportRow = removeReportRow;
+        window.saveReportDataForOrder = saveReportDataForOrder;
     </script>
 </body>
 </html>
