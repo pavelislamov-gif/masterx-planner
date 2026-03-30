@@ -166,40 +166,49 @@
         }
         
         // ============== ПОЛУЧЕНИЕ ПРОФИЛЯ ПО ОПЕРАЦИИ ==============
-        function getDetailForOperation(operationName, details) {
+        function getProfileForOperation(operationName, details) {
     if (!details || details.length === 0) return null;
     
-    let searchName = operationName;
-    
-    // Убираем префикс "Раскрой " (включая всё, что идёт после)
-    if (searchName.startsWith('Раскрой ')) {
-        searchName = searchName.replace('Раскрой ', '');
+    // Проверяем, что это операция раскроя
+    if (!operationName || !operationName.trim().startsWith('Раскрой ')) {
+        return null;
     }
     
-    console.log('🔍 Ищем деталь по названию:', searchName);
+    let searchName = operationName.replace('Раскрой ', '');
     
-    // Ищем среди всех деталей (профили и обычные)
+    // Убираем слова "профиля", "модуля", "планки" и пробелы
+    searchName = searchName.replace(/^(профиля|модуля|планки)\s+/i, '');
+    
+    console.log('🔍 Ищем профиль по названию:', searchName);
+    
+    // Ищем среди профилей (type === 'profile')
     for (let i = 0; i < details.length; i++) {
         const detail = details[i];
-        // Проверяем, содержит ли название детали искомое слово или наоборот
-        if (detail.name.includes(searchName) || searchName.includes(detail.name)) {
-            console.log('✅ Найдена деталь:', detail.name);
-            return detail;
+        if (detail.type === 'profile') {
+            // Проверяем, содержит ли название профиля искомое название
+            if (detail.name.includes(searchName) || searchName.includes(detail.name)) {
+                console.log('✅ Найден профиль:', detail.name);
+                return detail;
+            }
         }
     }
     
-    // Если не нашли, пробуем без учёта регистра
-    const searchLower = searchName.toLowerCase();
+    // Если не нашли, пробуем искать по ключевым идентификаторам (например, "МП 1928", "НПС 2999")
+    const searchParts = searchName.split(' ');
     for (let i = 0; i < details.length; i++) {
         const detail = details[i];
-        const detailLower = detail.name.toLowerCase();
-        if (detailLower.includes(searchLower) || searchLower.includes(detailLower)) {
-            console.log('✅ Найдена деталь (без учёта регистра):', detail.name);
-            return detail;
+        if (detail.type === 'profile') {
+            for (let j = 0; j < searchParts.length; j++) {
+                const part = searchParts[j];
+                if (part.length > 2 && detail.name.includes(part)) {
+                    console.log('✅ Найден профиль по ключевому слову "' + part + '":', detail.name);
+                    return detail;
+                }
+            }
         }
     }
     
-    console.log('❌ Деталь не найдена для:', searchName);
+    console.log('❌ Профиль не найден для:', searchName);
     return null;
 }
         
@@ -514,19 +523,18 @@
                 // ДОБАВЛЯЕМ ИНФОРМАЦИЮ О ПРОФИЛЕ (только для Раскрой профиля)
                 if (fullOrder && fullOrder.items && fullOrder.items[0]) {
     var details = fullOrder.items[0].details || [];
-    if (operationName && operationName.trim().startsWith('Раскрой ')) {
-        var detailInfo = getDetailForOperation(operationName, details);
-        if (detailInfo) {
-            var profileDiv = document.createElement('div');
-            profileDiv.className = 'profile-info';
-            profileDiv.innerHTML = `
-                <span class="profile-name">📐 ${escapeHtml(detailInfo.name)}</span>
-                <span class="profile-length">📏 Длина: ${detailInfo.lengthMm || 0} мм</span>
-                <span class="profile-qty">× ${detailInfo.quantity} шт</span>
-            `;
-            card.appendChild(profileDiv);
-        }
+    var profileInfo = getProfileForOperation(operationName, details);
+    if (profileInfo) {
+        var profileDiv = document.createElement('div');
+        profileDiv.className = 'profile-info';
+        profileDiv.innerHTML = `
+            <span class="profile-name">📐 ${escapeHtml(profileInfo.name)}</span>
+            <span class="profile-length">📏 Длина: ${profileInfo.lengthMm || 0} мм</span>
+            <span class="profile-qty">× ${profileInfo.quantity} шт</span>
+        `;
+        card.appendChild(profileDiv);
     }
+}
 }
                 
                 if (task.isExtra && task.description) {
