@@ -2344,18 +2344,51 @@
             
             let html = `
     <div style="padding: 15px;">
-        <div style="margin-bottom: 20px; border-bottom: 1px solid #2a2f38; padding-bottom: 10px;">
-            <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 10px;">
-                <h2 style="color: #ff3b3b; margin: 0;">📋 ОТЧЁТ ПО ЗАКАЗУ</h2>
-                <h3 style="margin: 0;">${escapeHtml(order.groupName)}</h3>
+        <div style="margin-bottom: 15px; border-bottom: 1px solid #2a2f38; padding-bottom: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;">
+                <h2 style="color: #ff3b3b; margin: 0; font-size: 18px;">📋 ОТЧЁТ ПО ЗАКАЗУ</h2>
+                <h3 style="margin: 0; font-size: 16px;">${escapeHtml(order.groupName)}</h3>
             </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 8px; font-size: 13px; color: #a0a0a0;">
-                <span>№${order.number}</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 5px; font-size: 12px; color: #a0a0a0;">
                 <span>📅 ${order.date}</span>
                 <span>📦 Изделий: ${order.items?.length || 0}</span>
             </div>
         </div>
 `;
+
+for (const [siteKey, reports] of Object.entries(reportsBySite)) {
+    html += `
+        <div style="margin-bottom: 12px; border: 1px solid #2a2f38; border-radius: 8px; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #232830, #1a1e24); padding: 6px 12px;">
+                <h4 style="margin: 0; color: #ff3b3b; font-size: 13px;">${siteNames[siteKey]}</h4>
+            </div>
+            <div style="padding: 6px 10px;">
+    `;
+    
+    if (reports.length === 0) {
+        html += `<div style="color: #a0a0a0; text-align: center; padding: 8px; font-size: 12px;">— Нет данных —</div>`;
+    } else {
+        reports.forEach(report => {
+            const rows = report.rows || [];
+            rows.forEach(row => {
+                const расход = row.расход || 0;
+                const количество = row.количество || 0;
+                const комментарий = row.комментарий || '';
+                
+                let text = `Расход: ${расход}, Количество: ${количество}`;
+                if (комментарий) text += `, ${комментарий}`;
+                
+                html += `
+                    <div style="margin-bottom: 4px; padding: 4px 6px; background: #15191f; border-radius: 4px; font-size: 12px;">
+                        ${escapeHtml(text)}
+                    </div>
+                `;
+            });
+        });
+    }
+    
+    html += `</div></div>`;
+}
             
             let hasData = false;
             
