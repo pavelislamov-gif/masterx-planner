@@ -166,26 +166,25 @@
         }
         
         // ============== ПОЛУЧЕНИЕ ПРОФИЛЯ ПО ОПЕРАЦИИ ==============
-        function getProfileForOperation(operationName, details) {
+        function getDetailForOperation(operationName, details) {
     if (!details || details.length === 0) return null;
     
     let searchName = operationName;
     
-    // Убираем префикс "Раскрой профиля " если есть
-    if (searchName.startsWith('Раскрой профиля ')) {
-        searchName = searchName.replace('Раскрой профиля ', '');
+    // Убираем префикс "Раскрой " (включая всё, что идёт после)
+    if (searchName.startsWith('Раскрой ')) {
+        searchName = searchName.replace('Раскрой ', '');
     }
     
-    console.log('🔍 Ищем профиль по названию:', searchName);
+    console.log('🔍 Ищем деталь по названию:', searchName);
     
-    // Ищем профиль в деталях
+    // Ищем среди всех деталей (профили и обычные)
     for (let i = 0; i < details.length; i++) {
         const detail = details[i];
-        if (detail.type === 'profile') {
-            if (detail.name.includes(searchName) || searchName.includes(detail.name)) {
-                console.log('✅ Найден профиль:', detail.name);
-                return detail;
-            }
+        // Проверяем, содержит ли название детали искомое слово или наоборот
+        if (detail.name.includes(searchName) || searchName.includes(detail.name)) {
+            console.log('✅ Найдена деталь:', detail.name);
+            return detail;
         }
     }
     
@@ -193,16 +192,14 @@
     const searchLower = searchName.toLowerCase();
     for (let i = 0; i < details.length; i++) {
         const detail = details[i];
-        if (detail.type === 'profile') {
-            const detailLower = detail.name.toLowerCase();
-            if (detailLower.includes(searchLower) || searchLower.includes(detailLower)) {
-                console.log('✅ Найден профиль (без учёта регистра):', detail.name);
-                return detail;
-            }
+        const detailLower = detail.name.toLowerCase();
+        if (detailLower.includes(searchLower) || searchLower.includes(detailLower)) {
+            console.log('✅ Найдена деталь (без учёта регистра):', detail.name);
+            return detail;
         }
     }
     
-    console.log('❌ Профиль не найден для:', searchName);
+    console.log('❌ Деталь не найдена для:', searchName);
     return null;
 }
         
