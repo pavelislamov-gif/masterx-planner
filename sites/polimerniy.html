@@ -101,27 +101,16 @@
         }
         .right-modal-header h3 { margin: 0; color: #ff3b3b; font-size: 18px; }
         .right-modal-close {
-            background: none; border: none; color: #a0a0a0; font-size: 28px; cursor: pointer; transition: all 0.2s;
+            background: none; border: none; color: #a0a0a0; font-size: 28px; cursor: pointer;
         }
-        .right-modal-close:hover { color: #ff3b3b; transform: scale(1.1); }
+        .right-modal-close:hover { color: #ff3b3b; }
         .right-modal-content {
             flex: 1; overflow-y: auto; padding: 20px;
         }
-        .right-modal-content::-webkit-scrollbar { width: 6px; }
-        .right-modal-content::-webkit-scrollbar-track { background: #1a1e24; }
-        .right-modal-content::-webkit-scrollbar-thumb { background: #ff3b3b; border-radius: 3px; }
         .right-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1999; display: none;
         }
         .right-modal-overlay.show { display: block; }
-        .report-input {
-            width: 100%; padding: 8px 12px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 6px; color: #fff; font-size: 14px;
-        }
-        .report-input:focus { outline: none; border-color: #ff9800; }
-        .report-textarea {
-            width: 100%; padding: 8px 12px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 6px; color: #fff; font-size: 14px; resize: vertical;
-        }
-        .report-textarea:focus { outline: none; border-color: #ff9800; }
 
         /* СВЕТЛАЯ ТЕМА */
         body.light-theme .right-modal {
@@ -132,8 +121,8 @@
             background: linear-gradient(135deg, #f8fafc, #f1f5f9);
             border-bottom: 1px solid #e2e8f0;
         }
-        body.light-theme .report-input,
-        body.light-theme .report-textarea {
+        body.light-theme .report-row input,
+        body.light-theme .report-row textarea {
             background: #ffffff;
             border: 1px solid #e2e8f0;
             color: #1e293b;
@@ -180,15 +169,13 @@
 
     <!-- ПРАВАЯ МОДАЛЬНАЯ ПАНЕЛЬ -->
     <div id="rightModalOverlay" class="right-modal-overlay" onclick="closeRightModal()"></div>
-<div id="rightModal" class="right-modal">
-    <div class="right-modal-header">
-        <h3>📝 Отчёт по операции</h3>
-        <button class="right-modal-close" onclick="closeRightModal()">&times;</button>
+    <div id="rightModal" class="right-modal">
+        <div class="right-modal-header">
+            <h3>📝 Отчёт по операции</h3>
+            <button class="right-modal-close" onclick="closeRightModal()">&times;</button>
+        </div>
+        <div id="rightModalContent" class="right-modal-content"></div>
     </div>
-    <div id="rightModalContent" class="right-modal-content">
-        <!-- Содержимое формы будет здесь -->
-    </div>
-</div>
 
     <script src="../js/storage.js"></script>
     <script src="../js/data-loader.js"></script>
@@ -765,290 +752,213 @@
         
         // ============== ПРАВАЯ МОДАЛЬНАЯ ПАНЕЛЬ ДЛЯ ОТЧЁТА ==============
         let currentReportTask = null;
-let currentReportFullOrder = null;
-let reportRows = []; // массив для хранения строк отчёта
+        let currentReportFullOrder = null;
+        let reportRows = [];
 
-function openRightModal(task, fullOrder) {
-    currentReportTask = task;
-    currentReportFullOrder = fullOrder;
-    
-    const modal = document.getElementById('rightModal');
-    const overlay = document.getElementById('rightModalOverlay');
-    const contentDiv = document.getElementById('rightModalContent');
-    
-    // Загружаем сохранённые данные
-    const savedData = getSavedReportData(task.id);
-    if (savedData && savedData.rows) {
-        reportRows = [...savedData.rows];
-    } else {
-        // Создаём одну пустую строку по умолчанию
-        reportRows = [{ paintUsed: 0, quantity: 0, comment: '' }];
-    }
-    
-    let operationName = task.operation;
-    if (typeof operationName === 'object' && operationName !== null) {
-        operationName = operationName.operation || JSON.stringify(operationName);
-    }
-    
-    // Получаем количество изделий из заказа
-    let productQuantity = 1;
-    if (fullOrder && fullOrder.items && fullOrder.items[0]) {
-        productQuantity = fullOrder.items[0].size?.quantity || 1;
-    }
-    
-    renderReportForm(contentDiv, operationName, productQuantity);
-    
-    modal.classList.add('open');
-    overlay.classList.add('show');
-}
+        function openRightModal(task, fullOrder) {
+            currentReportTask = task;
+            currentReportFullOrder = fullOrder;
+            
+            const modal = document.getElementById('rightModal');
+            const overlay = document.getElementById('rightModalOverlay');
+            const contentDiv = document.getElementById('rightModalContent');
+            
+            const savedData = getSavedReportData(task.id);
+            if (savedData && savedData.rows) {
+                reportRows = [...savedData.rows];
+            } else {
+                reportRows = [{ расход: 0, количество: 0, комментарий: '' }];
+            }
+            
+            renderReportForm(contentDiv);
+            modal.classList.add('open');
+            overlay.classList.add('show');
+        }
 
-function renderReportForm(container, operationName, productQuantity) {
-    let rowsHtml = '';
-    
-    reportRows.forEach((row, index) => {
-        rowsHtml += `
-            <div class="report-row" data-row-index="${index}" style="background: #15191f; border-radius: 8px; padding: 12px; margin-bottom: 12px; border: 1px solid #2a2f38;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <span style="font-size: 12px; color: #ff9800;">📝 Запись ${index + 1}</span>
-                    <button type="button" class="btn-remove-row" onclick="removeReportRow(${index})" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 11px;">✖️ Удалить</button>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                    <div>
-                        <label style="font-size: 11px; color: #a0a0a0;">🎨 Расход краски (граммы):</label>
-                        <input type="number" class="report-paint" data-row="${index}" value="${row.paintUsed || 0}" step="1" placeholder="0" style="width: 100%; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+        function renderReportForm(container) {
+            let rowsHtml = '';
+            
+            reportRows.forEach((row, index) => {
+                rowsHtml += `
+                    <div class="report-row" style="background: #15191f; border-radius: 8px; padding: 12px; margin-bottom: 12px; border: 1px solid #2a2f38;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="font-size: 12px; color: #ff9800;">📝 Запись ${index + 1}</span>
+                            <button type="button" class="btn-remove-row" onclick="removeReportRow(${index})" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 11px;">✖️</button>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <div>
+                                <label style="font-size: 11px; color: #a0a0a0;">📊 Расход:</label>
+                                <input type="number" class="report-expense" data-row="${index}" value="${row.расход || 0}" step="0.1" placeholder="0" style="width: 100%; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; color: #a0a0a0;">📦 Количество:</label>
+                                <input type="number" class="report-quantity" data-row="${index}" value="${row.количество || 0}" step="1" placeholder="0" style="width: 100%; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size: 11px; color: #a0a0a0;">💬 Комментарий:</label>
+                            <textarea class="report-comment" data-row="${index}" rows="2" placeholder="Дополнительная информация..." style="width: 100%; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">${escapeHtml(row.комментарий || '')}</textarea>
+                        </div>
                     </div>
-                    <div>
-                        <label style="font-size: 11px; color: #a0a0a0;">📦 Количество изделий:</label>
-                        <input type="number" class="report-qty" data-row="${index}" value="${row.quantity || 0}" step="1" placeholder="0" style="width: 100%; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
-                    </div>
+                `;
+            });
+            
+            let operationName = currentReportTask.operation;
+            if (typeof operationName === 'object' && operationName !== null) {
+                operationName = operationName.operation || JSON.stringify(operationName);
+            }
+            
+            container.innerHTML = `
+                <div style="margin-bottom: 20px; padding: 12px; background: #15191f; border-radius: 8px; border-left: 3px solid #ff9800;">
+                    <div style="font-size: 12px; color: #a0a0a0;">Заказ: ${escapeHtml(currentReportTask.orderNumber)}</div>
+                    <div style="font-size: 16px; font-weight: bold; color: #ff9800; margin: 5px 0;">${escapeHtml(currentReportTask.product)}</div>
+                    <div style="font-size: 12px;">🔧 Операция: ${escapeHtml(operationName)}</div>
                 </div>
-                <div>
-                    <label style="font-size: 11px; color: #a0a0a0;">💬 Комментарий:</label>
-                    <textarea class="report-comment" data-row="${index}" rows="2" placeholder="Дополнительная информация..." style="width: 100%; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">${escapeHtml(row.comment || '')}</textarea>
+                
+                <div id="reportRowsContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
+                    ${rowsHtml}
                 </div>
-            </div>
-        `;
-    });
-    
-    // Подсчитываем итоги
-    let totalPaint = reportRows.reduce((sum, row) => sum + (row.paintUsed || 0), 0);
-    let totalQuantity = reportRows.reduce((sum, row) => sum + (row.quantity || 0), 0);
-    
-    container.innerHTML = `
-        <div style="margin-bottom: 20px; padding: 12px; background: #15191f; border-radius: 8px; border-left: 3px solid #ff9800;">
-            <div style="font-size: 12px; color: #a0a0a0;">Заказ: ${escapeHtml(currentReportTask.orderNumber)}</div>
-            <div style="font-size: 16px; font-weight: bold; color: #ff9800; margin: 5px 0;">${escapeHtml(currentReportTask.product)}</div>
-            <div style="font-size: 12px;">🔧 Операция: ${escapeHtml(operationName)}</div>
-            <div style="font-size: 12px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #2a2f38;">
-                <span style="color: #ff9800;">📊 Итого:</span>
-                <span style="margin-left: 10px;">🎨 ${totalPaint} г</span>
-                <span style="margin-left: 10px;">📦 ${totalQuantity} шт</span>
-                <span style="margin-left: 10px;">📋 План: ${productQuantity} шт</span>
-            </div>
-        </div>
-        
-        <div id="reportRowsContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
-            ${rowsHtml}
-        </div>
-        
-        <div style="margin-bottom: 15px;">
-            <button type="button" class="btn btn-primary" onclick="addReportRow()" style="width: 100%; padding: 8px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer;">
-                ➕ Добавить строку
-            </button>
-        </div>
-        
-        <div class="form-group">
-            <label>👤 Исполнитель:</label>
-            <input type="text" id="reportOperator" value="${getSavedReportData(currentReportTask.id)?.operator || localStorage.getItem('currentUser') || ''}" placeholder="ФИО исполнителя" class="report-input" style="width: 100%; padding: 8px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 6px; color: #fff;">
-        </div>
-        
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-            <button type="button" class="btn btn-success" onclick="saveReportData()" style="flex: 1;">💾 Сохранить отчёт</button>
-            <button type="button" class="btn btn-danger" onclick="closeRightModal()" style="flex: 1;">✖️ Закрыть</button>
-        </div>
-        
-        ${getSavedReportData(currentReportTask.id)?.savedAt ? `
-        <div style="margin-top: 15px; padding: 8px; background: #15191f; border-radius: 6px; font-size: 11px; color: #4cd964;">
-            ✅ Последнее сохранение: ${new Date(getSavedReportData(currentReportTask.id).savedAt).toLocaleString()}
-        </div>
-        ` : ''}
-    `;
-    
-    // Добавляем обработчики для полей
-    document.querySelectorAll('.report-paint').forEach(input => {
-        input.addEventListener('change', function() {
-            const rowIndex = parseInt(this.dataset.row);
-            if (!isNaN(rowIndex) && reportRows[rowIndex]) {
-                reportRows[rowIndex].paintUsed = parseFloat(this.value) || 0;
-                updateReportTotals();
-            }
-        });
-    });
-    
-    document.querySelectorAll('.report-qty').forEach(input => {
-        input.addEventListener('change', function() {
-            const rowIndex = parseInt(this.dataset.row);
-            if (!isNaN(rowIndex) && reportRows[rowIndex]) {
-                reportRows[rowIndex].quantity = parseFloat(this.value) || 0;
-                updateReportTotals();
-            }
-        });
-    });
-    
-    document.querySelectorAll('.report-comment').forEach(textarea => {
-        textarea.addEventListener('change', function() {
-            const rowIndex = parseInt(this.dataset.row);
-            if (!isNaN(rowIndex) && reportRows[rowIndex]) {
-                reportRows[rowIndex].comment = this.value;
-            }
-        });
-    });
-}
-
-function updateReportTotals() {
-    const totalPaint = reportRows.reduce((sum, row) => sum + (row.paintUsed || 0), 0);
-    const totalQuantity = reportRows.reduce((sum, row) => sum + (row.quantity || 0), 0);
-    
-    const totalsDiv = document.querySelector('#rightModalContent .report-totals');
-    if (totalsDiv) {
-        totalsDiv.innerHTML = `
-            <span style="color: #ff9800;">📊 Итого:</span>
-            <span style="margin-left: 10px;">🎨 ${totalPaint} г</span>
-            <span style="margin-left: 10px;">📦 ${totalQuantity} шт</span>
-        `;
-    }
-}
-
-function addReportRow() {
-    reportRows.push({ paintUsed: 0, quantity: 0, comment: '' });
-    
-    let operationName = currentReportTask.operation;
-    if (typeof operationName === 'object' && operationName !== null) {
-        operationName = operationName.operation || JSON.stringify(operationName);
-    }
-    
-    let productQuantity = 1;
-    if (currentReportFullOrder && currentReportFullOrder.items && currentReportFullOrder.items[0]) {
-        productQuantity = currentReportFullOrder.items[0].size?.quantity || 1;
-    }
-    
-    const container = document.getElementById('rightModalContent');
-    renderReportForm(container, operationName, productQuantity);
-}
-
-function removeReportRow(rowIndex) {
-    if (reportRows.length <= 1) {
-        if (!confirm('Удалить последнюю строку? Будет создана пустая строка.')) return;
-        reportRows = [{ paintUsed: 0, quantity: 0, comment: '' }];
-    } else {
-        reportRows.splice(rowIndex, 1);
-    }
-    
-    let operationName = currentReportTask.operation;
-    if (typeof operationName === 'object' && operationName !== null) {
-        operationName = operationName.operation || JSON.stringify(operationName);
-    }
-    
-    let productQuantity = 1;
-    if (currentReportFullOrder && currentReportFullOrder.items && currentReportFullOrder.items[0]) {
-        productQuantity = currentReportFullOrder.items[0].size?.quantity || 1;
-    }
-    
-    const container = document.getElementById('rightModalContent');
-    renderReportForm(container, operationName, productQuantity);
-}
-
-function saveReportData() {
-    if (!currentReportTask) return;
-    
-    const operator = document.getElementById('reportOperator').value.trim();
-    if (!operator) {
-        alert('Введите ФИО исполнителя');
-        return;
-    }
-    
-    // Обновляем данные из полей перед сохранением
-    document.querySelectorAll('.report-paint').forEach(input => {
-        const rowIndex = parseInt(input.dataset.row);
-        if (!isNaN(rowIndex) && reportRows[rowIndex]) {
-            reportRows[rowIndex].paintUsed = parseFloat(input.value) || 0;
+                
+                <div style="margin-bottom: 15px;">
+                    <button type="button" class="btn-add-row" onclick="addReportRow()" style="width: 100%; padding: 8px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                        ➕
+                    </button>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn btn-success" onclick="saveReportData()" style="flex: 1;">💾 Сохранить</button>
+                    <button type="button" class="btn btn-danger" onclick="closeRightModal()" style="flex: 1;">✖️ Закрыть</button>
+                </div>
+                
+                ${getSavedReportData(currentReportTask.id)?.savedAt ? `
+                <div style="margin-top: 15px; padding: 8px; background: #15191f; border-radius: 6px; font-size: 11px; color: #4cd964;">
+                    ✅ Последнее сохранение: ${new Date(getSavedReportData(currentReportTask.id).savedAt).toLocaleString()}
+                </div>
+                ` : ''}
+            `;
+            
+            document.querySelectorAll('.report-expense').forEach(input => {
+                input.addEventListener('change', function() {
+                    const rowIndex = parseInt(this.dataset.row);
+                    if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                        reportRows[rowIndex].расход = parseFloat(this.value) || 0;
+                    }
+                });
+            });
+            document.querySelectorAll('.report-quantity').forEach(input => {
+                input.addEventListener('change', function() {
+                    const rowIndex = parseInt(this.dataset.row);
+                    if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                        reportRows[rowIndex].количество = parseFloat(this.value) || 0;
+                    }
+                });
+            });
+            document.querySelectorAll('.report-comment').forEach(textarea => {
+                textarea.addEventListener('change', function() {
+                    const rowIndex = parseInt(this.dataset.row);
+                    if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                        reportRows[rowIndex].комментарий = this.value;
+                    }
+                });
+            });
         }
-    });
-    
-    document.querySelectorAll('.report-qty').forEach(input => {
-        const rowIndex = parseInt(input.dataset.row);
-        if (!isNaN(rowIndex) && reportRows[rowIndex]) {
-            reportRows[rowIndex].quantity = parseFloat(input.value) || 0;
+
+        function addReportRow() {
+            reportRows.push({ расход: 0, количество: 0, комментарий: '' });
+            const container = document.getElementById('rightModalContent');
+            renderReportForm(container);
         }
-    });
-    
-    document.querySelectorAll('.report-comment').forEach(textarea => {
-        const rowIndex = parseInt(textarea.dataset.row);
-        if (!isNaN(rowIndex) && reportRows[rowIndex]) {
-            reportRows[rowIndex].comment = textarea.value;
+
+        function removeReportRow(rowIndex) {
+            if (reportRows.length <= 1) {
+                if (!confirm('Удалить последнюю строку? Будет создана пустая строка.')) return;
+                reportRows = [{ расход: 0, количество: 0, комментарий: '' }];
+            } else {
+                reportRows.splice(rowIndex, 1);
+            }
+            const container = document.getElementById('rightModalContent');
+            renderReportForm(container);
         }
-    });
-    
-    let operationName = currentReportTask.operation;
-    if (typeof operationName === 'object' && operationName !== null) {
-        operationName = operationName.operation || JSON.stringify(operationName);
-    }
-    
-    const reportData = {
-        taskId: currentReportTask.id,
-        orderId: currentReportTask.orderId,
-        orderNumber: currentReportTask.orderNumber,
-        product: currentReportTask.product,
-        operation: operationName,
-        size: currentReportTask.size,
-        siteKey: 'polimerniy',
-        rows: reportRows.map(row => ({
-            paintUsed: row.paintUsed || 0,
-            quantity: row.quantity || 0,
-            comment: row.comment || ''
-        })),
-        operator: operator,
-        savedAt: new Date().toISOString()
-    };
-    
-    // Сохраняем в localStorage
-    const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-    const existingIndex = allReports.findIndex(r => r.taskId === currentReportTask.id);
-    
-    if (existingIndex >= 0) {
-        allReports[existingIndex] = reportData;
-    } else {
-        allReports.push(reportData);
-    }
-    
-    localStorage.setItem('material_reports', JSON.stringify(allReports));
-    localStorage.setItem('currentUser', operator);
-    
-    alert('✅ Отчёт сохранён!');
-    closeRightModal();
-}
 
-function getSavedReportData(taskId) {
-    const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-    return allReports.find(r => r.taskId === taskId);
-}
+        function saveReportData() {
+            if (!currentReportTask) return;
+            
+            document.querySelectorAll('.report-expense').forEach(input => {
+                const rowIndex = parseInt(input.dataset.row);
+                if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                    reportRows[rowIndex].расход = parseFloat(input.value) || 0;
+                }
+            });
+            document.querySelectorAll('.report-quantity').forEach(input => {
+                const rowIndex = parseInt(input.dataset.row);
+                if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                    reportRows[rowIndex].количество = parseFloat(input.value) || 0;
+                }
+            });
+            document.querySelectorAll('.report-comment').forEach(textarea => {
+                const rowIndex = parseInt(textarea.dataset.row);
+                if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                    reportRows[rowIndex].комментарий = textarea.value;
+                }
+            });
+            
+            let operationName = currentReportTask.operation;
+            if (typeof operationName === 'object' && operationName !== null) {
+                operationName = operationName.operation || JSON.stringify(operationName);
+            }
+            
+            const reportData = {
+                taskId: currentReportTask.id,
+                orderId: currentReportTask.orderId,
+                orderNumber: currentReportTask.orderNumber,
+                product: currentReportTask.product,
+                operation: operationName,
+                size: currentReportTask.size,
+                siteKey: 'polimerniy',
+                rows: reportRows.map(row => ({
+                    расход: row.расход || 0,
+                    количество: row.количество || 0,
+                    комментарий: row.комментарий || ''
+                })),
+                savedAt: new Date().toISOString()
+            };
+            
+            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+            const existingIndex = allReports.findIndex(r => r.taskId === currentReportTask.id);
+            
+            if (existingIndex >= 0) {
+                allReports[existingIndex] = reportData;
+            } else {
+                allReports.push(reportData);
+            }
+            
+            localStorage.setItem('material_reports', JSON.stringify(allReports));
+            
+            alert('✅ Отчёт сохранён!');
+            closeRightModal();
+        }
 
-function closeRightModal() {
-    const modal = document.getElementById('rightModal');
-    const overlay = document.getElementById('rightModalOverlay');
-    modal.classList.remove('open');
-    overlay.classList.remove('show');
-    currentReportTask = null;
-    currentReportFullOrder = null;
-    reportRows = [];
-}
+        function getSavedReportData(taskId) {
+            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+            return allReports.find(r => r.taskId === taskId);
+        }
 
-// Глобальные функции
-window.openRightModal = openRightModal;
-window.closeRightModal = closeRightModal;
-window.saveReportData = saveReportData;
-window.addReportRow = addReportRow;
-window.removeReportRow = removeReportRow;
+        function closeRightModal() {
+            const modal = document.getElementById('rightModal');
+            const overlay = document.getElementById('rightModalOverlay');
+            modal.classList.remove('open');
+            overlay.classList.remove('show');
+            currentReportTask = null;
+            currentReportFullOrder = null;
+            reportRows = [];
+        }
+
+        // Глобальные функции
+        window.openRightModal = openRightModal;
+        window.closeRightModal = closeRightModal;
+        window.saveReportData = saveReportData;
+        window.addReportRow = addReportRow;
+        window.removeReportRow = removeReportRow;
     </script>
 </body>
 </html>
