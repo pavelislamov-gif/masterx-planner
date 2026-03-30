@@ -320,7 +320,7 @@
 
         // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
         const POLIMERNIY_STORAGE_KEY = 'polimerniy_open_cards';
-const POLIMERNIY_ITEMS_STORAGE_KEY = 'polimerniy_open_items';
+const POLIMERNIY_ITEMS_STORAGE_KEY = 'polimerniy_open_items_v2'; // меняем ключ чтобы не было конфликтов
 
 function saveOpenCardsState() {
     // Сохраняем открытые заказы
@@ -337,15 +337,15 @@ function saveOpenCardsState() {
     const openItems = [];
     document.querySelectorAll('.order-card').forEach(card => {
         const orderId = card.dataset.orderId;
-        card.querySelectorAll('.item-header').forEach((itemHeader, idx) => {
-            // Получаем ключ изделия из атрибута или из текста
-            const itemKey = itemHeader.dataset.itemKey;
+        card.querySelectorAll('.item-header').forEach(itemHeader => {
+            const itemKey = itemHeader.getAttribute('data-item-key');
             if (itemKey && !itemHeader.classList.contains('collapsed')) {
                 openItems.push({ orderId, itemKey });
             }
         });
     });
     localStorage.setItem(POLIMERNIY_ITEMS_STORAGE_KEY, JSON.stringify(openItems));
+    console.log('💾 Сохранено открытых изделий:', openItems);
 }
 
 function restoreOpenCardsState() {
@@ -366,24 +366,32 @@ function restoreOpenCardsState() {
         });
     }
     
-    // Восстанавливаем открытые изделия по ключу
-    const savedOpenItems = localStorage.getItem(POLIMERNIY_ITEMS_STORAGE_KEY);
-    if (savedOpenItems) {
-        const openItemsIds = JSON.parse(savedOpenItems);
-        openItemsIds.forEach(({ orderId, itemKey }) => {
-            const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
-            if (card) {
-                const itemHeader = card.querySelector(`.item-header[data-item-key="${itemKey}"]`);
-                const itemContent = itemHeader?.nextElementSibling;
-                if (itemHeader && itemContent) {
-                    itemHeader.classList.remove('collapsed');
-                    itemContent.classList.remove('collapsed');
-                    const arrowSpan = itemHeader.querySelector('.collapse-icon-item');
-                    if (arrowSpan) arrowSpan.textContent = '▲';
+    // Восстанавливаем открытые изделия по ключу (с задержкой чтобы DOM успел отрисоваться)
+    setTimeout(() => {
+        const savedOpenItems = localStorage.getItem(POLIMERNIY_ITEMS_STORAGE_KEY);
+        if (savedOpenItems) {
+            const openItemsIds = JSON.parse(savedOpenItems);
+            console.log('📂 Восстанавливаем открытые изделия:', openItemsIds);
+            openItemsIds.forEach(({ orderId, itemKey }) => {
+                const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
+                if (card) {
+                    const itemHeader = card.querySelector(`.item-header[data-item-key="${itemKey}"]`);
+                    if (itemHeader) {
+                        const itemContent = itemHeader.nextElementSibling;
+                        if (itemContent && itemContent.classList.contains('item-content')) {
+                            itemHeader.classList.remove('collapsed');
+                            itemContent.classList.remove('collapsed');
+                            const arrowSpan = itemHeader.querySelector('.collapse-icon-item');
+                            if (arrowSpan) arrowSpan.textContent = '▲';
+                            console.log('✅ Восстановлено изделие:', itemKey);
+                        }
+                    } else {
+                        console.log('⚠️ Не найден элемент с key:', itemKey);
+                    }
                 }
-            }
-        });
-    }
+            });
+        }
+    }, 150);
 }
 
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
