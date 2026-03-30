@@ -80,7 +80,7 @@
                 <img src="../images/logo.png" alt="MasterX Logo" class="logo-img" onerror="this.style.display='none'">
                 <div class="logo-text">Master<span class="x-red">X</span></div>
             </div>
-            <h1 style="margin:0; color: white; font-size:18px;">🔧 Слесарный участок</h1>
+            <h1 style="margin:0; color: white; font-size:18px;"> Слесарный участок</h1>
         </header>
 
         <div class="date-navigation">
@@ -169,33 +169,32 @@
         function getProfileForOperation(operationName, details) {
             if (!details || details.length === 0) return null;
             
-            // Извлекаем название профиля из операции
-            const profileKeywords = ['профиль', 'Профиль', 'НПС', 'МП', 'КП', 'ABA'];
-            let profileNameFromOp = null;
+            let searchName = operationName;
             
-            for (const keyword of profileKeywords) {
-                const regex = new RegExp(`${keyword}\\s+([А-Яа-я0-9\\s\\-]+)`, 'i');
-                const match = operationName.match(regex);
-                if (match) {
-                    profileNameFromOp = match[1].trim();
-                    break;
-                }
+            if (searchName.startsWith('Покраска профиля ')) {
+                searchName = searchName.replace('Покраска профиля ', '');
+            }
+            if (searchName.startsWith('Раскрой профиля ')) {
+                searchName = searchName.replace('Раскрой профиля ', '');
             }
             
-            // Если не нашли по ключевым словам, пробуем искать прямые совпадения
-            if (!profileNameFromOp) {
-                for (const detail of details) {
-                    if (detail.type === 'profile' && operationName.includes(detail.name)) {
+            for (let i = 0; i < details.length; i++) {
+                const detail = details[i];
+                if (detail.type === 'profile') {
+                    if (detail.name.includes(searchName) || searchName.includes(detail.name)) {
                         return detail;
                     }
                 }
-                return null;
             }
             
-            // Ищем профиль в деталях
-            for (const detail of details) {
-                if (detail.type === 'profile' && detail.name.includes(profileNameFromOp)) {
-                    return detail;
+            const searchLower = searchName.toLowerCase();
+            for (let i = 0; i < details.length; i++) {
+                const detail = details[i];
+                if (detail.type === 'profile') {
+                    const detailLower = detail.name.toLowerCase();
+                    if (detailLower.includes(searchLower) || searchLower.includes(detailLower)) {
+                        return detail;
+                    }
                 }
             }
             
@@ -290,31 +289,6 @@
             let currentFilter = 'all';
             let currentlyOpenOrderId = null;
             let isLoadingTasks = false;
-            
-            function saveOpenOrderState() {
-                const allContents = document.querySelectorAll('.order-content');
-                let foundOpenId = null;
-                allContents.forEach(content => {
-                    const card = content.closest('.order-card');
-                    if (card && !content.classList.contains('collapsed')) {
-                        foundOpenId = card.dataset.orderId;
-                    }
-                });
-                currentlyOpenOrderId = foundOpenId;
-            }
-            
-            function restoreOpenOrderState() {
-                if (!currentlyOpenOrderId) return;
-                const openCard = document.querySelector(`.order-card[data-order-id="${currentlyOpenOrderId}"]`);
-                if (openCard) {
-                    const header = openCard.querySelector('.order-header');
-                    const content = openCard.querySelector('.order-content');
-                    if (header && content) {
-                        header.classList.remove('collapsed');
-                        content.classList.remove('collapsed');
-                    }
-                }
-            }
             
             window.taskManager = taskManager;
             
@@ -504,103 +478,103 @@
                     tasksList.appendChild(orderDiv);
                 });
                 
-                restoreOpenCardsState();
-                isLoadingTasks = false;
+                setTimeout(function() {
+                    restoreOpenCardsState();
+                    isLoadingTasks = false;
+                }, 100);
             }
             
             function createTaskCard(task, fullOrder) {
-    var card = document.createElement('div');
-    card.className = 'task-card ' + (task.status === 'completed' ? 'completed' : '');
-    card.dataset.taskId = task.id;
-    
-    var planQuantity = task.totalQuantity || getTaskPlanFromDetails(task, fullOrder);
-    
-    var operationName = task.operation;
-    if (typeof operationName === 'object' && operationName !== null) {
-        operationName = operationName.operation || JSON.stringify(operationName);
-    }
-    if (typeof operationName !== 'string') {
-        operationName = String(operationName);
-    }
-    
-    var header = document.createElement('div');
-    header.className = 'task-header';
-    header.innerHTML = '<span class="task-title">' + escapeHtml(operationName) + (task.isExtra ? '<span class="extra-task-badge">Доп.</span>' : '') + '</span>';
-    card.appendChild(header);
-    
-    var planDiv = document.createElement('div');
-    planDiv.className = 'task-plan';
-    planDiv.innerHTML = '📋 План: ' + planQuantity + ' шт';
-    card.appendChild(planDiv);
-    
-    // ============== ДОБАВЛЯЕМ ИНФОРМАЦИЮ О ПРОФИЛЕ (только для Раскрой профиля) ==============
-    if (fullOrder && fullOrder.items && fullOrder.items[0]) {
-        var details = fullOrder.items[0].details || [];
-        if (operationName && operationName.trim().startsWith('Раскрой профиля')) {
-            var profileInfo = getProfileForOperation(operationName, details);
-            
-            if (profileInfo) {
-                var profileDiv = document.createElement('div');
-                profileDiv.className = 'profile-info';
-                profileDiv.innerHTML = `
-                    <span class="profile-name">📐 ${escapeHtml(profileInfo.name)}</span>
-                    <span class="profile-length">📏 Длина: ${profileInfo.lengthMm || 0} мм</span>
-                    <span class="profile-qty">× ${profileInfo.quantity} шт</span>
-                `;
-                card.appendChild(profileDiv);
+                var card = document.createElement('div');
+                card.className = 'task-card ' + (task.status === 'completed' ? 'completed' : '');
+                card.dataset.taskId = task.id;
+                
+                var planQuantity = task.totalQuantity || getTaskPlanFromDetails(task, fullOrder);
+                
+                var operationName = task.operation;
+                if (typeof operationName === 'object' && operationName !== null) {
+                    operationName = operationName.operation || JSON.stringify(operationName);
+                }
+                if (typeof operationName !== 'string') {
+                    operationName = String(operationName);
+                }
+                
+                var header = document.createElement('div');
+                header.className = 'task-header';
+                header.innerHTML = '<span class="task-title">' + escapeHtml(operationName) + (task.isExtra ? '<span class="extra-task-badge">Доп.</span>' : '') + '</span>';
+                card.appendChild(header);
+                
+                var planDiv = document.createElement('div');
+                planDiv.className = 'task-plan';
+                planDiv.innerHTML = '📋 План: ' + planQuantity + ' шт';
+                card.appendChild(planDiv);
+                
+                // ДОБАВЛЯЕМ ИНФОРМАЦИЮ О ПРОФИЛЕ (только для Раскрой профиля)
+                if (fullOrder && fullOrder.items && fullOrder.items[0]) {
+                    var details = fullOrder.items[0].details || [];
+                    if (operationName && operationName.trim().startsWith('Раскрой профиля')) {
+                        var profileInfo = getProfileForOperation(operationName, details);
+                        if (profileInfo) {
+                            var profileDiv = document.createElement('div');
+                            profileDiv.className = 'profile-info';
+                            profileDiv.innerHTML = `
+                                <span class="profile-name">📐 ${escapeHtml(profileInfo.name)}</span>
+                                <span class="profile-length">📏 Длина: ${profileInfo.lengthMm || 0} мм</span>
+                                <span class="profile-qty">× ${profileInfo.quantity} шт</span>
+                            `;
+                            card.appendChild(profileDiv);
+                        }
+                    }
+                }
+                
+                if (task.isExtra && task.description) {
+                    var desc = document.createElement('div');
+                    desc.className = 'task-description';
+                    desc.textContent = escapeHtml(task.description);
+                    card.appendChild(desc);
+                }
+                
+                var headersDiv = document.createElement('div');
+                headersDiv.className = 'executor-header';
+                headersDiv.innerHTML = '<span>ФИО</span><span>Кол-во</span><span>Статус</span><span></span>';
+                card.appendChild(headersDiv);
+                
+                var executorList = document.createElement('div');
+                executorList.className = 'executor-list';
+                executorList.id = 'executors-' + task.id;
+                
+                if (task.executors && task.executors.length > 0) {
+                    task.executors.forEach(function(executor) { 
+                        executorList.appendChild(createExecutorItem(task, executor)); 
+                    });
+                } else {
+                    var noExecutors = document.createElement('p');
+                    noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 12px;';
+                    noExecutors.textContent = 'Нет исполнителей';
+                    executorList.appendChild(noExecutors);
+                }
+                card.appendChild(executorList);
+                
+                var actionContainer = document.createElement('div');
+                actionContainer.className = 'action-container';
+                if (task.status !== 'completed') {
+                    var addBtn = document.createElement('button');
+                    addBtn.className = 'btn-add-executor';
+                    addBtn.textContent = '+ Добавить исполнителя';
+                    addBtn.onclick = function() { showAddExecutorForm(task, actionContainer); };
+                    actionContainer.appendChild(addBtn);
+                }
+                card.appendChild(actionContainer);
+                
+                var readyBtn = document.createElement('button');
+                readyBtn.className = 'btn-ready';
+                readyBtn.textContent = '✅ ГОТОВО';
+                readyBtn.disabled = task.status === 'completed';
+                readyBtn.onclick = function() { completeTask(task.id); };
+                card.appendChild(readyBtn);
+                
+                return card;
             }
-        }
-    }
-    
-    if (task.isExtra && task.description) {
-        var desc = document.createElement('div');
-        desc.className = 'task-description';
-        desc.textContent = escapeHtml(task.description);
-        card.appendChild(desc);
-    }
-    
-    // ============== ЭТА ЧАСТЬ ОБЯЗАТЕЛЬНА ДЛЯ РАБОТЫ С ИСПОЛНИТЕЛЯМИ ==============
-    var headersDiv = document.createElement('div');
-    headersDiv.className = 'executor-header';
-    headersDiv.innerHTML = '<span>ФИО</span><span>Кол-во</span><span>Статус</span><span></span>';
-    card.appendChild(headersDiv);
-    
-    var executorList = document.createElement('div');
-    executorList.className = 'executor-list';
-    executorList.id = 'executors-' + task.id;
-    
-    if (task.executors && task.executors.length > 0) {
-        task.executors.forEach(function(executor) { 
-            executorList.appendChild(createExecutorItem(task, executor)); 
-        });
-    } else {
-        var noExecutors = document.createElement('p');
-        noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 12px;';
-        noExecutors.textContent = 'Нет исполнителей';
-        executorList.appendChild(noExecutors);
-    }
-    card.appendChild(executorList);
-    
-    var actionContainer = document.createElement('div');
-    actionContainer.className = 'action-container';
-    if (task.status !== 'completed') {
-        var addBtn = document.createElement('button');
-        addBtn.className = 'btn-add-executor';
-        addBtn.textContent = '+ Добавить исполнителя';
-        addBtn.onclick = function() { showAddExecutorForm(task, actionContainer); };
-        actionContainer.appendChild(addBtn);
-    }
-    card.appendChild(actionContainer);
-    
-    var readyBtn = document.createElement('button');
-    readyBtn.className = 'btn-ready';
-    readyBtn.textContent = '✅ ГОТОВО';
-    readyBtn.disabled = task.status === 'completed';
-    readyBtn.onclick = function() { completeTask(task.id); };
-    card.appendChild(readyBtn);
-    
-    return card;
-}
             
             function createExecutorItem(task, executor) {
                 var div = document.createElement('div');
@@ -720,11 +694,7 @@
                 
                 if (confirm('Завершить задачу?\nОперация: ' + operationName + '\nВыполнено: ' + totalAssigned + ' шт')) {
                     taskManager.completeTask(taskId);
-                    var taskCard = document.querySelector('.task-card[data-task-id="' + taskId + '"]');
-                    if (taskCard) {
-                        var updatedTask = taskManager.tasks.find(t => t.id === taskId);
-                        if (updatedTask) taskCard.parentNode.replaceChild(createTaskCard(updatedTask), taskCard);
-                    }
+                    loadTasks();
                 }
             };
             
