@@ -517,7 +517,7 @@ for (var itemKey in order.items) {
     
     var itemHeader = document.createElement('div');
     itemHeader.className = 'item-header collapsed';
-    itemHeader.dataset.itemKey = itemKey;  // УНИКАЛЬНЫЙ КЛЮЧ
+    itemHeader.setAttribute('data-item-index', itemIndex);
     itemHeader.innerHTML = `
         <div style="display: flex; align-items: center; gap: 10px;">
             <span class="item-title">📦 ${escapeHtml(item.product)} ${item.size ? ' (' + escapeHtml(item.size) + ')' : ''} x ${item.totalQuantity} шт</span>
@@ -534,18 +534,20 @@ for (var itemKey in order.items) {
         itemContent.appendChild(createTaskCard(task, fullOrder));
     });
     
-    // Обработчик для сворачивания/разворачивания
-    itemHeader.onclick = function(e) {
-        if (e.target.tagName === 'BUTTON') return;
-        e.stopPropagation();
-        itemHeader.classList.toggle('collapsed');
-        itemContent.classList.toggle('collapsed');
-        var arrowSpan = itemHeader.querySelector('.collapse-icon-item');
-        if (arrowSpan) {
-            arrowSpan.textContent = itemHeader.classList.contains('collapsed') ? '▼' : '▲';
-        }
-        saveOpenCardsState();
-    };
+    // Сохраняем ссылку на itemContent в замыкании
+    (function(currentHeader, currentContent) {
+        currentHeader.onclick = function(e) {
+            if (e.target.tagName === 'BUTTON') return;
+            e.stopPropagation();
+            currentHeader.classList.toggle('collapsed');
+            currentContent.classList.toggle('collapsed');
+            var arrowSpan = currentHeader.querySelector('.collapse-icon-item');
+            if (arrowSpan) {
+                arrowSpan.textContent = currentHeader.classList.contains('collapsed') ? '▼' : '▲';
+            }
+            saveOpenCardsState();
+        };
+    })(itemHeader, itemContent);
     
     itemDiv.appendChild(itemHeader);
     itemDiv.appendChild(itemContent);
