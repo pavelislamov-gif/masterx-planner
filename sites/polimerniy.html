@@ -495,39 +495,40 @@
                         itemDiv.style.overflow = 'hidden';
                         
                         var itemHeader = document.createElement('div');
-                        itemHeader.className = 'item-header collapsed';
-                        itemHeader.innerHTML = `
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span class="item-title">📦 ${escapeHtml(item.product)} ${item.size ? ' (' + escapeHtml(item.size) + ')' : ''} x ${item.totalQuantity} шт</span>
-                                <button class="btn-report-item" onclick="event.stopPropagation(); openRightModalForItem('${order.orderId}', '${itemKey}')">📝 Отчёт</button>
-                            </div>
-                            <span class="collapse-icon-item">▼</span>
-                        `;
-                        
-                        var itemContent = document.createElement('div');
-                        itemContent.className = 'item-content collapsed';
-                        
-                        // Отображаем задачи этого изделия
-                        item.tasks.forEach(function(task) {
-                            itemContent.appendChild(createTaskCard(task, fullOrder));
-                        });
-                        
-                        itemHeader.onclick = function(e) {
-                            if (e.target.tagName === 'BUTTON') return;
-                            e.stopPropagation();
-                            itemHeader.classList.toggle('collapsed');
-                            itemContent.classList.toggle('collapsed');
-                            var arrowSpan = itemHeader.querySelector('.collapse-icon-item');
-                            if (arrowSpan) {
-                                arrowSpan.textContent = itemHeader.classList.contains('collapsed') ? '▼' : '▲';
-                            }
-                            saveOpenCardsState();
-                        };
-                        
-                        itemDiv.appendChild(itemHeader);
-                        itemDiv.appendChild(itemContent);
-                        content.appendChild(itemDiv);
-                        itemIndex++;
+itemHeader.className = 'item-header collapsed';
+itemHeader.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="item-title">📦 ${escapeHtml(item.product)} ${item.size ? ' (' + escapeHtml(item.size) + ')' : ''} x ${item.totalQuantity} шт</span>
+        <button class="btn-report-item" onclick="event.stopPropagation(); openRightModalForItem('${order.orderId}', '${itemKey}')">📝 Отчёт</button>
+    </div>
+    <span class="collapse-icon-item">▼</span>
+`;
+
+var itemContent = document.createElement('div');
+itemContent.className = 'item-content collapsed';
+
+// Отображаем задачи этого изделия
+item.tasks.forEach(function(task) {
+    itemContent.appendChild(createTaskCard(task, fullOrder));
+});
+
+// ДОБАВЛЯЕМ ОБРАБОТЧИК ДЛЯ СВОРАЧИВАНИЯ
+itemHeader.onclick = function(e) {
+    if (e.target.tagName === 'BUTTON') return;
+    e.stopPropagation();
+    itemHeader.classList.toggle('collapsed');
+    itemContent.classList.toggle('collapsed');
+    var arrowSpan = itemHeader.querySelector('.collapse-icon-item');
+    if (arrowSpan) {
+        arrowSpan.textContent = itemHeader.classList.contains('collapsed') ? '▼' : '▲';
+    }
+    saveOpenCardsState();
+};
+
+itemDiv.appendChild(itemHeader);
+itemDiv.appendChild(itemContent);
+content.appendChild(itemDiv);
+itemIndex++;
                     }
                     
                     header.addEventListener('click', function(e) {
