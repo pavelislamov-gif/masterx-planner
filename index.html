@@ -1798,19 +1798,19 @@
                 const header = document.createElement('div');
                 header.className = `order-header ${statusClass}`;
                 header.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-        <div>
-            <h3>📁 ${escapeHtml(order.groupName)}</h3>
-            <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
-                Изделий: ${order.items ? order.items.length : 0} | №${order.number || '---'}
-                ${groupStatus === 'green' ? ' | ✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? ' | ⚡ В РАБОТЕ' : ' | ⏳ ОЖИДАЕТ')}
-            </div>
-        </div>
-        <div>
-            <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
-        </div>
-    </div>
-`;
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <div>
+                            <h3>📁 ${escapeHtml(order.groupName)}</h3>
+                            <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
+                                Изделий: ${order.items ? order.items.length : 0} | №${order.number || '---'}
+                                ${groupStatus === 'green' ? ' | ✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? ' | ⚡ В РАБОТЕ' : ' | ⏳ ОЖИДАЕТ')}
+                            </div>
+                        </div>
+                        <div>
+                            <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
+                        </div>
+                    </div>
+                `;
 
                 const content = document.createElement('div');
                 content.className = 'order-content';
@@ -2156,19 +2156,18 @@
             
             const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
             
-            const reportsBySite = {
-                'polimerniy': [],
-                'slesarniy': [],
-                'frezerniy': [],
-                'tokarniy': [],
-                'lazerno': []
-            };
-            
-            allReports.forEach(report => {
-                const parts = report.taskId.split('_');
-                if (parts[0] == orderId && reportsBySite[report.siteKey] !== undefined) {
-                    reportsBySite[report.siteKey].push(report);
+            // Фильтруем отчёты по заказу
+            const orderReports = allReports.filter(report => {
+                // Новый формат (isItemReport или isOrderReport)
+                if ((report.isItemReport || report.isOrderReport) && report.orderId == orderId) {
+                    return true;
                 }
+                // Старый формат (по taskId)
+                if (report.taskId) {
+                    const parts = report.taskId.split('_');
+                    return parts[0] == orderId;
+                }
+                return false;
             });
             
             const siteNames = {
@@ -2179,6 +2178,21 @@
                 'lazerno': '✨ ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
             };
             
+            // Группируем по участкам
+            const reportsBySite = {
+                'polimerniy': [],
+                'slesarniy': [],
+                'frezerniy': [],
+                'tokarniy': [],
+                'lazerno': []
+            };
+            
+            orderReports.forEach(report => {
+                if (reportsBySite[report.siteKey] !== undefined) {
+                    reportsBySite[report.siteKey].push(report);
+                }
+            });
+            
             let html = `
                 <div style="padding: 15px;">
                     <div style="text-align: center; margin-bottom: 25px;">
@@ -2188,6 +2202,8 @@
                         <p style="color: #a0a0a0;">Изделий в заказе: ${order.items?.length || 0}</p>
                     </div>
             `;
+            
+            let hasData = false;
             
             for (const [siteKey, reports] of Object.entries(reportsBySite)) {
                 html += `
@@ -2201,6 +2217,7 @@
                 if (reports.length === 0) {
                     html += `<div style="color: #a0a0a0; text-align: center; padding: 20px;">— Нет данных —</div>`;
                 } else {
+                    hasData = true;
                     reports.forEach(report => {
                         const rows = report.rows || [];
                         rows.forEach(row => {
@@ -2221,6 +2238,15 @@
                 }
                 
                 html += `</div></div>`;
+            }
+            
+            if (!hasData) {
+                html += `
+                    <div style="text-align: center; padding: 40px; background: #15191f; border-radius: 12px;">
+                        <div style="font-size: 48px; margin-bottom: 15px;">📭</div>
+                        <p>Нет отчётов по этому заказу</p>
+                    </div>
+                `;
             }
             
             html += `
@@ -2271,9 +2297,21 @@
             const item = order.items[itemIndex];
             const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
             
+            // Создаём ключ для поиска отчётов по этому изделию
+            const itemKey = item.product + '_' + (item.size?.name || '');
+            
+            // Фильтруем отчёты для этого изделия
             const itemReports = allReports.filter(report => {
-                const parts = report.taskId.split('_');
-                return parts.length >= 3 && parts[0] == orderId && parts[2] == itemIndex;
+                // Проверяем по itemKey (новый формат)
+                if (report.isItemReport && report.itemKey === itemKey && report.orderId == orderId) {
+                    return true;
+                }
+                // Проверяем по taskId (старый формат)
+                if (report.taskId) {
+                    const parts = report.taskId.split('_');
+                    return parts.length >= 3 && parts[0] == orderId && parts[2] == itemIndex;
+                }
+                return false;
             });
             
             const siteNames = {
@@ -2284,17 +2322,7 @@
                 'lazerno': '✨ ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
             };
             
-            let html = `
-                <div style="padding: 15px;">
-                    <div style="text-align: center; margin-bottom: 25px;">
-                        <h2 style="color: #ff3b3b;">📋 ОТЧЁТ ПО ИЗДЕЛИЮ</h2>
-                        <h3>${escapeHtml(item.product)}</h3>
-                        <p style="color: #a0a0a0;">Группа: ${escapeHtml(order.groupName)} | Заказ: ${order.number}</p>
-                        <p style="color: #a0a0a0;">Размер: ${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</p>
-                        <p style="color: #a0a0a0;">Покрытие: ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</p>
-                    </div>
-            `;
-            
+            // Группируем отчёты по участкам
             const reportsBySite = {
                 'polimerniy': [],
                 'slesarniy': [],
@@ -2309,6 +2337,19 @@
                 }
             });
             
+            let html = `
+                <div style="padding: 15px;">
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <h2 style="color: #ff3b3b;">📋 ОТЧЁТ ПО ИЗДЕЛИЮ</h2>
+                        <h3>${escapeHtml(item.product)}</h3>
+                        <p style="color: #a0a0a0;">Группа: ${escapeHtml(order.groupName)} | Заказ: ${order.number}</p>
+                        <p style="color: #a0a0a0;">Размер: ${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</p>
+                        <p style="color: #a0a0a0;">Покрытие: ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</p>
+                    </div>
+            `;
+            
+            let hasData = false;
+            
             for (const [siteKey, reports] of Object.entries(reportsBySite)) {
                 html += `
                     <div style="margin-bottom: 25px; border: 1px solid #2a2f38; border-radius: 12px; overflow: hidden;">
@@ -2321,6 +2362,7 @@
                 if (reports.length === 0) {
                     html += `<div style="color: #a0a0a0; text-align: center; padding: 20px;">— Нет данных —</div>`;
                 } else {
+                    hasData = true;
                     reports.forEach(report => {
                         const rows = report.rows || [];
                         rows.forEach(row => {
@@ -2343,7 +2385,7 @@
                 html += `</div></div>`;
             }
             
-            if (itemReports.length === 0) {
+            if (!hasData) {
                 html += `
                     <div style="text-align: center; padding: 40px; background: #15191f; border-radius: 12px;">
                         <div style="font-size: 48px; margin-bottom: 15px;">📭</div>
