@@ -37,6 +37,18 @@
         }
         .item-header:hover { background: #232830; }
         .item-title { font-weight: 600; color: #ff9800; font-size: 14px; }
+        .btn-report-item {
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 3px 8px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-report-item:hover { background: #e68900; transform: scale(1.02); }
         .item-content { padding: 15px; }
         .item-content.collapsed { display: none; }
         .task-card { padding: 12px 15px; border-bottom: 1px solid #2a2f38; transition: all 0.3s; margin-bottom: 10px; background: #15191f; border-radius: 8px; }
@@ -63,19 +75,6 @@
         .new-executor-form input { width: 130px; padding: 4px 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; font-size: 11px; }
         .btn-ready { background: #28a745; color: white; padding: 4px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; margin: 8px 0 0 0; min-width: 80px; }
         .btn-ready:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-report-header {
-            background: #ff9800;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 5px 12px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 15px;
-            transition: all 0.2s;
-        }
-        .btn-report-header:hover { background: #e68900; transform: scale(1.02); }
         .extra-task-badge { background: #ff3b3b; color: white; padding: 2px 4px; border-radius: 10px; font-size: 9px; margin-left: 6px; }
         .task-description { color: #a0a0a0; font-size: 10px; margin: 4px 0 6px 0; padding: 4px; background: #15191f; border-radius: 4px; border-left: 2px solid #ff3b3b; }
         .no-tasks { text-align: center; padding: 40px; background: #1a1e24; border-radius: 12px; color: #a0a0a0; border: 1px solid #2a2f38; }
@@ -217,7 +216,7 @@
     <div id="rightModalOverlay" class="right-modal-overlay" onclick="closeRightModal()"></div>
     <div id="rightModal" class="right-modal">
         <div class="right-modal-header">
-            <h3>📝 Отчёт по заказу</h3>
+            <h3>📝 Отчёт по изделию</h3>
             <button class="right-modal-close" onclick="closeRightModal()">&times;</button>
         </div>
         <div id="rightModalContent" class="right-modal-content"></div>
@@ -459,7 +458,8 @@
                             product: task.product,
                             size: task.size,
                             totalQuantity: task.totalQuantity,
-                            tasks: []
+                            tasks: [],
+                            itemKey: itemKey
                         };
                     }
                     byOrder[task.orderId].items[itemKey].tasks.push(task);
@@ -473,15 +473,6 @@
                     var header = document.createElement('div');
                     header.className = 'order-header collapsed';
                     header.innerHTML = '<h3>📦 Заказ №' + escapeHtml(order.number) + '</h3><span class="collapse-icon">▼</span>';
-                    
-                    // КНОПКА ОТЧЁТ В ШАПКЕ ЗАКАЗА
-                    var reportBtn = document.createElement('button');
-                    reportBtn.className = 'btn-report-header';
-                    reportBtn.textContent = '📝 Отчёт';
-                    reportBtn.onclick = function() { 
-                        openRightModalForOrder(order.orderId); 
-                    };
-                    header.appendChild(reportBtn);
                     
                     var content = document.createElement('div');
                     content.className = 'order-content collapsed';
@@ -506,7 +497,10 @@
                         var itemHeader = document.createElement('div');
                         itemHeader.className = 'item-header collapsed';
                         itemHeader.innerHTML = `
-                            <span class="item-title">📦 ${escapeHtml(item.product)} ${item.size ? ' (' + escapeHtml(item.size) + ')' : ''} x ${item.totalQuantity} шт</span>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="item-title">📦 ${escapeHtml(item.product)} ${item.size ? ' (' + escapeHtml(item.size) + ')' : ''} x ${item.totalQuantity} шт</span>
+                                <button class="btn-report-item" onclick="event.stopPropagation(); openRightModalForItem('${order.orderId}', '${itemKey}')">📝 Отчёт</button>
+                            </div>
                             <span class="collapse-icon-item">▼</span>
                         `;
                         
@@ -519,6 +513,7 @@
                         });
                         
                         itemHeader.onclick = function(e) {
+                            if (e.target.tagName === 'BUTTON') return;
                             e.stopPropagation();
                             itemHeader.classList.toggle('collapsed');
                             itemContent.classList.toggle('collapsed');
@@ -796,12 +791,12 @@
             };
         }
         
-        // ============== ПРАВАЯ МОДАЛЬНАЯ ПАНЕЛЬ ДЛЯ ОТЧЁТА ==============
-        let currentReportOrderId = null;
+        // ============== ПРАВАЯ МОДАЛЬНАЯ ПАНЕЛЬ ДЛЯ ОТЧЁТА ПО ИЗДЕЛИЮ ==============
+        let currentReportItem = null;
         let currentReportFullOrder = null;
         let reportRows = [];
 
-        function openRightModalForOrder(orderId) {
+        function openRightModalForItem(orderId, itemKey) {
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             const fullOrder = allOrders.find(o => o.id == orderId);
             if (!fullOrder) {
@@ -809,34 +804,50 @@
                 return;
             }
             
-            currentReportOrderId = orderId;
+            // Находим конкретное изделие
+            const item = fullOrder.items.find(i => (i.product + '_' + (i.size?.name || '')) === itemKey);
+            if (!item) {
+                alert('Изделие не найдено');
+                return;
+            }
+            
+            currentReportItem = {
+                orderId: orderId,
+                orderNumber: fullOrder.number,
+                product: item.product,
+                size: item.size?.name,
+                quantity: item.size?.quantity,
+                ral: item.ral,
+                texture: item.texture,
+                itemKey: itemKey
+            };
             currentReportFullOrder = fullOrder;
             
             const modal = document.getElementById('rightModal');
             const overlay = document.getElementById('rightModalOverlay');
             const contentDiv = document.getElementById('rightModalContent');
             
-            // Загружаем сохранённые данные для этого заказа
-            const savedData = getSavedReportDataForOrder(orderId);
+            // Загружаем сохранённые данные для этого изделия
+            const savedData = getSavedReportDataForItem(orderId, itemKey);
             if (savedData && savedData.rows) {
                 reportRows = [...savedData.rows];
             } else {
                 reportRows = [{ расход: 0, количество: 0, комментарий: '' }];
             }
             
-            renderReportForm(contentDiv, fullOrder);
+            renderReportFormForItem(contentDiv, fullOrder, item);
             modal.classList.add('open');
             overlay.classList.add('show');
         }
 
-        function getSavedReportDataForOrder(orderId) {
+        function getSavedReportDataForItem(orderId, itemKey) {
             const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-            const orderReports = allReports.filter(r => r.orderId == orderId && r.isOrderReport === true);
+            const itemReports = allReports.filter(r => r.orderId == orderId && r.itemKey === itemKey && r.isItemReport === true);
             
-            if (orderReports.length === 0) return null;
+            if (itemReports.length === 0) return null;
             
             const allRows = [];
-            orderReports.forEach(report => {
+            itemReports.forEach(report => {
                 if (report.rows) {
                     allRows.push(...report.rows);
                 }
@@ -844,11 +855,11 @@
             
             return {
                 rows: allRows,
-                savedAt: orderReports[orderReports.length - 1]?.savedAt
+                savedAt: itemReports[itemReports.length - 1]?.savedAt
             };
         }
 
-        function renderReportForm(container, fullOrder) {
+        function renderReportFormForItem(container, fullOrder, item) {
             let rowsHtml = '';
             
             reportRows.forEach((row, index) => {
@@ -856,7 +867,7 @@
                     <div class="report-row" data-row-index="${index}">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                             <span style="font-size: 12px; color: #ff9800;">📝 Запись ${index + 1}</span>
-                            <button type="button" class="btn-remove-row" onclick="removeReportRow(${index})">✖️</button>
+                            <button type="button" class="btn-remove-row" onclick="removeReportRowItem(${index})">✖️</button>
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                             <div>
@@ -876,37 +887,31 @@
                 `;
             });
             
-            let orderInfo = '';
-            if (fullOrder) {
-                orderInfo = `
-                    <div style="margin-bottom: 20px; padding: 12px; background: #15191f; border-radius: 8px; border-left: 3px solid #ff9800;">
-                        <div style="font-size: 12px; color: #a0a0a0;">Заказ: ${escapeHtml(fullOrder.number)}</div>
-                        <div style="font-size: 16px; font-weight: bold; color: #ff9800; margin: 5px 0;">${escapeHtml(fullOrder.groupName)}</div>
-                        <div style="font-size: 12px;">📋 Изделий в заказе: ${fullOrder.items?.length || 0}</div>
-                    </div>
-                `;
-            }
-            
             container.innerHTML = `
                 <div style="padding: 20px 0;">
-                    ${orderInfo}
+                    <div style="margin-bottom: 20px; padding: 12px; background: #15191f; border-radius: 8px; border-left: 3px solid #ff9800;">
+                        <div style="font-size: 12px; color: #a0a0a0;">Заказ: ${escapeHtml(fullOrder.number)}</div>
+                        <div style="font-size: 16px; font-weight: bold; color: #ff9800; margin: 5px 0;">${escapeHtml(item.product)}</div>
+                        <div style="font-size: 12px;">📏 Размер: ${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</div>
+                        <div style="font-size: 12px;">🎨 Покрытие: ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</div>
+                    </div>
                     
                     <div id="reportRowsContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
                         ${rowsHtml}
                     </div>
                     
                     <div style="margin-bottom: 15px;">
-                        <button type="button" class="btn-add-row" onclick="addReportRow()">➕ Добавить строку</button>
+                        <button type="button" class="btn-add-row" onclick="addReportRowItem()">➕ Добавить строку</button>
                     </div>
                     
                     <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button type="button" class="btn btn-success" onclick="saveReportDataForOrder()" style="flex: 1;">💾 Сохранить</button>
+                        <button type="button" class="btn btn-success" onclick="saveReportDataForItem()" style="flex: 1;">💾 Сохранить</button>
                         <button type="button" class="btn btn-danger" onclick="closeRightModal()" style="flex: 1;">✖️ Закрыть</button>
                     </div>
                     
-                    ${getSavedReportDataForOrder(currentReportOrderId)?.savedAt ? `
+                    ${getSavedReportDataForItem(currentReportItem?.orderId, currentReportItem?.itemKey)?.savedAt ? `
                     <div style="margin-top: 15px; padding: 8px; background: #15191f; border-radius: 6px; font-size: 11px; color: #4cd964;">
-                        ✅ Последнее сохранение: ${new Date(getSavedReportDataForOrder(currentReportOrderId).savedAt).toLocaleString()}
+                        ✅ Последнее сохранение: ${new Date(getSavedReportDataForItem(currentReportItem.orderId, currentReportItem.itemKey).savedAt).toLocaleString()}
                     </div>
                     ` : ''}
                 </div>
@@ -938,13 +943,13 @@
             });
         }
 
-        function addReportRow() {
+        function addReportRowItem() {
             reportRows.push({ расход: 0, количество: 0, комментарий: '' });
             const container = document.getElementById('rightModalContent');
-            renderReportForm(container, currentReportFullOrder);
+            renderReportFormForItem(container, currentReportFullOrder, currentReportItem);
         }
 
-        function removeReportRow(rowIndex) {
+        function removeReportRowItem(rowIndex) {
             if (reportRows.length <= 1) {
                 if (!confirm('Удалить последнюю строку? Будет создана пустая строка.')) return;
                 reportRows = [{ расход: 0, количество: 0, комментарий: '' }];
@@ -952,11 +957,11 @@
                 reportRows.splice(rowIndex, 1);
             }
             const container = document.getElementById('rightModalContent');
-            renderReportForm(container, currentReportFullOrder);
+            renderReportFormForItem(container, currentReportFullOrder, currentReportItem);
         }
 
-        function saveReportDataForOrder() {
-            if (!currentReportOrderId || !currentReportFullOrder) return;
+        function saveReportDataForItem() {
+            if (!currentReportItem) return;
             
             document.querySelectorAll('.report-expense').forEach(input => {
                 const rowIndex = parseInt(input.dataset.row);
@@ -978,9 +983,14 @@
             });
             
             const reportData = {
-                orderId: currentReportOrderId,
-                orderNumber: currentReportFullOrder.number,
-                product: currentReportFullOrder.groupName,
+                orderId: currentReportItem.orderId,
+                orderNumber: currentReportItem.orderNumber,
+                product: currentReportItem.product,
+                size: currentReportItem.size,
+                quantity: currentReportItem.quantity,
+                ral: currentReportItem.ral,
+                texture: currentReportItem.texture,
+                itemKey: currentReportItem.itemKey,
                 siteKey: 'polimerniy',
                 rows: reportRows.map(row => ({
                     расход: row.расход || 0,
@@ -988,11 +998,11 @@
                     комментарий: row.комментарий || ''
                 })),
                 savedAt: new Date().toISOString(),
-                isOrderReport: true
+                isItemReport: true
             };
             
             let allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-            allReports = allReports.filter(r => !(r.orderId == currentReportOrderId && r.isOrderReport === true));
+            allReports = allReports.filter(r => !(r.orderId == currentReportItem.orderId && r.itemKey === currentReportItem.itemKey && r.isItemReport === true));
             allReports.push(reportData);
             localStorage.setItem('material_reports', JSON.stringify(allReports));
             
@@ -1005,17 +1015,17 @@
             const overlay = document.getElementById('rightModalOverlay');
             modal.classList.remove('open');
             overlay.classList.remove('show');
-            currentReportOrderId = null;
+            currentReportItem = null;
             currentReportFullOrder = null;
             reportRows = [];
         }
 
         // Глобальные функции
-        window.openRightModalForOrder = openRightModalForOrder;
+        window.openRightModalForItem = openRightModalForItem;
         window.closeRightModal = closeRightModal;
-        window.addReportRow = addReportRow;
-        window.removeReportRow = removeReportRow;
-        window.saveReportDataForOrder = saveReportDataForOrder;
+        window.addReportRowItem = addReportRowItem;
+        window.removeReportRowItem = removeReportRowItem;
+        window.saveReportDataForItem = saveReportDataForItem;
     </script>
 </body>
 </html>
