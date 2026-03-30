@@ -514,15 +514,15 @@
                 // ДОБАВЛЯЕМ ИНФОРМАЦИЮ О ПРОФИЛЕ (только для Раскрой профиля)
                 if (fullOrder && fullOrder.items && fullOrder.items[0]) {
     var details = fullOrder.items[0].details || [];
-    if (operationName && operationName.trim().startsWith('Раскрой профиля')) {
-        var profileInfo = getProfileForOperation(operationName, details);
-        if (profileInfo) {
+    if (operationName && operationName.trim().startsWith('Раскрой ')) {
+        var detailInfo = getDetailForOperation(operationName, details);
+        if (detailInfo) {
             var profileDiv = document.createElement('div');
             profileDiv.className = 'profile-info';
             profileDiv.innerHTML = `
-                <span class="profile-name">📐 ${escapeHtml(profileInfo.name)}</span>
-                <span class="profile-length">📏 Длина: ${profileInfo.lengthMm || 0} мм</span>
-                <span class="profile-qty">× ${profileInfo.quantity} шт</span>
+                <span class="profile-name">📐 ${escapeHtml(detailInfo.name)}</span>
+                <span class="profile-length">📏 Длина: ${detailInfo.lengthMm || 0} мм</span>
+                <span class="profile-qty">× ${detailInfo.quantity} шт</span>
             `;
             card.appendChild(profileDiv);
         }
