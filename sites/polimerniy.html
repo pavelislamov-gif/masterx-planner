@@ -320,7 +320,7 @@
 
         // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
         const POLIMERNIY_STORAGE_KEY = 'polimerniy_open_cards';
-const POLIMERNIY_ITEMS_STORAGE_KEY = 'polimerniy_open_items_v2'; // меняем ключ чтобы не было конфликтов
+const POLIMERNIY_ITEMS_STORAGE_KEY = 'polimerniy_open_items_v3';
 
 function saveOpenCardsState() {
     // Сохраняем открытые заказы
@@ -333,19 +333,23 @@ function saveOpenCardsState() {
     });
     localStorage.setItem(POLIMERNIY_STORAGE_KEY, JSON.stringify(openCards));
     
-    // Сохраняем открытые изделия (по уникальному ключу)
-    const openItems = [];
+    // Сохраняем открытые изделия - сохраняем ВСЕ индексы для каждого заказа
+    const openItemsByOrder = {};
     document.querySelectorAll('.order-card').forEach(card => {
         const orderId = card.dataset.orderId;
-        card.querySelectorAll('.item-header').forEach(itemHeader => {
-            const itemKey = itemHeader.getAttribute('data-item-key');
-            if (itemKey && !itemHeader.classList.contains('collapsed')) {
-                openItems.push({ orderId, itemKey });
+        const openIndices = [];
+        const items = card.querySelectorAll('.item-header');
+        items.forEach((itemHeader, idx) => {
+            if (!itemHeader.classList.contains('collapsed')) {
+                openIndices.push(idx);
             }
         });
+        if (openIndices.length > 0) {
+            openItemsByOrder[orderId] = openIndices;
+        }
     });
-    localStorage.setItem(POLIMERNIY_ITEMS_STORAGE_KEY, JSON.stringify(openItems));
-    console.log('💾 Сохранено открытых изделий:', openItems);
+    localStorage.setItem(POLIMERNIY_ITEMS_STORAGE_KEY, JSON.stringify(openItemsByOrder));
+    console.log('💾 Сохранены открытые изделия:', openItemsByOrder);
 }
 
 function restoreOpenCardsState() {
@@ -366,34 +370,37 @@ function restoreOpenCardsState() {
         });
     }
     
-    // Восстанавливаем открытые изделия по ключу (с задержкой чтобы DOM успел отрисоваться)
+    // Восстанавливаем открытые изделия
     setTimeout(() => {
         const savedOpenItems = localStorage.getItem(POLIMERNIY_ITEMS_STORAGE_KEY);
         if (savedOpenItems) {
-            const openItemsIds = JSON.parse(savedOpenItems);
-            console.log('📂 Восстанавливаем открытые изделия:', openItemsIds);
-            openItemsIds.forEach(({ orderId, itemKey }) => {
+            const openItemsByOrder = JSON.parse(savedOpenItems);
+            console.log('📂 Восстанавливаем открытые изделия:', openItemsByOrder);
+            
+            for (const orderId in openItemsByOrder) {
                 const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
                 if (card) {
-                    const itemHeader = card.querySelector(`.item-header[data-item-key="${itemKey}"]`);
-                    if (itemHeader) {
-                        const itemContent = itemHeader.nextElementSibling;
-                        if (itemContent && itemContent.classList.contains('item-content')) {
-                            itemHeader.classList.remove('collapsed');
-                            itemContent.classList.remove('collapsed');
-                            const arrowSpan = itemHeader.querySelector('.collapse-icon-item');
-                            if (arrowSpan) arrowSpan.textContent = '▲';
-                            console.log('✅ Восстановлено изделие:', itemKey);
+                    const items = card.querySelectorAll('.item-header');
+                    const openIndices = openItemsByOrder[orderId];
+                    
+                    openIndices.forEach(itemIndex => {
+                        const itemHeader = items[itemIndex];
+                        if (itemHeader) {
+                            const itemContent = itemHeader.nextElementSibling;
+                            if (itemContent && itemContent.classList.contains('item-content')) {
+                                itemHeader.classList.remove('collapsed');
+                                itemContent.classList.remove('collapsed');
+                                const arrowSpan = itemHeader.querySelector('.collapse-icon-item');
+                                if (arrowSpan) arrowSpan.textContent = '▲';
+                                console.log('✅ Восстановлено изделие индекс:', itemIndex);
+                            }
                         }
-                    } else {
-                        console.log('⚠️ Не найден элемент с key:', itemKey);
-                    }
+                    });
                 }
-            });
+            }
         }
     }, 150);
 }
-
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         if (typeof TaskManager === 'undefined') {
             console.error('❌ TaskManager не загружен!');
