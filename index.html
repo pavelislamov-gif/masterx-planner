@@ -1795,22 +1795,55 @@
                 card.className = 'order-card';
                 card.dataset.orderId = order.id;
 
-                const header = document.createElement('div');
-                header.className = `order-header ${statusClass}`;
-                header.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <div>
-                            <h3>📁 ${escapeHtml(order.groupName)}</h3>
-                            <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
-                                Изделий: ${order.items ? order.items.length : 0} | №${order.number || '---'}
-                                ${groupStatus === 'green' ? ' | ✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? ' | ⚡ В РАБОТЕ' : ' | ⏳ ОЖИДАЕТ')}
-                            </div>
-                        </div>
-                        <div>
-                            <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
-                        </div>
-                    </div>
-                `;
+                let sizeInfo = '';
+let ralInfo = '';
+const sizeMap = {};
+const ralSet = new Set();
+
+if (order.items && order.items.length > 0) {
+    order.items.forEach(item => {
+        // Собираем информацию о размерах
+        const sizeName = item.size?.name || 'Стандартный';
+        const quantity = item.size?.quantity || 1;
+        const key = sizeName;
+        if (!sizeMap[key]) {
+            sizeMap[key] = 0;
+        }
+        sizeMap[key] += quantity;
+        
+        // Собираем информацию о RAL
+        if (item.ral) {
+            ralSet.add(`${item.ral} / ${item.texture || ''}`);
+        }
+    });
+    
+    const sizeParts = [];
+    for (const [sizeName, totalQty] of Object.entries(sizeMap)) {
+        sizeParts.push(`${sizeName} × ${totalQty} шт`);
+    }
+    sizeInfo = sizeParts.join(', ');
+    ralInfo = Array.from(ralSet).join(', ');
+}
+
+const header = document.createElement('div');
+header.className = `order-header ${statusClass}`;
+header.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px;">
+        <div>
+            <h3>📁 ${escapeHtml(order.groupName)}</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 5px; font-size: 12px; color: #a0a0a0;">
+                <span>📦 Изделий: ${order.items ? order.items.length : 0}</span>
+                <span>№${order.number || '---'}</span>
+                ${sizeInfo ? `<span>📏 ${sizeInfo}</span>` : ''}
+                ${ralInfo ? `<span>🎨 ${ralInfo}</span>` : ''}
+                <span>${groupStatus === 'green' ? '✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? '⚡ В РАБОТЕ' : '⏳ ОЖИДАЕТ')}</span>
+            </div>
+        </div>
+        <div>
+            <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
+        </div>
+    </div>
+`;
 
                 const content = document.createElement('div');
                 content.className = 'order-content';
