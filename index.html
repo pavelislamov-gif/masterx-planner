@@ -2194,14 +2194,19 @@
             });
             
             let html = `
-                <div style="padding: 15px;">
-                    <div style="text-align: center; margin-bottom: 25px;">
-                        <h2 style="color: #ff3b3b;">📋 ОТЧЁТ ПО ЗАКАЗУ</h2>
-                        <h3>${escapeHtml(order.groupName)}</h3>
-                        <p style="color: #a0a0a0;">Номер: ${order.number} | Дата: ${order.date}</p>
-                        <p style="color: #a0a0a0;">Изделий в заказе: ${order.items?.length || 0}</p>
-                    </div>
-            `;
+    <div style="padding: 15px;">
+        <div style="margin-bottom: 20px; border-bottom: 1px solid #2a2f38; padding-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 10px;">
+                <h2 style="color: #ff3b3b; margin: 0;">📋 ОТЧЁТ ПО ИЗДЕЛИЮ</h2>
+                <h3 style="margin: 0;">${escapeHtml(item.product)}</h3>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 8px; font-size: 13px; color: #a0a0a0;">
+                <span>📁 ${escapeHtml(order.groupName)} | №${order.number}</span>
+                <span>📏 ${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
+                <span>🎨 ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</span>
+            </div>
+        </div>
+`;
             
             let hasData = false;
             
@@ -2338,15 +2343,19 @@
             });
             
             let html = `
-                <div style="padding: 15px;">
-                    <div style="text-align: center; margin-bottom: 25px;">
-                        <h2 style="color: #ff3b3b;">📋 ОТЧЁТ ПО ИЗДЕЛИЮ</h2>
-                        <h3>${escapeHtml(item.product)}</h3>
-                        <p style="color: #a0a0a0;">Группа: ${escapeHtml(order.groupName)} | Заказ: ${order.number}</p>
-                        <p style="color: #a0a0a0;">Размер: ${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</p>
-                        <p style="color: #a0a0a0;">Покрытие: ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</p>
-                    </div>
-            `;
+    <div style="padding: 15px;">
+        <div style="margin-bottom: 20px; border-bottom: 1px solid #2a2f38; padding-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 10px;">
+                <h2 style="color: #ff3b3b; margin: 0;">📋 ОТЧЁТ ПО ЗАКАЗУ</h2>
+                <h3 style="margin: 0;">${escapeHtml(order.groupName)}</h3>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 8px; font-size: 13px; color: #a0a0a0;">
+                <span>№${order.number}</span>
+                <span>📅 ${order.date}</span>
+                <span>📦 Изделий: ${order.items?.length || 0}</span>
+            </div>
+        </div>
+`;
             
             let hasData = false;
             
