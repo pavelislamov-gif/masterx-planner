@@ -950,7 +950,17 @@
             }
         }
 
-        // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ДЛЯ УЧАСТКА (с деталями) ==============
+        // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ==============
+        function getOperationNames(productName, siteKey) {
+            const ops = getOperationNamesWithDetails(productName, siteKey);
+            if (ops.length === 0) return [];
+
+            if (typeof ops[0] === 'object' && ops[0].operation) {
+                return ops.map(op => op.operation);
+            }
+            return ops;
+        }
+
         function getOperationNamesWithDetails(productName, siteKey) {
             const productOps = taskOperationsData[productName];
             if (!productOps) return [];
@@ -967,23 +977,6 @@
             if (!siteColumn) return [];
 
             return productOps[siteColumn] || [];
-        }
-
-        // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ДЛЯ ОТОБРАЖЕНИЯ (только названия) ==============
-        function getOperationNames(productName, siteKey) {
-            const ops = getOperationNamesWithDetails(productName, siteKey);
-            if (ops.length === 0) return [];
-
-            if (typeof ops[0] === 'object' && ops[0].operation) {
-                return ops.map(op => op.operation);
-            }
-            return ops;
-        }
-
-        // ============== ФУНКЦИЯ СОЗДАНИЯ ЗАДАЧ (НЕ СОЗДАЁТ АВТОМАТИЧЕСКИ) ==============
-        function createTasksForOrder(order) {
-            console.log(`📅 Заказ №${order.number} создан. Задачи не созданы автоматически.`);
-            console.log(`📋 Для создания задач нажмите кнопку + на нужной операции в карточке заказа.`);
         }
 
         // ============== ФУНКЦИИ ДЛЯ ПРОФИЛЕЙ ==============
@@ -1503,7 +1496,7 @@
             const year = date.getFullYear().toString().slice(-2);
             const month = (date.getMonth() + 1).toString().padStart(2, '0');
             const day = date.getDate().toString().padStart(2, '0');
-            return `Г-${year}${month}${day}-${index.toString().padStart(3, '0')}`;
+            return `${day}.${month}.${year}`;
         }
 
         function escapeHtml(str) {
@@ -1511,7 +1504,7 @@
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
-        // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК НА ГЛАВНОЙ ==============
+        // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
         const MAIN_STORAGE_KEY = 'main_open_cards';
         const MAIN_ITEMS_STORAGE_KEY = 'main_open_items';
 
@@ -1524,15 +1517,12 @@
                 }
             });
             localStorage.setItem(MAIN_STORAGE_KEY, JSON.stringify(openCards));
-            console.log('💾 Сохранены открытые карточки на главной:', openCards);
         }
 
         function restoreMainOpenCardsState() {
             const savedOpenCards = localStorage.getItem(MAIN_STORAGE_KEY);
             if (!savedOpenCards) return;
             const openCardsIds = JSON.parse(savedOpenCards);
-            console.log('📂 Восстанавливаем открытые карточки на главной:', openCardsIds);
-
             openCardsIds.forEach(orderId => {
                 const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
                 if (card) {
@@ -1540,7 +1530,6 @@
                     const content = card.querySelector('.order-content');
                     if (header && content) {
                         content.style.display = 'block';
-                        console.log('✅ Восстановлена карточка:', orderId);
                     }
                 }
             });
@@ -1557,15 +1546,12 @@
                 });
             });
             localStorage.setItem(MAIN_ITEMS_STORAGE_KEY, JSON.stringify(openItems));
-            console.log('💾 Сохранены открытые изделия:', openItems);
         }
 
         function restoreMainOpenItemsState() {
             const savedOpenItems = localStorage.getItem(MAIN_ITEMS_STORAGE_KEY);
             if (!savedOpenItems) return;
             const openItemsIds = JSON.parse(savedOpenItems);
-            console.log('📂 Восстанавливаем открытые изделия:', openItemsIds);
-
             openItemsIds.forEach(({ orderId, itemIndex }) => {
                 const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
                 if (card) {
@@ -1690,7 +1676,6 @@
             } else {
                 const item = order.items[itemIndex];
 
-                // ========== ОПРЕДЕЛЯЕМ ПЛАН ИЗ taskOperationsData ==========
                 let plannedQuantity = 1;
 
                 const siteColumnMap = {
@@ -1708,13 +1693,10 @@
                     const opData = productOps[siteColumn].find(op => op.operation === operationName);
 
                     if (opData && opData.detail) {
-                        console.log(`🔍 Привязка: "${operationName}" → деталь "${opData.detail}"`);
-
                         const details = item.details || [];
                         for (const detail of details) {
                             if (detail.name === opData.detail) {
                                 plannedQuantity = detail.quantity;
-                                console.log(`📦 Найдено в деталях: ${detail.name} = ${plannedQuantity} шт`);
                                 break;
                             }
                         }
@@ -1723,7 +1705,6 @@
                             for (const b of item.brackets) {
                                 if (`Кронштейн ${b.type}` === opData.detail) {
                                     plannedQuantity = b.quantity;
-                                    console.log(`🔧 Найдено в кронштейнах: ${b.type} = ${plannedQuantity} шт`);
                                     break;
                                 }
                             }
@@ -1733,15 +1714,12 @@
                             for (const l of item.lyres) {
                                 if (`Лира ${l.type}` === opData.detail) {
                                     plannedQuantity = l.quantity;
-                                    console.log(`🎸 Найдено в лирах: ${l.type} = ${plannedQuantity} шт`);
                                     break;
                                 }
                             }
                         }
                     }
                 }
-
-                console.log(`📋 Операция: "${operationName}" → план: ${plannedQuantity} шт`);
 
                 const newTask = {
                     id: taskId,
@@ -1856,14 +1834,14 @@
                         itemHeader.style.display = 'flex';
                         itemHeader.style.justifyContent = 'space-between';
                         itemHeader.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
-        <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemMaterialsReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
-            📊 Материалы
-        </button>
-    </div>
-    <span>▼</span>
-`;
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
+                                <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemMaterialsReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
+                                    📊 Материалы
+                                </button>
+                            </div>
+                            <span>▼</span>
+                        `;
 
                         const itemContent = document.createElement('div');
                         itemContent.className = 'item-content';
@@ -1977,7 +1955,6 @@
                 ordersList.appendChild(card);
             });
 
-            // Восстанавливаем состояние открытых карточек и изделий
             restoreMainOpenCardsState();
             restoreMainOpenItemsState();
         }
@@ -2104,6 +2081,109 @@
             });
         }
 
+        function showItemMaterialsReport(orderId, itemIndex) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order || !order.items[itemIndex]) {
+                alert('Изделие не найдено');
+                return;
+            }
+            
+            const item = order.items[itemIndex];
+            
+            let materialsHtml = '';
+            
+            const profiles = (item.details || []).filter(d => d.type === 'profile');
+            if (profiles.length > 0) {
+                materialsHtml += `
+                    <div style="margin-bottom: 15px;">
+                        <h4 style="color: #ff9800;">📐 ПРОФИЛИ</h4>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #232830;">
+                                    <th style="padding: 8px; text-align: left;">Наименование</th>
+                                    <th style="padding: 8px; text-align: center;">Длина (мм)</th>
+                                    <th style="padding: 8px; text-align: center;">Количество</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                profiles.forEach(p => {
+                    materialsHtml += `
+                        <tr style="border-bottom: 1px solid #2a2f38;">
+                            <td style="padding: 8px;">${escapeHtml(p.name)}</td>
+                            <td style="padding: 8px; text-align: center;">${p.lengthMm || 0}</td>
+                            <td style="padding: 8px; text-align: center;">${p.quantity}</td>
+                         </tr>
+                    `;
+                });
+                materialsHtml += `</tbody></table></div>`;
+            }
+            
+            const details = (item.details || []).filter(d => d.type !== 'profile');
+            const brackets = item.brackets || [];
+            const lyres = item.lyres || [];
+            
+            const allDetails = [];
+            brackets.forEach(b => {
+                if (b.type && b.type !== 'отсутствует' && b.quantity > 0) {
+                    allDetails.push({ name: `Кронштейн ${b.type}`, quantity: b.quantity });
+                }
+            });
+            lyres.forEach(l => {
+                if (l.type && l.type !== 'отсутствует' && l.quantity > 0) {
+                    allDetails.push({ name: `Лира ${l.type}`, quantity: l.quantity });
+                }
+            });
+            details.forEach(d => {
+                if (d.quantity > 0) {
+                    allDetails.push({ name: d.name, quantity: d.quantity });
+                }
+            });
+            
+            if (allDetails.length > 0) {
+                materialsHtml += `
+                    <div style="margin-bottom: 15px;">
+                        <h4 style="color: #ff9800;">🔧 ДЕТАЛИ</h4>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #232830;">
+                                    <th style="padding: 8px; text-align: left;">Наименование</th>
+                                    <th style="padding: 8px; text-align: center;">Количество</th>
+                                 </tr>
+                            </thead>
+                            <tbody>
+                `;
+                allDetails.forEach(d => {
+                    materialsHtml += `
+                        <tr style="border-bottom: 1px solid #2a2f38;">
+                            <td style="padding: 8px;">${escapeHtml(d.name)}</td>
+                            <td style="padding: 8px; text-align: center;">${d.quantity}</td>
+                         </tr>
+                    `;
+                });
+                materialsHtml += `</tbody></table></div>`;
+            }
+            
+            const modal = document.getElementById('materialsModal');
+            const reportDiv = document.getElementById('materialsReport');
+            
+            reportDiv.innerHTML = `
+                <div style="padding: 15px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="color: #ff3b3b;">📊 Материалы изделия</h2>
+                        <h3>${escapeHtml(item.product)}</h3>
+                        <p>Группа: ${escapeHtml(order.groupName)} | Заказ: ${order.number}</p>
+                        <p>Размер: ${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</p>
+                        <p>Покрытие: ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</p>
+                    </div>
+                    ${materialsHtml || '<div style="text-align: center; padding: 40px; color: #a0a0a0;">📭 Нет данных о материалах</div>'}
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+        }
+
         function closeMaterialsModal() {
             document.getElementById('materialsModal').style.display = 'none';
         }
@@ -2171,111 +2251,95 @@
         }
 
         // ============== ОТЧЁТ ПО ЗАКАЗУ ==============
-        function showItemMaterialsReport(orderId, itemIndex) {
-    const orders = loadOrdersFromStorage();
-    const order = orders.find(o => o.id == orderId);
-    if (!order || !order.items[itemIndex]) {
-        alert('Изделие не найдено');
-        return;
-    }
-    
-    const item = order.items[itemIndex];
-    
-    // Собираем данные по материалам из заказа
-    let materialsHtml = '';
-    
-    // Профили
-    const profiles = (item.details || []).filter(d => d.type === 'profile');
-    if (profiles.length > 0) {
-        materialsHtml += `
-            <div style="margin-bottom: 15px;">
-                <h4 style="color: #ff9800;">📐 ПРОФИЛИ</h4>
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr style="background: #232830;">
-                            <th style="padding: 8px; text-align: left;">Наименование</th>
-                            <th style="padding: 8px; text-align: center;">Длина (мм)</th>
-                            <th style="padding: 8px; text-align: center;">Количество</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-        profiles.forEach(p => {
-            materialsHtml += `
-                <tr style="border-bottom: 1px solid #2a2f38;">
-                    <td style="padding: 8px;">${escapeHtml(p.name)}</td>
-                    <td style="padding: 8px; text-align: center;">${p.lengthMm || 0}</td>
-                    <td style="padding: 8px; text-align: center;">${p.quantity}</td>
-                 </tr>
+        function showOrderReport(orderId) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) {
+                alert('Заказ не найден');
+                return;
+            }
+            
+            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+            
+            const reportsBySite = {
+                'polimerniy': [],
+                'slesarniy': [],
+                'frezerniy': [],
+                'tokarniy': [],
+                'lazerno': []
+            };
+            
+            allReports.forEach(report => {
+                const parts = report.taskId.split('_');
+                if (parts[0] == orderId && reportsBySite[report.siteKey] !== undefined) {
+                    reportsBySite[report.siteKey].push(report);
+                }
+            });
+            
+            const siteNames = {
+                'polimerniy': '🎨 ПОЛИМЕРНЫЙ УЧАСТОК',
+                'slesarniy': '🔩 СЛЕСАРНЫЙ УЧАСТОК',
+                'frezerniy': '⚙️ ФРЕЗЕРНЫЙ УЧАСТОК',
+                'tokarniy': '🔧 ТОКАРНЫЙ УЧАСТОК',
+                'lazerno': '✨ ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
+            };
+            
+            let html = `
+                <div style="padding: 15px;">
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <h2 style="color: #ff3b3b;">📋 ОТЧЁТ ПО ЗАКАЗУ</h2>
+                        <h3>${escapeHtml(order.groupName)}</h3>
+                        <p style="color: #a0a0a0;">Номер: ${order.number} | Дата: ${order.date}</p>
+                        <p style="color: #a0a0a0;">Изделий в заказе: ${order.items?.length || 0}</p>
+                    </div>
             `;
-        });
-        materialsHtml += `</tbody></table></div>`;
-    }
-    
-    // Детали
-    const details = (item.details || []).filter(d => d.type !== 'profile');
-    const brackets = item.brackets || [];
-    const lyres = item.lyres || [];
-    
-    const allDetails = [];
-    brackets.forEach(b => {
-        if (b.type && b.type !== 'отсутствует' && b.quantity > 0) {
-            allDetails.push({ name: `Кронштейн ${b.type}`, quantity: b.quantity });
+            
+            for (const [siteKey, reports] of Object.entries(reportsBySite)) {
+                html += `
+                    <div style="margin-bottom: 25px; border: 1px solid #2a2f38; border-radius: 12px; overflow: hidden;">
+                        <div style="background: linear-gradient(135deg, #232830, #1a1e24); padding: 12px 15px;">
+                            <h4 style="margin: 0; color: #ff3b3b;">${siteNames[siteKey]}</h4>
+                        </div>
+                        <div style="padding: 15px;">
+                `;
+                
+                if (reports.length === 0) {
+                    html += `<div style="color: #a0a0a0; text-align: center; padding: 20px;">— Нет данных —</div>`;
+                } else {
+                    reports.forEach(report => {
+                        const rows = report.rows || [];
+                        rows.forEach(row => {
+                            const расход = row.расход || 0;
+                            const количество = row.количество || 0;
+                            const комментарий = row.комментарий || '';
+                            
+                            let text = `Расход: ${расход}, Количество: ${количество}`;
+                            if (комментарий) text += `, ${комментарий}`;
+                            
+                            html += `
+                                <div style="margin-bottom: 12px; padding: 10px 12px; background: #15191f; border-radius: 6px; font-size: 13px;">
+                                    ${escapeHtml(text)}
+                                </div>
+                            `;
+                        });
+                    });
+                }
+                
+                html += `</div></div>`;
+            }
+            
+            html += `
+                <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #2a2f38;">
+                    <button class="btn btn-primary" onclick="printOrderReport()">🖨️ Распечатать</button>
+                    <button class="btn btn-danger" onclick="closeOrderReportModal()">✖️ Закрыть</button>
+                </div>
+            </div>`;
+            
+            const modal = document.getElementById('orderReportModal');
+            const contentDiv = document.getElementById('orderReportContent');
+            contentDiv.innerHTML = html;
+            modal.style.display = 'block';
         }
-    });
-    lyres.forEach(l => {
-        if (l.type && l.type !== 'отсутствует' && l.quantity > 0) {
-            allDetails.push({ name: `Лира ${l.type}`, quantity: l.quantity });
-        }
-    });
-    details.forEach(d => {
-        if (d.quantity > 0) {
-            allDetails.push({ name: d.name, quantity: d.quantity });
-        }
-    });
-    
-    if (allDetails.length > 0) {
-        materialsHtml += `
-            <div style="margin-bottom: 15px;">
-                <h4 style="color: #ff9800;">🔧 ДЕТАЛИ</h4>
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr style="background: #232830;">
-                            <th style="padding: 8px; text-align: left;">Наименование</th>
-                            <th style="padding: 8px; text-align: center;">Количество</th>
-                         </tr>
-                    </thead>
-                    <tbody>
-        `;
-        allDetails.forEach(d => {
-            materialsHtml += `
-                <tr style="border-bottom: 1px solid #2a2f38;">
-                    <td style="padding: 8px;">${escapeHtml(d.name)}</td>
-                    <td style="padding: 8px; text-align: center;">${d.quantity}</td>
-                 </tr>
-            `;
-        });
-        materialsHtml += `</tbody></table></div>`;
-    }
-    
-    const modal = document.getElementById('materialsModal');
-    const reportDiv = document.getElementById('materialsReport');
-    
-    reportDiv.innerHTML = `
-        <div style="padding: 15px;">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <h2 style="color: #ff3b3b;">📊 Материалы изделия</h2>
-                <h3>${escapeHtml(item.product)}</h3>
-                <p>Группа: ${escapeHtml(order.groupName)} | Заказ: ${order.number}</p>
-                <p>Размер: ${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</p>
-                <p>Покрытие: ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</p>
-            </div>
-            ${materialsHtml || '<div style="text-align: center; padding: 40px; color: #a0a0a0;">📭 Нет данных о материалах</div>'}
-        </div>
-    `;
-    
-    modal.style.display = 'block';
-}
 
         function printOrderReport() {
             const content = document.getElementById('orderReportContent').innerHTML;
@@ -2346,6 +2410,7 @@
         window.exportOrders = exportOrders;
         window.importOrders = importOrders;
         window.showMaterialsReport = showMaterialsReport;
+        window.showItemMaterialsReport = showItemMaterialsReport;
         window.closeMaterialsModal = closeMaterialsModal;
         window.addExtraTask = addExtraTask;
         window.deleteOrder = deleteOrder;
