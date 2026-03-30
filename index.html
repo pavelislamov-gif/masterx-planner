@@ -216,8 +216,8 @@
         }
 
         .order-header.status-orange {
-            background: linear-gradient(135deg, #3a2a1a, #fa7e02);
-            border-left: 4px solid #fa7e02;
+            background: linear-gradient(135deg, #3a2a1a, #2a1f0f);
+            border-left: 4px solid #ff9800;
         }
 
         .order-header.status-gray {
@@ -516,19 +516,19 @@
         }
 
         body.light-theme .order-header.status-green {
-    background: linear-gradient(135deg, #e8f5e9, #c8e6c9) !important;
-    border-left: 4px solid #2ecc71 !important;
-}
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9) !important;
+            border-left: 4px solid #2ecc71 !important;
+        }
 
-body.light-theme .order-header.status-orange {
-    background: linear-gradient(135deg, #fff3e0, #fa7e02) !important;
-    border-left: 4px solid ##fa7e02 !important;
-}
+        body.light-theme .order-header.status-orange {
+            background: linear-gradient(135deg, #fff3e0, #ffe6cc) !important;
+            border-left: 4px solid #ff9800 !important;
+        }
 
-body.light-theme .order-header.status-gray {
-    background: linear-gradient(135deg, #f5f5f5, #eeeeee) !important;
-    border-left: 4px solid #6c757d !important;
-}
+        body.light-theme .order-header.status-gray {
+            background: linear-gradient(135deg, #f5f5f5, #eeeeee) !important;
+            border-left: 4px solid #6c757d !important;
+        }
 
         /* Стили для кнопок над квадратиками */
         .operation-wrapper {
@@ -834,6 +834,14 @@ body.light-theme .order-header.status-gray {
             <div class="modal-content" style="max-width: 900px;">
                 <span class="close" onclick="closeMaterialsModal()">&times;</span>
                 <div id="materialsReport"></div>
+            </div>
+        </div>
+
+        <!-- МОДАЛЬНОЕ ОКНО ДЛЯ ОТЧЁТА ПО ЗАКАЗУ -->
+        <div id="orderReportModal" class="modal">
+            <div class="modal-content" style="max-width: 800px; max-height: 80vh; overflow-y: auto;">
+                <span class="close" onclick="closeOrderReportModal()">&times;</span>
+                <div id="orderReportContent"></div>
             </div>
         </div>
 
@@ -1491,12 +1499,12 @@ body.light-theme .order-header.status-gray {
         }
 
         function generateOrderNumber(index) {
-    const date = new Date();
-    const year = date.getFullYear().toString().slice(-2);
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    return `${day}.${month}.${year}`;
-}
+            const date = new Date();
+            const year = date.getFullYear().toString().slice(-2);
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `Г-${year}${month}${day}-${index.toString().padStart(3, '0')}`;
+        }
 
         function escapeHtml(str) {
             if (!str) return '';
@@ -1821,6 +1829,7 @@ body.light-theme .order-header.status-gray {
                             </div>
                         </div>
                         <div>
+                            <button class="btn btn-info" onclick="event.stopPropagation(); showOrderReport(${order.id})">📋 Отчёт по заказу</button>
                             <button class="btn btn-info" onclick="event.stopPropagation(); showMaterialsReport(${order.id})">📊 Материалы</button>
                             <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
                         </div>
@@ -1847,7 +1856,9 @@ body.light-theme .order-header.status-gray {
                         itemHeader.style.display = 'flex';
                         itemHeader.style.justifyContent = 'space-between';
                         itemHeader.innerHTML = `
-                            <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
+                            </div>
                             <span>▼</span>
                         `;
 
@@ -2156,6 +2167,123 @@ body.light-theme .order-header.status-gray {
             alert('✅ Группа удалена');
         }
 
+        // ============== ОТЧЁТ ПО ЗАКАЗУ ==============
+        function showOrderReport(orderId) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) {
+                alert('Заказ не найден');
+                return;
+            }
+            
+            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+            
+            // Группируем отчёты по участкам
+            const reportsBySite = {
+                'polimerniy': [],
+                'slesarniy': [],
+                'frezerniy': [],
+                'tokarniy': [],
+                'lazerno': []
+            };
+            
+            allReports.forEach(report => {
+                const parts = report.taskId.split('_');
+                if (parts[0] == orderId && reportsBySite[report.siteKey] !== undefined) {
+                    reportsBySite[report.siteKey].push(report);
+                }
+            });
+            
+            const siteNames = {
+                'polimerniy': '🎨 ПОЛИМЕРНЫЙ УЧАСТОК',
+                'slesarniy': '🔩 СЛЕСАРНЫЙ УЧАСТОК',
+                'frezerniy': '⚙️ ФРЕЗЕРНЫЙ УЧАСТОК',
+                'tokarniy': '🔧 ТОКАРНЫЙ УЧАСТОК',
+                'lazerno': '✨ ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
+            };
+            
+            let html = `
+                <div style="padding: 15px;">
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <h2 style="color: #ff3b3b;">📋 ОТЧЁТ ПО ЗАКАЗУ</h2>
+                        <h3>${escapeHtml(order.groupName)}</h3>
+                        <p style="color: #a0a0a0;">Номер: ${order.number} | Дата: ${order.date}</p>
+                        <p style="color: #a0a0a0;">Изделий в заказе: ${order.items?.length || 0}</p>
+                    </div>
+            `;
+            
+            // Проходим по всем участкам
+            for (const [siteKey, reports] of Object.entries(reportsBySite)) {
+                html += `
+                    <div style="margin-bottom: 25px; border: 1px solid #2a2f38; border-radius: 12px; overflow: hidden;">
+                        <div style="background: linear-gradient(135deg, #232830, #1a1e24); padding: 12px 15px;">
+                            <h4 style="margin: 0; color: #ff3b3b;">${siteNames[siteKey]}</h4>
+                        </div>
+                        <div style="padding: 15px;">
+                `;
+                
+                if (reports.length === 0) {
+                    html += `<div style="color: #a0a0a0; text-align: center; padding: 20px;">— Нет данных —</div>`;
+                } else {
+                    reports.forEach(report => {
+                        const rows = report.rows || [];
+                        rows.forEach(row => {
+                            const расход = row.расход || 0;
+                            const количество = row.количество || 0;
+                            const комментарий = row.комментарий || '';
+                            
+                            let text = `Расход: ${расход}, Количество: ${количество}`;
+                            if (комментарий) text += `, ${комментарий}`;
+                            
+                            html += `
+                                <div style="margin-bottom: 12px; padding: 10px 12px; background: #15191f; border-radius: 6px; font-size: 13px;">
+                                    ${escapeHtml(text)}
+                                </div>
+                            `;
+                        });
+                    });
+                }
+                
+                html += `</div></div>`;
+            }
+            
+            // Кнопки
+            html += `
+                <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #2a2f38;">
+                    <button class="btn btn-primary" onclick="printOrderReport()">🖨️ Распечатать</button>
+                    <button class="btn btn-danger" onclick="closeOrderReportModal()">✖️ Закрыть</button>
+                </div>
+            </div>`;
+            
+            const modal = document.getElementById('orderReportModal');
+            const contentDiv = document.getElementById('orderReportContent');
+            contentDiv.innerHTML = html;
+            modal.style.display = 'block';
+        }
+
+        function printOrderReport() {
+            const content = document.getElementById('orderReportContent').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Отчёт по заказу</title>
+                        <style>
+                            body { font-family: 'Segoe UI', sans-serif; padding: 20px; }
+                            @media print { button { display: none; } }
+                        </style>
+                    </head>
+                    <body>${content}</body>
+                </html>
+            `);
+            printWindow.print();
+            printWindow.close();
+        }
+
+        function closeOrderReportModal() {
+            document.getElementById('orderReportModal').style.display = 'none';
+        }
+
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         async function initMainPage() {
             productsList = await loadProducts() || [];
@@ -2209,6 +2337,9 @@ body.light-theme .order-header.status-gray {
         window.addCustomProfile = addCustomProfile;
         window.removeCustomProfile = removeCustomProfile;
         window.onNewItemProductChange = onNewItemProductChange;
+        window.showOrderReport = showOrderReport;
+        window.closeOrderReportModal = closeOrderReportModal;
+        window.printOrderReport = printOrderReport;
 
         document.addEventListener('DOMContentLoaded', initMainPage);
     </script>
