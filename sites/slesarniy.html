@@ -185,7 +185,6 @@
     for (let i = 0; i < details.length; i++) {
         const detail = details[i];
         if (detail.type === 'profile') {
-            // Проверяем, содержит ли название профиля искомое название
             if (detail.name.includes(searchName) || searchName.includes(detail.name)) {
                 console.log('✅ Найден профиль:', detail.name);
                 return detail;
@@ -193,7 +192,7 @@
         }
     }
     
-    // Если не нашли, пробуем искать по ключевым идентификаторам (например, "МП 1928", "НПС 2999")
+    // Если не нашли, пробуем искать по ключевым идентификаторам
     const searchParts = searchName.split(' ');
     for (let i = 0; i < details.length; i++) {
         const detail = details[i];
@@ -211,54 +210,54 @@
     console.log('❌ Профиль не найден для:', searchName);
     return null;
 }
-        
-        function getTaskPlanFromDetails(task, fullOrder) {
-            if (!fullOrder || !fullOrder.items || !fullOrder.items[0]) return 1;
-            
-            const item = fullOrder.items[0];
-            const details = item.details || [];
-            const productName = item.product;
-            
-            const productOps = taskOperationsData[productName];
-            if (!productOps) return item.size?.quantity || 1;
-            
-            let foundDetail = null;
-            for (const siteOps of Object.values(productOps)) {
-                for (const op of siteOps) {
-                    if (op.operation === task.operation) {
-                        foundDetail = op.detail;
-                        break;
-                    }
-                }
-                if (foundDetail) break;
+
+function getTaskPlanFromDetails(task, fullOrder) {
+    if (!fullOrder || !fullOrder.items || !fullOrder.items[0]) return 1;
+    
+    const item = fullOrder.items[0];
+    const details = item.details || [];
+    const productName = item.product;
+    
+    const productOps = taskOperationsData[productName];
+    if (!productOps) return item.size?.quantity || 1;
+    
+    let foundDetail = null;
+    for (const siteOps of Object.values(productOps)) {
+        for (const op of siteOps) {
+            if (op.operation === task.operation) {
+                foundDetail = op.detail;
+                break;
             }
-            
-            if (!foundDetail) return item.size?.quantity || 1;
-            
-            for (const detail of details) {
-                if (detail.name === foundDetail) {
-                    return detail.quantity;
-                }
-            }
-            
-            if (item.brackets) {
-                for (const b of item.brackets) {
-                    if (`Кронштейн ${b.type}` === foundDetail) {
-                        return b.quantity;
-                    }
-                }
-            }
-            
-            if (item.lyres) {
-                for (const l of item.lyres) {
-                    if (`Лира ${l.type}` === foundDetail) {
-                        return l.quantity;
-                    }
-                }
-            }
-            
-            return item.size?.quantity || 1;
         }
+        if (foundDetail) break;
+    }
+    
+    if (!foundDetail) return item.size?.quantity || 1;
+    
+    for (const detail of details) {
+        if (detail.name === foundDetail) {
+            return detail.quantity;
+        }
+    }
+    
+    if (item.brackets) {
+        for (const b of item.brackets) {
+            if (`Кронштейн ${b.type}` === foundDetail) {
+                return b.quantity;
+            }
+        }
+    }
+    
+    if (item.lyres) {
+        for (const l of item.lyres) {
+            if (`Лира ${l.type}` === foundDetail) {
+                return l.quantity;
+            }
+        }
+    }
+    
+    return item.size?.quantity || 1;
+}
 
         // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
         const SLESARNIY_STORAGE_KEY = 'slesarniy_open_cards';
