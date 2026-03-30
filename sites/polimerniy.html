@@ -320,65 +320,71 @@
 
         // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
         const POLIMERNIY_STORAGE_KEY = 'polimerniy_open_cards';
-        const POLIMERNIY_ITEMS_STORAGE_KEY = 'polimerniy_open_items';
-        
-        function saveOpenCardsState() {
-            const openCards = [];
-            document.querySelectorAll('.order-card').forEach(card => {
+const POLIMERNIY_ITEMS_STORAGE_KEY = 'polimerniy_open_items';
+
+function saveOpenCardsState() {
+    // Сохраняем открытые заказы
+    const openCards = [];
+    document.querySelectorAll('.order-card').forEach(card => {
+        const content = card.querySelector('.order-content');
+        if (content && !content.classList.contains('collapsed')) {
+            openCards.push(card.dataset.orderId);
+        }
+    });
+    localStorage.setItem(POLIMERNIY_STORAGE_KEY, JSON.stringify(openCards));
+    
+    // Сохраняем открытые изделия (по уникальному ключу)
+    const openItems = [];
+    document.querySelectorAll('.order-card').forEach(card => {
+        const orderId = card.dataset.orderId;
+        card.querySelectorAll('.item-header').forEach((itemHeader, idx) => {
+            // Получаем ключ изделия из атрибута или из текста
+            const itemKey = itemHeader.dataset.itemKey;
+            if (itemKey && !itemHeader.classList.contains('collapsed')) {
+                openItems.push({ orderId, itemKey });
+            }
+        });
+    });
+    localStorage.setItem(POLIMERNIY_ITEMS_STORAGE_KEY, JSON.stringify(openItems));
+}
+
+function restoreOpenCardsState() {
+    // Восстанавливаем открытые заказы
+    const savedOpenCards = localStorage.getItem(POLIMERNIY_STORAGE_KEY);
+    if (savedOpenCards) {
+        const openCardsIds = JSON.parse(savedOpenCards);
+        openCardsIds.forEach(orderId => {
+            const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
+            if (card) {
+                const header = card.querySelector('.order-header');
                 const content = card.querySelector('.order-content');
-                if (content && !content.classList.contains('collapsed')) {
-                    openCards.push(card.dataset.orderId);
+                if (header && content) {
+                    header.classList.remove('collapsed');
+                    content.classList.remove('collapsed');
                 }
-            });
-            localStorage.setItem(POLIMERNIY_STORAGE_KEY, JSON.stringify(openCards));
-            
-            const openItems = [];
-            document.querySelectorAll('.order-card').forEach(card => {
-                const orderId = card.dataset.orderId;
-                card.querySelectorAll('.item-content').forEach((itemContent, idx) => {
-                    if (itemContent && !itemContent.classList.contains('collapsed')) {
-                        openItems.push({ orderId, itemIndex: idx });
-                    }
-                });
-            });
-            localStorage.setItem(POLIMERNIY_ITEMS_STORAGE_KEY, JSON.stringify(openItems));
-        }
-        
-        function restoreOpenCardsState() {
-            const savedOpenCards = localStorage.getItem(POLIMERNIY_STORAGE_KEY);
-            if (savedOpenCards) {
-                const openCardsIds = JSON.parse(savedOpenCards);
-                openCardsIds.forEach(orderId => {
-                    const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
-                    if (card) {
-                        const header = card.querySelector('.order-header');
-                        const content = card.querySelector('.order-content');
-                        if (header && content) {
-                            header.classList.remove('collapsed');
-                            content.classList.remove('collapsed');
-                        }
-                    }
-                });
             }
-            
-            const savedOpenItems = localStorage.getItem(POLIMERNIY_ITEMS_STORAGE_KEY);
-            if (savedOpenItems) {
-                const openItemsIds = JSON.parse(savedOpenItems);
-                openItemsIds.forEach(({ orderId, itemIndex }) => {
-                    const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
-                    if (card) {
-                        const itemHeader = card.querySelectorAll('.item-header')[itemIndex];
-                        const itemContent = card.querySelectorAll('.item-content')[itemIndex];
-                        if (itemHeader && itemContent) {
-                            itemHeader.classList.remove('collapsed');
-                            itemContent.classList.remove('collapsed');
-                            const arrowSpan = itemHeader.querySelector('.collapse-icon-item');
-                            if (arrowSpan) arrowSpan.textContent = '▲';
-                        }
-                    }
-                });
+        });
+    }
+    
+    // Восстанавливаем открытые изделия по ключу
+    const savedOpenItems = localStorage.getItem(POLIMERNIY_ITEMS_STORAGE_KEY);
+    if (savedOpenItems) {
+        const openItemsIds = JSON.parse(savedOpenItems);
+        openItemsIds.forEach(({ orderId, itemKey }) => {
+            const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
+            if (card) {
+                const itemHeader = card.querySelector(`.item-header[data-item-key="${itemKey}"]`);
+                const itemContent = itemHeader?.nextElementSibling;
+                if (itemHeader && itemContent) {
+                    itemHeader.classList.remove('collapsed');
+                    itemContent.classList.remove('collapsed');
+                    const arrowSpan = itemHeader.querySelector('.collapse-icon-item');
+                    if (arrowSpan) arrowSpan.textContent = '▲';
+                }
             }
-        }
+        });
+    }
+}
 
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         if (typeof TaskManager === 'undefined') {
