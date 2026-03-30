@@ -80,7 +80,7 @@
                 <img src="../images/logo.png" alt="MasterX Logo" class="logo-img" onerror="this.style.display='none'">
                 <div class="logo-text">Master<span class="x-red">X</span></div>
             </div>
-            <h1 style="margin:0; color: white; font-size:18px;"> Слесарный участок</h1>
+            <h1 style="margin:0; color: white; font-size:18px;">🔧 Слесарный участок</h1>
         </header>
 
         <div class="date-navigation">
@@ -165,99 +165,94 @@
             return ops;
         }
         
-        // ============== ПОЛУЧЕНИЕ ПРОФИЛЯ ПО ОПЕРАЦИИ ==============
+        // ============== ПОЛУЧЕНИЕ ПРОФИЛЯ ПО ОПЕРАЦИИ РАСКРОЯ ==============
         function getProfileForOperation(operationName, details) {
-    if (!details || details.length === 0) return null;
-    
-    // Проверяем, что это операция раскроя
-    if (!operationName || !operationName.trim().startsWith('Раскрой ')) {
-        return null;
-    }
-    
-    let searchName = operationName.replace('Раскрой ', '');
-    
-    // Убираем слова "профиля", "модуля", "планки" и пробелы
-    searchName = searchName.replace(/^(профиля|модуля|планки)\s+/i, '');
-    
-    console.log('🔍 Ищем профиль по названию:', searchName);
-    
-    // Ищем среди профилей (type === 'profile')
-    for (let i = 0; i < details.length; i++) {
-        const detail = details[i];
-        if (detail.type === 'profile') {
-            if (detail.name.includes(searchName) || searchName.includes(detail.name)) {
-                console.log('✅ Найден профиль:', detail.name);
-                return detail;
+            if (!details || details.length === 0) return null;
+            
+            if (!operationName || !operationName.trim().startsWith('Раскрой ')) {
+                return null;
             }
-        }
-    }
-    
-    // Если не нашли, пробуем искать по ключевым идентификаторам
-    const searchParts = searchName.split(' ');
-    for (let i = 0; i < details.length; i++) {
-        const detail = details[i];
-        if (detail.type === 'profile') {
-            for (let j = 0; j < searchParts.length; j++) {
-                const part = searchParts[j];
-                if (part.length > 2 && detail.name.includes(part)) {
-                    console.log('✅ Найден профиль по ключевому слову "' + part + '":', detail.name);
-                    return detail;
+            
+            let searchName = operationName.replace('Раскрой ', '');
+            searchName = searchName.replace(/^(профиля|модуля|планки)\s+/i, '');
+            
+            console.log('🔍 Ищем профиль по названию:', searchName);
+            
+            for (let i = 0; i < details.length; i++) {
+                const detail = details[i];
+                if (detail.type === 'profile') {
+                    if (detail.name.includes(searchName) || searchName.includes(detail.name)) {
+                        console.log('✅ Найден профиль:', detail.name);
+                        return detail;
+                    }
                 }
             }
-        }
-    }
-    
-    console.log('❌ Профиль не найден для:', searchName);
-    return null;
-}
-
-function getTaskPlanFromDetails(task, fullOrder) {
-    if (!fullOrder || !fullOrder.items || !fullOrder.items[0]) return 1;
-    
-    const item = fullOrder.items[0];
-    const details = item.details || [];
-    const productName = item.product;
-    
-    const productOps = taskOperationsData[productName];
-    if (!productOps) return item.size?.quantity || 1;
-    
-    let foundDetail = null;
-    for (const siteOps of Object.values(productOps)) {
-        for (const op of siteOps) {
-            if (op.operation === task.operation) {
-                foundDetail = op.detail;
-                break;
+            
+            const searchParts = searchName.split(' ');
+            for (let i = 0; i < details.length; i++) {
+                const detail = details[i];
+                if (detail.type === 'profile') {
+                    for (let j = 0; j < searchParts.length; j++) {
+                        const part = searchParts[j];
+                        if (part.length > 2 && detail.name.includes(part)) {
+                            console.log('✅ Найден профиль по ключевому слову "' + part + '":', detail.name);
+                            return detail;
+                        }
+                    }
+                }
             }
+            
+            console.log('❌ Профиль не найден для:', searchName);
+            return null;
         }
-        if (foundDetail) break;
-    }
-    
-    if (!foundDetail) return item.size?.quantity || 1;
-    
-    for (const detail of details) {
-        if (detail.name === foundDetail) {
-            return detail.quantity;
-        }
-    }
-    
-    if (item.brackets) {
-        for (const b of item.brackets) {
-            if (`Кронштейн ${b.type}` === foundDetail) {
-                return b.quantity;
+        
+        function getTaskPlanFromDetails(task, fullOrder) {
+            if (!fullOrder || !fullOrder.items || !fullOrder.items[0]) return 1;
+            
+            const item = fullOrder.items[0];
+            const details = item.details || [];
+            const productName = item.product;
+            
+            const productOps = taskOperationsData[productName];
+            if (!productOps) return item.size?.quantity || 1;
+            
+            let foundDetail = null;
+            for (const siteOps of Object.values(productOps)) {
+                for (const op of siteOps) {
+                    if (op.operation === task.operation) {
+                        foundDetail = op.detail;
+                        break;
+                    }
+                }
+                if (foundDetail) break;
             }
-        }
-    }
-    
-    if (item.lyres) {
-        for (const l of item.lyres) {
-            if (`Лира ${l.type}` === foundDetail) {
-                return l.quantity;
+            
+            if (!foundDetail) return item.size?.quantity || 1;
+            
+            for (const detail of details) {
+                if (detail.name === foundDetail) {
+                    return detail.quantity;
+                }
             }
+            
+            if (item.brackets) {
+                for (const b of item.brackets) {
+                    if (`Кронштейн ${b.type}` === foundDetail) {
+                        return b.quantity;
+                    }
+                }
+            }
+            
+            if (item.lyres) {
+                for (const l of item.lyres) {
+                    if (`Лира ${l.type}` === foundDetail) {
+                        return l.quantity;
+                    }
+                }
+            }
+            
+            return item.size?.quantity || 1;
         }
-    }
-    
-    return item.size?.quantity || 1;
-}
 
         // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
         const SLESARNIY_STORAGE_KEY = 'slesarniy_open_cards';
@@ -519,22 +514,21 @@ function getTaskPlanFromDetails(task, fullOrder) {
                 planDiv.innerHTML = '📋 План: ' + planQuantity + ' шт';
                 card.appendChild(planDiv);
                 
-                // ДОБАВЛЯЕМ ИНФОРМАЦИЮ О ПРОФИЛЕ (только для Раскрой профиля)
+                // ДОБАВЛЯЕМ ИНФОРМАЦИЮ О ПРОФИЛЕ (только для операций Раскрой)
                 if (fullOrder && fullOrder.items && fullOrder.items[0]) {
-    var details = fullOrder.items[0].details || [];
-    var profileInfo = getProfileForOperation(operationName, details);
-    if (profileInfo) {
-        var profileDiv = document.createElement('div');
-        profileDiv.className = 'profile-info';
-        profileDiv.innerHTML = `
-            <span class="profile-name">📐 ${escapeHtml(profileInfo.name)}</span>
-            <span class="profile-length">📏 Длина: ${profileInfo.lengthMm || 0} мм</span>
-            <span class="profile-qty">× ${profileInfo.quantity} шт</span>
-        `;
-        card.appendChild(profileDiv);
-    }
-}
-}
+                    var details = fullOrder.items[0].details || [];
+                    var profileInfo = getProfileForOperation(operationName, details);
+                    if (profileInfo) {
+                        var profileDiv = document.createElement('div');
+                        profileDiv.className = 'profile-info';
+                        profileDiv.innerHTML = `
+                            <span class="profile-name">📐 ${escapeHtml(profileInfo.name)}</span>
+                            <span class="profile-length">📏 Длина: ${profileInfo.lengthMm || 0} мм</span>
+                            <span class="profile-qty">× ${profileInfo.quantity} шт</span>
+                        `;
+                        card.appendChild(profileDiv);
+                    }
+                }
                 
                 if (task.isExtra && task.description) {
                     var desc = document.createElement('div');
