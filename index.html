@@ -837,7 +837,7 @@
             </div>
         </div>
 
-        <!-- МОДАЛЬНОЕ ОКНО ДЛЯ ОТЧЁТА ПО ЗАКАЗУ -->
+        <!-- МОДАЛЬНОЕ ОКНО ДЛЯ ОТЧЁТА ПО ЗАКАЗУ/ИЗДЕЛИЮ -->
         <div id="orderReportModal" class="modal">
             <div class="modal-content" style="max-width: 800px; max-height: 80vh; overflow-y: auto;">
                 <span class="close" onclick="closeOrderReportModal()">&times;</span>
@@ -1834,14 +1834,14 @@
                         itemHeader.style.display = 'flex';
                         itemHeader.style.justifyContent = 'space-between';
                         itemHeader.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
-        <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
-            📋 Отчёт
-        </button>
-    </div>
-    <span>▼</span>
-`;
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
+                                <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
+                                    📋 Отчёт
+                                </button>
+                            </div>
+                            <span>▼</span>
+                        `;
 
                         const itemContent = document.createElement('div');
                         itemContent.className = 'item-content';
@@ -2081,109 +2081,6 @@
             });
         }
 
-        function showItemMaterialsReport(orderId, itemIndex) {
-            const orders = loadOrdersFromStorage();
-            const order = orders.find(o => o.id == orderId);
-            if (!order || !order.items[itemIndex]) {
-                alert('Изделие не найдено');
-                return;
-            }
-            
-            const item = order.items[itemIndex];
-            
-            let materialsHtml = '';
-            
-            const profiles = (item.details || []).filter(d => d.type === 'profile');
-            if (profiles.length > 0) {
-                materialsHtml += `
-                    <div style="margin-bottom: 15px;">
-                        <h4 style="color: #ff9800;">📐 ПРОФИЛИ</h4>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="background: #232830;">
-                                    <th style="padding: 8px; text-align: left;">Наименование</th>
-                                    <th style="padding: 8px; text-align: center;">Длина (мм)</th>
-                                    <th style="padding: 8px; text-align: center;">Количество</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                `;
-                profiles.forEach(p => {
-                    materialsHtml += `
-                        <tr style="border-bottom: 1px solid #2a2f38;">
-                            <td style="padding: 8px;">${escapeHtml(p.name)}</td>
-                            <td style="padding: 8px; text-align: center;">${p.lengthMm || 0}</td>
-                            <td style="padding: 8px; text-align: center;">${p.quantity}</td>
-                         </tr>
-                    `;
-                });
-                materialsHtml += `</tbody></table></div>`;
-            }
-            
-            const details = (item.details || []).filter(d => d.type !== 'profile');
-            const brackets = item.brackets || [];
-            const lyres = item.lyres || [];
-            
-            const allDetails = [];
-            brackets.forEach(b => {
-                if (b.type && b.type !== 'отсутствует' && b.quantity > 0) {
-                    allDetails.push({ name: `Кронштейн ${b.type}`, quantity: b.quantity });
-                }
-            });
-            lyres.forEach(l => {
-                if (l.type && l.type !== 'отсутствует' && l.quantity > 0) {
-                    allDetails.push({ name: `Лира ${l.type}`, quantity: l.quantity });
-                }
-            });
-            details.forEach(d => {
-                if (d.quantity > 0) {
-                    allDetails.push({ name: d.name, quantity: d.quantity });
-                }
-            });
-            
-            if (allDetails.length > 0) {
-                materialsHtml += `
-                    <div style="margin-bottom: 15px;">
-                        <h4 style="color: #ff9800;">🔧 ДЕТАЛИ</h4>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="background: #232830;">
-                                    <th style="padding: 8px; text-align: left;">Наименование</th>
-                                    <th style="padding: 8px; text-align: center;">Количество</th>
-                                 </tr>
-                            </thead>
-                            <tbody>
-                `;
-                allDetails.forEach(d => {
-                    materialsHtml += `
-                        <tr style="border-bottom: 1px solid #2a2f38;">
-                            <td style="padding: 8px;">${escapeHtml(d.name)}</td>
-                            <td style="padding: 8px; text-align: center;">${d.quantity}</td>
-                         </tr>
-                    `;
-                });
-                materialsHtml += `</tbody></table></div>`;
-            }
-            
-            const modal = document.getElementById('materialsModal');
-            const reportDiv = document.getElementById('materialsReport');
-            
-            reportDiv.innerHTML = `
-                <div style="padding: 15px;">
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <h2 style="color: #ff3b3b;">📊 Материалы изделия</h2>
-                        <h3>${escapeHtml(item.product)}</h3>
-                        <p>Группа: ${escapeHtml(order.groupName)} | Заказ: ${order.number}</p>
-                        <p>Размер: ${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</p>
-                        <p>Покрытие: ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</p>
-                    </div>
-                    ${materialsHtml || '<div style="text-align: center; padding: 40px; color: #a0a0a0;">📭 Нет данных о материалах</div>'}
-                </div>
-            `;
-            
-            modal.style.display = 'block';
-        }
-
         function closeMaterialsModal() {
             document.getElementById('materialsModal').style.display = 'none';
         }
@@ -2251,138 +2148,243 @@
         }
 
         // ============== ОТЧЁТ ПО ЗАКАЗУ ==============
-        function showItemReport(orderId, itemIndex) {
-    const orders = loadOrdersFromStorage();
-    const order = orders.find(o => o.id == orderId);
-    if (!order || !order.items[itemIndex]) {
-        alert('Изделие не найдено');
-        return;
-    }
-    
-    const item = order.items[itemIndex];
-    const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-    
-    // Фильтруем отчёты только для этого изделия
-    const itemReports = allReports.filter(report => {
-        const parts = report.taskId.split('_');
-        return parts.length >= 3 && parts[0] == orderId && parts[2] == itemIndex;
-    });
-    
-    const siteNames = {
-        'polimerniy': '🎨 ПОЛИМЕРНЫЙ УЧАСТОК',
-        'slesarniy': '🔩 СЛЕСАРНЫЙ УЧАСТОК',
-        'frezerniy': '⚙️ ФРЕЗЕРНЫЙ УЧАСТОК',
-        'tokarniy': '🔧 ТОКАРНЫЙ УЧАСТОК',
-        'lazerno': '✨ ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
-    };
-    
-    let html = `
-        <div style="padding: 15px;">
-            <div style="text-align: center; margin-bottom: 25px;">
-                <h2 style="color: #ff3b3b;">📋 ОТЧЁТ ПО ИЗДЕЛИЮ</h2>
-                <h3>${escapeHtml(item.product)}</h3>
-                <p style="color: #a0a0a0;">Группа: ${escapeHtml(order.groupName)} | Заказ: ${order.number}</p>
-                <p style="color: #a0a0a0;">Размер: ${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</p>
-                <p style="color: #a0a0a0;">Покрытие: ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</p>
-            </div>
-    `;
-    
-    // Группируем отчёты по участкам
-    const reportsBySite = {
-        'polimerniy': [],
-        'slesarniy': [],
-        'frezerniy': [],
-        'tokarniy': [],
-        'lazerno': []
-    };
-    
-    itemReports.forEach(report => {
-        if (reportsBySite[report.siteKey] !== undefined) {
-            reportsBySite[report.siteKey].push(report);
-        }
-    });
-    
-    // Проходим по всем участкам
-    for (const [siteKey, reports] of Object.entries(reportsBySite)) {
-        html += `
-            <div style="margin-bottom: 25px; border: 1px solid #2a2f38; border-radius: 12px; overflow: hidden;">
-                <div style="background: linear-gradient(135deg, #232830, #1a1e24); padding: 12px 15px;">
-                    <h4 style="margin: 0; color: #ff3b3b;">${siteNames[siteKey]}</h4>
-                </div>
-                <div style="padding: 15px;">
-        `;
-        
-        if (reports.length === 0) {
-            html += `<div style="color: #a0a0a0; text-align: center; padding: 20px;">— Нет данных —</div>`;
-        } else {
-            reports.forEach(report => {
-                const rows = report.rows || [];
-                rows.forEach(row => {
-                    const расход = row.расход || 0;
-                    const количество = row.количество || 0;
-                    const комментарий = row.комментарий || '';
-                    
-                    let text = `Расход: ${расход}, Количество: ${количество}`;
-                    if (комментарий) text += `, ${комментарий}`;
-                    
-                    html += `
-                        <div style="margin-bottom: 12px; padding: 10px 12px; background: #15191f; border-radius: 6px; font-size: 13px;">
-                            ${escapeHtml(text)}
-                        </div>
-                    `;
-                });
+        function showOrderReport(orderId) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) {
+                alert('Заказ не найден');
+                return;
+            }
+            
+            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+            
+            const reportsBySite = {
+                'polimerniy': [],
+                'slesarniy': [],
+                'frezerniy': [],
+                'tokarniy': [],
+                'lazerno': []
+            };
+            
+            allReports.forEach(report => {
+                const parts = report.taskId.split('_');
+                if (parts[0] == orderId && reportsBySite[report.siteKey] !== undefined) {
+                    reportsBySite[report.siteKey].push(report);
+                }
             });
+            
+            const siteNames = {
+                'polimerniy': '🎨 ПОЛИМЕРНЫЙ УЧАСТОК',
+                'slesarniy': '🔩 СЛЕСАРНЫЙ УЧАСТОК',
+                'frezerniy': '⚙️ ФРЕЗЕРНЫЙ УЧАСТОК',
+                'tokarniy': '🔧 ТОКАРНЫЙ УЧАСТОК',
+                'lazerno': '✨ ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
+            };
+            
+            let html = `
+                <div style="padding: 15px;">
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <h2 style="color: #ff3b3b;">📋 ОТЧЁТ ПО ЗАКАЗУ</h2>
+                        <h3>${escapeHtml(order.groupName)}</h3>
+                        <p style="color: #a0a0a0;">Номер: ${order.number} | Дата: ${order.date}</p>
+                        <p style="color: #a0a0a0;">Изделий в заказе: ${order.items?.length || 0}</p>
+                    </div>
+            `;
+            
+            for (const [siteKey, reports] of Object.entries(reportsBySite)) {
+                html += `
+                    <div style="margin-bottom: 25px; border: 1px solid #2a2f38; border-radius: 12px; overflow: hidden;">
+                        <div style="background: linear-gradient(135deg, #232830, #1a1e24); padding: 12px 15px;">
+                            <h4 style="margin: 0; color: #ff3b3b;">${siteNames[siteKey]}</h4>
+                        </div>
+                        <div style="padding: 15px;">
+                `;
+                
+                if (reports.length === 0) {
+                    html += `<div style="color: #a0a0a0; text-align: center; padding: 20px;">— Нет данных —</div>`;
+                } else {
+                    reports.forEach(report => {
+                        const rows = report.rows || [];
+                        rows.forEach(row => {
+                            const расход = row.расход || 0;
+                            const количество = row.количество || 0;
+                            const комментарий = row.комментарий || '';
+                            
+                            let text = `Расход: ${расход}, Количество: ${количество}`;
+                            if (комментарий) text += `, ${комментарий}`;
+                            
+                            html += `
+                                <div style="margin-bottom: 12px; padding: 10px 12px; background: #15191f; border-radius: 6px; font-size: 13px;">
+                                    ${escapeHtml(text)}
+                                </div>
+                            `;
+                        });
+                    });
+                }
+                
+                html += `</div></div>`;
+            }
+            
+            html += `
+                <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #2a2f38;">
+                    <button class="btn btn-primary" onclick="printOrderReport()">🖨️ Распечатать</button>
+                    <button class="btn btn-danger" onclick="closeOrderReportModal()">✖️ Закрыть</button>
+                </div>
+            </div>`;
+            
+            const modal = document.getElementById('orderReportModal');
+            const contentDiv = document.getElementById('orderReportContent');
+            contentDiv.innerHTML = html;
+            modal.style.display = 'block';
         }
-        
-        html += `</div></div>`;
-    }
-    
-    if (itemReports.length === 0) {
-        html += `
-            <div style="text-align: center; padding: 40px; background: #15191f; border-radius: 12px;">
-                <div style="font-size: 48px; margin-bottom: 15px;">📭</div>
-                <p>Нет отчётов по этому изделию</p>
-                <p style="font-size: 12px; color: #a0a0a0;">Операторы ещё не заполнили отчёты</p>
-            </div>
-        `;
-    }
-    
-    html += `
-        <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #2a2f38;">
-            <button class="btn btn-primary" onclick="printCurrentReport()">🖨️ Распечатать</button>
-            <button class="btn btn-danger" onclick="closeOrderReportModal()">✖️ Закрыть</button>
-        </div>
-    </div>`;
-    
-    const modal = document.getElementById('orderReportModal');
-    const contentDiv = document.getElementById('orderReportContent');
-    contentDiv.innerHTML = html;
-    modal.style.display = 'block';
-    
-    // Сохраняем для печати
-    window.currentReportHtml = html;
-}
 
-function printCurrentReport() {
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <html>
-            <head>
-                <title>Отчёт по изделию</title>
-                <style>
-                    body { font-family: 'Segoe UI', sans-serif; padding: 20px; }
-                    @media print { button { display: none; } }
-                </style>
-            </head>
-            <body>${window.currentReportHtml}</body>
-        </html>
-    `);
-    printWindow.print();
-    printWindow.close();
-}
+        function printOrderReport() {
+            const content = document.getElementById('orderReportContent').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Отчёт по заказу</title>
+                        <style>
+                            body { font-family: 'Segoe UI', sans-serif; padding: 20px; }
+                            @media print { button { display: none; } }
+                        </style>
+                    </head>
+                    <body>${content}</body>
+                </html>
+            `);
+            printWindow.print();
+            printWindow.close();
+        }
 
         function closeOrderReportModal() {
             document.getElementById('orderReportModal').style.display = 'none';
+        }
+
+        // ============== ОТЧЁТ ПО ИЗДЕЛИЮ ==============
+        function showItemReport(orderId, itemIndex) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order || !order.items[itemIndex]) {
+                alert('Изделие не найдено');
+                return;
+            }
+            
+            const item = order.items[itemIndex];
+            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+            
+            const itemReports = allReports.filter(report => {
+                const parts = report.taskId.split('_');
+                return parts.length >= 3 && parts[0] == orderId && parts[2] == itemIndex;
+            });
+            
+            const siteNames = {
+                'polimerniy': '🎨 ПОЛИМЕРНЫЙ УЧАСТОК',
+                'slesarniy': '🔩 СЛЕСАРНЫЙ УЧАСТОК',
+                'frezerniy': '⚙️ ФРЕЗЕРНЫЙ УЧАСТОК',
+                'tokarniy': '🔧 ТОКАРНЫЙ УЧАСТОК',
+                'lazerno': '✨ ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
+            };
+            
+            let html = `
+                <div style="padding: 15px;">
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <h2 style="color: #ff3b3b;">📋 ОТЧЁТ ПО ИЗДЕЛИЮ</h2>
+                        <h3>${escapeHtml(item.product)}</h3>
+                        <p style="color: #a0a0a0;">Группа: ${escapeHtml(order.groupName)} | Заказ: ${order.number}</p>
+                        <p style="color: #a0a0a0;">Размер: ${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</p>
+                        <p style="color: #a0a0a0;">Покрытие: ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</p>
+                    </div>
+            `;
+            
+            const reportsBySite = {
+                'polimerniy': [],
+                'slesarniy': [],
+                'frezerniy': [],
+                'tokarniy': [],
+                'lazerno': []
+            };
+            
+            itemReports.forEach(report => {
+                if (reportsBySite[report.siteKey] !== undefined) {
+                    reportsBySite[report.siteKey].push(report);
+                }
+            });
+            
+            for (const [siteKey, reports] of Object.entries(reportsBySite)) {
+                html += `
+                    <div style="margin-bottom: 25px; border: 1px solid #2a2f38; border-radius: 12px; overflow: hidden;">
+                        <div style="background: linear-gradient(135deg, #232830, #1a1e24); padding: 12px 15px;">
+                            <h4 style="margin: 0; color: #ff3b3b;">${siteNames[siteKey]}</h4>
+                        </div>
+                        <div style="padding: 15px;">
+                `;
+                
+                if (reports.length === 0) {
+                    html += `<div style="color: #a0a0a0; text-align: center; padding: 20px;">— Нет данных —</div>`;
+                } else {
+                    reports.forEach(report => {
+                        const rows = report.rows || [];
+                        rows.forEach(row => {
+                            const расход = row.расход || 0;
+                            const количество = row.количество || 0;
+                            const комментарий = row.комментарий || '';
+                            
+                            let text = `Расход: ${расход}, Количество: ${количество}`;
+                            if (комментарий) text += `, ${комментарий}`;
+                            
+                            html += `
+                                <div style="margin-bottom: 12px; padding: 10px 12px; background: #15191f; border-radius: 6px; font-size: 13px;">
+                                    ${escapeHtml(text)}
+                                </div>
+                            `;
+                        });
+                    });
+                }
+                
+                html += `</div></div>`;
+            }
+            
+            if (itemReports.length === 0) {
+                html += `
+                    <div style="text-align: center; padding: 40px; background: #15191f; border-radius: 12px;">
+                        <div style="font-size: 48px; margin-bottom: 15px;">📭</div>
+                        <p>Нет отчётов по этому изделию</p>
+                    </div>
+                `;
+            }
+            
+            html += `
+                <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #2a2f38;">
+                    <button class="btn btn-primary" onclick="printCurrentReport()">🖨️ Распечатать</button>
+                    <button class="btn btn-danger" onclick="closeOrderReportModal()">✖️ Закрыть</button>
+                </div>
+            </div>`;
+            
+            const modal = document.getElementById('orderReportModal');
+            const contentDiv = document.getElementById('orderReportContent');
+            contentDiv.innerHTML = html;
+            modal.style.display = 'block';
+            
+            window.currentReportHtml = html;
+        }
+
+        function printCurrentReport() {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Отчёт по изделию</title>
+                        <style>
+                            body { font-family: 'Segoe UI', sans-serif; padding: 20px; }
+                            @media print { button { display: none; } }
+                        </style>
+                    </head>
+                    <body>${window.currentReportHtml}</body>
+                </html>
+            `);
+            printWindow.print();
+            printWindow.close();
         }
 
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
@@ -2431,7 +2433,6 @@ function printCurrentReport() {
         window.exportOrders = exportOrders;
         window.importOrders = importOrders;
         window.showMaterialsReport = showMaterialsReport;
-        window.showItemMaterialsReport = showItemMaterialsReport;
         window.closeMaterialsModal = closeMaterialsModal;
         window.addExtraTask = addExtraTask;
         window.deleteOrder = deleteOrder;
