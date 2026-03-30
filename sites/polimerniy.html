@@ -328,7 +328,7 @@ function saveOpenCardsState() {
     document.querySelectorAll('.order-card').forEach(card => {
         const content = card.querySelector('.order-content');
         if (content && !content.classList.contains('collapsed')) {
-            openCards.push(card.dataset.orderId);
+            openCards.push(String(card.dataset.orderId)); // Приводим к строке
         }
     });
     localStorage.setItem(POLIMERNIY_STORAGE_KEY, JSON.stringify(openCards));
@@ -336,7 +336,7 @@ function saveOpenCardsState() {
     // Сохраняем открытые изделия - сохраняем ВСЕ индексы для каждого заказа
     const openItemsByOrder = {};
     document.querySelectorAll('.order-card').forEach(card => {
-        const orderId = card.dataset.orderId;
+        const orderId = String(card.dataset.orderId); // Приводим к строке
         const openIndices = [];
         const items = card.querySelectorAll('.item-header');
         items.forEach((itemHeader, idx) => {
