@@ -1828,15 +1828,12 @@ if (order.items && order.items.length > 0) {
 const header = document.createElement('div');
 header.className = `order-header ${statusClass}`;
 header.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
         <div>
             <h3>📁 ${escapeHtml(order.groupName)}</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 5px; font-size: 12px; color: #a0a0a0;">
-                <span>📦 Изделий: ${order.items ? order.items.length : 0}</span>
-                <span>№${order.number || '---'}</span>
-                ${sizeInfo ? `<span>📏 ${sizeInfo}</span>` : ''}
-                ${ralInfo ? `<span>🎨 ${ralInfo}</span>` : ''}
-                <span>${groupStatus === 'green' ? '✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? '⚡ В РАБОТЕ' : '⏳ ОЖИДАЕТ')}</span>
+            <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
+                Изделий: ${order.items ? order.items.length : 0} | №${order.number || '---'}
+                ${groupStatus === 'green' ? ' | ✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? ' | ⚡ В РАБОТЕ' : ' | ⏳ ОЖИДАЕТ')}
             </div>
         </div>
         <div>
@@ -1865,14 +1862,20 @@ header.innerHTML = `
                         itemHeader.style.display = 'flex';
                         itemHeader.style.justifyContent = 'space-between';
                         itemHeader.innerHTML = `
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
-                                <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
-                                    📋 Отчёт
-                                </button>
-                            </div>
-                            <span>▼</span>
-                        `;
+    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
+            <span style="font-size: 11px; color: #4cd964;">${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
+            ${item.ral ? `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>` : ''}
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
+                📋 Отчёт
+            </button>
+            <span>▼</span>
+        </div>
+    </div>
+`;
 
                         const itemContent = document.createElement('div');
                         itemContent.className = 'item-content';
