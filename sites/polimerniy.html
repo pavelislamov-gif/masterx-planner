@@ -55,8 +55,19 @@
         .new-executor-form input { width: 160px; padding: 5px 8px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; font-size: 12px; }
         .btn-ready { background: #28a745; color: white; padding: 5px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; margin: 10px 0 0 0; min-width: 100px; }
         .btn-ready:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-report { background: #ff9800; color: white; border: none; border-radius: 4px; padding: 5px 12px; cursor: pointer; font-size: 11px; font-weight: 600; margin-left: 8px; transition: all 0.2s; }
-        .btn-report:hover { background: #e68900; transform: scale(1.02); }
+        .btn-report-header {
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 15px;
+            transition: all 0.2s;
+        }
+        .btn-report-header:hover { background: #e68900; transform: scale(1.02); }
         .extra-task-badge { background: #ff3b3b; color: white; padding: 2px 6px; border-radius: 20px; font-size: 10px; margin-left: 8px; }
         .task-description { color: #a0a0a0; font-size: 11px; margin: 5px 0 8px 0; padding: 6px; background: #15191f; border-radius: 4px; border-left: 3px solid #ff3b3b; }
         .no-tasks { text-align: center; padding: 40px; background: #1a1e24; border-radius: 12px; color: #a0a0a0; border: 1px solid #2a2f38; }
@@ -126,6 +137,49 @@
             background: #ffffff;
             border: 1px solid #e2e8f0;
             color: #1e293b;
+        }
+        .report-row {
+            background: #15191f;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #2a2f38;
+        }
+        .report-input {
+            width: 100%;
+            padding: 6px;
+            background: #1e232b;
+            border: 1px solid #2a2f38;
+            border-radius: 4px;
+            color: #fff;
+        }
+        .report-textarea {
+            width: 100%;
+            padding: 6px;
+            background: #1e232b;
+            border: 1px solid #2a2f38;
+            border-radius: 4px;
+            color: #fff;
+            resize: vertical;
+        }
+        .btn-add-row {
+            width: 100%;
+            padding: 8px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-remove-row {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 11px;
         }
     </style>
 </head>
@@ -380,6 +434,15 @@
                     header.className = 'order-header collapsed';
                     header.innerHTML = '<h3>📦 Заказ №' + escapeHtml(order.number) + '</h3><span class="collapse-icon">▼</span>';
                     
+                    // КНОПКА ОТЧЁТ В ШАПКЕ ЗАКАЗА
+                    var reportBtn = document.createElement('button');
+                    reportBtn.className = 'btn-report-header';
+                    reportBtn.textContent = '📝 Отчёт';
+                    reportBtn.onclick = function() { 
+                        openRightModalForOrder(order.orderId); 
+                    };
+                    header.appendChild(reportBtn);
+                    
                     var content = document.createElement('div');
                     content.className = 'order-content collapsed';
                     
@@ -589,12 +652,7 @@
                 readyBtn.onclick = function() { completeTask(task.id); };
                 card.appendChild(readyBtn);
                 
-                // КНОПКА ОТЧЁТ
-                var reportBtn = document.createElement('button');
-                reportBtn.className = 'btn-report';
-                reportBtn.textContent = '📝 Отчёт';
-                reportBtn.onclick = function() { openRightModal(task, fullOrder); };
-                card.appendChild(reportBtn);
+                // КНОПКА ОТЧЁТ УДАЛЕНА - ПЕРЕНЕСЕНА В ШАПКУ ЗАКАЗА
                 
                 return card;
             }
@@ -755,6 +813,65 @@
         let currentReportFullOrder = null;
         let reportRows = [];
 
+        function openRightModalForOrder(orderId) {
+            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+            const fullOrder = allOrders.find(o => o.id == orderId);
+            if (!fullOrder) {
+                alert('Заказ не найден');
+                return;
+            }
+            
+            // Создаём виртуальную задачу для отчёта по всему заказу
+            const virtualTask = {
+                id: `order_${orderId}`,
+                orderId: orderId,
+                orderNumber: fullOrder.number || '---',
+                product: fullOrder.groupName || 'Заказ',
+                operation: 'Все операции',
+                size: 'Группа',
+                totalQuantity: 1,
+                isExtra: false
+            };
+            
+            currentReportTask = virtualTask;
+            currentReportFullOrder = fullOrder;
+            
+            const modal = document.getElementById('rightModal');
+            const overlay = document.getElementById('rightModalOverlay');
+            const contentDiv = document.getElementById('rightModalContent');
+            
+            // Загружаем сохранённые данные для этого заказа
+            const savedData = getSavedReportDataForOrder(orderId);
+            if (savedData && savedData.rows) {
+                reportRows = [...savedData.rows];
+            } else {
+                reportRows = [{ расход: 0, количество: 0, комментарий: '' }];
+            }
+            
+            renderReportForm(contentDiv);
+            modal.classList.add('open');
+            overlay.classList.add('show');
+        }
+
+        function getSavedReportDataForOrder(orderId) {
+            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+            const orderReports = allReports.filter(r => r.orderId == orderId && r.isOrderReport === true);
+            
+            if (orderReports.length === 0) return null;
+            
+            const allRows = [];
+            orderReports.forEach(report => {
+                if (report.rows) {
+                    allRows.push(...report.rows);
+                }
+            });
+            
+            return {
+                rows: allRows,
+                savedAt: orderReports[orderReports.length - 1]?.savedAt
+            };
+        }
+
         function openRightModal(task, fullOrder) {
             currentReportTask = task;
             currentReportFullOrder = fullOrder;
@@ -780,61 +897,87 @@
             
             reportRows.forEach((row, index) => {
                 rowsHtml += `
-                    <div class="report-row" style="background: #15191f; border-radius: 8px; padding: 12px; margin-bottom: 12px; border: 1px solid #2a2f38;">
+                    <div class="report-row" data-row-index="${index}">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                             <span style="font-size: 12px; color: #ff9800;">📝 Запись ${index + 1}</span>
-                            <button type="button" class="btn-remove-row" onclick="removeReportRow(${index})" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 11px;">✖️</button>
+                            <button type="button" class="btn-remove-row" onclick="removeReportRow(${index})">✖️</button>
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                             <div>
                                 <label style="font-size: 11px; color: #a0a0a0;">📊 Расход:</label>
-                                <input type="number" class="report-expense" data-row="${index}" value="${row.расход || 0}" step="0.1" placeholder="0" style="width: 100%; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+                                <input type="number" class="report-input report-expense" data-row="${index}" value="${row.расход || 0}" step="0.1" placeholder="0">
                             </div>
                             <div>
                                 <label style="font-size: 11px; color: #a0a0a0;">📦 Количество:</label>
-                                <input type="number" class="report-quantity" data-row="${index}" value="${row.количество || 0}" step="1" placeholder="0" style="width: 100%; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+                                <input type="number" class="report-input report-quantity" data-row="${index}" value="${row.количество || 0}" step="1" placeholder="0">
                             </div>
                         </div>
                         <div>
                             <label style="font-size: 11px; color: #a0a0a0;">💬 Комментарий:</label>
-                            <textarea class="report-comment" data-row="${index}" rows="2" placeholder="Дополнительная информация..." style="width: 100%; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">${escapeHtml(row.комментарий || '')}</textarea>
+                            <textarea class="report-textarea report-comment" data-row="${index}" rows="2" placeholder="Дополнительная информация...">${escapeHtml(row.комментарий || '')}</textarea>
                         </div>
                     </div>
                 `;
             });
             
-            let operationName = currentReportTask.operation;
-            if (typeof operationName === 'object' && operationName !== null) {
-                operationName = operationName.operation || JSON.stringify(operationName);
+            let title = 'Отчёт по операции';
+            let infoText = '';
+            
+            if (currentReportTask && currentReportTask.id.toString().startsWith('order_')) {
+                title = '📝 Отчёт по заказу';
+                infoText = `
+                    <div style="margin-bottom: 20px; padding: 12px; background: #15191f; border-radius: 8px; border-left: 3px solid #ff9800;">
+                        <div style="font-size: 12px; color: #a0a0a0;">Заказ: ${escapeHtml(currentReportTask.orderNumber)}</div>
+                        <div style="font-size: 16px; font-weight: bold; color: #ff9800; margin: 5px 0;">${escapeHtml(currentReportTask.product)}</div>
+                        <div style="font-size: 12px;">📋 Все операции по заказу</div>
+                    </div>
+                `;
+            } else {
+                let operationName = currentReportTask?.operation || '';
+                if (typeof operationName === 'object' && operationName !== null) {
+                    operationName = operationName.operation || JSON.stringify(operationName);
+                }
+                infoText = `
+                    <div style="margin-bottom: 20px; padding: 12px; background: #15191f; border-radius: 8px; border-left: 3px solid #ff9800;">
+                        <div style="font-size: 12px; color: #a0a0a0;">Заказ: ${escapeHtml(currentReportTask?.orderNumber)}</div>
+                        <div style="font-size: 16px; font-weight: bold; color: #ff9800; margin: 5px 0;">${escapeHtml(currentReportTask?.product)}</div>
+                        <div style="font-size: 12px;">🔧 Операция: ${escapeHtml(operationName)}</div>
+                    </div>
+                `;
             }
             
             container.innerHTML = `
-                <div style="margin-bottom: 20px; padding: 12px; background: #15191f; border-radius: 8px; border-left: 3px solid #ff9800;">
-                    <div style="font-size: 12px; color: #a0a0a0;">Заказ: ${escapeHtml(currentReportTask.orderNumber)}</div>
-                    <div style="font-size: 16px; font-weight: bold; color: #ff9800; margin: 5px 0;">${escapeHtml(currentReportTask.product)}</div>
-                    <div style="font-size: 12px;">🔧 Операция: ${escapeHtml(operationName)}</div>
+                <div class="right-modal-header" style="margin: -20px -20px 0 -20px; padding: 15px 20px;">
+                    <h3>${title}</h3>
+                    <button class="right-modal-close" onclick="closeRightModal()">&times;</button>
                 </div>
-                
-                <div id="reportRowsContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
-                    ${rowsHtml}
+                <div style="padding: 20px 0;">
+                    ${infoText}
+                    
+                    <div id="reportRowsContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
+                        ${rowsHtml}
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <button type="button" class="btn-add-row" onclick="addReportRow()">➕ Добавить строку</button>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="button" class="btn btn-success" onclick="saveReportData()" style="flex: 1;">💾 Сохранить</button>
+                        <button type="button" class="btn btn-danger" onclick="closeRightModal()" style="flex: 1;">✖️ Закрыть</button>
+                    </div>
+                    
+                    ${getSavedReportDataForOrder(currentReportTask?.orderId)?.savedAt && currentReportTask?.id.toString().startsWith('order_') ? `
+                    <div style="margin-top: 15px; padding: 8px; background: #15191f; border-radius: 6px; font-size: 11px; color: #4cd964;">
+                        ✅ Последнее сохранение: ${new Date(getSavedReportDataForOrder(currentReportTask.orderId).savedAt).toLocaleString()}
+                    </div>
+                    ` : ''}
+                    ${!currentReportTask?.id.toString().startsWith('order_') && getSavedReportData(currentReportTask?.id)?.savedAt ? `
+                    <div style="margin-top: 15px; padding: 8px; background: #15191f; border-radius: 6px; font-size: 11px; color: #4cd964;">
+                        ✅ Последнее сохранение: ${new Date(getSavedReportData(currentReportTask.id).savedAt).toLocaleString()}
+                    </div>
+                    ` : ''}
                 </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <button type="button" class="btn-add-row" onclick="addReportRow()" style="width: 100%; padding: 8px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
-                        ➕
-                    </button>
-                </div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button type="button" class="btn btn-success" onclick="saveReportData()" style="flex: 1;">💾 Сохранить</button>
-                    <button type="button" class="btn btn-danger" onclick="closeRightModal()" style="flex: 1;">✖️ Закрыть</button>
-                </div>
-                
-                ${getSavedReportData(currentReportTask.id)?.savedAt ? `
-                <div style="margin-top: 15px; padding: 8px; background: #15191f; border-radius: 6px; font-size: 11px; color: #4cd964;">
-                    ✅ Последнее сохранение: ${new Date(getSavedReportData(currentReportTask.id).savedAt).toLocaleString()}
-                </div>
-                ` : ''}
             `;
             
             document.querySelectorAll('.report-expense').forEach(input => {
@@ -902,37 +1045,61 @@
                 }
             });
             
-            let operationName = currentReportTask.operation;
-            if (typeof operationName === 'object' && operationName !== null) {
-                operationName = operationName.operation || JSON.stringify(operationName);
-            }
+            const isOrderReport = currentReportTask.id.toString().startsWith('order_');
             
-            const reportData = {
-                taskId: currentReportTask.id,
-                orderId: currentReportTask.orderId,
-                orderNumber: currentReportTask.orderNumber,
-                product: currentReportTask.product,
-                operation: operationName,
-                size: currentReportTask.size,
-                siteKey: 'polimerniy',
-                rows: reportRows.map(row => ({
-                    расход: row.расход || 0,
-                    количество: row.количество || 0,
-                    комментарий: row.комментарий || ''
-                })),
-                savedAt: new Date().toISOString()
-            };
-            
-            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-            const existingIndex = allReports.findIndex(r => r.taskId === currentReportTask.id);
-            
-            if (existingIndex >= 0) {
-                allReports[existingIndex] = reportData;
-            } else {
+            let reportData;
+            if (isOrderReport) {
+                reportData = {
+                    orderId: currentReportTask.orderId,
+                    orderNumber: currentReportTask.orderNumber,
+                    product: currentReportTask.product,
+                    siteKey: 'polimerniy',
+                    rows: reportRows.map(row => ({
+                        расход: row.расход || 0,
+                        количество: row.количество || 0,
+                        комментарий: row.комментарий || ''
+                    })),
+                    savedAt: new Date().toISOString(),
+                    isOrderReport: true
+                };
+                
+                let allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+                allReports = allReports.filter(r => !(r.orderId == currentReportTask.orderId && r.isOrderReport === true));
                 allReports.push(reportData);
+                localStorage.setItem('material_reports', JSON.stringify(allReports));
+            } else {
+                let operationName = currentReportTask.operation;
+                if (typeof operationName === 'object' && operationName !== null) {
+                    operationName = operationName.operation || JSON.stringify(operationName);
+                }
+                
+                reportData = {
+                    taskId: currentReportTask.id,
+                    orderId: currentReportTask.orderId,
+                    orderNumber: currentReportTask.orderNumber,
+                    product: currentReportTask.product,
+                    operation: operationName,
+                    size: currentReportTask.size,
+                    siteKey: 'polimerniy',
+                    rows: reportRows.map(row => ({
+                        расход: row.расход || 0,
+                        количество: row.количество || 0,
+                        комментарий: row.комментарий || ''
+                    })),
+                    savedAt: new Date().toISOString()
+                };
+                
+                const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+                const existingIndex = allReports.findIndex(r => r.taskId === currentReportTask.id);
+                
+                if (existingIndex >= 0) {
+                    allReports[existingIndex] = reportData;
+                } else {
+                    allReports.push(reportData);
+                }
+                
+                localStorage.setItem('material_reports', JSON.stringify(allReports));
             }
-            
-            localStorage.setItem('material_reports', JSON.stringify(allReports));
             
             alert('✅ Отчёт сохранён!');
             closeRightModal();
@@ -955,6 +1122,7 @@
 
         // Глобальные функции
         window.openRightModal = openRightModal;
+        window.openRightModalForOrder = openRightModalForOrder;
         window.closeRightModal = closeRightModal;
         window.saveReportData = saveReportData;
         window.addReportRow = addReportRow;
