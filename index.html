@@ -585,6 +585,16 @@
             border-color: #cc2e2e;
         }
 
+        .square.pending {
+            background-color: #1e232b !important;
+            border-color: #3a404b !important;
+        }
+
+        body.light-theme .square.pending {
+            background-color: #e9ecef !important;
+            border-color: #dee2e6 !important;
+        }
+
         .operation-name-small {
             font-size: 10px;
             margin-top: 4px;
@@ -901,18 +911,41 @@
             let allCompleted = true;
 
             Object.values(order.tasks).forEach(status => {
-                if (status === 'orange') {
+                if (status === 'in_progress') {
                     hasInProgress = true;
                     allCompleted = false;
                 }
-                if (status !== 'green') {
+                if (status === 'pending') {
                     allCompleted = false;
+                }
+                if (status !== 'completed' && status !== 'green') {
+                    allCompleted = false;
+                }
+                if (status === 'green') {
+                    // уже завершено
                 }
             });
 
             if (allCompleted && Object.keys(order.tasks).length > 0) return 'green';
             if (hasInProgress) return 'orange';
             return 'gray';
+        }
+
+        // ============== ОБНОВЛЕНИЕ СТАТУСА ЗАДАЧИ В ЗАКАЗЕ ==============
+        function updateOrderTaskStatus(orderId, taskId, status) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) return;
+            
+            if (!order.tasks) order.tasks = {};
+            order.tasks[taskId] = status;
+            
+            const orderIndex = orders.findIndex(o => o.id == orderId);
+            orders[orderIndex] = order;
+            saveOrdersToStorage(orders);
+            
+            renderOrdersList();
+            updateStatistics();
         }
 
         // ============== ЗАГРУЗКА ДАННЫХ ==============
@@ -1668,186 +1701,189 @@
 
         // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА ==============
         function createSiteRow(name, order, itemIndex, siteKey) {
-    const item = order.items[itemIndex];
-    if (!item) return '<div>Нет данных</div>';
+            const item = order.items[itemIndex];
+            if (!item) return '<div>Нет данных</div>';
 
-    const operations = getOperationNames(item.product, siteKey);
+            const operations = getOperationNames(item.product, siteKey);
 
-    if (!operations || operations.length === 0) {
-        return `
-            <div class="site-item">
-                <span class="site-name">${name}</span>
-                <div class="squares">
-                    <div class="square red" title="Нет операций"></div>
+            if (!operations || operations.length === 0) {
+                return `
+                    <div class="site-item">
+                        <span class="site-name">${name}</span>
+                        <div class="squares">
+                            <div class="square red" title="Нет операций"></div>
+                        </div>
+                        <span>0/0</span>
+                        <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕ Доп.</button>
+                    </div>
+                `;
+            }
+
+            let squaresHtml = '';
+            let completedCount = 0;
+
+            for (let i = 0; i < operations.length; i++) {
+                const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
+                const operationName = operations[i];
+                let taskStatus = '';
+                let isAdded = false;
+
+                if (order.tasks && order.tasks[taskId]) {
+                    taskStatus = order.tasks[taskId];
+                    if (taskStatus === 'green') completedCount++;
+                }
+
+                try {
+                    const storageKey = `tasks_${siteKey}`;
+                    const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                    isAdded = tasks.some(t => t.id === taskId);
+                } catch(e) {}
+
+                squaresHtml += `
+                    <div class="operation-wrapper">
+                        <button class="op-toggle-btn ${isAdded ? 'added' : ''}" 
+                                onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}')">
+                            ${isAdded ? '✓' : '+'}
+                        </button>
+                        <div class="square ${taskStatus}" title="${escapeHtml(operationName)}"></div>
+                        <div class="operation-name-small">${escapeHtml(operationName)}</div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="site-item">
+                    <span class="site-name">${name}</span>
+                    <div class="squares">${squaresHtml}</div>
+                    <div>
+                        <span>${completedCount}/${operations.length}</span>
+                        <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')" style="margin-left: 10px;">➕ Доп.</button>
+                    </div>
                 </div>
-                <span>0/0</span>
-                <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕ Доп.</button>
-            </div>
-        `;
-    }
-
-    let squaresHtml = '';
-    let completedCount = 0;
-
-    for (let i = 0; i < operations.length; i++) {
-        const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
-        const operationName = operations[i];
-        let taskStatus = '';
-        let isAdded = false;
-
-        if (order.tasks && order.tasks[taskId]) {
-            taskStatus = order.tasks[taskId];
-            if (taskStatus === 'green') completedCount++;
+            `;
         }
-
-        // ИСПРАВЛЕННАЯ ПРОВЕРКА - без даты
-        try {
-            const storageKey = `tasks_${siteKey}`;  // Убрали дату
-            const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            isAdded = tasks.some(t => t.id === taskId);
-        } catch(e) {}
-
-        squaresHtml += `
-            <div class="operation-wrapper">
-                <button class="op-toggle-btn ${isAdded ? 'added' : ''}" 
-                        onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}')">
-                    ${isAdded ? '✓' : '+'}
-                </button>
-                <div class="square ${taskStatus}" title="${escapeHtml(operationName)}"></div>
-                <div class="operation-name-small">${escapeHtml(operationName)}</div>
-            </div>
-        `;
-    }
-
-    return `
-        <div class="site-item">
-            <span class="site-name">${name}</span>
-            <div class="squares">${squaresHtml}</div>
-            <div>
-                <span>${completedCount}/${operations.length}</span>
-                <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')" style="margin-left: 10px;">➕ Доп.</button>
-            </div>
-        </div>
-    `;
-}
 
         // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ ==============
         function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName) {
-    const orders = loadOrdersFromStorage();
-    const order = orders.find(o => o.id == orderId);
-    if (!order) { alert('Заказ не найден'); return; }
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) { alert('Заказ не найден'); return; }
 
-    const storageKey = `tasks_${siteKey}`;
-    const taskId = `${order.id}_${siteKey}_${itemIndex}_${opIndex}`;
+            const storageKey = `tasks_${siteKey}`;
+            const taskId = `${order.id}_${siteKey}_${itemIndex}_${opIndex}`;
 
-    let existingTasks = [];
-    try {
-        const saved = localStorage.getItem(storageKey);
-        if (saved) existingTasks = JSON.parse(saved);
-    } catch(e) { console.error(e); }
+            let existingTasks = [];
+            try {
+                const saved = localStorage.getItem(storageKey);
+                if (saved) existingTasks = JSON.parse(saved);
+            } catch(e) { console.error(e); }
 
-    const taskExists = existingTasks.some(t => t.id === taskId);
+            const taskExists = existingTasks.some(t => t.id === taskId);
 
-    if (taskExists) {
-        if (confirm(`❓ Удалить операцию "${operationName}" с участка?`)) {
-            // Удаляем задачу из localStorage
-            const filteredTasks = existingTasks.filter(t => t.id !== taskId);
-            localStorage.setItem(storageKey, JSON.stringify(filteredTasks));
+            if (taskExists) {
+                if (confirm(`❓ Удалить операцию "${operationName}" с участка?`)) {
+                    const filteredTasks = existingTasks.filter(t => t.id !== taskId);
+                    localStorage.setItem(storageKey, JSON.stringify(filteredTasks));
 
-            // Удаляем статус из order.tasks
-            if (order.tasks && order.tasks[taskId]) {
-                delete order.tasks[taskId];
+                    if (order.tasks && order.tasks[taskId]) {
+                        delete order.tasks[taskId];
+                    }
+                    
+                    const newStatus = getGroupStatus(order);
+                    order.status = newStatus === 'green' ? 'completed' : (newStatus === 'orange' ? 'active' : 'pending');
+                    
+                    const orderIndex = orders.findIndex(o => o.id == orderId);
+                    orders[orderIndex] = order;
+                    saveOrdersToStorage(orders);
+
+                    renderOrdersList();
+                    updateStatistics();
+
+                    alert(`✅ Операция "${operationName}" удалена с участка`);
+                }
+            } else {
+                const item = order.items[itemIndex];
+
+                let plannedQuantity = 1;
+
+                const siteColumnMap = {
+                    'tokarniy': 'токарно-фрезерный',
+                    'frezerniy': 'фрезерный',
+                    'slesarniy': 'слесарный',
+                    'lazerno': 'лазерно-гибочный',
+                    'polimerniy': 'полимерный'
+                };
+
+                const siteColumn = siteColumnMap[siteKey];
+                const productOps = taskOperationsData[item.product];
+
+                if (productOps && siteColumn && productOps[siteColumn]) {
+                    const opData = productOps[siteColumn].find(op => op.operation === operationName);
+
+                    if (opData && opData.detail) {
+                        const details = item.details || [];
+                        for (const detail of details) {
+                            if (detail.name === opData.detail) {
+                                plannedQuantity = detail.quantity;
+                                break;
+                            }
+                        }
+
+                        if (plannedQuantity === 1 && item.brackets) {
+                            for (const b of item.brackets) {
+                                if (`Кронштейн ${b.type}` === opData.detail) {
+                                    plannedQuantity = b.quantity;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (plannedQuantity === 1 && item.lyres) {
+                            for (const l of item.lyres) {
+                                if (`Лира ${l.type}` === opData.detail) {
+                                    plannedQuantity = l.quantity;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                const newTask = {
+                    id: taskId,
+                    orderId: order.id,
+                    orderNumber: order.number,
+                    product: item.product,
+                    size: item.size?.name || 'Стандартный',
+                    totalQuantity: plannedQuantity,
+                    completedQuantity: 0,
+                    operation: operationName,
+                    index: opIndex,
+                    status: 'pending',
+                    executors: [],
+                    date: new Date().toISOString().split('T')[0],
+                    isExtra: false
+                };
+
+                existingTasks.push(newTask);
+                localStorage.setItem(storageKey, JSON.stringify(existingTasks));
+
+                if (!order.tasks) order.tasks = {};
+                order.tasks[taskId] = 'pending';
+                
+                const newStatus = getGroupStatus(order);
+                order.status = newStatus === 'green' ? 'completed' : (newStatus === 'orange' ? 'active' : 'pending');
+                
                 const orderIndex = orders.findIndex(o => o.id == orderId);
                 orders[orderIndex] = order;
                 saveOrdersToStorage(orders);
-            }
 
-            // Обновляем отображение (перерисовываем страницу)
-            renderOrdersList();
-            updateStatistics();
-
-            alert(`✅ Операция "${operationName}" удалена с участка`);
-        }
-    } else {
-        const item = order.items[itemIndex];
-
-        let plannedQuantity = 1;
-
-        const siteColumnMap = {
-            'tokarniy': 'токарно-фрезерный',
-            'frezerniy': 'фрезерный',
-            'slesarniy': 'слесарный',
-            'lazerno': 'лазерно-гибочный',
-            'polimerniy': 'полимерный'
-        };
-
-        const siteColumn = siteColumnMap[siteKey];
-        const productOps = taskOperationsData[item.product];
-
-        if (productOps && siteColumn && productOps[siteColumn]) {
-            const opData = productOps[siteColumn].find(op => op.operation === operationName);
-
-            if (opData && opData.detail) {
-                const details = item.details || [];
-                for (const detail of details) {
-                    if (detail.name === opData.detail) {
-                        plannedQuantity = detail.quantity;
-                        break;
-                    }
-                }
-
-                if (plannedQuantity === 1 && item.brackets) {
-                    for (const b of item.brackets) {
-                        if (`Кронштейн ${b.type}` === opData.detail) {
-                            plannedQuantity = b.quantity;
-                            break;
-                        }
-                    }
-                }
-
-                if (plannedQuantity === 1 && item.lyres) {
-                    for (const l of item.lyres) {
-                        if (`Лира ${l.type}` === opData.detail) {
-                            plannedQuantity = l.quantity;
-                            break;
-                        }
-                    }
-                }
+                alert(`✅ Операция "${operationName}" добавлена на участок с планом ${plannedQuantity} шт`);
+                
+                renderOrdersList();
+                updateStatistics();
             }
         }
-
-        const newTask = {
-            id: taskId,
-            orderId: order.id,
-            orderNumber: order.number,
-            product: item.product,
-            size: item.size?.name || 'Стандартный',
-            totalQuantity: plannedQuantity,
-            completedQuantity: 0,
-            operation: operationName,
-            index: opIndex,
-            status: 'pending',
-            executors: [],
-            date: new Date().toISOString().split('T')[0],
-            isExtra: false
-        };
-
-        existingTasks.push(newTask);
-        localStorage.setItem(storageKey, JSON.stringify(existingTasks));
-
-        if (!order.tasks) order.tasks = {};
-        order.tasks[taskId] = 'pending';
-        const orderIndex = orders.findIndex(o => o.id == orderId);
-        orders[orderIndex] = order;
-        saveOrdersToStorage(orders);
-
-        alert(`✅ Операция "${operationName}" добавлена на участок с планом ${plannedQuantity} шт`);
-        
-        // Обновляем отображение
-        renderOrdersList();
-        updateStatistics();
-    }
-}
 
         // ============== ОТОБРАЖЕНИЕ СПИСКА ГРУПП ==============
         function renderOrdersList() {
@@ -2070,8 +2106,8 @@
             orders.forEach(order => {
                 if (order.tasks) {
                     Object.values(order.tasks).forEach(status => {
-                        if (status === 'orange') activeTasks++;
-                        if (status === 'green') completedTasks++;
+                        if (status === 'in_progress') activeTasks++;
+                        if (status === 'completed' || status === 'green') completedTasks++;
                     });
                 }
             });
@@ -2212,52 +2248,52 @@
         }
 
         function deleteOrder(orderId) {
-    if (!confirm('Удалить группу? Все связанные задачи также будут удалены.')) return;
+            if (!confirm('Удалить группу? Все связанные задачи также будут удалены.')) return;
 
-    let orders = loadOrdersFromStorage();
-    orders = orders.filter(o => o.id !== orderId);
-    saveOrdersToStorage(orders);
+            let orders = loadOrdersFromStorage();
+            orders = orders.filter(o => o.id !== orderId);
+            saveOrdersToStorage(orders);
 
-    const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
-    
-    sites.forEach(site => {
-        const key = `tasks_${site}`;
-        const tasks = localStorage.getItem(key);
-        if (tasks) {
-            let tasksArr = JSON.parse(tasks);
-            tasksArr = tasksArr.filter(t => t.orderId !== orderId);
-            localStorage.setItem(key, JSON.stringify(tasksArr));
+            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+            
+            sites.forEach(site => {
+                const key = `tasks_${site}`;
+                const tasks = localStorage.getItem(key);
+                if (tasks) {
+                    let tasksArr = JSON.parse(tasks);
+                    tasksArr = tasksArr.filter(t => t.orderId !== orderId);
+                    localStorage.setItem(key, JSON.stringify(tasksArr));
+                }
+            });
+
+            saveMainOpenCardsState();
+            saveMainOpenItemsState();
+            renderOrdersList();
+            updateStatistics();
+            alert('✅ Группа удалена');
         }
-    });
-
-    saveMainOpenCardsState();
-    saveMainOpenItemsState();
-    renderOrdersList();
-    updateStatistics();
-    alert('✅ Группа удалена');
-}
 
         // ============== ОТЧЁТ ПО ЗАКАЗУ ==============
         function showOrderReport(orderId) {
-    const orders = loadOrdersFromStorage();
-    const order = orders.find(o => o.id == orderId);
-    if (!order) {
-        alert('Заказ не найден');
-        return;
-    }
-    
-    const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-    
-    const orderReports = allReports.filter(report => {
-        if ((report.isItemReport || report.isOrderReport) && report.orderId == orderId) {
-            return true;
-        }
-        if (report.taskId) {
-            const parts = report.taskId.split('_');
-            return parts[0] == orderId;
-        }
-        return false;
-    });
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) {
+                alert('Заказ не найден');
+                return;
+            }
+            
+            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+            
+            const orderReports = allReports.filter(report => {
+                if ((report.isItemReport || report.isOrderReport) && report.orderId == orderId) {
+                    return true;
+                }
+                if (report.taskId) {
+                    const parts = report.taskId.split('_');
+                    return parts[0] == orderId;
+                }
+                return false;
+            });
             
             const siteNames = {
                 'polimerniy': '🎨 ПОЛИМЕРНЫЙ УЧАСТОК',
@@ -2551,6 +2587,7 @@
         window.printOrderReport = printOrderReport;
         window.showItemReport = showItemReport;
         window.printCurrentReport = printCurrentReport;
+        window.updateOrderTaskStatus = updateOrderTaskStatus;
 
         document.addEventListener('DOMContentLoaded', initMainPage);
     </script>
