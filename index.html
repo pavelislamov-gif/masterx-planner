@@ -1733,127 +1733,126 @@
 
         // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ ==============
         function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName) {
-            const orders = loadOrdersFromStorage();
-            const order = orders.find(o => o.id == orderId);
-            if (!order) { alert('Заказ не найден'); return; }
+    const orders = loadOrdersFromStorage();
+    const order = orders.find(o => o.id == orderId);
+    if (!order) { alert('Заказ не найден'); return; }
 
-            const dateStr = order.date;
-            const storageKey = `tasks_${siteKey}_${dateStr}`;
-            const taskId = `${order.id}_${siteKey}_${itemIndex}_${opIndex}`;
+    const storageKey = `tasks_${siteKey}`;  // Убрали дату
+    const taskId = `${order.id}_${siteKey}_${itemIndex}_${opIndex}`;
 
-            let existingTasks = [];
-            try {
-                const saved = localStorage.getItem(storageKey);
-                if (saved) existingTasks = JSON.parse(saved);
-            } catch(e) { console.error(e); }
+    let existingTasks = [];
+    try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) existingTasks = JSON.parse(saved);
+    } catch(e) { console.error(e); }
 
-            const taskExists = existingTasks.some(t => t.id === taskId);
+    const taskExists = existingTasks.some(t => t.id === taskId);
 
-            if (taskExists) {
-                if (confirm(`❓ Удалить операцию "${operationName}" с участка?`)) {
-                    const filteredTasks = existingTasks.filter(t => t.id !== taskId);
-                    localStorage.setItem(storageKey, JSON.stringify(filteredTasks));
+    if (taskExists) {
+        if (confirm(`❓ Удалить операцию "${operationName}" с участка?`)) {
+            const filteredTasks = existingTasks.filter(t => t.id !== taskId);
+            localStorage.setItem(storageKey, JSON.stringify(filteredTasks));
 
-                    button.classList.remove('added');
-                    button.textContent = '+';
+            button.classList.remove('added');
+            button.textContent = '+';
 
-                    const squareDiv = button.parentElement?.querySelector('.square');
-                    if (squareDiv) {
-                        squareDiv.classList.remove('orange', 'green');
-                    }
+            const squareDiv = button.parentElement?.querySelector('.square');
+            if (squareDiv) {
+                squareDiv.classList.remove('orange', 'green');
+            }
 
-                    if (order.tasks && order.tasks[taskId]) {
-                        delete order.tasks[taskId];
-                        const orderIndex = orders.findIndex(o => o.id == orderId);
-                        orders[orderIndex] = order;
-                        saveOrdersToStorage(orders);
-                    }
-
-                    alert(`✅ Операция "${operationName}" удалена с участка`);
-                    updateStatistics();
-                    renderOrdersList();
-                }
-            } else {
-                const item = order.items[itemIndex];
-
-                let plannedQuantity = 1;
-
-                const siteColumnMap = {
-                    'tokarniy': 'токарно-фрезерный',
-                    'frezerniy': 'фрезерный',
-                    'slesarniy': 'слесарный',
-                    'lazerno': 'лазерно-гибочный',
-                    'polimerniy': 'полимерный'
-                };
-
-                const siteColumn = siteColumnMap[siteKey];
-                const productOps = taskOperationsData[item.product];
-
-                if (productOps && siteColumn && productOps[siteColumn]) {
-                    const opData = productOps[siteColumn].find(op => op.operation === operationName);
-
-                    if (opData && opData.detail) {
-                        const details = item.details || [];
-                        for (const detail of details) {
-                            if (detail.name === opData.detail) {
-                                plannedQuantity = detail.quantity;
-                                break;
-                            }
-                        }
-
-                        if (plannedQuantity === 1 && item.brackets) {
-                            for (const b of item.brackets) {
-                                if (`Кронштейн ${b.type}` === opData.detail) {
-                                    plannedQuantity = b.quantity;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (plannedQuantity === 1 && item.lyres) {
-                            for (const l of item.lyres) {
-                                if (`Лира ${l.type}` === opData.detail) {
-                                    plannedQuantity = l.quantity;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                const newTask = {
-                    id: taskId,
-                    orderId: order.id,
-                    orderNumber: order.number,
-                    product: item.product,
-                    size: item.size?.name || 'Стандартный',
-                    totalQuantity: plannedQuantity,
-                    completedQuantity: 0,
-                    operation: operationName,
-                    index: opIndex,
-                    status: 'pending',
-                    executors: [],
-                    date: dateStr,
-                    isExtra: false
-                };
-
-                existingTasks.push(newTask);
-                localStorage.setItem(storageKey, JSON.stringify(existingTasks));
-
-                button.classList.add('added');
-                button.textContent = '✓';
-
-                if (!order.tasks) order.tasks = {};
-                order.tasks[taskId] = 'pending';
+            if (order.tasks && order.tasks[taskId]) {
+                delete order.tasks[taskId];
                 const orderIndex = orders.findIndex(o => o.id == orderId);
                 orders[orderIndex] = order;
                 saveOrdersToStorage(orders);
+            }
 
-                alert(`✅ Операция "${operationName}" добавлена на участок с планом ${plannedQuantity} шт`);
-                updateStatistics();
-                renderOrdersList();
+            alert(`✅ Операция "${operationName}" удалена с участка`);
+            updateStatistics();
+            renderOrdersList();
+        }
+    } else {
+        const item = order.items[itemIndex];
+
+        let plannedQuantity = 1;
+
+        const siteColumnMap = {
+            'tokarniy': 'токарно-фрезерный',
+            'frezerniy': 'фрезерный',
+            'slesarniy': 'слесарный',
+            'lazerno': 'лазерно-гибочный',
+            'polimerniy': 'полимерный'
+        };
+
+        const siteColumn = siteColumnMap[siteKey];
+        const productOps = taskOperationsData[item.product];
+
+        if (productOps && siteColumn && productOps[siteColumn]) {
+            const opData = productOps[siteColumn].find(op => op.operation === operationName);
+
+            if (opData && opData.detail) {
+                const details = item.details || [];
+                for (const detail of details) {
+                    if (detail.name === opData.detail) {
+                        plannedQuantity = detail.quantity;
+                        break;
+                    }
+                }
+
+                if (plannedQuantity === 1 && item.brackets) {
+                    for (const b of item.brackets) {
+                        if (`Кронштейн ${b.type}` === opData.detail) {
+                            plannedQuantity = b.quantity;
+                            break;
+                        }
+                    }
+                }
+
+                if (plannedQuantity === 1 && item.lyres) {
+                    for (const l of item.lyres) {
+                        if (`Лира ${l.type}` === opData.detail) {
+                            plannedQuantity = l.quantity;
+                            break;
+                        }
+                    }
+                }
             }
         }
+
+        const newTask = {
+            id: taskId,
+            orderId: order.id,
+            orderNumber: order.number,
+            product: item.product,
+            size: item.size?.name || 'Стандартный',
+            totalQuantity: plannedQuantity,
+            completedQuantity: 0,
+            operation: operationName,
+            index: opIndex,
+            status: 'pending',
+            executors: [],
+            date: new Date().toISOString().split('T')[0],
+            isExtra: false
+        };
+
+        existingTasks.push(newTask);
+        localStorage.setItem(storageKey, JSON.stringify(existingTasks));
+
+        button.classList.add('added');
+        button.textContent = '✓';
+
+        if (!order.tasks) order.tasks = {};
+        order.tasks[taskId] = 'pending';
+        const orderIndex = orders.findIndex(o => o.id == orderId);
+        orders[orderIndex] = order;
+        saveOrdersToStorage(orders);
+
+        alert(`✅ Операция "${operationName}" добавлена на участок с планом ${plannedQuantity} шт`);
+        updateStatistics();
+        renderOrdersList();
+    }
+}
 
         // ============== ОТОБРАЖЕНИЕ СПИСКА ГРУПП ==============
         function renderOrdersList() {
