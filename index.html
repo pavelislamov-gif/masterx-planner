@@ -1737,7 +1737,7 @@
     const order = orders.find(o => o.id == orderId);
     if (!order) { alert('Заказ не найден'); return; }
 
-    const storageKey = `tasks_${siteKey}`;  // Убрали дату
+    const storageKey = `tasks_${siteKey}`;
     const taskId = `${order.id}_${siteKey}_${itemIndex}_${opIndex}`;
 
     let existingTasks = [];
@@ -1750,17 +1750,11 @@
 
     if (taskExists) {
         if (confirm(`❓ Удалить операцию "${operationName}" с участка?`)) {
+            // Удаляем задачу из localStorage
             const filteredTasks = existingTasks.filter(t => t.id !== taskId);
             localStorage.setItem(storageKey, JSON.stringify(filteredTasks));
 
-            button.classList.remove('added');
-            button.textContent = '+';
-
-            const squareDiv = button.parentElement?.querySelector('.square');
-            if (squareDiv) {
-                squareDiv.classList.remove('orange', 'green');
-            }
-
+            // Удаляем статус из order.tasks
             if (order.tasks && order.tasks[taskId]) {
                 delete order.tasks[taskId];
                 const orderIndex = orders.findIndex(o => o.id == orderId);
@@ -1768,9 +1762,11 @@
                 saveOrdersToStorage(orders);
             }
 
-            alert(`✅ Операция "${operationName}" удалена с участка`);
-            updateStatistics();
+            // Обновляем отображение (перерисовываем страницу)
             renderOrdersList();
+            updateStatistics();
+
+            alert(`✅ Операция "${operationName}" удалена с участка`);
         }
     } else {
         const item = order.items[itemIndex];
@@ -1839,9 +1835,6 @@
         existingTasks.push(newTask);
         localStorage.setItem(storageKey, JSON.stringify(existingTasks));
 
-        button.classList.add('added');
-        button.textContent = '✓';
-
         if (!order.tasks) order.tasks = {};
         order.tasks[taskId] = 'pending';
         const orderIndex = orders.findIndex(o => o.id == orderId);
@@ -1849,8 +1842,10 @@
         saveOrdersToStorage(orders);
 
         alert(`✅ Операция "${operationName}" добавлена на участок с планом ${plannedQuantity} шт`);
-        updateStatistics();
+        
+        // Обновляем отображение
         renderOrdersList();
+        updateStatistics();
     }
 }
 
