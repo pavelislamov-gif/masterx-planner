@@ -787,86 +787,117 @@
         let reportRows = [];
 
         function openRightModalForItem(orderId, itemKey) {
-            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-            const fullOrder = allOrders.find(o => o.id == orderId);
-            if (!fullOrder) {
-                alert('Заказ не найден');
-                return;
+    const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+    const fullOrder = allOrders.find(o => o.id == orderId);
+    if (!fullOrder) {
+        alert('Заказ не найден');
+        return;
+    }
+    
+    console.log('🔍 itemKey:', itemKey);
+    console.log('🔍 fullOrder.items:', fullOrder.items);
+    
+    // Ищем изделие по product и size из itemKey
+    // Формат itemKey: orderId_product_size_ral (или orderId_product_)
+    // Нужно извлечь product и size
+    const parts = itemKey.split('_');
+    // Первая часть - orderId
+    const orderIdFromKey = parts[0];
+    // Остальные части - product, size, ral
+    
+    // Извлекаем product (может содержать подчёркивания) и size
+    // Последний элемент - ral, предпоследний - size, всё остальное - product
+    let productName, sizeName, ralName;
+    
+    if (parts.length === 3) {
+        // Формат: orderId_product_size (без ral)
+        productName = parts[1];
+        sizeName = parts[2];
+        ralName = '';
+    } else if (parts.length === 4) {
+        // Формат: orderId_product_size_ral
+        productName = parts[1];
+        sizeName = parts[2];
+        ralName = parts[3];
+    } else {
+        // Сложный случай: продукт может содержать подчёркивания
+        // Последний элемент - ral, предпоследний - size, всё остальное - product
+        ralName = parts[parts.length - 1];
+        sizeName = parts[parts.length - 2];
+        productName = parts.slice(1, -2).join('_');
+    }
+    
+    // Очищаем от возможных лишних символов
+    productName = productName.trim();
+    sizeName = sizeName.trim();
+    ralName = ralName.trim();
+    
+    console.log('🔍 Распарсено:', { productName, sizeName, ralName });
+    
+    // Ищем изделие
+    let foundItem = null;
+    for (const item of fullOrder.items) {
+        const itemSize = item.size?.name || '';
+        const itemRal = item.ral || '';
+        
+        // Сравниваем по продукту и размеру (игнорируем RAL если он пустой)
+        if (item.product === productName) {
+            // Если размер совпадает или оба пустые
+            const sizeMatch = (itemSize === sizeName) || (sizeName === '' && itemSize === '');
+            if (sizeMatch) {
+                foundItem = item;
+                break;
             }
-            
-            console.log('🔍 itemKey:', itemKey);
-            
-            // Разбираем itemKey: формат "orderId_product_size_ral"
-            // Нужно правильно извлечь, так как в названии продукта могут быть подчёркивания
-            const parts = itemKey.split('_');
-            // Первая часть - orderId
-            const orderIdFromKey = parts[0];
-            // Последняя часть - ral
-            const ralName = parts[parts.length - 1];
-            // Всё между первым и последним - product и size
-            const middleParts = parts.slice(1, -1);
-            
-            // Последний элемент в middleParts - это size, остальное - product
-            let productName, sizeName;
-            if (middleParts.length === 1) {
-                // Только продукт, без размера
-                productName = middleParts[0];
-                sizeName = '';
-            } else {
-                // Последний - размер, остальное - продукт (может содержать подчёркивания)
-                sizeName = middleParts[middleParts.length - 1];
-                productName = middleParts.slice(0, -1).join('_');
-            }
-            
-            console.log('🔍 Распарсено:', { productName, sizeName, ralName });
-            
-            // Находим изделие
-            let foundItem = null;
-            for (const item of fullOrder.items) {
-                const itemSize = item.size?.name || '';
-                const itemRal = item.ral || '';
-                if (item.product === productName && itemSize === sizeName && itemRal === ralName) {
-                    foundItem = item;
-                    break;
-                }
-            }
-            
-            if (!foundItem) {
-                console.error('❌ Изделие не найдено!');
-                alert('Изделие не найдено');
-                return;
-            }
-            
-            console.log('✅ Найдено изделие:', foundItem);
-            
-            currentReportItem = {
-                orderId: orderId,
-                orderNumber: fullOrder.number,
-                groupName: fullOrder.groupName,
-                product: foundItem.product,
-                size: foundItem.size?.name,
-                quantity: foundItem.size?.quantity,
-                ral: foundItem.ral,
-                texture: foundItem.texture,
-                itemKey: itemKey
-            };
-            currentReportFullOrder = fullOrder;
-            
-            const modal = document.getElementById('rightModal');
-            const overlay = document.getElementById('rightModalOverlay');
-            const contentDiv = document.getElementById('rightModalContent');
-            
-            const savedData = getSavedReportDataForItem(orderId, itemKey);
-            if (savedData && savedData.rows) {
-                reportRows = [...savedData.rows];
-            } else {
-                reportRows = [{ расход: 0, количество: 0, комментарий: '' }];
-            }
-            
-            renderReportFormForItem(contentDiv, fullOrder, foundItem);
-            modal.classList.add('open');
-            overlay.classList.add('show');
         }
+    }
+    
+    // Если не нашли, пробуем искать по части названия
+    if (!foundItem) {
+        for (const item of fullOrder.items) {
+            if (item.product.includes(productName) || productName.includes(item.product)) {
+                foundItem = item;
+                break;
+            }
+        }
+    }
+    
+    if (!foundItem) {
+        console.error('❌ Изделие не найдено!');
+        console.log('Доступные изделия:', fullOrder.items.map(i => ({ product: i.product, size: i.size?.name })));
+        alert('Изделие не найдено');
+        return;
+    }
+    
+    console.log('✅ Найдено изделие:', foundItem);
+    
+    currentReportItem = {
+        orderId: orderId,
+        orderNumber: fullOrder.number,
+        groupName: fullOrder.groupName,
+        product: foundItem.product,
+        size: foundItem.size?.name,
+        quantity: foundItem.size?.quantity,
+        ral: foundItem.ral,
+        texture: foundItem.texture,
+        itemKey: itemKey
+    };
+    currentReportFullOrder = fullOrder;
+    
+    const modal = document.getElementById('rightModal');
+    const overlay = document.getElementById('rightModalOverlay');
+    const contentDiv = document.getElementById('rightModalContent');
+    
+    const savedData = getSavedReportDataForItem(orderId, itemKey);
+    if (savedData && savedData.rows) {
+        reportRows = [...savedData.rows];
+    } else {
+        reportRows = [{ расход: 0, количество: 0, комментарий: '' }];
+    }
+    
+    renderReportFormForItem(contentDiv, fullOrder, foundItem);
+    modal.classList.add('open');
+    overlay.classList.add('show');
+}
 
         function getSavedReportDataForItem(orderId, itemKey) {
             const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
