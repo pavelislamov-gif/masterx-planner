@@ -450,22 +450,22 @@
             tasks.forEach(task => {
                 // Уникальный ключ для изделия
                 const itemKey = `${task.orderId}_${task.product}_${task.size || ''}_${task.ral || ''}`;
-                if (!byItem[itemKey]) {
-                    byItem[itemKey] = {
-                        orderId: task.orderId,
-                        orderNumber: task.orderNumber,
-                        groupName: '',
-                        product: task.product,
-                        size: task.size,
-                        ral: task.ral,
-                        texture: task.texture,
-                        totalQuantity: task.totalQuantity,
-                        tasks: [],
-                        itemKey: itemKey
-                    };
-                }
-                byItem[itemKey].tasks.push(task);
-            });
+    if (!byItem[itemKey]) {
+        byItem[itemKey] = {
+            orderId: task.orderId,
+            orderNumber: task.orderNumber,
+            groupName: '',
+            product: task.product,
+            size: task.size,
+            ral: task.ral,
+            texture: task.texture,
+            totalQuantity: task.totalQuantity,
+            tasks: [],
+            itemKey: itemKey
+        };
+    }
+    byItem[itemKey].tasks.push(task);
+});
             
             // Загружаем информацию о группе для каждого изделия
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
@@ -788,56 +788,70 @@
         let reportRows = [];
 
         function openRightModalForItem(orderId, itemKey) {
-            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-            const fullOrder = allOrders.find(o => o.id == orderId);
-            if (!fullOrder) {
-                alert('Заказ не найден');
-                return;
+    const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+    const fullOrder = allOrders.find(o => o.id == orderId);
+    if (!fullOrder) {
+        alert('Заказ не найден');
+        return;
+    }
+    
+    // Извлекаем product, size, ral из itemKey
+    // Формат itemKey: orderId_product_size_ral
+    const parts = itemKey.split('_');
+    // parts[0] - orderId, parts[1] - product, parts[2] - size, parts[3] - ral
+    const productName = parts[1];
+    const sizeName = parts[2] || '';
+    const ralName = parts[3] || '';
+    
+    // Находим изделие по product, size и ral
+    let foundItem = null;
+    for (const item of fullOrder.items) {
+        if (item.product === productName) {
+            // Если размер и RAL совпадают (или оба пустые)
+            const itemSize = item.size?.name || '';
+            const itemRal = item.ral || '';
+            if (itemSize === sizeName && itemRal === ralName) {
+                foundItem = item;
+                break;
             }
-            
-            // Находим изделие по ключу
-            let foundItem = null;
-            for (const item of fullOrder.items) {
-                const key = `${orderId}_${item.product}_${item.size?.name || ''}_${item.ral || ''}`;
-                if (key === itemKey) {
-                    foundItem = item;
-                    break;
-                }
-            }
-            
-            if (!foundItem) {
-                alert('Изделие не найдено');
-                return;
-            }
-            
-            currentReportItem = {
-                orderId: orderId,
-                orderNumber: fullOrder.number,
-                groupName: fullOrder.groupName,
-                product: foundItem.product,
-                size: foundItem.size?.name,
-                quantity: foundItem.size?.quantity,
-                ral: foundItem.ral,
-                texture: foundItem.texture,
-                itemKey: itemKey
-            };
-            currentReportFullOrder = fullOrder;
-            
-            const modal = document.getElementById('rightModal');
-            const overlay = document.getElementById('rightModalOverlay');
-            const contentDiv = document.getElementById('rightModalContent');
-            
-            const savedData = getSavedReportDataForItem(orderId, itemKey);
-            if (savedData && savedData.rows) {
-                reportRows = [...savedData.rows];
-            } else {
-                reportRows = [{ расход: 0, количество: 0, комментарий: '' }];
-            }
-            
-            renderReportFormForItem(contentDiv, fullOrder, foundItem);
-            modal.classList.add('open');
-            overlay.classList.add('show');
         }
+    }
+    
+    if (!foundItem) {
+        alert('Изделие не найдено');
+        console.log('Поиск:', { productName, sizeName, ralName });
+        console.log('Доступные изделия:', fullOrder.items);
+        return;
+    }
+    
+    currentReportItem = {
+        orderId: orderId,
+        orderNumber: fullOrder.number,
+        groupName: fullOrder.groupName,
+        product: foundItem.product,
+        size: foundItem.size?.name,
+        quantity: foundItem.size?.quantity,
+        ral: foundItem.ral,
+        texture: foundItem.texture,
+        itemKey: itemKey
+    };
+    currentReportFullOrder = fullOrder;
+    
+    const modal = document.getElementById('rightModal');
+    const overlay = document.getElementById('rightModalOverlay');
+    const contentDiv = document.getElementById('rightModalContent');
+    
+    const savedData = getSavedReportDataForItem(orderId, itemKey);
+    if (savedData && savedData.rows) {
+        reportRows = [...savedData.rows];
+    } else {
+        reportRows = [{ расход: 0, количество: 0, комментарий: '' }];
+    }
+    
+    renderReportFormForItem(contentDiv, fullOrder, foundItem);
+    modal.classList.add('open');
+    overlay.classList.add('show');
+}
 
         function getSavedReportDataForItem(orderId, itemKey) {
             const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
