@@ -484,19 +484,25 @@
             }
             
             completeTask(taskId) {
-                const task = this.tasks.find(t => t.id === taskId);
-                if (task && task.status !== 'completed') {
-                    task.status = 'completed';
-                    task.completedAt = new Date().toISOString();
-                    this.saveData();
-                    
-                    // Обновляем статус в заказе на главной странице
-                    if (typeof window.updateOrderTaskStatus === 'function') {
-                        window.updateOrderTaskStatus(task.orderId, task.id, 'completed');
-                    }
-                }
-            }
+    const task = this.tasks.find(t => t.id === taskId);
+    if (task && task.status !== 'completed') {
+        task.status = 'completed';
+        task.completedAt = new Date().toISOString();
+        this.saveData();
+        
+        // Обновляем заказ
+        const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+        const order = orders.find(o => o.id == task.orderId);
+        if (order) {
+            if (!order.tasks) order.tasks = {};
+            order.tasks[task.id] = 'completed';
+            const orderIndex = orders.findIndex(o => o.id == task.orderId);
+            orders[orderIndex] = order;
+            localStorage.setItem('masterx_orders', JSON.stringify(orders));
+            console.log(`✅ Задача ${task.id} завершена`);
         }
+    }
+}
 
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         let taskManager = null;
