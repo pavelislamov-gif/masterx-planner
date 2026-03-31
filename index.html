@@ -726,7 +726,7 @@
             <button class="btn btn-success" onclick="importOrders()">📤 Импорт заказов</button>
         </div>
 
-        <!-- МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ГРУППЫ -->
+        <!-- МОДАЛЬНОЕ ОКНО СОЗДАНИЯ/РЕДАКТИРОВАНИЯ ГРУППЫ -->
         <div id="groupModal" class="modal">
             <div class="modal-content group-modal-content">
                 <span class="close" onclick="closeGroupModal()">&times;</span>
@@ -824,7 +824,7 @@
 
                 <div class="form-actions">
                     <button type="button" class="btn btn-danger" onclick="closeGroupModal()">Отмена</button>
-                    <button type="button" class="btn btn-success" onclick="createGroupOrder()">📋 Сформировать группу</button>
+                    <button type="button" class="btn btn-success" id="createGroupBtn" onclick="createGroupOrder()">📋 Сформировать группу</button>
                 </div>
             </div>
         </div>
@@ -866,6 +866,7 @@
         let tempLyres = [];
         let tempProfiles = [];
         let taskOperationsData = {};
+        let editingOrderId = null;
 
         // ============== ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ==============
         function initThemeToggle() {
@@ -1210,6 +1211,7 @@
 
         // ============== МОДАЛЬНОЕ ОКНО ==============
         function openGroupModal() {
+            resetEditMode();
             tempItemsList = [];
             tempBrackets = [];
             tempLyres = [];
@@ -1222,6 +1224,20 @@
 
         function closeGroupModal() {
             document.getElementById('groupModal').style.display = 'none';
+            resetEditMode();
+        }
+
+        function resetEditMode() {
+            editingOrderId = null;
+            const createBtn = document.getElementById('createGroupBtn');
+            if (createBtn) {
+                createBtn.textContent = '📋 Сформировать группу';
+                createBtn.onclick = function() { createGroupOrder(); };
+            }
+            const cancelBtn = document.getElementById('cancelEditBtn');
+            if (cancelBtn) {
+                cancelBtn.remove();
+            }
         }
 
         function resetAddItemForm() {
@@ -1483,12 +1499,96 @@
             orders.push(newOrder);
             saveOrdersToStorage(orders);
 
-            console.log(`✅ Группа "${groupName}" успешно создана! Задачи не созданы автоматически.`);
+            console.log(`✅ Группа "${groupName}" успешно создана!`);
 
             closeGroupModal();
             renderOrdersList();
             updateStatistics();
             alert(`✅ Группа "${groupName}" успешно создана!`);
+        }
+
+        function editGroup(orderId) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) {
+                alert('Группа не найдена');
+                return;
+            }
+            
+            editingOrderId = orderId;
+            
+            document.getElementById('groupNameInput').value = order.groupName;
+            
+            tempItemsList = [];
+            tempBrackets = [];
+            tempLyres = [];
+            tempProfiles = [];
+            
+            order.items.forEach(item => {
+                tempItemsList.push(JSON.parse(JSON.stringify(item)));
+            });
+            
+            updateItemsListDisplay();
+            
+            document.getElementById('groupModal').style.display = 'block';
+            
+            const createBtn = document.getElementById('createGroupBtn');
+            if (createBtn) {
+                createBtn.textContent = '💾 Сохранить изменения';
+                createBtn.onclick = function() { updateGroupOrder(); };
+            }
+            
+            if (!document.getElementById('cancelEditBtn')) {
+                const cancelEditBtn = document.createElement('button');
+                cancelEditBtn.id = 'cancelEditBtn';
+                cancelEditBtn.className = 'btn btn-warning';
+                cancelEditBtn.textContent = '↩️ Отменить редактирование';
+                cancelEditBtn.onclick = function() {
+                    closeGroupModal();
+                    resetEditMode();
+                };
+                const formActions = document.querySelector('#groupModal .form-actions');
+                if (formActions) {
+                    formActions.insertBefore(cancelEditBtn, formActions.firstChild);
+                }
+            }
+        }
+
+        function updateGroupOrder() {
+            const groupName = document.getElementById('groupNameInput').value.trim();
+            if (!groupName) {
+                alert('Введите название группы');
+                return;
+            }
+            if (tempItemsList.length === 0) {
+                alert('Добавьте хотя бы одно изделие');
+                return;
+            }
+            
+            const orders = loadOrdersFromStorage();
+            const orderIndex = orders.findIndex(o => o.id == editingOrderId);
+            
+            if (orderIndex === -1) {
+                alert('Группа не найдена');
+                resetEditMode();
+                closeGroupModal();
+                return;
+            }
+            
+            orders[orderIndex] = {
+                ...orders[orderIndex],
+                groupName: groupName,
+                items: JSON.parse(JSON.stringify(tempItemsList)),
+                date: new Date().toISOString().split('T')[0]
+            };
+            
+            saveOrdersToStorage(orders);
+            
+            alert('✅ Группа успешно обновлена!');
+            resetEditMode();
+            closeGroupModal();
+            renderOrdersList();
+            updateStatistics();
         }
 
         function generateOrderNumber(index) {
@@ -1795,52 +1895,23 @@
                 card.className = 'order-card';
                 card.dataset.orderId = order.id;
 
-                let sizeInfo = '';
-let ralInfo = '';
-const sizeMap = {};
-const ralSet = new Set();
-
-if (order.items && order.items.length > 0) {
-    order.items.forEach(item => {
-        // Собираем информацию о размерах
-        const sizeName = item.size?.name || 'Стандартный';
-        const quantity = item.size?.quantity || 1;
-        const key = sizeName;
-        if (!sizeMap[key]) {
-            sizeMap[key] = 0;
-        }
-        sizeMap[key] += quantity;
-        
-        // Собираем информацию о RAL
-        if (item.ral) {
-            ralSet.add(`${item.ral} / ${item.texture || ''}`);
-        }
-    });
-    
-    const sizeParts = [];
-    for (const [sizeName, totalQty] of Object.entries(sizeMap)) {
-        sizeParts.push(`${sizeName} × ${totalQty} шт`);
-    }
-    sizeInfo = sizeParts.join(', ');
-    ralInfo = Array.from(ralSet).join(', ');
-}
-
-const header = document.createElement('div');
-header.className = `order-header ${statusClass}`;
-header.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-        <div>
-            <h3>📁 ${escapeHtml(order.groupName)}</h3>
-            <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
-                Изделий: ${order.items ? order.items.length : 0} | №${order.number || '---'}
-                ${groupStatus === 'green' ? ' | ✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? ' | ⚡ В РАБОТЕ' : ' | ⏳ ОЖИДАЕТ')}
-            </div>
-        </div>
-        <div>
-            <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
-        </div>
-    </div>
-`;
+                const header = document.createElement('div');
+                header.className = `order-header ${statusClass}`;
+                header.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <div>
+                            <h3>📁 ${escapeHtml(order.groupName)}</h3>
+                            <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
+                                Изделий: ${order.items ? order.items.length : 0} | №${order.number || '---'}
+                                ${groupStatus === 'green' ? ' | ✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? ' | ⚡ В РАБОТЕ' : ' | ⏳ ОЖИДАЕТ')}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-info" onclick="event.stopPropagation(); editGroup(${order.id})">✏️ Редактировать</button>
+                            <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
+                        </div>
+                    </div>
+                `;
 
                 const content = document.createElement('div');
                 content.className = 'order-content';
@@ -1862,20 +1933,20 @@ header.innerHTML = `
                         itemHeader.style.display = 'flex';
                         itemHeader.style.justifyContent = 'space-between';
                         itemHeader.innerHTML = `
-    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 8px;">
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-            <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
-            <span style="font-size: 11px; color: #4cd964;">${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
-            ${item.ral ? `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>` : ''}
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
-                📋 Отчёт
-            </button>
-            <span>▼</span>
-        </div>
-    </div>
-`;
+                            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 8px;">
+                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                    <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
+                                    <span style="font-size: 11px; color: #4cd964;">${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
+                                    ${item.ral ? `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>` : ''}
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
+                                        📋 Отчёт
+                                    </button>
+                                    <span>▼</span>
+                                </div>
+                            </div>
+                        `;
 
                         const itemContent = document.createElement('div');
                         itemContent.className = 'item-content';
@@ -2192,7 +2263,6 @@ header.innerHTML = `
             
             const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
             
-            // Фильтруем отчёты по заказу
             const orderReports = allReports.filter(report => {
                 if ((report.isItemReport || report.isOrderReport) && report.orderId == orderId) {
                     return true;
@@ -2212,7 +2282,6 @@ header.innerHTML = `
                 'lazerno': '✨ ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
             };
             
-            // Группируем по участкам (только те, где есть данные)
             const reportsBySite = {};
             
             orderReports.forEach(report => {
@@ -2324,7 +2393,6 @@ header.innerHTML = `
             
             const itemKey = item.product + '_' + (item.size?.name || '');
             
-            // Фильтруем отчёты для этого изделия
             const itemReports = allReports.filter(report => {
                 if (report.isItemReport && report.itemKey === itemKey && report.orderId == orderId) {
                     return true;
@@ -2344,7 +2412,6 @@ header.innerHTML = `
                 'lazerno': '✨ ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
             };
             
-            // Группируем по участкам (только те, где есть данные)
             const reportsBySite = {};
             
             itemReports.forEach(report => {
@@ -2483,6 +2550,7 @@ header.innerHTML = `
         window.addLyreField = addLyreField;
         window.addItemToGroup = addItemToGroup;
         window.createGroupOrder = createGroupOrder;
+        window.editGroup = editGroup;
         window.exportOrders = exportOrders;
         window.importOrders = importOrders;
         window.showMaterialsReport = showMaterialsReport;
