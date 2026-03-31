@@ -447,26 +447,30 @@
             
             // Группируем задачи по изделию (уникальный ключ: orderId + product + size + ral)
             const byItem = {};
-            tasks.forEach(task => {
-                const size = task.size || '';
-                const ral = task.ral || '';
-                const itemKey = `${task.orderId}_${task.product}_${size}_${ral}`;
-                if (!byItem[itemKey]) {
-                    byItem[itemKey] = {
-                        orderId: task.orderId,
-                        orderNumber: task.orderNumber,
-                        groupName: '',
-                        product: task.product,
-                        size: size,
-                        ral: ral,
-                        texture: task.texture,
-                        totalQuantity: task.totalQuantity,
-                        tasks: [],
-                        itemKey: itemKey
-                    };
-                }
-                byItem[itemKey].tasks.push(task);
-            });
+tasks.forEach(task => {
+    const size = task.size || '';
+    const ral = task.ral || '';
+    const itemIndex = task.itemIndex !== undefined ? task.itemIndex : 0;
+    
+    const itemKey = `${task.orderId}_item${itemIndex}_${task.product}_${size}_${ral}`;
+    
+    if (!byItem[itemKey]) {
+        byItem[itemKey] = {
+            orderId: task.orderId,
+            orderNumber: task.orderNumber,
+            groupName: '',
+            product: task.product,
+            size: size,
+            ral: ral,
+            texture: task.texture,
+            totalQuantity: task.totalQuantity,
+            tasks: [],
+            itemKey: itemKey,
+            itemIndex: itemIndex
+        };
+    }
+    byItem[itemKey].tasks.push(task);
+});
             
             // Загружаем информацию о группе для каждого изделия
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
