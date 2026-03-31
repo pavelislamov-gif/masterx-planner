@@ -1964,20 +1964,20 @@
                         itemHeader.style.display = 'flex';
                         itemHeader.style.justifyContent = 'space-between';
                         itemHeader.innerHTML = `
-                            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 8px;">
-                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                                    <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
-                                    <span style="font-size: 11px; color: #4cd964;">${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
-                                    ${item.ral ? `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>` : ''}
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
-                                        📋 Отчёт
-                                    </button>
-                                    <span>▼</span>
-                                </div>
-                            </div>
-                        `;
+    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
+            <span style="font-size: 11px; color: #4cd964;">${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
+            ${item.ral ? `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>` : ''}
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
+                📋 Отчёт
+            </button>
+            <span id="arrow-${order.id}-${itemIndex}" style="cursor: pointer;">▼</span>
+        </div>
+    </div>
+`;
 
                         const itemContent = document.createElement('div');
                         itemContent.className = 'item-content';
