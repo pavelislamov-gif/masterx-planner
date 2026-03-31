@@ -2217,61 +2217,52 @@
         }
 
         function deleteOrder(orderId) {
-            if (!confirm('Удалить группу? Все связанные задачи также будут удалены.')) return;
+    if (!confirm('Удалить группу? Все связанные задачи также будут удалены.')) return;
 
-            let orders = loadOrdersFromStorage();
-            orders = orders.filter(o => o.id !== orderId);
-            saveOrdersToStorage(orders);
+    let orders = loadOrdersFromStorage();
+    orders = orders.filter(o => o.id !== orderId);
+    saveOrdersToStorage(orders);
 
-            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
-            const dates = [];
-            const today = new Date();
-            for (let i = -30; i <= 30; i++) {
-                const date = new Date(today);
-                date.setDate(today.getDate() + i);
-                dates.push(date.toISOString().split('T')[0]);
-            }
-
-            sites.forEach(site => {
-                dates.forEach(date => {
-                    const key = `tasks_${site}_${date}`;
-                    const tasks = localStorage.getItem(key);
-                    if (tasks) {
-                        let tasksArr = JSON.parse(tasks);
-                        tasksArr = tasksArr.filter(t => t.orderId !== orderId);
-                        localStorage.setItem(key, JSON.stringify(tasksArr));
-                    }
-                });
-            });
-
-            saveMainOpenCardsState();
-            saveMainOpenItemsState();
-            renderOrdersList();
-            updateStatistics();
-            alert('✅ Группа удалена');
+    const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+    
+    sites.forEach(site => {
+        const key = `tasks_${site}`;
+        const tasks = localStorage.getItem(key);
+        if (tasks) {
+            let tasksArr = JSON.parse(tasks);
+            tasksArr = tasksArr.filter(t => t.orderId !== orderId);
+            localStorage.setItem(key, JSON.stringify(tasksArr));
         }
+    });
+
+    saveMainOpenCardsState();
+    saveMainOpenItemsState();
+    renderOrdersList();
+    updateStatistics();
+    alert('✅ Группа удалена');
+}
 
         // ============== ОТЧЁТ ПО ЗАКАЗУ ==============
         function showOrderReport(orderId) {
-            const orders = loadOrdersFromStorage();
-            const order = orders.find(o => o.id == orderId);
-            if (!order) {
-                alert('Заказ не найден');
-                return;
-            }
-            
-            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-            
-            const orderReports = allReports.filter(report => {
-                if ((report.isItemReport || report.isOrderReport) && report.orderId == orderId) {
-                    return true;
-                }
-                if (report.taskId) {
-                    const parts = report.taskId.split('_');
-                    return parts[0] == orderId;
-                }
-                return false;
-            });
+    const orders = loadOrdersFromStorage();
+    const order = orders.find(o => o.id == orderId);
+    if (!order) {
+        alert('Заказ не найден');
+        return;
+    }
+    
+    const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+    
+    const orderReports = allReports.filter(report => {
+        if ((report.isItemReport || report.isOrderReport) && report.orderId == orderId) {
+            return true;
+        }
+        if (report.taskId) {
+            const parts = report.taskId.split('_');
+            return parts[0] == orderId;
+        }
+        return false;
+    });
             
             const siteNames = {
                 'polimerniy': '🎨 ПОЛИМЕРНЫЙ УЧАСТОК',
