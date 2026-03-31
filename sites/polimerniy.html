@@ -13,32 +13,18 @@
         .order-header.collapsed .collapse-icon { transform: rotate(-90deg); }
         .order-content { padding: 15px 20px; transition: all 0.2s; }
         .order-content.collapsed { display: none; }
-        .item-header {
-            padding: 10px 15px;
-            background: #1e232b;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #2a2f38;
-        }
-        .item-header:hover { background: #232830; }
-        .item-title { font-weight: 600; color: #ff9800; font-size: 14px; }
-        .item-subtitle { font-size: 11px; color: #a0a0a0; margin-top: 4px; }
         .btn-report-item {
             background: #ff9800;
             color: white;
             border: none;
             border-radius: 4px;
-            padding: 3px 8px;
+            padding: 5px 12px;
             cursor: pointer;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             transition: all 0.2s;
         }
         .btn-report-item:hover { background: #e68900; transform: scale(1.02); }
-        .item-content { padding: 15px; }
-        .item-content.collapsed { display: none; }
         .task-card { padding: 12px 15px; border-bottom: 1px solid #2a2f38; transition: all 0.3s; margin-bottom: 10px; background: #15191f; border-radius: 8px; }
         .task-card:last-child { border-bottom: none; margin-bottom: 0; }
         .task-card.completed { opacity: 0.8; background: #1a2a1a; border-left: 3px solid #2ecc71; }
@@ -296,42 +282,6 @@
             return item.size?.quantity || 1;
         }
 
-        // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
-        const POLIMERNIY_ITEMS_STORAGE_KEY = 'polimerniy_open_items';
-
-        function saveOpenCardsState() {
-            const openItems = [];
-            document.querySelectorAll('.item-header').forEach((itemHeader, idx) => {
-                if (!itemHeader.classList.contains('collapsed')) {
-                    const orderId = itemHeader.closest('.order-card')?.dataset.orderId;
-                    const itemKey = itemHeader.dataset.itemKey;
-                    if (orderId && itemKey) {
-                        openItems.push({ orderId, itemKey });
-                    }
-                }
-            });
-            localStorage.setItem(POLIMERNIY_ITEMS_STORAGE_KEY, JSON.stringify(openItems));
-        }
-
-        function restoreOpenCardsState() {
-            const savedOpenItems = localStorage.getItem(POLIMERNIY_ITEMS_STORAGE_KEY);
-            if (savedOpenItems) {
-                const openItemsIds = JSON.parse(savedOpenItems);
-                openItemsIds.forEach(({ orderId, itemKey }) => {
-                    const itemHeader = document.querySelector(`.item-header[data-item-key="${itemKey}"]`);
-                    if (itemHeader) {
-                        const itemContent = itemHeader.nextElementSibling;
-                        if (itemContent && itemContent.classList.contains('item-content')) {
-                            itemHeader.classList.remove('collapsed');
-                            itemContent.classList.remove('collapsed');
-                            const arrowSpan = itemHeader.querySelector('.collapse-icon-item');
-                            if (arrowSpan) arrowSpan.textContent = '▲';
-                        }
-                    }
-                });
-            }
-        }
-
         // ============== УПРОЩЁННЫЙ МЕНЕДЖЕР ЗАДАЧ БЕЗ ДАТЫ ==============
         class SimpleTaskManager {
             constructor(siteKey) {
@@ -467,7 +417,6 @@
             taskManager = new SimpleTaskManager('polimerniy');
             window.taskManager = taskManager;
             loadTasks();
-            window.addEventListener('beforeunload', function() { saveOpenCardsState(); });
         }
         
         window.applyFilters = function() {
@@ -496,19 +445,16 @@
                 return;
             }
             
-            // Группируем задачи по заказу и изделию
-            const byOrder = {};
+            // Группируем задачи по изделию (уникальный ключ: orderId + product + size + ral)
+            const byItem = {};
             tasks.forEach(task => {
-                if (!byOrder[task.orderId]) {
-                    byOrder[task.orderId] = {
-                        number: task.orderNumber,
+                // Уникальный ключ для изделия
+                const itemKey = `${task.orderId}_${task.product}_${task.size || ''}_${task.ral || ''}`;
+                if (!byItem[itemKey]) {
+                    byItem[itemKey] = {
                         orderId: task.orderId,
-                        items: {}
-                    };
-                }
-                const itemKey = task.product + '_' + (task.size || '') + '_' + (task.ral || '');
-                if (!byOrder[task.orderId].items[itemKey]) {
-                    byOrder[task.orderId].items[itemKey] = {
+                        orderNumber: task.orderNumber,
+                        groupName: '',
                         product: task.product,
                         size: task.size,
                         ral: task.ral,
@@ -518,95 +464,81 @@
                         itemKey: itemKey
                     };
                 }
-                byOrder[task.orderId].items[itemKey].tasks.push(task);
+                byItem[itemKey].tasks.push(task);
             });
             
-            Object.values(byOrder).forEach(order => {
-                const orderDiv = document.createElement('div');
-                orderDiv.className = 'order-card';
-                orderDiv.dataset.orderId = order.orderId;
+            // Загружаем информацию о группе для каждого изделия
+            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+            for (const itemKey in byItem) {
+                const item = byItem[itemKey];
+                const order = allOrders.find(o => o.id == item.orderId);
+                if (order) {
+                    item.groupName = order.groupName;
+                    // Если нет RAL в задаче, пробуем найти в заказе
+                    if (!item.ral && order.items) {
+                        const foundItem = order.items.find(i => i.product === item.product);
+                        if (foundItem) {
+                            item.ral = foundItem.ral;
+                            item.texture = foundItem.texture;
+                        }
+                    }
+                }
+            }
+            
+            // Отображаем каждое изделие как отдельную карточку
+            Object.values(byItem).forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'order-card';
+                itemDiv.dataset.itemKey = item.itemKey;
                 
-                const orderHeader = document.createElement('div');
-                orderHeader.className = 'order-header collapsed';
-                orderHeader.innerHTML = '<h3>📦 Заказ №' + escapeHtml(order.number) + '</h3><span class="collapse-icon">▼</span>';
+                const header = document.createElement('div');
+                header.className = 'order-header collapsed';
+                header.innerHTML = `
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span style="font-weight: bold; color: #ff9800;">📦 ${escapeHtml(item.product)}</span>
+                            <span style="font-size: 12px; color: #4cd964;">${escapeHtml(item.size || '-')} × ${item.totalQuantity} шт</span>
+                            ${item.ral ? `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>` : ''}
+                        </div>
+                        <div style="font-size: 11px; color: #a0a0a0; margin-top: 4px;">
+                            📁 ${escapeHtml(item.groupName)} | Заказ №${escapeHtml(item.orderNumber)}
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn-report-item" onclick="event.stopPropagation(); openRightModalForItem('${item.orderId}', '${item.itemKey}')">📝 Отчёт</button>
+                        <span class="collapse-icon" style="cursor: pointer;">▼</span>
+                    </div>
+                `;
                 
-                const orderContent = document.createElement('div');
-                orderContent.className = 'order-content collapsed';
+                const content = document.createElement('div');
+                content.className = 'order-content collapsed';
                 
                 let fullOrder = null;
                 try {
-                    const allOrders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
-                    fullOrder = allOrders.find(o => o.id == order.orderId);
+                    const allOrdersData = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+                    fullOrder = allOrdersData.find(o => o.id == item.orderId);
                 } catch (e) {}
                 
-                let itemIndex = 0;
-                for (const itemKey in order.items) {
-                    const item = order.items[itemKey];
-                    
-                    const itemDiv = document.createElement('div');
-                    itemDiv.style.marginBottom = '15px';
-                    itemDiv.style.border = '1px solid #2a2f38';
-                    itemDiv.style.borderRadius = '8px';
-                    itemDiv.style.overflow = 'hidden';
-                    
-                    const itemHeader = document.createElement('div');
-                    itemHeader.className = 'item-header collapsed';
-                    itemHeader.dataset.itemKey = itemKey;
-                    itemHeader.innerHTML = `
-                        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 8px;">
-                            <div>
-                                <div class="item-title">📦 ${escapeHtml(item.product)} ${item.size ? ' (' + escapeHtml(item.size) + ')' : ''} × ${item.totalQuantity} шт</div>
-                                <div class="item-subtitle">
-                                    📁 ${escapeHtml(fullOrder?.groupName || '')} ${item.ral ? ` | 🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}` : ''}
-                                </div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <button class="btn-report-item" onclick="event.stopPropagation(); openRightModalForItem('${order.orderId}', '${itemKey}')">📝 Отчёт</button>
-                                <span class="collapse-icon-item" style="cursor: pointer;">▼</span>
-                            </div>
-                        </div>
-                    `;
-                    
-                    const itemContent = document.createElement('div');
-                    itemContent.className = 'item-content collapsed';
-                    
-                    item.tasks.forEach(task => {
-                        itemContent.appendChild(createTaskCard(task, fullOrder));
-                    });
-                    
-                    itemHeader.onclick = function(e) {
-                        if (e.target.tagName === 'BUTTON') return;
-                        e.stopPropagation();
-                        itemHeader.classList.toggle('collapsed');
-                        itemContent.classList.toggle('collapsed');
-                        const arrowSpan = itemHeader.querySelector('.collapse-icon-item');
-                        if (arrowSpan) {
-                            arrowSpan.textContent = itemHeader.classList.contains('collapsed') ? '▼' : '▲';
-                        }
-                        saveOpenCardsState();
-                    };
-                    
-                    itemDiv.appendChild(itemHeader);
-                    itemDiv.appendChild(itemContent);
-                    orderContent.appendChild(itemDiv);
-                    itemIndex++;
-                }
-                
-                orderHeader.addEventListener('click', function(e) {
-                    if (e.target.tagName === 'BUTTON') return;
-                    orderHeader.classList.toggle('collapsed');
-                    orderContent.classList.toggle('collapsed');
+                item.tasks.forEach(task => {
+                    content.appendChild(createTaskCard(task, fullOrder));
                 });
                 
-                orderDiv.appendChild(orderHeader);
-                orderDiv.appendChild(orderContent);
-                tasksList.appendChild(orderDiv);
+                header.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'BUTTON') return;
+                    header.classList.toggle('collapsed');
+                    content.classList.toggle('collapsed');
+                    const arrowSpan = header.querySelector('.collapse-icon');
+                    if (arrowSpan) {
+                        arrowSpan.textContent = header.classList.contains('collapsed') ? '▼' : '▲';
+                    }
+                });
+                
+                itemDiv.appendChild(header);
+                itemDiv.appendChild(content);
+                tasksList.appendChild(itemDiv);
             });
             
-            setTimeout(function() {
-                restoreOpenCardsState();
-                isLoadingTasks = false;
-            }, 100);
+            isLoadingTasks = false;
         }
         
         function createTaskCard(task, fullOrder) {
@@ -863,11 +795,17 @@
                 return;
             }
             
-            const item = fullOrder.items.find(i => {
-                const key = i.product + '_' + (i.size?.name || '') + '_' + (i.ral || '');
-                return key === itemKey;
-            });
-            if (!item) {
+            // Находим изделие по ключу
+            let foundItem = null;
+            for (const item of fullOrder.items) {
+                const key = `${orderId}_${item.product}_${item.size?.name || ''}_${item.ral || ''}`;
+                if (key === itemKey) {
+                    foundItem = item;
+                    break;
+                }
+            }
+            
+            if (!foundItem) {
                 alert('Изделие не найдено');
                 return;
             }
@@ -876,11 +814,11 @@
                 orderId: orderId,
                 orderNumber: fullOrder.number,
                 groupName: fullOrder.groupName,
-                product: item.product,
-                size: item.size?.name,
-                quantity: item.size?.quantity,
-                ral: item.ral,
-                texture: item.texture,
+                product: foundItem.product,
+                size: foundItem.size?.name,
+                quantity: foundItem.size?.quantity,
+                ral: foundItem.ral,
+                texture: foundItem.texture,
                 itemKey: itemKey
             };
             currentReportFullOrder = fullOrder;
@@ -896,7 +834,7 @@
                 reportRows = [{ расход: 0, количество: 0, комментарий: '' }];
             }
             
-            renderReportFormForItem(contentDiv, fullOrder, item);
+            renderReportFormForItem(contentDiv, fullOrder, foundItem);
             modal.classList.add('open');
             overlay.classList.add('show');
         }
