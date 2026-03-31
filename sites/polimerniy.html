@@ -24,6 +24,7 @@
         }
         .item-header:hover { background: #232830; }
         .item-title { font-weight: 600; color: #ff9800; font-size: 14px; }
+        .item-subtitle { font-size: 11px; color: #a0a0a0; margin-top: 4px; }
         .btn-report-item {
             background: #ff9800;
             color: white;
@@ -296,83 +297,39 @@
         }
 
         // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
-        const POLIMERNIY_STORAGE_KEY = 'polimerniy_open_cards';
-        const POLIMERNIY_ITEMS_STORAGE_KEY = 'polimerniy_open_items_v3';
+        const POLIMERNIY_ITEMS_STORAGE_KEY = 'polimerniy_open_items';
 
         function saveOpenCardsState() {
-            const openCards = [];
-            document.querySelectorAll('.order-card').forEach(card => {
-                const content = card.querySelector('.order-content');
-                if (content && !content.classList.contains('collapsed')) {
-                    openCards.push(String(card.dataset.orderId));
-                }
-            });
-            localStorage.setItem(POLIMERNIY_STORAGE_KEY, JSON.stringify(openCards));
-            
-            const openItemsByOrder = {};
-            document.querySelectorAll('.order-card').forEach(card => {
-                const orderId = String(card.dataset.orderId);
-                const openIndices = [];
-                const items = card.querySelectorAll('.item-header');
-                items.forEach((itemHeader, idx) => {
-                    if (!itemHeader.classList.contains('collapsed')) {
-                        openIndices.push(idx);
+            const openItems = [];
+            document.querySelectorAll('.item-header').forEach((itemHeader, idx) => {
+                if (!itemHeader.classList.contains('collapsed')) {
+                    const orderId = itemHeader.closest('.order-card')?.dataset.orderId;
+                    const itemKey = itemHeader.dataset.itemKey;
+                    if (orderId && itemKey) {
+                        openItems.push({ orderId, itemKey });
                     }
-                });
-                if (openIndices.length > 0) {
-                    openItemsByOrder[orderId] = openIndices;
                 }
             });
-            localStorage.setItem(POLIMERNIY_ITEMS_STORAGE_KEY, JSON.stringify(openItemsByOrder));
-            console.log('💾 Сохранены открытые изделия:', openItemsByOrder);
+            localStorage.setItem(POLIMERNIY_ITEMS_STORAGE_KEY, JSON.stringify(openItems));
         }
 
         function restoreOpenCardsState() {
-            const savedOpenCards = localStorage.getItem(POLIMERNIY_STORAGE_KEY);
-            if (savedOpenCards) {
-                const openCardsIds = JSON.parse(savedOpenCards);
-                openCardsIds.forEach(orderId => {
-                    const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
-                    if (card) {
-                        const header = card.querySelector('.order-header');
-                        const content = card.querySelector('.order-content');
-                        if (header && content) {
-                            header.classList.remove('collapsed');
-                            content.classList.remove('collapsed');
+            const savedOpenItems = localStorage.getItem(POLIMERNIY_ITEMS_STORAGE_KEY);
+            if (savedOpenItems) {
+                const openItemsIds = JSON.parse(savedOpenItems);
+                openItemsIds.forEach(({ orderId, itemKey }) => {
+                    const itemHeader = document.querySelector(`.item-header[data-item-key="${itemKey}"]`);
+                    if (itemHeader) {
+                        const itemContent = itemHeader.nextElementSibling;
+                        if (itemContent && itemContent.classList.contains('item-content')) {
+                            itemHeader.classList.remove('collapsed');
+                            itemContent.classList.remove('collapsed');
+                            const arrowSpan = itemHeader.querySelector('.collapse-icon-item');
+                            if (arrowSpan) arrowSpan.textContent = '▲';
                         }
                     }
                 });
             }
-            
-            setTimeout(() => {
-                const savedOpenItems = localStorage.getItem(POLIMERNIY_ITEMS_STORAGE_KEY);
-                if (savedOpenItems) {
-                    const openItemsByOrder = JSON.parse(savedOpenItems);
-                    console.log('📂 Восстанавливаем открытые изделия:', openItemsByOrder);
-                    
-                    for (const orderId in openItemsByOrder) {
-                        const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
-                        if (card) {
-                            const items = card.querySelectorAll('.item-header');
-                            const openIndices = openItemsByOrder[orderId];
-                            
-                            openIndices.forEach(itemIndex => {
-                                const itemHeader = items[itemIndex];
-                                if (itemHeader) {
-                                    const itemContent = itemHeader.nextElementSibling;
-                                    if (itemContent && itemContent.classList.contains('item-content')) {
-                                        itemHeader.classList.remove('collapsed');
-                                        itemContent.classList.remove('collapsed');
-                                        const arrowSpan = itemHeader.querySelector('.collapse-icon-item');
-                                        if (arrowSpan) arrowSpan.textContent = '▲';
-                                        console.log('✅ Восстановлено изделие индекс:', itemIndex);
-                                    }
-                                }
-                            });
-                        }
-                    }
-                }
-            }, 150);
         }
 
         // ============== УПРОЩЁННЫЙ МЕНЕДЖЕР ЗАДАЧ БЕЗ ДАТЫ ==============
@@ -429,7 +386,6 @@
                         executor.status = status;
                         this.saveData();
                         
-                        // Определяем новый статус задачи на основе всех исполнителей
                         let taskStatus = 'pending';
                         if (task.executors.some(e => e.status === 'in_progress')) {
                             taskStatus = 'in_progress';
@@ -439,11 +395,9 @@
                             taskStatus = 'pending';
                         }
                         
-                        // Обновляем статус задачи
                         task.status = taskStatus;
                         this.saveData();
                         
-                        // НЕПОСРЕДСТВЕННО ОБНОВЛЯЕМ ЗАКАЗ В localStorage
                         const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
                         const order = orders.find(o => o.id == task.orderId);
                         if (order) {
@@ -452,7 +406,6 @@
                             const orderIndex = orders.findIndex(o => o.id == task.orderId);
                             orders[orderIndex] = order;
                             localStorage.setItem('masterx_orders', JSON.stringify(orders));
-                            console.log(`✅ Обновлён статус в заказе: ${task.id} -> ${taskStatus}`);
                         }
                     }
                 }
@@ -490,7 +443,6 @@
                     task.completedAt = new Date().toISOString();
                     this.saveData();
                     
-                    // Обновляем заказ
                     const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
                     const order = orders.find(o => o.id == task.orderId);
                     if (order) {
@@ -499,7 +451,6 @@
                         const orderIndex = orders.findIndex(o => o.id == task.orderId);
                         orders[orderIndex] = order;
                         localStorage.setItem('masterx_orders', JSON.stringify(orders));
-                        console.log(`✅ Задача ${task.id} завершена`);
                     }
                 }
             }
@@ -545,7 +496,7 @@
                 return;
             }
             
-            // Группируем задачи по заказу, а внутри по изделию
+            // Группируем задачи по заказу и изделию
             const byOrder = {};
             tasks.forEach(task => {
                 if (!byOrder[task.orderId]) {
@@ -555,11 +506,13 @@
                         items: {}
                     };
                 }
-                const itemKey = task.product + '_' + (task.size || '');
+                const itemKey = task.product + '_' + (task.size || '') + '_' + (task.ral || '');
                 if (!byOrder[task.orderId].items[itemKey]) {
                     byOrder[task.orderId].items[itemKey] = {
                         product: task.product,
                         size: task.size,
+                        ral: task.ral,
+                        texture: task.texture,
                         totalQuantity: task.totalQuantity,
                         tasks: [],
                         itemKey: itemKey
@@ -573,12 +526,12 @@
                 orderDiv.className = 'order-card';
                 orderDiv.dataset.orderId = order.orderId;
                 
-                const header = document.createElement('div');
-                header.className = 'order-header collapsed';
-                header.innerHTML = '<h3>📦 Заказ №' + escapeHtml(order.number) + '</h3><span class="collapse-icon">▼</span>';
+                const orderHeader = document.createElement('div');
+                orderHeader.className = 'order-header collapsed';
+                orderHeader.innerHTML = '<h3>📦 Заказ №' + escapeHtml(order.number) + '</h3><span class="collapse-icon">▼</span>';
                 
-                const content = document.createElement('div');
-                content.className = 'order-content collapsed';
+                const orderContent = document.createElement('div');
+                orderContent.className = 'order-content collapsed';
                 
                 let fullOrder = null;
                 try {
@@ -598,13 +551,20 @@
                     
                     const itemHeader = document.createElement('div');
                     itemHeader.className = 'item-header collapsed';
-                    itemHeader.setAttribute('data-item-index', itemIndex);
+                    itemHeader.dataset.itemKey = itemKey;
                     itemHeader.innerHTML = `
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span class="item-title">📦 ${escapeHtml(item.product)} ${item.size ? ' (' + escapeHtml(item.size) + ')' : ''} x ${item.totalQuantity} шт</span>
-                            <button class="btn-report-item" onclick="event.stopPropagation(); openRightModalForItem('${order.orderId}', '${itemKey}')">📝 Отчёт</button>
+                        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                <div class="item-title">📦 ${escapeHtml(item.product)} ${item.size ? ' (' + escapeHtml(item.size) + ')' : ''} × ${item.totalQuantity} шт</div>
+                                <div class="item-subtitle">
+                                    📁 ${escapeHtml(fullOrder?.groupName || '')} ${item.ral ? ` | 🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}` : ''}
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button class="btn-report-item" onclick="event.stopPropagation(); openRightModalForItem('${order.orderId}', '${itemKey}')">📝 Отчёт</button>
+                                <span class="collapse-icon-item" style="cursor: pointer;">▼</span>
+                            </div>
                         </div>
-                        <span class="collapse-icon-item">▼</span>
                     `;
                     
                     const itemContent = document.createElement('div');
@@ -614,35 +574,32 @@
                         itemContent.appendChild(createTaskCard(task, fullOrder));
                     });
                     
-                    (function(currentHeader, currentContent) {
-                        currentHeader.onclick = function(e) {
-                            if (e.target.tagName === 'BUTTON') return;
-                            e.stopPropagation();
-                            currentHeader.classList.toggle('collapsed');
-                            currentContent.classList.toggle('collapsed');
-                            const arrowSpan = currentHeader.querySelector('.collapse-icon-item');
-                            if (arrowSpan) {
-                                arrowSpan.textContent = currentHeader.classList.contains('collapsed') ? '▼' : '▲';
-                            }
-                            saveOpenCardsState();
-                        };
-                    })(itemHeader, itemContent);
+                    itemHeader.onclick = function(e) {
+                        if (e.target.tagName === 'BUTTON') return;
+                        e.stopPropagation();
+                        itemHeader.classList.toggle('collapsed');
+                        itemContent.classList.toggle('collapsed');
+                        const arrowSpan = itemHeader.querySelector('.collapse-icon-item');
+                        if (arrowSpan) {
+                            arrowSpan.textContent = itemHeader.classList.contains('collapsed') ? '▼' : '▲';
+                        }
+                        saveOpenCardsState();
+                    };
                     
                     itemDiv.appendChild(itemHeader);
                     itemDiv.appendChild(itemContent);
-                    content.appendChild(itemDiv);
+                    orderContent.appendChild(itemDiv);
                     itemIndex++;
                 }
                 
-                header.addEventListener('click', function(e) {
+                orderHeader.addEventListener('click', function(e) {
                     if (e.target.tagName === 'BUTTON') return;
-                    header.classList.toggle('collapsed');
-                    content.classList.toggle('collapsed');
-                    saveOpenCardsState();
+                    orderHeader.classList.toggle('collapsed');
+                    orderContent.classList.toggle('collapsed');
                 });
                 
-                orderDiv.appendChild(header);
-                orderDiv.appendChild(content);
+                orderDiv.appendChild(orderHeader);
+                orderDiv.appendChild(orderContent);
                 tasksList.appendChild(orderDiv);
             });
             
@@ -893,7 +850,7 @@
             link.click();
         };
         
-        // ============== ПРАВАЯ МОДАЛЬНАЯ ПАНЕЛЬ ДЛЯ ОТЧЁТА ==============
+        // ============== ПРАВАЯ МОДАЛЬНАЯ ПАНЕЛЬ ДЛЯ ОТЧЁТА ПО ИЗДЕЛИЮ ==============
         let currentReportItem = null;
         let currentReportFullOrder = null;
         let reportRows = [];
@@ -906,7 +863,10 @@
                 return;
             }
             
-            const item = fullOrder.items.find(i => (i.product + '_' + (i.size?.name || '')) === itemKey);
+            const item = fullOrder.items.find(i => {
+                const key = i.product + '_' + (i.size?.name || '') + '_' + (i.ral || '');
+                return key === itemKey;
+            });
             if (!item) {
                 alert('Изделие не найдено');
                 return;
@@ -915,6 +875,7 @@
             currentReportItem = {
                 orderId: orderId,
                 orderNumber: fullOrder.number,
+                groupName: fullOrder.groupName,
                 product: item.product,
                 size: item.size?.name,
                 quantity: item.size?.quantity,
@@ -992,6 +953,7 @@
                     <div style="margin-bottom: 20px; padding: 12px; background: #15191f; border-radius: 8px; border-left: 3px solid #ff9800;">
                         <div style="font-size: 12px; color: #a0a0a0;">Заказ: ${escapeHtml(fullOrder.number)}</div>
                         <div style="font-size: 16px; font-weight: bold; color: #ff9800; margin: 5px 0;">${escapeHtml(item.product)}</div>
+                        <div style="font-size: 12px;">📁 ${escapeHtml(fullOrder.groupName)}</div>
                         <div style="font-size: 12px;">📏 Размер: ${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</div>
                         <div style="font-size: 12px;">🎨 Покрытие: ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</div>
                     </div>
@@ -1085,6 +1047,7 @@
             const reportData = {
                 orderId: currentReportItem.orderId,
                 orderNumber: currentReportItem.orderNumber,
+                groupName: currentReportItem.groupName,
                 product: currentReportItem.product,
                 size: currentReportItem.size,
                 quantity: currentReportItem.quantity,
