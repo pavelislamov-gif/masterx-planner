@@ -428,6 +428,25 @@
                     if (executor) {
                         executor.status = status;
                         this.saveData();
+                        
+                        // Определяем новый статус задачи на основе всех исполнителей
+                        let taskStatus = 'pending';
+                        if (task.executors.some(e => e.status === 'in_progress')) {
+                            taskStatus = 'in_progress';
+                        } else if (task.executors.every(e => e.status === 'shift_ended' || e.status === 'completed')) {
+                            taskStatus = 'completed';
+                        } else if (task.executors.some(e => e.status === 'pending') && !task.executors.some(e => e.status === 'in_progress')) {
+                            taskStatus = 'pending';
+                        }
+                        
+                        // Обновляем статус задачи
+                        task.status = taskStatus;
+                        this.saveData();
+                        
+                        // Обновляем статус в заказе на главной странице
+                        if (typeof window.updateOrderTaskStatus === 'function') {
+                            window.updateOrderTaskStatus(task.orderId, task.id, taskStatus);
+                        }
                     }
                 }
             }
@@ -463,6 +482,11 @@
                     task.status = 'completed';
                     task.completedAt = new Date().toISOString();
                     this.saveData();
+                    
+                    // Обновляем статус в заказе на главной странице
+                    if (typeof window.updateOrderTaskStatus === 'function') {
+                        window.updateOrderTaskStatus(task.orderId, task.id, 'completed');
+                    }
                 }
             }
         }
