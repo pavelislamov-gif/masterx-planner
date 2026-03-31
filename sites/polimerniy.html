@@ -474,20 +474,33 @@ tasks.forEach(task => {
             
             // Загружаем информацию о группе для каждого изделия
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-            for (const itemKey in byItem) {
-                const item = byItem[itemKey];
-                const order = allOrders.find(o => o.id == item.orderId);
-                if (order) {
-                    item.groupName = order.groupName;
-                    if (!item.ral && order.items) {
-                        const foundItem = order.items.find(i => i.product === item.product);
-                        if (foundItem) {
-                            item.ral = foundItem.ral;
-                            item.texture = foundItem.texture;
-                        }
-                    }
-                }
+for (const itemKey in byItem) {
+    const item = byItem[itemKey];
+    const order = allOrders.find(o => o.id == item.orderId);
+    if (order && order.items) {
+        item.groupName = order.groupName || '';
+
+        // Ищем изделие по itemIndex (самый надёжный способ)
+        const foundItem = order.items[item.itemIndex];
+        if (foundItem) {
+            item.product = foundItem.product;
+            item.size = foundItem.size?.name || '';
+            item.ral = foundItem.ral || '';
+            item.texture = foundItem.texture || '';
+            item.totalQuantity = foundItem.size?.quantity || 1;
+        } 
+        // Если по индексу не нашли — ищем по названию продукта
+        else {
+            const foundByName = order.items.find(i => i.product === item.product);
+            if (foundByName) {
+                item.size = foundByName.size?.name || '';
+                item.ral = foundByName.ral || '';
+                item.texture = foundByName.texture || '';
+                item.totalQuantity = foundByName.size?.quantity || 1;
             }
+        }
+    }
+}
             
             // Отображаем каждое изделие как отдельную карточку
             Object.values(byItem).forEach(item => {
