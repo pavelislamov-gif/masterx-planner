@@ -1668,68 +1668,68 @@
 
         // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА ==============
         function createSiteRow(name, order, itemIndex, siteKey) {
-            const item = order.items[itemIndex];
-            if (!item) return '<div>Нет данных</div>';
+    const item = order.items[itemIndex];
+    if (!item) return '<div>Нет данных</div>';
 
-            const operations = getOperationNames(item.product, siteKey);
+    const operations = getOperationNames(item.product, siteKey);
 
-            if (!operations || operations.length === 0) {
-                return `
-                    <div class="site-item">
-                        <span class="site-name">${name}</span>
-                        <div class="squares">
-                            <div class="square red" title="Нет операций"></div>
-                        </div>
-                        <span>0/0</span>
-                        <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕ Доп.</button>
-                    </div>
-                `;
-            }
-
-            let squaresHtml = '';
-            let completedCount = 0;
-
-            for (let i = 0; i < operations.length; i++) {
-                const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
-                const operationName = operations[i];
-                let taskStatus = '';
-                let isAdded = false;
-
-                if (order.tasks && order.tasks[taskId]) {
-                    taskStatus = order.tasks[taskId];
-                    if (taskStatus === 'green') completedCount++;
-                }
-
-                try {
-                    const dateStr = order.date;
-                    const storageKey = `tasks_${siteKey}_${dateStr}`;
-                    const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
-                    isAdded = tasks.some(t => t.id === taskId);
-                } catch(e) {}
-
-                squaresHtml += `
-                    <div class="operation-wrapper">
-                        <button class="op-toggle-btn ${isAdded ? 'added' : ''}" 
-                                onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}')">
-                            ${isAdded ? '✓' : '+'}
-                        </button>
-                        <div class="square ${taskStatus}" title="${escapeHtml(operationName)}"></div>
-                        <div class="operation-name-small">${escapeHtml(operationName)}</div>
-                    </div>
-                `;
-            }
-
-            return `
-                <div class="site-item">
-                    <span class="site-name">${name}</span>
-                    <div class="squares">${squaresHtml}</div>
-                    <div>
-                        <span>${completedCount}/${operations.length}</span>
-                        <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')" style="margin-left: 10px;">➕ Доп.</button>
-                    </div>
+    if (!operations || operations.length === 0) {
+        return `
+            <div class="site-item">
+                <span class="site-name">${name}</span>
+                <div class="squares">
+                    <div class="square red" title="Нет операций"></div>
                 </div>
-            `;
+                <span>0/0</span>
+                <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕ Доп.</button>
+            </div>
+        `;
+    }
+
+    let squaresHtml = '';
+    let completedCount = 0;
+
+    for (let i = 0; i < operations.length; i++) {
+        const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
+        const operationName = operations[i];
+        let taskStatus = '';
+        let isAdded = false;
+
+        if (order.tasks && order.tasks[taskId]) {
+            taskStatus = order.tasks[taskId];
+            if (taskStatus === 'green') completedCount++;
         }
+
+        // ИСПРАВЛЕННАЯ ПРОВЕРКА - без даты
+        try {
+            const storageKey = `tasks_${siteKey}`;  // Убрали дату
+            const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            isAdded = tasks.some(t => t.id === taskId);
+        } catch(e) {}
+
+        squaresHtml += `
+            <div class="operation-wrapper">
+                <button class="op-toggle-btn ${isAdded ? 'added' : ''}" 
+                        onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}')">
+                    ${isAdded ? '✓' : '+'}
+                </button>
+                <div class="square ${taskStatus}" title="${escapeHtml(operationName)}"></div>
+                <div class="operation-name-small">${escapeHtml(operationName)}</div>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="site-item">
+            <span class="site-name">${name}</span>
+            <div class="squares">${squaresHtml}</div>
+            <div>
+                <span>${completedCount}/${operations.length}</span>
+                <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')" style="margin-left: 10px;">➕ Доп.</button>
+            </div>
+        </div>
+    `;
+}
 
         // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ ==============
         function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName) {
