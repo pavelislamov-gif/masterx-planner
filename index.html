@@ -905,32 +905,28 @@
 
         // ============== ОПРЕДЕЛЕНИЕ СТАТУСА ГРУППЫ ==============
         function getGroupStatus(order) {
-    if (!order.tasks || Object.keys(order.tasks).length === 0) return 'gray';
+            if (!order.tasks || Object.keys(order.tasks).length === 0) return 'gray';
 
-    let hasInProgress = false;
-    let allCompleted = true;
+            let hasInProgress = false;
+            let allCompleted = true;
 
-    Object.values(order.tasks).forEach(status => {
-        // Статусы: 'pending', 'in_progress', 'completed', 'green', 'orange'
-        if (status === 'in_progress') {
-            hasInProgress = true;
-            allCompleted = false;
-        }
-        if (status === 'pending') {
-            allCompleted = false;
-        }
-        if (status !== 'completed' && status !== 'green') {
-            allCompleted = false;
-        }
-        if (status === 'green') {
-            // уже завершено, ничего не делаем
-        }
-    });
+            Object.values(order.tasks).forEach(status => {
+                if (status === 'in_progress') {
+                    hasInProgress = true;
+                    allCompleted = false;
+                }
+                if (status === 'pending') {
+                    allCompleted = false;
+                }
+                if (status !== 'completed' && status !== 'green') {
+                    allCompleted = false;
+                }
+            });
 
-    if (allCompleted && Object.keys(order.tasks).length > 0) return 'green';
-    if (hasInProgress) return 'orange';
-    return 'gray';
-}
+            if (allCompleted && Object.keys(order.tasks).length > 0) return 'green';
+            if (hasInProgress) return 'orange';
+            return 'gray';
+        }
 
         // ============== ОБНОВЛЕНИЕ СТАТУСА ЗАДАЧИ В ЗАКАЗЕ ==============
         function updateOrderTaskStatus(orderId, taskId, status) {
@@ -1964,20 +1960,20 @@
                         itemHeader.style.display = 'flex';
                         itemHeader.style.justifyContent = 'space-between';
                         itemHeader.innerHTML = `
-    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 8px;">
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-            <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
-            <span style="font-size: 11px; color: #4cd964;">${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
-            ${item.ral ? `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>` : ''}
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
-                📋 Отчёт
-            </button>
-            <span id="arrow-${order.id}-${itemIndex}" style="cursor: pointer;">▼</span>
-        </div>
-    </div>
-`;
+                            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 8px;">
+                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                    <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
+                                    <span style="font-size: 11px; color: #4cd964;">${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
+                                    ${item.ral ? `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>` : ''}
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
+                                        📋 Отчёт
+                                    </button>
+                                    <span id="arrow-${order.id}-${itemIndex}" style="cursor: pointer;">▼</span>
+                                </div>
+                            </div>
+                        `;
 
                         const itemContent = document.createElement('div');
                         itemContent.className = 'item-content';
@@ -2066,10 +2062,15 @@
                             </div>
                         `;
 
-                        itemHeader.onclick = () => {
+                        // Исправленный обработчик onclick
+                        itemHeader.onclick = (e) => {
+                            if (e.target.tagName === 'BUTTON') return;
                             const isVisible = itemContent.style.display !== 'none';
                             itemContent.style.display = isVisible ? 'none' : 'block';
-                            itemHeader.querySelector('span:last-child').textContent = isVisible ? '▼' : '▲';
+                            const arrowSpan = document.getElementById(`arrow-${order.id}-${itemIndex}`);
+                            if (arrowSpan) {
+                                arrowSpan.textContent = isVisible ? '▼' : '▲';
+                            }
                             saveMainOpenItemsState();
                         };
 
