@@ -493,15 +493,17 @@
 
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         let taskManager = null;
+        window.taskManager = null;
         let currentFilter = 'all';
         let isLoadingTasks = false;
         
         async function init() {
             await loadTaskOperationsData();
-            taskManager = new SimpleTaskManager('polimerniy');
-            loadTasks();
-            window.addEventListener('beforeunload', function() { saveOpenCardsState(); });
-        }
+    taskManager = new SimpleTaskManager('polimerniy');
+    window.taskManager = taskManager; // Делаем глобальным
+    loadTasks();
+    window.addEventListener('beforeunload', function() { saveOpenCardsState(); });
+}
         
         window.applyFilters = function() {
             currentFilter = document.getElementById('statusFilter').value;
