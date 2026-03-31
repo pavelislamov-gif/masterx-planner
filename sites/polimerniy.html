@@ -422,34 +422,41 @@
             }
             
             updateExecutorStatus(taskId, executorId, status) {
-                const task = this.tasks.find(t => t.id === taskId);
-                if (task && task.executors) {
-                    const executor = task.executors.find(e => e.id === executorId);
-                    if (executor) {
-                        executor.status = status;
-                        this.saveData();
-                        
-                        // Определяем новый статус задачи на основе всех исполнителей
-                        let taskStatus = 'pending';
-                        if (task.executors.some(e => e.status === 'in_progress')) {
-                            taskStatus = 'in_progress';
-                        } else if (task.executors.every(e => e.status === 'shift_ended' || e.status === 'completed')) {
-                            taskStatus = 'completed';
-                        } else if (task.executors.some(e => e.status === 'pending') && !task.executors.some(e => e.status === 'in_progress')) {
-                            taskStatus = 'pending';
-                        }
-                        
-                        // Обновляем статус задачи
-                        task.status = taskStatus;
-                        this.saveData();
-                        
-                        // Обновляем статус в заказе на главной странице
-                        if (typeof window.updateOrderTaskStatus === 'function') {
-                            window.updateOrderTaskStatus(task.orderId, task.id, taskStatus);
-                        }
-                    }
-                }
+    const task = this.tasks.find(t => t.id === taskId);
+    if (task && task.executors) {
+        const executor = task.executors.find(e => e.id === executorId);
+        if (executor) {
+            executor.status = status;
+            this.saveData();
+            
+            // Определяем новый статус задачи
+            let taskStatus = 'pending';
+            if (task.executors.some(e => e.status === 'in_progress')) {
+                taskStatus = 'in_progress';
+            } else if (task.executors.every(e => e.status === 'shift_ended' || e.status === 'completed')) {
+                taskStatus = 'completed';
+            } else if (task.executors.some(e => e.status === 'pending') && !task.executors.some(e => e.status === 'in_progress')) {
+                taskStatus = 'pending';
             }
+            
+            // Обновляем статус задачи
+            task.status = taskStatus;
+            this.saveData();
+            
+            // НЕПОСРЕДСТВЕННО ОБНОВЛЯЕМ ЗАКАЗ В localStorage
+            const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+            const order = orders.find(o => o.id == task.orderId);
+            if (order) {
+                if (!order.tasks) order.tasks = {};
+                order.tasks[task.id] = taskStatus;
+                const orderIndex = orders.findIndex(o => o.id == task.orderId);
+                orders[orderIndex] = order;
+                localStorage.setItem('masterx_orders', JSON.stringify(orders));
+                console.log(`✅ Обновлён статус в заказе: ${task.id} -> ${taskStatus}`);
+            }
+        }
+    }
+}
             
             addExecutor(taskId, name) {
                 const task = this.tasks.find(t => t.id === taskId);
