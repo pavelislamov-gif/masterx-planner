@@ -378,293 +378,443 @@
 
         /* СВЕТЛАЯ ТЕМА */
         body.light-theme {
-            background-color: #f0f2f5 !important;
-            color: #1e293b !important;
-        }
+    background-color: #f0f2f5 !important;
+    color: #1e293b !important;
+}
 
-        body.light-theme .container {
-            background-color: #f0f2f5 !important;
-        }
+body.light-theme .container {
+    background-color: #f0f2f5 !important;
+}
 
-        body.light-theme header {
-            background: linear-gradient(135deg, #1a1e24, #0f1217) !important;
-            border: 1px solid #2a2f38 !important;
-        }
+body.light-theme header {
+    background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+}
 
-        body.light-theme .logo-text {
-            color: #ffffff !important;
-        }
+body.light-theme .logo-text {
+    color: #1e293b !important;
+}
 
-        body.light-theme .btn {
-            background: #2a2f38 !important;
-            color: #e0e0e0 !important;
-            border: 1px solid #3a404b !important;
-        }
+body.light-theme .logo-text .x-red {
+    color: #ff3b3b !important;
+    text-shadow: none !important;
+}
 
-        body.light-theme .btn-primary {
-            background: linear-gradient(135deg, #0057b3, #003d80) !important;
-            color: white !important;
-        }
+body.light-theme .btn {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #e2e8f0 !important;
+}
 
-        body.light-theme .btn-success {
-            background: linear-gradient(135deg, #1a7f3d, #0e5a2a) !important;
-            color: white !important;
-        }
+body.light-theme .btn:hover {
+    background: #f1f5f9 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
 
-        body.light-theme .btn-danger {
-            background: linear-gradient(135deg, #b33c3c, #8b2e2e) !important;
-            color: white !important;
-        }
+body.light-theme .btn-primary {
+    background: linear-gradient(135deg, #0057b3, #003d80) !important;
+    color: white !important;
+    border: none !important;
+}
 
-        body.light-theme .order-card {
-            background: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-        }
+body.light-theme .btn-primary:hover {
+    background: linear-gradient(135deg, #0066cc, #004d99) !important;
+}
 
-        body.light-theme .order-header {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
-            border-bottom: 1px solid #e2e8f0 !important;
-        }
+body.light-theme .btn-success {
+    background: linear-gradient(135deg, #1a7f3d, #0e5a2a) !important;
+    color: white !important;
+    border: none !important;
+}
 
-        body.light-theme .order-header h3 {
-            color: #1e293b !important;
-        }
+body.light-theme .btn-success:hover {
+    background: linear-gradient(135deg, #219b4b, #1a7f3d) !important;
+}
 
-        body.light-theme .site-item {
-            background: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-        }
+body.light-theme .btn-danger {
+    background: linear-gradient(135deg, #b33c3c, #8b2e2e) !important;
+    color: white !important;
+    border: none !important;
+}
 
-        body.light-theme .site-name {
-            color: #1e293b !important;
-        }
+body.light-theme .btn-danger:hover {
+    background: linear-gradient(135deg, #c44a4a, #a13333) !important;
+}
 
-        body.light-theme .square {
-            background: #e9ecef !important;
-            border: 1px solid #dee2e6 !important;
-        }
+body.light-theme .btn-warning {
+    background: linear-gradient(135deg, #b38f2e, #80641f) !important;
+    color: white !important;
+    border: none !important;
+}
 
-        body.light-theme .square.orange {
-            background-color: #f97316 !important;
-        }
+body.light-theme .btn-info {
+    background: linear-gradient(135deg, #1f8a9c, #146b7a) !important;
+    color: white !important;
+    border: none !important;
+}
 
-        body.light-theme .square.green {
-            background-color: #22c55e !important;
-        }
+body.light-theme .btn-outline-red {
+    background: transparent !important;
+    border: 1px solid #ff3b3b !important;
+    color: #ff3b3b !important;
+}
 
-        body.light-theme .square.red {
-            background-color: #ef4444 !important;
-        }
+body.light-theme .btn-outline-red:hover {
+    background: #ff3b3b !important;
+    color: white !important;
+}
 
-        body.light-theme .order-stats {
-            background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
-            border: 1px solid #e2e8f0 !important;
-        }
+/* КАРТОЧКИ ГРУПП */
+body.light-theme .order-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
 
-        body.light-theme .stat-item {
-            background: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-        }
+body.light-theme .order-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-color: #cbd5e1;
+}
 
-        body.light-theme .stat-label {
-            color: #64748b !important;
-        }
+/* ЗАГОЛОВКИ ГРУПП */
+body.light-theme .order-header {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
 
-        body.light-theme .sites-navigation {
-            background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
-            border: 1px solid #e2e8f0 !important;
-        }
+body.light-theme .order-header h3 {
+    color: #1e293b !important;
+}
 
-        body.light-theme .site-link {
-            background: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-            color: #334155 !important;
-        }
+body.light-theme .order-header.status-green {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9) !important;
+    border-left: 4px solid #2ecc71 !important;
+}
 
-        body.light-theme .search-box {
-            background: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-            color: #1e293b !important;
-        }
+body.light-theme .order-header.status-orange {
+    background: linear-gradient(135deg, #fff3e0, #ffe6cc) !important;
+    border-left: 4px solid #ff9800 !important;
+}
 
-        body.light-theme .add-item-panel,
-        body.light-theme .items-list-panel {
-            background: #f8fafc !important;
-            border: 1px solid #e2e8f0 !important;
-        }
+body.light-theme .order-header.status-gray {
+    background: linear-gradient(135deg, #f5f5f5, #eeeeee) !important;
+    border-left: 4px solid #6c757d !important;
+}
 
-        body.light-theme .item-card {
-            background: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-        }
+/* ЗАГОЛОВКИ ИЗДЕЛИЙ */
+body.light-theme .item-header {
+    background: #f8fafc !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
 
-        body.light-theme .item-card-content div {
-            background: #f1f5f9 !important;
-            color: #1e293b !important;
-        }
+body.light-theme .item-header.item-status-green {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9) !important;
+    border-left: 4px solid #2ecc71 !important;
+}
 
-        body.light-theme .form-group input,
-        body.light-theme .form-group select {
-            background: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-            color: #1e293b !important;
-        }
+body.light-theme .item-header.item-status-orange {
+    background: linear-gradient(135deg, #fff3e0, #ffe6cc) !important;
+    border-left: 4px solid #ff9800 !important;
+}
 
-        body.light-theme .modal-content {
-            background: linear-gradient(135deg, #ffffff, #fefefe) !important;
-            border: 1px solid #e2e8f0 !important;
-        }
+body.light-theme .item-header.item-status-gray {
+    background: linear-gradient(135deg, #f5f5f5, #eeeeee) !important;
+    border-left: 4px solid #6c757d !important;
+}
 
-        body.light-theme .order-header.status-green {
-            background: linear-gradient(135deg, #e8f5e9, #c8e6c9) !important;
-            border-left: 4px solid #2ecc71 !important;
-        }
+body.light-theme .item-header span {
+    color: #1e293b !important;
+}
 
-        body.light-theme .order-header.status-orange {
-            background: linear-gradient(135deg, #fff3e0, #ffe6cc) !important;
-            border-left: 4px solid #ff9800 !important;
-        }
+/* БЛОКИ С УЧАСТКАМИ */
+body.light-theme .site-item {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+}
 
-        body.light-theme .order-header.status-gray {
-            background: linear-gradient(135deg, #f5f5f5, #eeeeee) !important;
-            border-left: 4px solid #6c757d !important;
-        }
+body.light-theme .site-item:hover {
+    background: #f8fafc !important;
+    border-color: #cbd5e1;
+}
 
-        /* Стили для кнопок над квадратиками */
-        .operation-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0 5px;
-        }
+body.light-theme .site-name {
+    color: #1e293b !important;
+}
 
-        .op-toggle-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: none;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            background: #2ecc71;
-            color: white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
+/* КВАДРАТИКИ */
+body.light-theme .square {
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+}
 
-        .op-toggle-btn.added {
-            background: #e74c3c;
-        }
+body.light-theme .square.orange {
+    background-color: #ff9800 !important;
+    border-color: #e65100 !important;
+}
 
-        .square {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            background: #1e232b;
-            border: 2px solid #3a404b;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
+body.light-theme .square.green {
+    background-color: #4caf50 !important;
+    border-color: #2e7d32 !important;
+}
 
-        .square.orange {
-            background-color: #ff9800;
-            border-color: #e65100;
-        }
+body.light-theme .square.red {
+    background-color: #ff3b3b !important;
+    border-color: #cc2e2e !important;
+}
 
-        .square.green {
-            background-color: #4caf50;
-            border-color: #2e7d32;
-        }
+body.light-theme .square.pending {
+    background-color: #f1f5f9 !important;
+    border-color: #e2e8f0 !important;
+}
 
-        .square.red {
-            background-color: #ff3b3b;
-            border-color: #cc2e2e;
-        }
+/* СТАТИСТИКА */
+body.light-theme .order-stats {
+    background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+    border: 1px solid #e2e8f0 !important;
+}
 
-        .square.pending {
-            background-color: #1e232b !important;
-            border-color: #3a404b !important;
-        }
+body.light-theme .stat-item {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+}
 
-        body.light-theme .square.pending {
-            background-color: #e9ecef !important;
-            border-color: #dee2e6 !important;
-        }
+body.light-theme .stat-value {
+    background: linear-gradient(135deg, #0057b3, #003d80) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
 
-        .operation-name-small {
-            font-size: 10px;
-            margin-top: 4px;
-            color: #a0a0a0;
-            text-align: center;
-            max-width: 60px;
-            word-break: break-word;
-        }
+body.light-theme .stat-label {
+    color: #64748b !important;
+}
 
-        .squares {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            align-items: flex-start;
-        }
+/* НАВИГАЦИЯ */
+body.light-theme .sites-navigation {
+    background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+    border: 1px solid #e2e8f0 !important;
+}
 
-        .site-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 20px;
-            background: #1a1e24;
-            border-radius: 8px;
-            border: 1px solid #2a2f38;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
+body.light-theme .site-link {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #334155 !important;
+}
 
-        /* Стили для деталей */
-        .detail-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 12px;
-            background: #1e232b;
-            border-radius: 6px;
-            margin-bottom: 6px;
-            border: 1px solid #2a2f38;
-        }
+body.light-theme .site-link:hover {
+    background: linear-gradient(135deg, #ff3b3b, #cc2e2e) !important;
+    color: white !important;
+    border-color: #ff3b3b !important;
+}
 
-        .profile-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 12px;
-            background: #1e232b;
-            border-radius: 6px;
-            margin-bottom: 6px;
-            border: 1px solid #2a2f38;
-        }
+/* ПОИСК И ФИЛЬТРЫ */
+body.light-theme .search-box {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #1e293b !important;
+}
 
-        .profile-name-custom {
-            min-width: 180px;
-            padding: 4px;
-            background: #15191f;
-            border: 1px solid #2a2f38;
-            border-radius: 4px;
-            color: #fff;
-        }
+body.light-theme .search-box:focus {
+    border-color: #ff3b3b !important;
+    box-shadow: 0 0 0 2px rgba(255,59,59,0.1) !important;
+}
 
-        .components-title {
-            margin-top: 20px;
-            margin-bottom: 12px;
-            color: #ff3b3b;
-            font-size: 14px;
-            font-weight: 600;
-            border-left: 3px solid #ff3b3b;
-            padding-left: 10px;
-        }
+body.light-theme .search-box::placeholder {
+    color: #94a3b8 !important;
+}
+
+/* МОДАЛЬНЫЕ ОКНА */
+body.light-theme .modal-content {
+    background: linear-gradient(135deg, #ffffff, #fefefe) !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .form-group input,
+body.light-theme .form-group select,
+body.light-theme .form-group textarea {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+body.light-theme .form-group input:focus,
+body.light-theme .form-group select:focus,
+body.light-theme .form-group textarea:focus {
+    border-color: #ff3b3b !important;
+    box-shadow: 0 0 0 2px rgba(255,59,59,0.1) !important;
+}
+
+body.light-theme .form-group label {
+    color: #64748b !important;
+}
+
+/* ПАНЕЛИ ДОБАВЛЕНИЯ ИЗДЕЛИЙ */
+body.light-theme .add-item-panel,
+body.light-theme .items-list-panel {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .item-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .item-card-content div {
+    background: #f1f5f9 !important;
+    color: #1e293b !important;
+}
+
+body.light-theme .item-card-title {
+    color: #ff3b3b !important;
+}
+
+/* ДЕТАЛИ И ПРОФИЛИ */
+body.light-theme .detail-item,
+body.light-theme .profile-item {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .profile-name-custom {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+/* КНОПКИ В КВАДРАТИКАХ */
+body.light-theme .op-toggle-btn {
+    background: #2ecc71 !important;
+    color: white !important;
+}
+
+body.light-theme .op-toggle-btn.added {
+    background: #e74c3c !important;
+}
+
+/* ПУСТОЕ СОСТОЯНИЕ */
+body.light-theme .empty-state {
+    background: #f8fafc !important;
+    border: 2px dashed #e2e8f0 !important;
+    color: #64748b !important;
+}
+
+/* СКРОЛЛБАР */
+body.light-theme ::-webkit-scrollbar-track {
+    background: #f1f5f9 !important;
+}
+
+body.light-theme ::-webkit-scrollbar-thumb {
+    background: #cbd5e1 !important;
+}
+
+body.light-theme ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8 !important;
+}
+
+/* ЗАГОЛОВКИ */
+body.light-theme h1, body.light-theme h2, body.light-theme h3, 
+body.light-theme h4, body.light-theme h5, body.light-theme h6 {
+    color: #1e293b !important;
+}
+
+body.light-theme h1 {
+    background: linear-gradient(135deg, #1e293b, #475569) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+
+body.light-theme hr {
+    border-top: 1px solid #e2e8f0 !important;
+}
+
+/* ОТЧЁТЫ */
+body.light-theme .materials-report {
+    color: #1e293b !important;
+}
+
+body.light-theme .materials-table th {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+}
+
+body.light-theme .materials-table td {
+    border-bottom: 1px solid #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+body.light-theme .materials-table tfoot {
+    background: #f8fafc !important;
+}
+
+/* УВЕДОМЛЕНИЯ */
+body.light-theme .notification {
+    background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+    color: #1e293b !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .notification.success {
+    border-left-color: #2ecc71 !important;
+}
+
+body.light-theme .notification.error {
+    border-left-color: #ff3b3b !important;
+}
+
+body.light-theme .notification.warning {
+    border-left-color: #f39c12 !important;
+}
+
+body.light-theme .notification.info {
+    border-left-color: #3498db !important;
+}
+
+/* СТАТУСЫ */
+body.light-theme .status-text {
+    background: #f1f5f9 !important;
+    color: #1e293b !important;
+}
+
+body.light-theme .order-header .btn,
+body.light-theme .item-header .btn {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+body.light-theme .order-header .btn:hover,
+body.light-theme .item-header .btn:hover {
+    background: #f1f5f9 !important;
+}
+
+/* КОМПЛЕКТУЮЩИЕ */
+body.light-theme .component-row {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .component-row .component-input {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+body.light-theme .components-title {
+    color: #ff3b3b !important;
+}
+
+/* ИНДИКАТОР ЗАГРУЗКИ */
+body.light-theme .loading {
+    color: #64748b !important;
+}
+
+body.light-theme .spinner {
+    border: 3px solid #e2e8f0 !important;
+    border-top: 3px solid #ff3b3b !important;
+}
     </style>
 </head>
 <body>
