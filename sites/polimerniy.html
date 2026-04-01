@@ -13,25 +13,12 @@
         .order-header.collapsed .collapse-icon { transform: rotate(-90deg); }
         .order-content { padding: 15px 20px; transition: all 0.2s; }
         .order-content.collapsed { display: none; }
-        .btn-report-item {
-            background: #ff9800;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 5px 12px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        .btn-report-item:hover { background: #e68900; transform: scale(1.02); }
         .task-card { padding: 12px 15px; border-bottom: 1px solid #2a2f38; transition: all 0.3s; margin-bottom: 10px; background: #15191f; border-radius: 8px; }
         .task-card:last-child { border-bottom: none; margin-bottom: 0; }
         .task-card.completed { opacity: 0.8; background: #1a2a1a; border-left: 3px solid #2ecc71; }
         .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .task-title { font-size: 13px; font-weight: 600; color: #fff; }
         .task-plan { color: #ff9800; font-size: 11px; margin-bottom: 8px; padding: 2px 6px; background: #1e232b; border-radius: 4px; display: inline-block; }
-        .profile-info { margin-bottom: 8px; padding: 4px 8px; background: #232830; border-radius: 4px; font-size: 11px; border-left: 2px solid #ff9800; }
         .executor-header { display: flex; gap: 8px; padding: 0 8px; margin-bottom: 4px; font-size: 10px; color: #a0a0a0; }
         .executor-header span:nth-child(1) { width: 120px; }
         .executor-header span:nth-child(2) { width: 60px; text-align: center; }
@@ -44,6 +31,21 @@
         .btn-work.active { background: #fd7e14; color: white; }
         .btn-work:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-add-executor { background: #6c757d; color: white; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 10px; margin: 6px 0; width: 120px; }
+        .btn-report-item {
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-report-item:hover {
+            background: #e68900;
+            transform: scale(1.02);
+        }
         .action-container { margin: 6px 0; }
         .new-executor-form { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding: 6px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; flex-wrap: wrap; }
         .new-executor-form input { width: 130px; padding: 4px 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; font-size: 11px; }
@@ -65,105 +67,63 @@
         .btn-danger { background: #dc3545; color: white; border: none; padding: 3px 6px; font-size: 10px; }
         .btn-end-shift { background: #ff9800; color: white; padding: 3px 6px; border: none; border-radius: 4px; cursor: pointer; font-size: 10px; width: 85px; font-weight: 600; margin-left: 4px; }
         .btn-end-shift:disabled { background: #4caf50; cursor: not-allowed; opacity: 0.7; }
-
-        /* ПРАВАЯ МОДАЛЬНАЯ ПАНЕЛЬ */
-        .right-modal {
-            position: fixed;
-            right: -450px;
-            top: 0;
-            width: 450px;
-            height: 100vh;
-            background: linear-gradient(135deg, #1a1e24, #0f1217);
-            border-left: 2px solid #ff3b3b;
-            box-shadow: -5px 0 30px rgba(0,0,0,0.5);
-            transition: right 0.3s ease;
-            z-index: 2000;
+        .order-header.orange { background: linear-gradient(135deg, #3a2a1a, #2a1f0f) !important; border-left: 4px solid #ff9800 !important; }
+        .order-header.green { background: linear-gradient(135deg, #1a3a1a, #0f2a0f) !important; border-left: 4px solid #2ecc71 !important; }
+        .status-text { font-weight: 600; padding: 4px 12px; border-radius: 6px; font-size: 12px; min-width: 90px; text-align: center; }
+        .right-modal { position: fixed; right: -450px; top: 0; width: 450px; height: 100vh; background: linear-gradient(135deg, #1a1e24, #0f1217); border-left: 2px solid #ff3b3b; box-shadow: -5px 0 30px rgba(0,0,0,0.5); transition: right 0.3s ease; z-index: 2000; display: flex; flex-direction: column; overflow: hidden; }
+        .right-modal.open { right: 0; }
+        .right-modal-header { background: linear-gradient(135deg, #232830, #1a1e24); padding: 15px 20px; border-bottom: 1px solid #2a2f38; display: flex; justify-content: space-between; align-items: center; }
+        .right-modal-header h3 { margin: 0; color: #ff3b3b; font-size: 18px; }
+        .right-modal-close { background: none; border: none; color: #a0a0a0; font-size: 28px; cursor: pointer; }
+        .right-modal-close:hover { color: #ff3b3b; }
+        .right-modal-content { flex: 1; overflow-y: auto; padding: 20px; }
+        .right-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1999; display: none; }
+        .right-modal-overlay.show { display: block; }
+        .report-row { background: #15191f; border-radius: 8px; padding: 12px; margin-bottom: 12px; border: 1px solid #2a2f38; }
+        .report-input { width: 100%; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; }
+        .report-textarea { width: 100%; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; resize: vertical; }
+        .btn-add-row { width: 100%; padding: 8px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        .btn-remove-row { background: #dc3545; color: white; border: none; border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 11px; }
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+            background: #15191f;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #2a2f38;
+            margin-bottom: 20px;
+        }
+        .filter-group {
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            gap: 4px;
         }
-        .right-modal.open { right: 0; }
-        .right-modal-header {
-            background: linear-gradient(135deg, #232830, #1a1e24);
-            padding: 15px 20px;
-            border-bottom: 1px solid #2a2f38;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .filter-group label {
+            font-size: 10px;
+            color: #a0a0a0;
+            letter-spacing: 0.5px;
         }
-        .right-modal-header h3 { margin: 0; color: #ff3b3b; font-size: 18px; }
-        .right-modal-close {
-            background: none; border: none; color: #a0a0a0; font-size: 28px; cursor: pointer;
-        }
-        .right-modal-close:hover { color: #ff3b3b; }
-        .right-modal-content {
-            flex: 1; overflow-y: auto; padding: 20px;
-        }
-        .right-modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1999; display: none;
-        }
-        .right-modal-overlay.show { display: block; }
-        .report-row {
-            background: #15191f;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 12px;
-            border: 1px solid #2a2f38;
-        }
-        .report-input {
-            width: 100%;
-            padding: 6px;
+        .filter-group input, .filter-group select {
+            padding: 6px 10px;
             background: #1e232b;
             border: 1px solid #2a2f38;
-            border-radius: 4px;
-            color: #fff;
-        }
-        .report-textarea {
-            width: 100%;
-            padding: 6px;
-            background: #1e232b;
-            border: 1px solid #2a2f38;
-            border-radius: 4px;
-            color: #fff;
-            resize: vertical;
-        }
-        .btn-add-row {
-            width: 100%;
-            padding: 8px;
-            background: #28a745;
-            color: white;
-            border: none;
             border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
+            color: #fff;
+            font-size: 12px;
+            min-width: 130px;
         }
-        .btn-remove-row {
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 2px 8px;
-            cursor: pointer;
-            font-size: 11px;
+        .filter-group input:focus, .filter-group select:focus {
+            outline: none;
+            border-color: #ff3b3b;
         }
-        .order-header.orange {
-    background: linear-gradient(135deg, #3a2a1a, #2a1f0f) !important;
-    border-left: 4px solid #ff9800 !important;
-}
-
-.order-header.green {
-    background: linear-gradient(135deg, #1a3a1a, #0f2a0f) !important;
-    border-left: 4px solid #2ecc71 !important;
-}
-
-.status-text {
-    font-weight: 600;
-    padding: 4px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    min-width: 90px;
-    text-align: center;
-}
+        .btn-reset {
+            background: #6c757d;
+            padding: 6px 12px;
+            font-size: 12px;
+            margin-top: 18px;
+        }
     </style>
 </head>
 <body>
@@ -176,13 +136,49 @@
             <h1 style="margin:0; color: white; font-size:18px;">🎨 Полимерный участок</h1>
         </header>
 
-        <div class="filter-section">
-            <select id="statusFilter" class="search-box" style="width: auto; padding: 6px 10px;" onchange="applyFilters()">
-                <option value="all">Все задачи</option>
-                <option value="pending">Ожидают</option>
-                <option value="in_progress">В работе</option>
-                <option value="completed">Завершённые</option>
-            </select>
+        <!-- КОМПАКТНЫЙ ФИЛЬТР -->
+        <div class="filter-row">
+            <div class="filter-group">
+                <label>📁 ГРУППА</label>
+                <input type="text" id="filterGroupName" placeholder="Название группы" style="min-width: 180px;">
+            </div>
+            <div class="filter-group">
+                <label>📦 ИЗДЕЛИЕ</label>
+                <select id="filterProduct">
+                    <option value="">Все</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>📏 РАЗМЕР</label>
+                <select id="filterSize">
+                    <option value="">Все</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>🎨 RAL</label>
+                <select id="filterRal">
+                    <option value="">Все</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>🧵 ТЕКСТУРА</label>
+                <select id="filterTexture">
+                    <option value="">Все</option>
+                    <option value="матовая">Матовая</option>
+                    <option value="глянцевая">Глянцевая</option>
+                    <option value="сатиновая">Муар</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>📊 СТАТУС</label>
+                <select id="statusFilter">
+                    <option value="all">Все задачи</option>
+                    <option value="pending">Ожидают</option>
+                    <option value="in_progress">В работе</option>
+                    <option value="completed">Завершённые</option>
+                </select>
+            </div>
+            <button class="btn btn-sm btn-reset" onclick="resetFilters()">🔄 Сбросить</button>
         </div>
 
         <div class="order-stats">
@@ -194,7 +190,6 @@
         <div id="tasksList" class="tasks-list"><div class="loading"><div class="spinner"></div><p>Загрузка задач...</p></div></div>
     </div>
 
-    <!-- ПРАВАЯ МОДАЛЬНАЯ ПАНЕЛЬ -->
     <div id="rightModalOverlay" class="right-modal-overlay" onclick="closeRightModal()"></div>
     <div id="rightModal" class="right-modal">
         <div class="right-modal-header">
@@ -215,9 +210,14 @@
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
-        // ============== ЗАГРУЗКА ОПЕРАЦИЙ ==============
         let taskOperationsData = {};
+        let taskManager = null;
+        let isLoadingTasks = false;
+        let currentReportItem = null;
+        let currentReportFullOrder = null;
+        let reportRows = [];
         
+        // ============== ЗАГРУЗКА ОПЕРАЦИЙ ==============
         async function loadTaskOperationsData() {
             try {
                 const response = await fetch('../data/taskOperations.json');
@@ -225,203 +225,139 @@
                     const data = await response.json();
                     taskOperationsData = data.operations || {};
                     console.log('✅ Загружены операции из taskOperations.json');
-                } else {
-                    console.warn('taskOperations.json не найден');
                 }
             } catch(e) {
                 console.error('Ошибка загрузки taskOperations.json:', e);
             }
         }
         
-        // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ==============
-        function getOperationNames(productName, siteKey) {
-            const productOps = taskOperationsData[productName];
-            if (!productOps) return [];
-            const siteMap = {
-                'tokarniy': 'токарно-фрезерный', 'frezerniy': 'фрезерный',
-                'slesarniy': 'слесарный', 'lazerno': 'лазерно-гибочный', 'polimerniy': 'полимерный'
-            };
-            const siteColumn = siteMap[siteKey];
-            if (!siteColumn) return [];
-            const ops = productOps[siteColumn] || [];
-            if (ops.length > 0 && typeof ops[0] === 'object' && ops[0].operation) {
-                return ops.map(op => op.operation);
-            }
-            return ops;
-        }
-        
-        // ============== ПОЛУЧЕНИЕ ПРОФИЛЯ ==============
-        function getProfileForOperation(operationName, details) {
-            if (!details || details.length === 0) return null;
-            let searchName = operationName;
-            if (searchName.startsWith('Покраска профиля ')) {
-                searchName = searchName.replace('Покраска профиля ', '');
-            }
-            for (let i = 0; i < details.length; i++) {
-                const detail = details[i];
-                if (detail.type === 'profile') {
-                    if (detail.name.includes(searchName) || searchName.includes(detail.name)) return detail;
+        // ============== ЗАПОЛНЕНИЕ ВЫПАДАЮЩИХ СПИСКОВ ==============
+        function populateFilters() {
+            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+            const products = new Set();
+            const sizes = new Set();
+            const rals = new Set();
+            
+            allOrders.forEach(order => {
+                if (order.items) {
+                    order.items.forEach(item => {
+                        if (item.product) products.add(item.product);
+                        if (item.size?.name) sizes.add(item.size.name);
+                        if (item.ral && item.ral.trim()) rals.add(item.ral.trim());
+                    });
                 }
+            });
+            
+            const productSelect = document.getElementById('filterProduct');
+            if (productSelect) {
+                productSelect.innerHTML = '<option value="">Все</option>';
+                Array.from(products).sort().forEach(p => {
+                    productSelect.innerHTML += `<option value="${p}">${p}</option>`;
+                });
             }
-            return null;
+            
+            const sizeSelect = document.getElementById('filterSize');
+            if (sizeSelect) {
+                sizeSelect.innerHTML = '<option value="">Все</option>';
+                Array.from(sizes).sort().forEach(s => {
+                    sizeSelect.innerHTML += `<option value="${s}">${s}</option>`;
+                });
+            }
+            
+            const ralSelect = document.getElementById('filterRal');
+            if (ralSelect) {
+                ralSelect.innerHTML = '<option value="">Все</option>';
+                Array.from(rals).sort().forEach(r => {
+                    ralSelect.innerHTML += `<option value="${r}">${r}</option>`;
+                });
+            }
         }
         
-        function getTaskPlanFromDetails(task, fullOrder) {
-            if (!fullOrder || !fullOrder.items || !fullOrder.items[0]) return 1;
-            const item = fullOrder.items[0];
-            const details = item.details || [];
-            const productName = item.product;
-            const productOps = taskOperationsData[productName];
-            if (!productOps) return item.size?.quantity || 1;
-            let foundDetail = null;
-            for (const siteOps of Object.values(productOps)) {
-                for (const op of siteOps) {
-                    if (op.operation === task.operation) {
-                        foundDetail = op.detail;
-                        break;
+        function resetFilters() {
+            document.getElementById('filterGroupName').value = '';
+            document.getElementById('filterProduct').value = '';
+            document.getElementById('filterSize').value = '';
+            document.getElementById('filterRal').value = '';
+            document.getElementById('filterTexture').value = '';
+            document.getElementById('statusFilter').value = 'all';
+            loadTasks();
+        }
+        
+        // ============== КЛАСС УПРАВЛЕНИЯ ЗАДАЧАМИ ==============
+        class SimpleTaskManager {
+            constructor(siteKey) {
+                this.siteKey = siteKey;
+                this.tasks = [];
+                this.storageKey = `tasks_${siteKey}`;
+            }
+            
+            loadData() {
+                const saved = localStorage.getItem(this.storageKey);
+                if (saved) {
+                    this.tasks = JSON.parse(saved);
+                } else {
+                    this.tasks = [];
+                }
+                return this.tasks;
+            }
+            
+            saveData() {
+                localStorage.setItem(this.storageKey, JSON.stringify(this.tasks));
+            }
+            
+            getTasksByStatus(status) {
+                if (status === 'all') return this.tasks;
+                return this.tasks.filter(t => t.status === status);
+            }
+            
+            getStats() {
+                const total = this.tasks.length;
+                const inProgress = this.tasks.filter(t => t.status === 'in_progress').length;
+                const completed = this.tasks.filter(t => t.status === 'completed').length;
+                return { total, inProgress, completed };
+            }
+            
+            updateExecutorQuantity(taskId, executorId, quantity) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (task && task.executors) {
+                    const executor = task.executors.find(e => e.id === executorId);
+                    if (executor) {
+                        executor.quantity = quantity;
+                        this.saveData();
                     }
                 }
-                if (foundDetail) break;
             }
-            if (!foundDetail) return item.size?.quantity || 1;
-            for (const detail of details) {
-                if (detail.name === foundDetail) return detail.quantity;
-            }
-            if (item.brackets) {
-                for (const b of item.brackets) {
-                    if (`Кронштейн ${b.type}` === foundDetail) return b.quantity;
-                }
-            }
-            if (item.lyres) {
-                for (const l of item.lyres) {
-                    if (`Лира ${l.type}` === foundDetail) return l.quantity;
-                }
-            }
-            return item.size?.quantity || 1;
-        }
-
-        // ============== УПРОЩЁННЫЙ МЕНЕДЖЕР ЗАДАЧ БЕЗ ДАТЫ ==============
-        class SimpleTaskManager {
-    constructor(siteKey) {
-        this.siteKey = siteKey;
-        this.tasks = [];
-        this.currentFilter = 'all';
-        this.storageKey = `tasks_${siteKey}`;
-    }
-    
-    loadData() {
-        const saved = localStorage.getItem(this.storageKey);
-        if (saved) {
-            this.tasks = JSON.parse(saved);
-        } else {
-            this.tasks = [];
-        }
-        return this.tasks;
-    }
-    
-    saveData() {
-        localStorage.setItem(this.storageKey, JSON.stringify(this.tasks));
-    }
-    
-    getTasksByStatus(status) {
-        if (status === 'all') return this.tasks;
-        return this.tasks.filter(t => t.status === status);
-    }
-    
-    getStats() {
-        const total = this.tasks.length;
-        const inProgress = this.tasks.filter(t => t.status === 'in_progress').length;
-        const completed = this.tasks.filter(t => t.status === 'completed').length;
-        return { total, inProgress, completed };
-    }
-    
-    updateExecutorQuantity(taskId, executorId, quantity) {
-        const task = this.tasks.find(t => t.id === taskId);
-        if (task && task.executors) {
-            const executor = task.executors.find(e => e.id === executorId);
-            if (executor) {
-                executor.quantity = quantity;
-                this.saveData();
-            }
-        }
-    }
-    
-    updateExecutorStatus(taskId, executorId, status) {
-        const task = this.tasks.find(t => t.id === taskId);
-        if (!task || !task.executors) return;
-
-        const executor = task.executors.find(e => e.id === executorId);
-        if (executor) {
-            executor.status = status;
-            this.saveData();
-
-            let taskStatus = 'pending';
-            if (task.executors.some(e => e.status === 'in_progress')) {
-                taskStatus = 'in_progress';
-            } else if (task.executors.every(e => e.status === 'shift_ended' || e.status === 'completed')) {
-                taskStatus = 'completed';
-            }
-
-            task.status = taskStatus;
-            this.saveData();
-
-            updateItemStatusTexts();
-
-            const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-            const order = orders.find(o => o.id == task.orderId);
-            if (order) {
-                if (!order.tasks) order.tasks = {};
-                order.tasks[task.id] = taskStatus;
-                localStorage.setItem('masterx_orders', JSON.stringify(orders));
-            }
-        }
-    }
-    
-    addExecutor(taskId, name) {
-        const task = this.tasks.find(t => t.id === taskId);
-        if (task) {
-            if (!task.executors) task.executors = [];
-            if (task.executors.some(e => e.name === name)) return false;
-            task.executors.push({
-                id: Date.now(),
-                name: name,
-                quantity: 0,
-                status: 'pending'
-            });
-            this.saveData();
-            return true;
-        }
-        return false;
-    }
-    
-    removeExecutor(taskId, executorId) {
-        const task = this.tasks.find(t => t.id === taskId);
-        if (task && task.executors) {
-            task.executors = task.executors.filter(e => e.id !== executorId);
-            this.saveData();
-        }
-    }
-    
-    completeTask(taskId) {
-        const task = this.tasks.find(t => t.id === taskId);
-        if (task && task.status !== 'completed') {
-            task.status = 'completed';
-            task.completedAt = new Date().toISOString();
-            this.saveData();
-            updateItemStatusTexts();
             
-            const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-            const order = orders.find(o => o.id == task.orderId);
-            if (order) {
-                if (!order.tasks) order.tasks = {};
-                order.tasks[task.id] = 'completed';
-                const orderIndex = orders.findIndex(o => o.id == task.orderId);
-                orders[orderIndex] = order;
-                localStorage.setItem('masterx_orders', JSON.stringify(orders));
+            updateExecutorStatus(taskId, executorId, status) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (!task || !task.executors) return;
+
+                const executor = task.executors.find(e => e.id === executorId);
+                if (executor) {
+                    executor.status = status;
+                    this.saveData();
+
+                    let taskStatus = 'pending';
+                    if (task.executors.some(e => e.status === 'in_progress')) {
+                        taskStatus = 'in_progress';
+                    } else if (task.executors.every(e => e.status === 'shift_ended' || e.status === 'completed')) {
+                        taskStatus = 'completed';
+                    }
+
+                    task.status = taskStatus;
+                    this.saveData();
+
+                    updateItemStatusTexts();
+
+                    const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+                    const order = orders.find(o => o.id == task.orderId);
+                    if (order) {
+                        if (!order.tasks) order.tasks = {};
+                        order.tasks[task.id] = taskStatus;
+                        localStorage.setItem('masterx_orders', JSON.stringify(orders));
+                    }
+                }
             }
-        }
-    }
-}
             
             addExecutor(taskId, name) {
                 const task = this.tasks.find(t => t.id === taskId);
@@ -468,166 +404,197 @@
                 }
             }
         }
-
-        // ============== ИНИЦИАЛИЗАЦИЯ ==============
-        let taskManager = null;
-        window.taskManager = null;
-        let currentFilter = 'all';
-        let isLoadingTasks = false;
         
-        async function init() {
-            await loadTaskOperationsData();
-            taskManager = new SimpleTaskManager('polimerniy');
-            window.taskManager = taskManager;
-            loadTasks();
-        }
-        
-        window.applyFilters = function() {
-            currentFilter = document.getElementById('statusFilter').value;
-            loadTasks();
-        };
-        
+        // ============== ОСНОВНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==============
         function loadTasks() {
-    taskManager.loadData();
-    const tasks = taskManager.getTasksByStatus(document.getElementById('statusFilter').value);
-    
-    // Статистика
-    const stats = taskManager.getStats();
-    document.getElementById('totalTasks').textContent = stats.total;
-    document.getElementById('tasksInProgress').textContent = stats.inProgress;
-    document.getElementById('tasksCompleted').textContent = stats.completed;
-
-    const tasksList = document.getElementById('tasksList');
-    tasksList.innerHTML = '';
-
-    if (tasks.length === 0) {
-        tasksList.innerHTML = '<div class="no-tasks"><p>📭 Нет задач</p></div>';
-        return;
-    }
-
-    byItem = {};
-    tasks.forEach(task => {
-        const size = task.size || '';
-        const ral = task.ral || '';
-        const itemIndex = task.itemIndex !== undefined ? task.itemIndex : 0;
-        const itemKey = `${task.orderId}_item${itemIndex}_${task.product}_${size}_${ral}`;
-
-        if (!byItem[itemKey]) {
-            byItem[itemKey] = {
-                orderId: task.orderId,
-                orderNumber: task.orderNumber,
-                groupName: '',
-                product: task.product,
-                size: size,
-                ral: ral,
-                texture: task.texture || '',
-                totalQuantity: task.totalQuantity || 1,
-                tasks: [],
-                itemKey: itemKey,
-                itemIndex: itemIndex
+            if (isLoadingTasks) return;
+            isLoadingTasks = true;
+            
+            taskManager.loadData();
+            let tasks = taskManager.getTasksByStatus(document.getElementById('statusFilter').value);
+            
+            // ПОЛУЧАЕМ ЗНАЧЕНИЯ ФИЛЬТРОВ
+            const filterGroupName = document.getElementById('filterGroupName').value.toLowerCase();
+            const filterProduct = document.getElementById('filterProduct').value.toLowerCase();
+            const filterSize = document.getElementById('filterSize').value.toLowerCase();
+            const filterRal = document.getElementById('filterRal').value.toLowerCase();
+            const filterTexture = document.getElementById('filterTexture').value.toLowerCase();
+            
+            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+            
+            // ФИЛЬТРАЦИЯ ЗАДАЧ
+            tasks = tasks.filter(task => {
+                const order = allOrders.find(o => o.id == task.orderId);
+                if (!order) return false;
+                
+                // Фильтр по названию группы
+                if (filterGroupName && !order.groupName?.toLowerCase().includes(filterGroupName)) return false;
+                
+                const item = order.items?.[task.itemIndex || 0];
+                if (!item) return false;
+                
+                // Фильтр по изделию
+                if (filterProduct && !item.product?.toLowerCase().includes(filterProduct)) return false;
+                
+                // Фильтр по размеру
+                if (filterSize && !item.size?.name?.toLowerCase().includes(filterSize)) return false;
+                
+                // Фильтр по RAL
+                if (filterRal && !item.ral?.toLowerCase().includes(filterRal)) return false;
+                
+                // Фильтр по текстуре
+                if (filterTexture && !item.texture?.toLowerCase().includes(filterTexture)) return false;
+                
+                return true;
+            });
+            
+            const stats = {
+                total: tasks.length,
+                inProgress: tasks.filter(t => t.status === 'in_progress').length,
+                completed: tasks.filter(t => t.status === 'completed').length
             };
+            document.getElementById('totalTasks').textContent = stats.total;
+            document.getElementById('tasksInProgress').textContent = stats.inProgress;
+            document.getElementById('tasksCompleted').textContent = stats.completed;
+
+            const tasksList = document.getElementById('tasksList');
+            tasksList.innerHTML = '';
+
+            if (tasks.length === 0) {
+                tasksList.innerHTML = '<div class="no-tasks"><p>📭 Нет задач по выбранным фильтрам</p></div>';
+                isLoadingTasks = false;
+                return;
+            }
+
+            const byItem = {};
+            tasks.forEach(task => {
+                const size = task.size || '';
+                const ral = task.ral || '';
+                const itemIndex = task.itemIndex !== undefined ? task.itemIndex : 0;
+                const itemKey = `${task.orderId}_item${itemIndex}_${task.product}_${size}_${ral}`;
+
+                if (!byItem[itemKey]) {
+                    byItem[itemKey] = {
+                        orderId: task.orderId,
+                        orderNumber: task.orderNumber,
+                        groupName: '',
+                        product: task.product,
+                        size: size,
+                        ral: ral,
+                        texture: task.texture || '',
+                        totalQuantity: task.totalQuantity || 1,
+                        tasks: [],
+                        itemKey: itemKey,
+                        itemIndex: itemIndex
+                    };
+                }
+                byItem[itemKey].tasks.push(task);
+            });
+
+            Object.values(byItem).forEach(item => {
+                const order = allOrders.find(o => o.id == item.orderId);
+                if (order && order.items && order.items[item.itemIndex]) {
+                    const foundItem = order.items[item.itemIndex];
+                    item.groupName = order.groupName || '';
+                    item.product = foundItem.product;
+                    item.size = foundItem.size?.name || '';
+                    item.ral = foundItem.ral || '';
+                    item.texture = foundItem.texture || '';
+                    item.totalQuantity = foundItem.size?.quantity || 1;
+                }
+            });
+
+            Object.values(byItem).forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'order-card';
+                itemDiv.dataset.itemKey = item.itemKey;
+
+                const header = document.createElement('div');
+                header.className = 'order-header collapsed';
+
+                const hasInProgress = item.tasks.some(t => t.status === 'in_progress');
+                const allCompleted = item.tasks.length > 0 && item.tasks.every(t => t.status === 'completed');
+                if (allCompleted) header.classList.add('green');
+                else if (hasInProgress) header.classList.add('orange');
+
+                header.innerHTML = `
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span style="font-weight: bold; color: #ff9800;">📦 ${escapeHtml(item.product)}</span>
+                            <span style="font-size: 12px; color: #4cd964;">${escapeHtml(item.size || '-')} × ${item.totalQuantity} шт</span>
+                            ${item.ral ? `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>` : ''}
+                        </div>
+                        <div style="font-size: 11px; color: #a0a0a0; margin-top: 4px;">
+                            📁 ${escapeHtml(item.groupName)} | Заказ №${escapeHtml(item.orderNumber)}
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn-report-item" onclick="event.stopPropagation(); openRightModalForItem('${item.orderId}', '${item.itemKey}')">📝 Отчёт</button>
+                        <span id="status-text-${item.itemKey}" class="status-text"></span>
+                        <span class="collapse-icon" style="cursor: pointer;">▼</span>
+                    </div>
+                `;
+
+                const content = document.createElement('div');
+                content.className = 'order-content collapsed';
+
+                item.tasks.forEach(task => content.appendChild(createTaskCard(task)));
+
+                header.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'BUTTON') return;
+                    header.classList.toggle('collapsed');
+                    content.classList.toggle('collapsed');
+                    const arrow = header.querySelector('.collapse-icon');
+                    if (arrow) arrow.textContent = header.classList.contains('collapsed') ? '▼' : '▲';
+                });
+
+                itemDiv.appendChild(header);
+                itemDiv.appendChild(content);
+                tasksList.appendChild(itemDiv);
+            });
+
+            updateItemStatusTexts();
+            isLoadingTasks = false;
         }
-        byItem[itemKey].tasks.push(task);
-    });
-
-    // Обновляем данные из заказов
-    const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-    Object.values(byItem).forEach(item => {
-        const order = allOrders.find(o => o.id == item.orderId);
-        if (order && order.items && order.items[item.itemIndex]) {
-            const foundItem = order.items[item.itemIndex];
-            item.groupName = order.groupName || '';
-            item.product = foundItem.product;
-            item.size = foundItem.size?.name || '';
-            item.ral = foundItem.ral || '';
-            item.texture = foundItem.texture || '';
-            item.totalQuantity = foundItem.size?.quantity || 1;
-        }
-    });
-
-    // Рендер карточек
-    Object.values(byItem).forEach(item => {
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'order-card';
-        itemDiv.dataset.itemKey = item.itemKey;
-
-        const header = document.createElement('div');
-        header.className = `order-header collapsed`;
-
-        // Применяем цвет сразу
-        const hasInProgress = item.tasks.some(t => t.status === 'in_progress');
-        const allCompleted = item.tasks.length > 0 && item.tasks.every(t => t.status === 'completed');
-        if (allCompleted) header.classList.add('green');
-        else if (hasInProgress) header.classList.add('orange');
-
-        header.innerHTML = `
-            <div style="flex: 1;">
-                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <span style="font-weight: bold; color: #ff9800;">📦 ${escapeHtml(item.product)}</span>
-                    <span style="font-size: 12px; color: #4cd964;">${escapeHtml(item.size || '-')} × ${item.totalQuantity} шт</span>
-                    ${item.ral ? `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>` : ''}
-                </div>
-                <div style="font-size: 11px; color: #a0a0a0; margin-top: 4px;">
-                    📁 ${escapeHtml(item.groupName)} | Заказ №${escapeHtml(item.orderNumber)}
-                </div>
-            </div>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <button class="btn-report-item" onclick="event.stopPropagation(); openRightModalForItem('${item.orderId}', '${item.itemKey}')">📝 Отчёт</button>
-                <span id="status-text-${item.itemKey}" class="status-text"></span>
-                <span class="collapse-icon" style="cursor: pointer;">▼</span>
-            </div>
-        `;
-
-        const content = document.createElement('div');
-        content.className = 'order-content collapsed';
-
-        item.tasks.forEach(task => content.appendChild(createTaskCard(task)));
-
-        header.addEventListener('click', function(e) {
-            if (e.target.tagName === 'BUTTON') return;
-            header.classList.toggle('collapsed');
-            content.classList.toggle('collapsed');
-            const arrow = header.querySelector('.collapse-icon');
-            if (arrow) arrow.textContent = header.classList.contains('collapsed') ? '▼' : '▲';
-        });
-
-        itemDiv.appendChild(header);
-        itemDiv.appendChild(content);
-        tasksList.appendChild(itemDiv);
-    });
-
-    updateItemStatusTexts();
-}
-
-        function updateItemStatusTexts() {
-    Object.values(byItem).forEach(item => {
-        const span = document.getElementById(`status-text-${item.itemKey}`);
-        if (!span) return;
-
-        const hasInProgress = item.tasks.some(t => t.status === 'in_progress');
-        const allCompleted = item.tasks.length > 0 && item.tasks.every(t => t.status === 'completed');
-
-        if (allCompleted) {
-            span.textContent = 'ГОТОВО';
-            span.style.background = '#1a3a1a';
-            span.style.color = '#2ecc71';
-        } else if (hasInProgress) {
-            span.textContent = 'В РАБОТЕ';
-            span.style.background = '#3a2a1a';
-            span.style.color = '#ff9800';
-        } else {
-            span.textContent = '';
-        }
-    });
-}
         
-        function createTaskCard(task, fullOrder) {
+        function updateItemStatusTexts() {
+            document.querySelectorAll('.order-card').forEach(card => {
+                const itemKey = card.dataset.itemKey;
+                const span = document.getElementById(`status-text-${itemKey}`);
+                if (!span) return;
+                
+                const tasks = [];
+                card.querySelectorAll('.task-card').forEach(taskCard => {
+                    const taskId = taskCard.dataset.taskId;
+                    if (taskId && taskManager.tasks) {
+                        const task = taskManager.tasks.find(t => t.id === taskId);
+                        if (task) tasks.push(task);
+                    }
+                });
+                
+                const hasInProgress = tasks.some(t => t.status === 'in_progress');
+                const allCompleted = tasks.length > 0 && tasks.every(t => t.status === 'completed');
+                
+                if (allCompleted) {
+                    span.textContent = 'ГОТОВО';
+                    span.style.background = '#1a3a1a';
+                    span.style.color = '#2ecc71';
+                } else if (hasInProgress) {
+                    span.textContent = 'В РАБОТЕ';
+                    span.style.background = '#3a2a1a';
+                    span.style.color = '#ff9800';
+                } else {
+                    span.textContent = '';
+                }
+            });
+        }
+        
+        function createTaskCard(task) {
             const card = document.createElement('div');
             card.className = 'task-card ' + (task.status === 'completed' ? 'completed' : '');
             card.dataset.taskId = task.id;
             
-            const planQuantity = task.totalQuantity || getTaskPlanFromDetails(task, fullOrder);
-            
+            const planQuantity = task.totalQuantity || 1;
             let operationName = task.operation;
             if (typeof operationName === 'object' && operationName !== null) {
                 operationName = operationName.operation || JSON.stringify(operationName);
@@ -645,23 +612,6 @@
             planDiv.className = 'task-plan';
             planDiv.innerHTML = '📋 План: ' + planQuantity + ' шт';
             card.appendChild(planDiv);
-            
-            if (fullOrder && fullOrder.items && fullOrder.items[0]) {
-                const details = fullOrder.items[0].details || [];
-                if (operationName && operationName.trim().startsWith('Покраска профиля')) {
-                    const profileInfo = getProfileForOperation(operationName, details);
-                    if (profileInfo) {
-                        const profileDiv = document.createElement('div');
-                        profileDiv.className = 'profile-info';
-                        profileDiv.innerHTML = `
-                            <span class="profile-name">📐 ${escapeHtml(profileInfo.name)}</span>
-                            <span class="profile-length">📏 Длина: ${profileInfo.lengthMm || 0} мм</span>
-                            <span class="profile-qty">× ${profileInfo.quantity} шт</span>
-                        `;
-                        card.appendChild(profileDiv);
-                    }
-                }
-            }
             
             if (task.isExtra && task.description) {
                 const desc = document.createElement('div');
@@ -834,24 +784,30 @@
         
         window.exportToExcel = function() {
             const tasks = taskManager.tasks;
-            let csv = "Заказ,Изделие,Операция,Исполнитель,Количество,Статус,План\n";
+            let csv = "Заказ,Группа,Изделие,Размер,Операция,Исполнитель,Количество,Статус,План,RAL,Текстура\n";
+            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+            
             tasks.forEach(task => {
-                let fullOrder = null;
-                try {
-                    const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-                    fullOrder = allOrders.find(o => o.id == task.orderId);
-                } catch(e) {}
-                const planQuantity = task.totalQuantity || getTaskPlanFromDetails(task, fullOrder);
+                const order = allOrders.find(o => o.id == task.orderId);
+                const item = order?.items?.[task.itemIndex || 0];
+                const planQuantity = task.totalQuantity || 1;
                 let operationName = task.operation;
                 if (typeof operationName === 'object' && operationName !== null) {
                     operationName = operationName.operation || JSON.stringify(operationName);
                 }
+                
+                const groupName = order?.groupName || '';
+                const product = item?.product || task.product || '';
+                const size = item?.size?.name || task.size || '';
+                const ral = item?.ral || '';
+                const texture = item?.texture || '';
+                
                 if (task.executors && task.executors.length > 0) {
                     task.executors.forEach(exec => {
-                        csv += `"${task.orderNumber}","${task.product}","${operationName}","${exec.name}",${exec.quantity || 0},"${exec.status}",${planQuantity}\n`;
+                        csv += `"${task.orderNumber}","${groupName}","${product}","${size}","${operationName}","${exec.name}",${exec.quantity || 0},"${exec.status}",${planQuantity},"${ral}","${texture}"\n`;
                     });
                 } else {
-                    csv += `"${task.orderNumber}","${task.product}","${operationName}","Нет",0,"${task.status}",${planQuantity}\n`;
+                    csv += `"${task.orderNumber}","${groupName}","${product}","${size}","${operationName}","Нет",0,"${task.status}",${planQuantity},"${ral}","${texture}"\n`;
                 }
             });
             const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -861,146 +817,101 @@
             link.click();
         };
         
-        // ============== ПРАВАЯ МОДАЛЬНАЯ ПАНЕЛЬ ДЛЯ ОТЧЁТА ПО ИЗДЕЛИЮ ==============
-        let currentReportItem = null;
-        let currentReportFullOrder = null;
-        let reportRows = [];
-
+        // ============== ПРАВАЯ МОДАЛЬНАЯ ПАНЕЛЬ (ОТЧЁТ) ==============
         function openRightModalForItem(orderId, itemKey) {
-    const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-    const fullOrder = allOrders.find(o => o.id == orderId);
-    if (!fullOrder) {
-        alert('Заказ не найден');
-        return;
-    }
-    
-    console.log('🔍 itemKey:', itemKey);
-    console.log('🔍 fullOrder.items:', fullOrder.items);
-    
-    // Ищем изделие по product и size из itemKey
-    // Формат itemKey: orderId_product_size_ral (или orderId_product_)
-    // Нужно извлечь product и size
-    const parts = itemKey.split('_');
-    // Первая часть - orderId
-    const orderIdFromKey = parts[0];
-    // Остальные части - product, size, ral
-    
-    // Извлекаем product (может содержать подчёркивания) и size
-    // Последний элемент - ral, предпоследний - size, всё остальное - product
-    let productName, sizeName, ralName;
-    
-    if (parts.length === 3) {
-        // Формат: orderId_product_size (без ral)
-        productName = parts[1];
-        sizeName = parts[2];
-        ralName = '';
-    } else if (parts.length === 4) {
-        // Формат: orderId_product_size_ral
-        productName = parts[1];
-        sizeName = parts[2];
-        ralName = parts[3];
-    } else {
-        // Сложный случай: продукт может содержать подчёркивания
-        // Последний элемент - ral, предпоследний - size, всё остальное - product
-        ralName = parts[parts.length - 1];
-        sizeName = parts[parts.length - 2];
-        productName = parts.slice(1, -2).join('_');
-    }
-    
-    // Очищаем от возможных лишних символов
-    productName = productName.trim();
-    sizeName = sizeName.trim();
-    ralName = ralName.trim();
-    
-    console.log('🔍 Распарсено:', { productName, sizeName, ralName });
-    
-    // Ищем изделие
-    let foundItem = null;
-    for (const item of fullOrder.items) {
-        const itemSize = item.size?.name || '';
-        const itemRal = item.ral || '';
+            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+            const fullOrder = allOrders.find(o => o.id == orderId);
+            if (!fullOrder) {
+                alert('Заказ не найден');
+                return;
+            }
+            
+            const parts = itemKey.split('_');
+            let productName, sizeName;
+            if (parts.length === 3) {
+                productName = parts[1];
+                sizeName = parts[2];
+            } else if (parts.length === 4) {
+                productName = parts[1];
+                sizeName = parts[2];
+            } else {
+                sizeName = parts[parts.length - 1];
+                productName = parts.slice(1, -1).join('_');
+            }
+            
+            productName = productName.trim();
+            sizeName = sizeName.trim();
+            
+            let foundItem = null;
+            for (const item of fullOrder.items) {
+                const itemSize = item.size?.name || '';
+                if (item.product === productName) {
+                    const sizeMatch = (itemSize === sizeName) || (sizeName === '' && itemSize === '');
+                    if (sizeMatch) {
+                        foundItem = item;
+                        break;
+                    }
+                }
+            }
+            
+            if (!foundItem) {
+                for (const item of fullOrder.items) {
+                    if (item.product.includes(productName) || productName.includes(item.product)) {
+                        foundItem = item;
+                        break;
+                    }
+                }
+            }
+            
+            if (!foundItem) {
+                alert('Изделие не найдено');
+                return;
+            }
+            
+            currentReportItem = {
+                orderId: orderId,
+                orderNumber: fullOrder.number,
+                groupName: fullOrder.groupName,
+                product: foundItem.product,
+                size: foundItem.size?.name,
+                quantity: foundItem.size?.quantity,
+                ral: foundItem.ral,
+                texture: foundItem.texture,
+                itemKey: itemKey
+            };
+            currentReportFullOrder = fullOrder;
+            
+            const modal = document.getElementById('rightModal');
+            const overlay = document.getElementById('rightModalOverlay');
+            const contentDiv = document.getElementById('rightModalContent');
+            
+            const savedData = getSavedReportDataForItem(orderId, itemKey);
+            if (savedData && savedData.rows) {
+                reportRows = [...savedData.rows];
+            } else {
+                reportRows = [{ расход: 0, количество: 0, комментарий: '' }];
+            }
+            
+            renderReportFormForItem(contentDiv, fullOrder, foundItem);
+            modal.classList.add('open');
+            overlay.classList.add('show');
+        }
         
-        // Сравниваем по продукту и размеру (игнорируем RAL если он пустой)
-        if (item.product === productName) {
-            // Если размер совпадает или оба пустые
-            const sizeMatch = (itemSize === sizeName) || (sizeName === '' && itemSize === '');
-            if (sizeMatch) {
-                foundItem = item;
-                break;
-            }
-        }
-    }
-    
-    // Если не нашли, пробуем искать по части названия
-    if (!foundItem) {
-        for (const item of fullOrder.items) {
-            if (item.product.includes(productName) || productName.includes(item.product)) {
-                foundItem = item;
-                break;
-            }
-        }
-    }
-    
-    if (!foundItem) {
-        console.error('❌ Изделие не найдено!');
-        console.log('Доступные изделия:', fullOrder.items.map(i => ({ product: i.product, size: i.size?.name })));
-        alert('Изделие не найдено');
-        return;
-    }
-    
-    console.log('✅ Найдено изделие:', foundItem);
-    
-    currentReportItem = {
-        orderId: orderId,
-        orderNumber: fullOrder.number,
-        groupName: fullOrder.groupName,
-        product: foundItem.product,
-        size: foundItem.size?.name,
-        quantity: foundItem.size?.quantity,
-        ral: foundItem.ral,
-        texture: foundItem.texture,
-        itemKey: itemKey
-    };
-    currentReportFullOrder = fullOrder;
-    
-    const modal = document.getElementById('rightModal');
-    const overlay = document.getElementById('rightModalOverlay');
-    const contentDiv = document.getElementById('rightModalContent');
-    
-    const savedData = getSavedReportDataForItem(orderId, itemKey);
-    if (savedData && savedData.rows) {
-        reportRows = [...savedData.rows];
-    } else {
-        reportRows = [{ расход: 0, количество: 0, комментарий: '' }];
-    }
-    
-    renderReportFormForItem(contentDiv, fullOrder, foundItem);
-    modal.classList.add('open');
-    overlay.classList.add('show');
-}
-
         function getSavedReportDataForItem(orderId, itemKey) {
             const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
             const itemReports = allReports.filter(r => r.orderId == orderId && r.itemKey === itemKey && r.isItemReport === true);
-            
             if (itemReports.length === 0) return null;
-            
             const allRows = [];
             itemReports.forEach(report => {
                 if (report.rows) {
                     allRows.push(...report.rows);
                 }
             });
-            
-            return {
-                rows: allRows,
-                savedAt: itemReports[itemReports.length - 1]?.savedAt
-            };
+            return { rows: allRows, savedAt: itemReports[itemReports.length - 1]?.savedAt };
         }
-
+        
         function renderReportFormForItem(container, fullOrder, item) {
             let rowsHtml = '';
-            
             reportRows.forEach((row, index) => {
                 rowsHtml += `
                     <div class="report-row" data-row-index="${index}">
@@ -1048,12 +959,6 @@
                         <button type="button" class="btn btn-success" onclick="saveReportDataForItem()" style="flex: 1;">💾 Сохранить</button>
                         <button type="button" class="btn btn-danger" onclick="closeRightModal()" style="flex: 1;">✖️ Закрыть</button>
                     </div>
-                    
-                    ${getSavedReportDataForItem(currentReportItem?.orderId, currentReportItem?.itemKey)?.savedAt ? `
-                    <div style="margin-top: 15px; padding: 8px; background: #15191f; border-radius: 6px; font-size: 11px; color: #4cd964;">
-                        ✅ Последнее сохранение: ${new Date(getSavedReportDataForItem(currentReportItem.orderId, currentReportItem.itemKey).savedAt).toLocaleString()}
-                    </div>
-                    ` : ''}
                 </div>
             `;
             
@@ -1082,13 +987,13 @@
                 });
             });
         }
-
+        
         function addReportRowItem() {
             reportRows.push({ расход: 0, количество: 0, комментарий: '' });
             const container = document.getElementById('rightModalContent');
             renderReportFormForItem(container, currentReportFullOrder, currentReportItem);
         }
-
+        
         function removeReportRowItem(rowIndex) {
             if (reportRows.length <= 1) {
                 if (!confirm('Удалить последнюю строку? Будет создана пустая строка.')) return;
@@ -1099,7 +1004,7 @@
             const container = document.getElementById('rightModalContent');
             renderReportFormForItem(container, currentReportFullOrder, currentReportItem);
         }
-
+        
         function saveReportDataForItem() {
             if (!currentReportItem) return;
             
@@ -1150,7 +1055,7 @@
             alert('✅ Отчёт сохранён!');
             closeRightModal();
         }
-
+        
         function closeRightModal() {
             const modal = document.getElementById('rightModal');
             const overlay = document.getElementById('rightModalOverlay');
@@ -1160,8 +1065,30 @@
             currentReportFullOrder = null;
             reportRows = [];
         }
-
-        // Глобальные функции
+        
+        // ============== ОБНОВЛЕНИЕ ФИЛЬТРОВ ПРИ ИЗМЕНЕНИИ ==============
+        function setupFilterListeners() {
+            const inputs = ['filterGroupName', 'filterProduct', 'filterSize', 'filterRal', 'filterTexture', 'statusFilter'];
+            inputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', () => loadTasks());
+                    el.addEventListener('change', () => loadTasks());
+                }
+            });
+        }
+        
+        // ============== ИНИЦИАЛИЗАЦИЯ ==============
+        async function init() {
+            await loadTaskOperationsData();
+            taskManager = new SimpleTaskManager('polimerniy');
+            window.taskManager = taskManager;
+            populateFilters();
+            setupFilterListeners();
+            loadTasks();
+        }
+        
+        window.resetFilters = resetFilters;
         window.openRightModalForItem = openRightModalForItem;
         window.closeRightModal = closeRightModal;
         window.addReportRowItem = addReportRowItem;
