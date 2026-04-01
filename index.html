@@ -2017,216 +2017,273 @@
 
         // ============== ОТОБРАЖЕНИЕ СПИСКА ГРУПП ==============
         function renderOrdersList() {
-            const ordersList = document.getElementById('ordersList');
-            if (!ordersList) return;
+    const ordersList = document.getElementById('ordersList');
+    if (!ordersList) return;
 
-            const orders = loadOrdersFromStorage() || [];
-            const searchText = document.getElementById('searchInput')?.value?.toLowerCase() || '';
-            const statusFilter = document.getElementById('statusFilter')?.value || 'all';
+    const orders = loadOrdersFromStorage() || [];
+    const searchText = document.getElementById('searchInput')?.value?.toLowerCase() || '';
+    const statusFilter = document.getElementById('statusFilter')?.value || 'all';
 
-            let filteredOrders = orders.filter(order => {
-                if (!order.groupName) return false;
-                const matchSearch = order.groupName.toLowerCase().includes(searchText) ||
-                    (order.items && order.items.some(item => item.product && item.product.toLowerCase().includes(searchText)));
-                if (!matchSearch) return false;
+    let filteredOrders = orders.filter(order => {
+        if (!order.groupName) return false;
+        const matchSearch = order.groupName.toLowerCase().includes(searchText) ||
+            (order.items && order.items.some(item => item.product && item.product.toLowerCase().includes(searchText)));
+        if (!matchSearch) return false;
 
-                const groupStatus = getGroupStatus(order);
-                if (statusFilter === 'active') {
-                    return groupStatus === 'orange' || groupStatus === 'gray';
+        const groupStatus = getGroupStatus(order);
+        if (statusFilter === 'active') {
+            return groupStatus === 'orange' || groupStatus === 'gray';
+        }
+        if (statusFilter === 'completed') {
+            return groupStatus === 'green';
+        }
+        return true;
+    });
+
+    ordersList.innerHTML = '';
+
+    if (filteredOrders.length === 0) {
+        ordersList.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">Нет групп</div></div>`;
+        return;
+    }
+
+    filteredOrders.forEach(order => {
+        const groupStatus = getGroupStatus(order);
+        const statusClass = groupStatus === 'green' ? 'status-green' : (groupStatus === 'orange' ? 'status-orange' : 'status-gray');
+
+        const card = document.createElement('div');
+        card.className = 'order-card';
+        card.dataset.orderId = order.id;
+
+        const header = document.createElement('div');
+        header.className = `order-header ${statusClass}`;
+        header.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div>
+                    <h3>📁 ${escapeHtml(order.groupName)}</h3>
+                    <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
+                        Изделий: ${order.items ? order.items.length : 0} | №${order.number || '---'}
+                        ${groupStatus === 'green' ? ' | ✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? ' | ⚡ В РАБОТЕ' : ' | ⏳ ОЖИДАЕТ')}
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-info" onclick="event.stopPropagation(); editGroup(${order.id})">✏️ Редактировать</button>
+                    <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
+                </div>
+            </div>
+        `;
+
+        const content = document.createElement('div');
+        content.className = 'order-content';
+        content.style.display = 'none';
+
+        if (order.items && order.items.length > 0) {
+            order.items.forEach((item, itemIndex) => {
+                // ========== ОПРЕДЕЛЯЕМ СТАТУС ИЗДЕЛИЯ ==========
+                let itemStatus = 'pending'; // pending, in_progress, completed
+                let allTasksCompleted = true;
+                let hasInProgress = false;
+                
+                if (order.tasks) {
+                    for (const [taskId, taskStatus] of Object.entries(order.tasks)) {
+                        const parts = taskId.split('_');
+                        if (parts.length >= 3 && parseInt(parts[2]) === itemIndex) {
+                            if (taskStatus === 'orange' || taskStatus === 'in_progress') {
+                                hasInProgress = true;
+                                allTasksCompleted = false;
+                            } else if (taskStatus === 'pending') {
+                                allTasksCompleted = false;
+                            }
+                        }
+                    }
                 }
-                if (statusFilter === 'completed') {
-                    return groupStatus === 'green';
+                
+                if (allTasksCompleted && Object.keys(order.tasks).length > 0) {
+                    itemStatus = 'completed';
+                } else if (hasInProgress) {
+                    itemStatus = 'in_progress';
+                } else {
+                    itemStatus = 'pending';
                 }
-                return true;
-            });
+                
+                // Определяем класс для шапки изделия
+                let itemHeaderClass = '';
+                let itemStatusText = '';
+                if (itemStatus === 'completed') {
+                    itemHeaderClass = 'item-status-green';
+                    itemStatusText = '✅ ГОТОВО';
+                } else if (itemStatus === 'in_progress') {
+                    itemHeaderClass = 'item-status-orange';
+                    itemStatusText = '⚡ В РАБОТЕ';
+                } else {
+                    itemHeaderClass = 'item-status-gray';
+                    itemStatusText = '⏳ ОЖИДАЕТ';
+                }
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.style.marginBottom = '20px';
+                itemDiv.style.border = '1px solid #2a2f38';
+                itemDiv.style.borderRadius = '8px';
+                itemDiv.style.overflow = 'hidden';
 
-            ordersList.innerHTML = '';
-
-            if (filteredOrders.length === 0) {
-                ordersList.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">Нет групп</div></div>`;
-                return;
-            }
-
-            filteredOrders.forEach(order => {
-                const groupStatus = getGroupStatus(order);
-                const statusClass = groupStatus === 'green' ? 'status-green' : (groupStatus === 'orange' ? 'status-orange' : 'status-gray');
-
-                const card = document.createElement('div');
-                card.className = 'order-card';
-                card.dataset.orderId = order.id;
-
-                const header = document.createElement('div');
-                header.className = `order-header ${statusClass}`;
-                header.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <div>
-                            <h3>📁 ${escapeHtml(order.groupName)}</h3>
-                            <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
-                                Изделий: ${order.items ? order.items.length : 0} | №${order.number || '---'}
-                                ${groupStatus === 'green' ? ' | ✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? ' | ⚡ В РАБОТЕ' : ' | ⏳ ОЖИДАЕТ')}
-                            </div>
+                const itemHeader = document.createElement('div');
+                itemHeader.className = `item-header ${itemHeaderClass}`;
+                itemHeader.style.padding = '10px 15px';
+                itemHeader.style.cursor = 'pointer';
+                itemHeader.style.display = 'flex';
+                itemHeader.style.justifyContent = 'space-between';
+                itemHeader.style.transition = 'all 0.2s';
+                
+                // Добавляем цвет фона в зависимости от статуса
+                if (itemStatus === 'completed') {
+                    itemHeader.style.background = 'linear-gradient(135deg, #1a3a1a, #0f2a0f)';
+                    itemHeader.style.borderLeft = '4px solid #2ecc71';
+                } else if (itemStatus === 'in_progress') {
+                    itemHeader.style.background = 'linear-gradient(135deg, #3a2a1a, #2a1f0f)';
+                    itemHeader.style.borderLeft = '4px solid #ff9800';
+                } else {
+                    itemHeader.style.background = '#232830';
+                    itemHeader.style.borderLeft = '4px solid #6c757d';
+                }
+                
+                itemHeader.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
+                            <span style="font-size: 11px; color: #4cd964;">${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
+                            ${item.ral ? `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>` : ''}
+                            <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: ${itemStatus === 'completed' ? '#2ecc71' : (itemStatus === 'in_progress' ? '#ff9800' : '#6c757d')}; color: #1a1e24; font-weight: 600;">
+                                ${itemStatusText}
+                            </span>
                         </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button class="btn btn-info" onclick="event.stopPropagation(); editGroup(${order.id})">✏️ Редактировать</button>
-                            <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
+                                📋 Отчёт
+                            </button>
+                            <span id="arrow-${order.id}-${itemIndex}" style="cursor: pointer; color: #a0a0a0;">▼</span>
                         </div>
                     </div>
                 `;
 
-                const content = document.createElement('div');
-                content.className = 'order-content';
-                content.style.display = 'none';
+                const itemContent = document.createElement('div');
+                itemContent.className = 'item-content';
+                itemContent.style.padding = '15px';
+                itemContent.style.display = 'none';
 
-                if (order.items && order.items.length > 0) {
-                    order.items.forEach((item, itemIndex) => {
-                        const itemDiv = document.createElement('div');
-                        itemDiv.style.marginBottom = '20px';
-                        itemDiv.style.border = '1px solid #2a2f38';
-                        itemDiv.style.borderRadius = '8px';
-                        itemDiv.style.overflow = 'hidden';
+                let bracketsHtml = item.brackets && item.brackets.length > 0 ? 
+                    item.brackets.map(b => `<span>${b.type}: ${b.quantity} шт</span>`).join(', ') : 'нет';
 
-                        const itemHeader = document.createElement('div');
-                        itemHeader.className = 'item-header';
-                        itemHeader.style.padding = '10px 15px';
-                        itemHeader.style.background = '#232830';
-                        itemHeader.style.cursor = 'pointer';
-                        itemHeader.style.display = 'flex';
-                        itemHeader.style.justifyContent = 'space-between';
-                        itemHeader.innerHTML = `
-                            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 8px;">
-                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                                    <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
-                                    <span style="font-size: 11px; color: #4cd964;">${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
-                                    ${item.ral ? `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>` : ''}
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
-                                        📋 Отчёт
-                                    </button>
-                                    <span id="arrow-${order.id}-${itemIndex}" style="cursor: pointer;">▼</span>
-                                </div>
+                let lyresHtml = item.lyres && item.lyres.length > 0 ? 
+                    item.lyres.map(l => `<span>${l.type}: ${l.quantity} шт</span>`).join(', ') : 'нет';
+
+                const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
+                const profiles = (item.details || []).filter(d => d.type === 'profile');
+
+                let regularDetailsHtml = regularDetails.length > 0 ? 
+                    regularDetails.map(d => `<span>${d.name}: ${d.quantity} шт</span>`).join(', ') : '';
+
+                let profilesHtml = profiles.length > 0 ? 
+                    profiles.map(p => `<span>${p.name}: ${p.lengthMm}мм x ${p.quantity} шт</span>`).join(', ') : '';
+
+                itemContent.innerHTML = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 25px; margin-bottom: 20px;">
+                        <div>
+                            <div style="margin-bottom: 12px;">
+                                <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">РАЗМЕР</div>
+                                <div><strong>${escapeHtml(item.size?.name || '-')}</strong> <span style="color: #4cd964;">× ${item.size?.quantity || 0} шт</span></div>
                             </div>
-                        `;
-
-                        const itemContent = document.createElement('div');
-                        itemContent.className = 'item-content';
-                        itemContent.style.padding = '15px';
-                        itemContent.style.display = 'none';
-
-                        let bracketsHtml = item.brackets && item.brackets.length > 0 ? 
-                            item.brackets.map(b => `<span>${b.type}: ${b.quantity} шт</span>`).join(', ') : 'нет';
-
-                        let lyresHtml = item.lyres && item.lyres.length > 0 ? 
-                            item.lyres.map(l => `<span>${l.type}: ${l.quantity} шт</span>`).join(', ') : 'нет';
-
-                        const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
-                        const profiles = (item.details || []).filter(d => d.type === 'profile');
-
-                        let regularDetailsHtml = regularDetails.length > 0 ? 
-                            regularDetails.map(d => `<span>${d.name}: ${d.quantity} шт</span>`).join(', ') : '';
-
-                        let profilesHtml = profiles.length > 0 ? 
-                            profiles.map(p => `<span>${p.name}: ${p.lengthMm}мм x ${p.quantity} шт</span>`).join(', ') : '';
-
-                        itemContent.innerHTML = `
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 25px; margin-bottom: 20px;">
-                                <div>
-                                    <div style="margin-bottom: 12px;">
-                                        <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">РАЗМЕР</div>
-                                        <div><strong>${escapeHtml(item.size?.name || '-')}</strong> <span style="color: #4cd964;">× ${item.size?.quantity || 0} шт</span></div>
+                            <div style="margin-bottom: 12px;">
+                                <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">ПОКРЫТИЕ</div>
+                                <div><strong>${escapeHtml(item.ral || '-')}</strong> / ${escapeHtml(item.texture || '-')}</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">ПРОФИЛИ</div>
+                            ${profiles.length > 0 ? 
+                                profiles.map(p => `
+                                    <div style="margin-bottom: 8px;">
+                                        <div>• ${escapeHtml(p.name)}</div>
+                                        <div style="margin-left: 12px; color: #a0a0a0; font-size: 12px;">
+                                            <span style="color: #ff9800;">${p.lengthMm} мм</span> <span style="color: #4cd964;">× ${p.quantity} шт</span>
+                                        </div>
                                     </div>
-                                    <div style="margin-bottom: 12px;">
-                                        <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">ПОКРЫТИЕ</div>
-                                        <div><strong>${escapeHtml(item.ral || '-')}</strong> / ${escapeHtml(item.texture || '-')}</div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">ПРОФИЛИ</div>
-                                    ${profiles.length > 0 ? 
-                                        profiles.map(p => `
-                                            <div style="margin-bottom: 8px;">
-                                                <div>• ${escapeHtml(p.name)}</div>
-                                                <div style="margin-left: 12px; color: #a0a0a0; font-size: 12px;">
-                                                    <span style="color: #ff9800;">${p.lengthMm} мм</span> <span style="color: #4cd964;">× ${p.quantity} шт</span>
-                                                </div>
-                                            </div>
-                                        `).join('') : 
-                                        '<div style="color: #6c757d;">— нет —</div>'}
-                                </div>
-                                <div>
-                                    <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">ДЕТАЛИ</div>
-                                    ${(() => {
-                                        const allDetails = [];
-                                        if (item.brackets && item.brackets.length > 0) {
-                                            item.brackets.forEach(b => {
-                                                allDetails.push({ name: `Кронштейн ${b.type}`, quantity: b.quantity });
-                                            });
-                                        }
-                                        if (item.lyres && item.lyres.length > 0) {
-                                            item.lyres.forEach(l => {
-                                                allDetails.push({ name: `Лира ${l.type}`, quantity: l.quantity });
-                                            });
-                                        }
-                                        if (regularDetails.length > 0) {
-                                            regularDetails.forEach(d => {
-                                                allDetails.push({ name: d.name, quantity: d.quantity });
-                                            });
-                                        }
-                                        return allDetails.length > 0 ? 
-                                            allDetails.map(d => `
-                                                <div style="margin-bottom: 6px;">
-                                                    • ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span>
-                                                </div>
-                                            `).join('') : 
-                                            '<div style="color: #6c757d;">— нет —</div>';
-                                    })()}
-                                </div>
-                            </div>
-                            
-                            <div id="sites-${order.id}-${itemIndex}" class="sites-section">
-                                <h4 style="margin-bottom: 12px;">ПРОИЗВОДСТВЕННЫЕ УЧАСТКИ</h4>
-                                <div class="sites-grid">
-                                    ${createSiteRow('Токарный', order, itemIndex, 'tokarniy')}
-                                    ${createSiteRow('Слесарный', order, itemIndex, 'slesarniy')}
-                                    ${createSiteRow('Фрезерный', order, itemIndex, 'frezerniy')}
-                                    ${createSiteRow('Лазерно-гибочный', order, itemIndex, 'lazerno')}
-                                    ${createSiteRow('Полимерный', order, itemIndex, 'polimerniy')}
-                                </div>
-                            </div>
-                        `;
+                                `).join('') : 
+                                '<div style="color: #6c757d;">— нет —</div>'}
+                        </div>
+                        <div>
+                            <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">ДЕТАЛИ</div>
+                            ${(() => {
+                                const allDetails = [];
+                                if (item.brackets && item.brackets.length > 0) {
+                                    item.brackets.forEach(b => {
+                                        allDetails.push({ name: `Кронштейн ${b.type}`, quantity: b.quantity });
+                                    });
+                                }
+                                if (item.lyres && item.lyres.length > 0) {
+                                    item.lyres.forEach(l => {
+                                        allDetails.push({ name: `Лира ${l.type}`, quantity: l.quantity });
+                                    });
+                                }
+                                if (regularDetails.length > 0) {
+                                    regularDetails.forEach(d => {
+                                        allDetails.push({ name: d.name, quantity: d.quantity });
+                                    });
+                                }
+                                return allDetails.length > 0 ? 
+                                    allDetails.map(d => `
+                                        <div style="margin-bottom: 6px;">
+                                            • ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span>
+                                        </div>
+                                    `).join('') : 
+                                    '<div style="color: #6c757d;">— нет —</div>';
+                            })()}
+                        </div>
+                    </div>
+                    
+                    <div id="sites-${order.id}-${itemIndex}" class="sites-section">
+                        <h4 style="margin-bottom: 12px;">ПРОИЗВОДСТВЕННЫЕ УЧАСТКИ</h4>
+                        <div class="sites-grid">
+                            ${createSiteRow('Токарный', order, itemIndex, 'tokarniy')}
+                            ${createSiteRow('Слесарный', order, itemIndex, 'slesarniy')}
+                            ${createSiteRow('Фрезерный', order, itemIndex, 'frezerniy')}
+                            ${createSiteRow('Лазерно-гибочный', order, itemIndex, 'lazerno')}
+                            ${createSiteRow('Полимерный', order, itemIndex, 'polimerniy')}
+                        </div>
+                    </div>
+                `;
 
-                        itemHeader.onclick = (e) => {
-                            if (e.target.tagName === 'BUTTON') return;
-                            const isVisible = itemContent.style.display !== 'none';
-                            itemContent.style.display = isVisible ? 'none' : 'block';
-                            const arrowSpan = document.getElementById(`arrow-${order.id}-${itemIndex}`);
-                            if (arrowSpan) {
-                                arrowSpan.textContent = isVisible ? '▼' : '▲';
-                            }
-                            saveMainOpenItemsState();
-                        };
-
-                        itemDiv.appendChild(itemHeader);
-                        itemDiv.appendChild(itemContent);
-                        content.appendChild(itemDiv);
-                    });
-                }
-
-                header.onclick = (e) => {
+                itemHeader.onclick = (e) => {
                     if (e.target.tagName === 'BUTTON') return;
-                    const isVisible = content.style.display !== 'none';
-                    content.style.display = isVisible ? 'none' : 'block';
-                    saveMainOpenCardsState();
+                    const isVisible = itemContent.style.display !== 'none';
+                    itemContent.style.display = isVisible ? 'none' : 'block';
+                    const arrowSpan = document.getElementById(`arrow-${order.id}-${itemIndex}`);
+                    if (arrowSpan) {
+                        arrowSpan.textContent = isVisible ? '▼' : '▲';
+                    }
+                    saveMainOpenItemsState();
                 };
 
-                card.appendChild(header);
-                card.appendChild(content);
-                ordersList.appendChild(card);
+                itemDiv.appendChild(itemHeader);
+                itemDiv.appendChild(itemContent);
+                content.appendChild(itemDiv);
             });
-
-            restoreMainOpenCardsState();
-            restoreMainOpenItemsState();
         }
+
+        header.onclick = (e) => {
+            if (e.target.tagName === 'BUTTON') return;
+            const isVisible = content.style.display !== 'none';
+            content.style.display = isVisible ? 'none' : 'block';
+            saveMainOpenCardsState();
+        };
+
+        card.appendChild(header);
+        card.appendChild(content);
+        ordersList.appendChild(card);
+    });
+
+    restoreMainOpenCardsState();
+    restoreMainOpenItemsState();
+}
 
         // ============== СТАТИСТИКА ==============
         function updateStatistics() {
