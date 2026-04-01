@@ -376,445 +376,327 @@
             background-color: #fff;
         }
 
+        /* СТАТУСЫ ИЗДЕЛИЙ */
+        .item-header {
+            transition: all 0.2s;
+        }
+        .item-header.item-status-green {
+            background: linear-gradient(135deg, #1a3a1a, #0f2a0f) !important;
+            border-left: 4px solid #2ecc71 !important;
+        }
+        .item-header.item-status-orange {
+            background: linear-gradient(135deg, #3a2a1a, #2a1f0f) !important;
+            border-left: 4px solid #ff9800 !important;
+        }
+        .item-header.item-status-gray {
+            background: linear-gradient(135deg, #232830, #1a1e24) !important;
+            border-left: 4px solid #6c757d !important;
+        }
+
         /* СВЕТЛАЯ ТЕМА */
         body.light-theme {
-    background-color: #f0f2f5 !important;
-    color: #1e293b !important;
-}
-
-body.light-theme .container {
-    background-color: #f0f2f5 !important;
-}
-
-body.light-theme header {
-    background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
-    border: 1px solid #e2e8f0 !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
-}
-
-body.light-theme .logo-text {
-    color: #1e293b !important;
-}
-
-body.light-theme .logo-text .x-red {
-    color: #ff3b3b !important;
-    text-shadow: none !important;
-}
-
-body.light-theme .btn {
-    background: #ffffff !important;
-    color: #1e293b !important;
-    border: 1px solid #e2e8f0 !important;
-}
-
-body.light-theme .btn:hover {
-    background: #f1f5f9 !important;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-body.light-theme .btn-primary {
-    background: linear-gradient(135deg, #0057b3, #003d80) !important;
-    color: white !important;
-    border: none !important;
-}
-
-body.light-theme .btn-primary:hover {
-    background: linear-gradient(135deg, #0066cc, #004d99) !important;
-}
-
-body.light-theme .btn-success {
-    background: linear-gradient(135deg, #1a7f3d, #0e5a2a) !important;
-    color: white !important;
-    border: none !important;
-}
-
-body.light-theme .btn-success:hover {
-    background: linear-gradient(135deg, #219b4b, #1a7f3d) !important;
-}
-
-body.light-theme .btn-danger {
-    background: linear-gradient(135deg, #b33c3c, #8b2e2e) !important;
-    color: white !important;
-    border: none !important;
-}
-
-body.light-theme .btn-danger:hover {
-    background: linear-gradient(135deg, #c44a4a, #a13333) !important;
-}
-
-body.light-theme .btn-warning {
-    background: linear-gradient(135deg, #b38f2e, #80641f) !important;
-    color: white !important;
-    border: none !important;
-}
-
-body.light-theme .btn-info {
-    background: linear-gradient(135deg, #1f8a9c, #146b7a) !important;
-    color: white !important;
-    border: none !important;
-}
-
-body.light-theme .btn-outline-red {
-    background: transparent !important;
-    border: 1px solid #ff3b3b !important;
-    color: #ff3b3b !important;
-}
-
-body.light-theme .btn-outline-red:hover {
-    background: #ff3b3b !important;
-    color: white !important;
-}
-
-/* КАРТОЧКИ ГРУПП */
-body.light-theme .order-card {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-body.light-theme .order-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    border-color: #cbd5e1;
-}
-
-/* ЗАГОЛОВКИ ГРУПП */
-body.light-theme .order-header {
-    background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-}
-
-body.light-theme .order-header h3 {
-    color: #1e293b !important;
-}
-
-body.light-theme .order-header.status-green {
-    background: linear-gradient(135deg, #e8f5e9, #c8e6c9) !important;
-    border-left: 4px solid #2ecc71 !important;
-}
-
-body.light-theme .order-header.status-orange {
-    background: linear-gradient(135deg, #fff3e0, #ffe6cc) !important;
-    border-left: 4px solid #ff9800 !important;
-}
-
-body.light-theme .order-header.status-gray {
-    background: linear-gradient(135deg, #f5f5f5, #eeeeee) !important;
-    border-left: 4px solid #6c757d !important;
-}
-
-/* ЗАГОЛОВКИ ИЗДЕЛИЙ */
-body.light-theme .item-header {
-    background: #f8fafc !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-}
-
-body.light-theme .item-header.item-status-green {
-    background: linear-gradient(135deg, #e8f5e9, #c8e6c9) !important;
-    border-left: 4px solid #2ecc71 !important;
-}
-
-body.light-theme .item-header.item-status-orange {
-    background: linear-gradient(135deg, #fff3e0, #ffe6cc) !important;
-    border-left: 4px solid #ff9800 !important;
-}
-
-body.light-theme .item-header.item-status-gray {
-    background: linear-gradient(135deg, #f5f5f5, #eeeeee) !important;
-    border-left: 4px solid #6c757d !important;
-}
-
-body.light-theme .item-header span {
-    color: #1e293b !important;
-}
-
-/* БЛОКИ С УЧАСТКАМИ */
-body.light-theme .site-item {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-}
-
-body.light-theme .site-item:hover {
-    background: #f8fafc !important;
-    border-color: #cbd5e1;
-}
-
-body.light-theme .site-name {
-    color: #1e293b !important;
-}
-
-/* КВАДРАТИКИ */
-body.light-theme .square {
-    background: #f1f5f9 !important;
-    border: 1px solid #e2e8f0 !important;
-}
-
-body.light-theme .square.orange {
-    background-color: #ff9800 !important;
-    border-color: #e65100 !important;
-}
-
-body.light-theme .square.green {
-    background-color: #4caf50 !important;
-    border-color: #2e7d32 !important;
-}
-
-body.light-theme .square.red {
-    background-color: #ff3b3b !important;
-    border-color: #cc2e2e !important;
-}
-
-body.light-theme .square.pending {
-    background-color: #f1f5f9 !important;
-    border-color: #e2e8f0 !important;
-}
-
-/* СТАТИСТИКА */
-body.light-theme .order-stats {
-    background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
-    border: 1px solid #e2e8f0 !important;
-}
-
-body.light-theme .stat-item {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-}
-
-body.light-theme .stat-value {
-    background: linear-gradient(135deg, #0057b3, #003d80) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-}
-
-body.light-theme .stat-label {
-    color: #64748b !important;
-}
-
-/* НАВИГАЦИЯ */
-body.light-theme .sites-navigation {
-    background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
-    border: 1px solid #e2e8f0 !important;
-}
-
-body.light-theme .site-link {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #334155 !important;
-}
-
-body.light-theme .site-link:hover {
-    background: linear-gradient(135deg, #ff3b3b, #cc2e2e) !important;
-    color: white !important;
-    border-color: #ff3b3b !important;
-}
-
-/* ПОИСК И ФИЛЬТРЫ */
-body.light-theme .search-box {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #1e293b !important;
-}
-
-body.light-theme .search-box:focus {
-    border-color: #ff3b3b !important;
-    box-shadow: 0 0 0 2px rgba(255,59,59,0.1) !important;
-}
-
-body.light-theme .search-box::placeholder {
-    color: #94a3b8 !important;
-}
-
-/* МОДАЛЬНЫЕ ОКНА */
-body.light-theme .modal-content {
-    background: linear-gradient(135deg, #ffffff, #fefefe) !important;
-    border: 1px solid #e2e8f0 !important;
-}
-
-body.light-theme .form-group input,
-body.light-theme .form-group select,
-body.light-theme .form-group textarea {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #1e293b !important;
-}
-
-body.light-theme .form-group input:focus,
-body.light-theme .form-group select:focus,
-body.light-theme .form-group textarea:focus {
-    border-color: #ff3b3b !important;
-    box-shadow: 0 0 0 2px rgba(255,59,59,0.1) !important;
-}
-
-body.light-theme .form-group label {
-    color: #64748b !important;
-}
-
-/* ПАНЕЛИ ДОБАВЛЕНИЯ ИЗДЕЛИЙ */
-body.light-theme .add-item-panel,
-body.light-theme .items-list-panel {
-    background: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
-}
-
-body.light-theme .item-card {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-}
-
-body.light-theme .item-card-content div {
-    background: #f1f5f9 !important;
-    color: #1e293b !important;
-}
-
-body.light-theme .item-card-title {
-    color: #ff3b3b !important;
-}
-
-/* ДЕТАЛИ И ПРОФИЛИ */
-body.light-theme .detail-item,
-body.light-theme .profile-item {
-    background: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
-}
-
-body.light-theme .profile-name-custom {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #1e293b !important;
-}
-
-/* КНОПКИ В КВАДРАТИКАХ */
-body.light-theme .op-toggle-btn {
-    background: #2ecc71 !important;
-    color: white !important;
-}
-
-body.light-theme .op-toggle-btn.added {
-    background: #e74c3c !important;
-}
-
-/* ПУСТОЕ СОСТОЯНИЕ */
-body.light-theme .empty-state {
-    background: #f8fafc !important;
-    border: 2px dashed #e2e8f0 !important;
-    color: #64748b !important;
-}
-
-/* СКРОЛЛБАР */
-body.light-theme ::-webkit-scrollbar-track {
-    background: #f1f5f9 !important;
-}
-
-body.light-theme ::-webkit-scrollbar-thumb {
-    background: #cbd5e1 !important;
-}
-
-body.light-theme ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8 !important;
-}
-
-/* ЗАГОЛОВКИ */
-body.light-theme h1, body.light-theme h2, body.light-theme h3, 
-body.light-theme h4, body.light-theme h5, body.light-theme h6 {
-    color: #1e293b !important;
-}
-
-body.light-theme h1 {
-    background: linear-gradient(135deg, #1e293b, #475569) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-}
-
-body.light-theme hr {
-    border-top: 1px solid #e2e8f0 !important;
-}
-
-/* ОТЧЁТЫ */
-body.light-theme .materials-report {
-    color: #1e293b !important;
-}
-
-body.light-theme .materials-table th {
-    background: #f1f5f9 !important;
-    color: #475569 !important;
-    border-bottom: 2px solid #e2e8f0 !important;
-}
-
-body.light-theme .materials-table td {
-    border-bottom: 1px solid #e2e8f0 !important;
-    color: #1e293b !important;
-}
-
-body.light-theme .materials-table tfoot {
-    background: #f8fafc !important;
-}
-
-/* УВЕДОМЛЕНИЯ */
-body.light-theme .notification {
-    background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
-    color: #1e293b !important;
-    border: 1px solid #e2e8f0 !important;
-}
-
-body.light-theme .notification.success {
-    border-left-color: #2ecc71 !important;
-}
-
-body.light-theme .notification.error {
-    border-left-color: #ff3b3b !important;
-}
-
-body.light-theme .notification.warning {
-    border-left-color: #f39c12 !important;
-}
-
-body.light-theme .notification.info {
-    border-left-color: #3498db !important;
-}
-
-/* СТАТУСЫ */
-body.light-theme .status-text {
-    background: #f1f5f9 !important;
-    color: #1e293b !important;
-}
-
-body.light-theme .order-header .btn,
-body.light-theme .item-header .btn {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #1e293b !important;
-}
-
-body.light-theme .order-header .btn:hover,
-body.light-theme .item-header .btn:hover {
-    background: #f1f5f9 !important;
-}
-
-/* КОМПЛЕКТУЮЩИЕ */
-body.light-theme .component-row {
-    background: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
-}
-
-body.light-theme .component-row .component-input {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #1e293b !important;
-}
-
-body.light-theme .components-title {
-    color: #ff3b3b !important;
-}
-
-/* ИНДИКАТОР ЗАГРУЗКИ */
-body.light-theme .loading {
-    color: #64748b !important;
-}
-
-body.light-theme .spinner {
-    border: 3px solid #e2e8f0 !important;
-    border-top: 3px solid #ff3b3b !important;
-}
+            background-color: #f0f2f5 !important;
+            color: #1e293b !important;
+        }
+
+        body.light-theme .container {
+            background-color: #f0f2f5 !important;
+        }
+
+        body.light-theme header {
+            background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+        }
+
+        body.light-theme .logo-text {
+            color: #1e293b !important;
+        }
+
+        body.light-theme .logo-text .x-red {
+            color: #ff3b3b !important;
+            text-shadow: none !important;
+        }
+
+        body.light-theme .btn {
+            background: #ffffff !important;
+            color: #1e293b !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .btn:hover {
+            background: #f1f5f9 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        body.light-theme .btn-primary {
+            background: linear-gradient(135deg, #0057b3, #003d80) !important;
+            color: white !important;
+            border: none !important;
+        }
+
+        body.light-theme .btn-success {
+            background: linear-gradient(135deg, #1a7f3d, #0e5a2a) !important;
+            color: white !important;
+            border: none !important;
+        }
+
+        body.light-theme .btn-danger {
+            background: linear-gradient(135deg, #b33c3c, #8b2e2e) !important;
+            color: white !important;
+            border: none !important;
+        }
+
+        body.light-theme .order-card {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .order-header {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .order-header h3 {
+            color: #1e293b !important;
+        }
+
+        body.light-theme .order-header.status-green {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9) !important;
+            border-left: 4px solid #2ecc71 !important;
+        }
+
+        body.light-theme .order-header.status-orange {
+            background: linear-gradient(135deg, #fff3e0, #ffe6cc) !important;
+            border-left: 4px solid #ff9800 !important;
+        }
+
+        body.light-theme .order-header.status-gray {
+            background: linear-gradient(135deg, #f5f5f5, #eeeeee) !important;
+            border-left: 4px solid #6c757d !important;
+        }
+
+        body.light-theme .item-header.item-status-green {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9) !important;
+            border-left: 4px solid #2ecc71 !important;
+        }
+
+        body.light-theme .item-header.item-status-orange {
+            background: linear-gradient(135deg, #fff3e0, #ffe6cc) !important;
+            border-left: 4px solid #ff9800 !important;
+        }
+
+        body.light-theme .item-header.item-status-gray {
+            background: linear-gradient(135deg, #f5f5f5, #eeeeee) !important;
+            border-left: 4px solid #6c757d !important;
+        }
+
+        body.light-theme .site-item {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .site-name {
+            color: #1e293b !important;
+        }
+
+        body.light-theme .square {
+            background: #f1f5f9 !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .square.orange {
+            background-color: #ff9800 !important;
+        }
+
+        body.light-theme .square.green {
+            background-color: #4caf50 !important;
+        }
+
+        body.light-theme .order-stats {
+            background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .stat-item {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .stat-label {
+            color: #64748b !important;
+        }
+
+        body.light-theme .sites-navigation {
+            background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .site-link {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #334155 !important;
+        }
+
+        body.light-theme .search-box {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #1e293b !important;
+        }
+
+        body.light-theme .modal-content {
+            background: linear-gradient(135deg, #ffffff, #fefefe) !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .form-group input,
+        body.light-theme .form-group select {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #1e293b !important;
+        }
+
+        body.light-theme .add-item-panel,
+        body.light-theme .items-list-panel {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .item-card {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .item-card-content div {
+            background: #f1f5f9 !important;
+            color: #1e293b !important;
+        }
+
+        /* Стили для кнопок над квадратиками */
+        .operation-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 5px;
+        }
+
+        .op-toggle-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            background: #2ecc71;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .op-toggle-btn.added {
+            background: #e74c3c;
+        }
+
+        .square {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: #1e232b;
+            border: 2px solid #3a404b;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .square.orange {
+            background-color: #ff9800;
+            border-color: #e65100;
+        }
+
+        .square.green {
+            background-color: #4caf50;
+            border-color: #2e7d32;
+        }
+
+        .square.red {
+            background-color: #ff3b3b;
+            border-color: #cc2e2e;
+        }
+
+        .operation-name-small {
+            font-size: 10px;
+            margin-top: 4px;
+            color: #a0a0a0;
+            text-align: center;
+            max-width: 60px;
+            word-break: break-word;
+        }
+
+        .squares {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .site-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: #1a1e24;
+            border-radius: 8px;
+            border: 1px solid #2a2f38;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #1e232b;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            border: 1px solid #2a2f38;
+        }
+
+        .profile-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #1e232b;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            border: 1px solid #2a2f38;
+        }
+
+        .profile-name-custom {
+            min-width: 180px;
+            padding: 4px;
+            background: #15191f;
+            border: 1px solid #2a2f38;
+            border-radius: 4px;
+            color: #fff;
+        }
+
+        .components-title {
+            margin-top: 20px;
+            margin-bottom: 12px;
+            color: #ff3b3b;
+            font-size: 14px;
+            font-weight: 600;
+            border-left: 3px solid #ff3b3b;
+            padding-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -929,21 +811,6 @@ body.light-theme .spinner {
                         <div id="detailsContainer" style="display: none;">
                             <div class="components-title">🔧 ДЕТАЛИ:</div>
                             <div id="detailsList"></div>
-                        </div>
-
-                        <!-- КРОНШТЕЙНЫ И ЛИРЫ -->
-                        <div class="form-group">
-                            <label>Кронштейны и лиры:</label>
-                            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 10px;">
-                                <div style="flex: 1;">
-                                    <div id="bracketsListContainer" style="margin-bottom: 5px;"></div>
-                                    <button type="button" class="btn-outline" onclick="addBracketField()" style="width: 100%;">+ Кронштейн</button>
-                                </div>
-                                <div style="flex: 1;">
-                                    <div id="lyresListContainer" style="margin-bottom: 5px;"></div>
-                                    <button type="button" class="btn-outline" onclick="addLyreField()" style="width: 100%;">+ Лира</button>
-                                </div>
-                            </div>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -1420,7 +1287,6 @@ body.light-theme .spinner {
             if (cancelBtn) {
                 cancelBtn.remove();
             }
-            // Возвращаем кнопку добавления в исходное состояние
             const addBtn = document.getElementById('addItemBtn');
             if (addBtn) {
                 addBtn.textContent = '✅ Добавить изделие';
@@ -1442,112 +1308,6 @@ body.light-theme .spinner {
             tempBrackets = [];
             tempLyres = [];
             tempProfiles = [];
-            renderBracketsFields();
-            renderLyresFields();
-        }
-
-        function renderBracketsFields() {
-            const container = document.getElementById('bracketsListContainer');
-            if (!container) return;
-
-            if (tempBrackets.length === 0) {
-                container.innerHTML = '<div style="color: #a0a0a0; font-size: 12px; padding: 5px; text-align: center;">—</div>';
-                return;
-            }
-
-            let html = '';
-            tempBrackets.forEach((bracket, idx) => {
-                html += `
-                    <div class="position-item" style="margin-bottom: 5px;">
-                        <select data-bracket-index="${idx}" class="bracket-select" style="flex: 2; font-size: 12px;">
-                            <option value="">Выберите</option>
-                            ${bracketsList.map(b => `<option value="${b.name}" ${bracket.type === b.name ? 'selected' : ''}>${b.name}</option>`).join('')}
-                        </select>
-                        <input type="number" class="bracket-quantity" data-bracket-index="${idx}" value="${bracket.quantity || 0}" min="0" placeholder="шт" style="width: 60px;">
-                        <button class="remove-position" onclick="removeBracketField(${idx})" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 2px 6px;">✕</button>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-
-            document.querySelectorAll('.bracket-select').forEach(select => {
-                select.addEventListener('change', (e) => {
-                    const idx = parseInt(e.target.dataset.bracketIndex);
-                    if (!isNaN(idx) && tempBrackets[idx]) {
-                        tempBrackets[idx].type = e.target.value;
-                    }
-                });
-            });
-            document.querySelectorAll('.bracket-quantity').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    const idx = parseInt(e.target.dataset.bracketIndex);
-                    if (!isNaN(idx) && tempBrackets[idx]) {
-                        tempBrackets[idx].quantity = parseInt(e.target.value) || 0;
-                    }
-                });
-            });
-        }
-
-        function addBracketField() {
-            tempBrackets.push({ type: '', quantity: 0 });
-            renderBracketsFields();
-        }
-
-        function removeBracketField(index) {
-            tempBrackets.splice(index, 1);
-            renderBracketsFields();
-        }
-
-        function renderLyresFields() {
-            const container = document.getElementById('lyresListContainer');
-            if (!container) return;
-
-            if (tempLyres.length === 0) {
-                container.innerHTML = '<div style="color: #a0a0a0; font-size: 12px; padding: 5px; text-align: center;">—</div>';
-                return;
-            }
-
-            let html = '';
-            tempLyres.forEach((lyre, idx) => {
-                html += `
-                    <div class="position-item" style="margin-bottom: 5px;">
-                        <select data-lyre-index="${idx}" class="lyre-select" style="flex: 2; font-size: 12px;">
-                            <option value="">Выберите</option>
-                            ${lyresList.map(l => `<option value="${l.name}" ${lyre.type === l.name ? 'selected' : ''}>${l.name}</option>`).join('')}
-                        </select>
-                        <input type="number" class="lyre-quantity" data-lyre-index="${idx}" value="${lyre.quantity || 0}" min="0" placeholder="шт" style="width: 60px;">
-                        <button class="remove-position" onclick="removeLyreField(${idx})" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 2px 6px;">✕</button>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-
-            document.querySelectorAll('.lyre-select').forEach(select => {
-                select.addEventListener('change', (e) => {
-                    const idx = parseInt(e.target.dataset.lyreIndex);
-                    if (!isNaN(idx) && tempLyres[idx]) {
-                        tempLyres[idx].type = e.target.value;
-                    }
-                });
-            });
-            document.querySelectorAll('.lyre-quantity').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    const idx = parseInt(e.target.dataset.lyreIndex);
-                    if (!isNaN(idx) && tempLyres[idx]) {
-                        tempLyres[idx].quantity = parseInt(e.target.value) || 0;
-                    }
-                });
-            });
-        }
-
-        function addLyreField() {
-            tempLyres.push({ type: '', quantity: 0 });
-            renderLyresFields();
-        }
-
-        function removeLyreField(index) {
-            tempLyres.splice(index, 1);
-            renderLyresFields();
         }
 
         function updateItemsListDisplay() {
@@ -1571,12 +1331,6 @@ body.light-theme .spinner {
 
             let html = '';
             tempItemsList.forEach((item, index) => {
-                let bracketsHtml = item.brackets && item.brackets.length > 0 ? 
-                    item.brackets.map(b => `<span>${b.type}: ${b.quantity} шт</span>`).join('') : '<span>нет</span>';
-
-                let lyresHtml = item.lyres && item.lyres.length > 0 ? 
-                    item.lyres.map(l => `<span>${l.type}: ${l.quantity} шт</span>`).join('') : '<span>нет</span>';
-
                 const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
                 const profiles = (item.details || []).filter(d => d.type === 'profile');
 
@@ -1597,8 +1351,6 @@ body.light-theme .spinner {
                         </div>
                         <div class="item-card-content">
                             <div>📏 Размер: ${escapeHtml(item.size?.name || '-')} x ${item.size?.quantity || 0} шт</div>
-                            <div>🔧 Кронштейны: ${bracketsHtml}</div>
-                            <div>🎸 Лиры: ${lyresHtml}</div>
                             <div>🎨 RAL: ${item.ral || '-'} / ${item.texture || '-'}</div>
                             ${regularDetailsHtml ? `<div>🔩 Детали: ${regularDetailsHtml}</div>` : ''}
                             ${profilesHtml ? `<div>📐 Профили: ${profilesHtml}</div>` : ''}
@@ -1619,7 +1371,6 @@ body.light-theme .spinner {
             const item = tempItemsList[index];
             if (!item) return;
             
-            // Заполняем форму данными изделия
             document.getElementById('newItemProduct').value = item.product;
             onNewItemProductChange();
             
@@ -1629,11 +1380,8 @@ body.light-theme .spinner {
                 document.getElementById('newItemRal').value = item.ral || '';
                 document.getElementById('newItemTexture').value = item.texture || '';
                 
-                tempBrackets = item.brackets ? [...item.brackets] : [];
-                renderBracketsFields();
-                
-                tempLyres = item.lyres ? [...item.lyres] : [];
-                renderLyresFields();
+                tempBrackets = [];
+                tempLyres = [];
                 
                 tempProfiles = (item.details || []).filter(d => d.type === 'profile');
                 const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
@@ -1692,8 +1440,6 @@ body.light-theme .spinner {
                 return;
             }
 
-            const brackets = tempBrackets.filter(b => b.type && b.quantity > 0);
-            const lyres = tempLyres.filter(l => l.type && l.quantity > 0);
             const details = collectDetailsFromForm();
 
             const updatedItem = {
@@ -1702,8 +1448,8 @@ body.light-theme .spinner {
                     name: sizeName,
                     quantity: parseInt(document.getElementById('newItemSizeQuantity').value) || 1
                 },
-                brackets: brackets,
-                lyres: lyres,
+                brackets: [],
+                lyres: [],
                 details: details,
                 ral: document.getElementById('newItemRal').value || '',
                 texture: document.getElementById('newItemTexture').value || ''
@@ -1758,8 +1504,6 @@ body.light-theme .spinner {
                 return;
             }
 
-            const brackets = tempBrackets.filter(b => b.type && b.quantity > 0);
-            const lyres = tempLyres.filter(l => l.type && l.quantity > 0);
             const details = collectDetailsFromForm();
 
             const newItem = {
@@ -1768,8 +1512,8 @@ body.light-theme .spinner {
                     name: sizeName,
                     quantity: parseInt(document.getElementById('newItemSizeQuantity').value) || 1
                 },
-                brackets: brackets,
-                lyres: lyres,
+                brackets: [],
+                lyres: [],
                 details: details,
                 ral: document.getElementById('newItemRal').value || '',
                 texture: document.getElementById('newItemTexture').value || ''
@@ -1783,41 +1527,40 @@ body.light-theme .spinner {
         }
 
         function createGroupOrder() {
-    const groupName = document.getElementById('groupNameInput').value.trim();
-    if (!groupName) {
-        alert('Введите название группы');
-        return;
-    }
-    if (tempItemsList.length === 0) {
-        alert('Добавьте хотя бы одно изделие');
-        return;
-    }
+            const groupName = document.getElementById('groupNameInput').value.trim();
+            if (!groupName) {
+                alert('Введите название группы');
+                return;
+            }
+            if (tempItemsList.length === 0) {
+                alert('Добавьте хотя бы одно изделие');
+                return;
+            }
 
-    const orders = loadOrdersFromStorage();
-    const newOrder = {
-        id: Date.now(),
-        groupName: groupName,
-        date: new Date().toISOString().split('T')[0],
-        number: generateOrderNumber(orders.length + 1),
-        items: JSON.parse(JSON.stringify(tempItemsList)),
-        status: 'active',
-        tasks: {},
-        extraTasks: []
-    };
+            const orders = loadOrdersFromStorage();
+            const newOrder = {
+                id: Date.now(),
+                groupName: groupName,
+                date: new Date().toISOString().split('T')[0],
+                number: generateOrderNumber(orders.length + 1),
+                items: JSON.parse(JSON.stringify(tempItemsList)),
+                status: 'active',
+                tasks: {},
+                extraTasks: []
+            };
 
-    orders.push(newOrder);
-    saveOrdersToStorage(orders);
-    
-    // СОЗДАЁМ ЗАДАЧИ ДЛЯ ВСЕХ УЧАСТКОВ
-    if (typeof createTasksForOrder === 'function') {
-        createTasksForOrder(newOrder);
-    }
-    
-    closeGroupModal();
-    renderOrdersList();
-    updateStatistics();
-    alert(`✅ Группа "${groupName}" успешно создана!`);
-}
+            orders.push(newOrder);
+            saveOrdersToStorage(orders);
+            
+            if (typeof createTasksForOrder === 'function') {
+                createTasksForOrder(newOrder);
+            }
+            
+            closeGroupModal();
+            renderOrdersList();
+            updateStatistics();
+            alert(`✅ Группа "${groupName}" успешно создана!`);
+        }
 
         function editGroup(orderId) {
             const orders = loadOrdersFromStorage();
@@ -2107,24 +1850,6 @@ body.light-theme .spinner {
                                 break;
                             }
                         }
-
-                        if (plannedQuantity === 1 && item.brackets) {
-                            for (const b of item.brackets) {
-                                if (`Кронштейн ${b.type}` === opData.detail) {
-                                    plannedQuantity = b.quantity;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (plannedQuantity === 1 && item.lyres) {
-                            for (const l of item.lyres) {
-                                if (`Лира ${l.type}` === opData.detail) {
-                                    plannedQuantity = l.quantity;
-                                    break;
-                                }
-                            }
-                        }
                     }
                 }
 
@@ -2167,273 +1892,240 @@ body.light-theme .spinner {
 
         // ============== ОТОБРАЖЕНИЕ СПИСКА ГРУПП ==============
         function renderOrdersList() {
-    const ordersList = document.getElementById('ordersList');
-    if (!ordersList) return;
+            const ordersList = document.getElementById('ordersList');
+            if (!ordersList) return;
 
-    const orders = loadOrdersFromStorage() || [];
-    const searchText = document.getElementById('searchInput')?.value?.toLowerCase() || '';
-    const statusFilter = document.getElementById('statusFilter')?.value || 'all';
+            const orders = loadOrdersFromStorage() || [];
+            const searchText = document.getElementById('searchInput')?.value?.toLowerCase() || '';
+            const statusFilter = document.getElementById('statusFilter')?.value || 'all';
 
-    let filteredOrders = orders.filter(order => {
-        if (!order.groupName) return false;
-        const matchSearch = order.groupName.toLowerCase().includes(searchText) ||
-            (order.items && order.items.some(item => item.product && item.product.toLowerCase().includes(searchText)));
-        if (!matchSearch) return false;
+            let filteredOrders = orders.filter(order => {
+                if (!order.groupName) return false;
+                const matchSearch = order.groupName.toLowerCase().includes(searchText) ||
+                    (order.items && order.items.some(item => item.product && item.product.toLowerCase().includes(searchText)));
+                if (!matchSearch) return false;
 
-        const groupStatus = getGroupStatus(order);
-        if (statusFilter === 'active') {
-            return groupStatus === 'orange' || groupStatus === 'gray';
-        }
-        if (statusFilter === 'completed') {
-            return groupStatus === 'green';
-        }
-        return true;
-    });
+                const groupStatus = getGroupStatus(order);
+                if (statusFilter === 'active') {
+                    return groupStatus === 'orange' || groupStatus === 'gray';
+                }
+                if (statusFilter === 'completed') {
+                    return groupStatus === 'green';
+                }
+                return true;
+            });
 
-    ordersList.innerHTML = '';
+            ordersList.innerHTML = '';
 
-    if (filteredOrders.length === 0) {
-        ordersList.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">Нет групп</div></div>`;
-        return;
-    }
+            if (filteredOrders.length === 0) {
+                ordersList.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">Нет групп</div></div>`;
+                return;
+            }
 
-    filteredOrders.forEach(order => {
-        const groupStatus = getGroupStatus(order);
-        const statusClass = groupStatus === 'green' ? 'status-green' : (groupStatus === 'orange' ? 'status-orange' : 'status-gray');
+            filteredOrders.forEach(order => {
+                const groupStatus = getGroupStatus(order);
+                const statusClass = groupStatus === 'green' ? 'status-green' : (groupStatus === 'orange' ? 'status-orange' : 'status-gray');
 
-        const card = document.createElement('div');
-        card.className = 'order-card';
-        card.dataset.orderId = order.id;
+                const card = document.createElement('div');
+                card.className = 'order-card';
+                card.dataset.orderId = order.id;
 
-        const header = document.createElement('div');
-        header.className = `order-header ${statusClass}`;
-        header.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                <div>
-                    <h3>📁 ${escapeHtml(order.groupName)}</h3>
-                    <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
-                        Изделий: ${order.items ? order.items.length : 0} | №${order.number || '---'}
-                        ${groupStatus === 'green' ? ' | ✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? ' | ⚡ В РАБОТЕ' : ' | ⏳ ОЖИДАЕТ')}
+                const header = document.createElement('div');
+                header.className = `order-header ${statusClass}`;
+                header.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <div>
+                            <h3>📁 ${escapeHtml(order.groupName)}</h3>
+                            <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
+                                Изделий: ${order.items ? order.items.length : 0} | №${order.number || '---'}
+                                ${groupStatus === 'green' ? ' | ✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? ' | ⚡ В РАБОТЕ' : ' | ⏳ ОЖИДАЕТ')}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-info" onclick="event.stopPropagation(); editGroup(${order.id})">✏️ Редактировать</button>
+                            <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
+                        </div>
                     </div>
-                </div>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-info" onclick="event.stopPropagation(); editGroup(${order.id})">✏️ Редактировать</button>
-                    <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
-                </div>
-            </div>
-        `;
+                `;
 
-        const content = document.createElement('div');
-        content.className = 'order-content';
-        content.style.display = 'none';
+                const content = document.createElement('div');
+                content.className = 'order-content';
+                content.style.display = 'none';
 
-        if (order.items && order.items.length > 0) {
-            order.items.forEach((item, itemIndex) => {
-                // ========== ОПРЕДЕЛЯЕМ СТАТУС ИЗДЕЛИЯ ==========
-                let itemStatus = 'pending'; // pending, in_progress, completed
-                let allTasksCompleted = true;
-                let hasInProgress = false;
-                
-                if (order.tasks) {
-                    for (const [taskId, taskStatus] of Object.entries(order.tasks)) {
-                        const parts = taskId.split('_');
-                        if (parts.length >= 3 && parseInt(parts[2]) === itemIndex) {
-                            if (taskStatus === 'orange' || taskStatus === 'in_progress') {
-                                hasInProgress = true;
-                                allTasksCompleted = false;
-                            } else if (taskStatus === 'pending') {
-                                allTasksCompleted = false;
+                if (order.items && order.items.length > 0) {
+                    order.items.forEach((item, itemIndex) => {
+                        // ОПРЕДЕЛЯЕМ СТАТУС ИЗДЕЛИЯ
+                        let itemStatus = 'pending';
+                        let allTasksCompleted = true;
+                        let hasInProgress = false;
+                        
+                        if (order.tasks) {
+                            for (const [taskId, taskStatus] of Object.entries(order.tasks)) {
+                                const parts = taskId.split('_');
+                                if (parts.length >= 3 && parseInt(parts[2]) === itemIndex) {
+                                    if (taskStatus === 'orange' || taskStatus === 'in_progress') {
+                                        hasInProgress = true;
+                                        allTasksCompleted = false;
+                                    } else if (taskStatus === 'pending') {
+                                        allTasksCompleted = false;
+                                    }
+                                }
                             }
                         }
-                    }
-                }
-                
-                if (allTasksCompleted && Object.keys(order.tasks).length > 0) {
-                    itemStatus = 'completed';
-                } else if (hasInProgress) {
-                    itemStatus = 'in_progress';
-                } else {
-                    itemStatus = 'pending';
-                }
-                
-                // Определяем класс для шапки изделия
-                let itemHeaderClass = '';
-                let itemStatusText = '';
-                if (itemStatus === 'completed') {
-                    itemHeaderClass = 'item-status-green';
-                    itemStatusText = '✅ ГОТОВО';
-                } else if (itemStatus === 'in_progress') {
-                    itemHeaderClass = 'item-status-orange';
-                    itemStatusText = '⚡ В РАБОТЕ';
-                } else {
-                    itemHeaderClass = 'item-status-gray';
-                    itemStatusText = '⏳ ОЖИДАЕТ';
-                }
-                
-                const itemDiv = document.createElement('div');
-                itemDiv.style.marginBottom = '20px';
-                itemDiv.style.border = '1px solid #2a2f38';
-                itemDiv.style.borderRadius = '8px';
-                itemDiv.style.overflow = 'hidden';
+                        
+                        if (allTasksCompleted && Object.keys(order.tasks).length > 0) {
+                            itemStatus = 'completed';
+                        } else if (hasInProgress) {
+                            itemStatus = 'in_progress';
+                        } else {
+                            itemStatus = 'pending';
+                        }
+                        
+                        let itemHeaderClass = '';
+                        let itemStatusText = '';
+                        let headerBgColor = '';
+                        let headerBorderColor = '';
+                        
+                        if (itemStatus === 'completed') {
+                            itemHeaderClass = 'item-status-green';
+                            itemStatusText = '✅ ГОТОВО';
+                            headerBgColor = 'linear-gradient(135deg, #1a3a1a, #0f2a0f)';
+                            headerBorderColor = '#2ecc71';
+                        } else if (itemStatus === 'in_progress') {
+                            itemHeaderClass = 'item-status-orange';
+                            itemStatusText = '⚡ В РАБОТЕ';
+                            headerBgColor = 'linear-gradient(135deg, #3a2a1a, #2a1f0f)';
+                            headerBorderColor = '#ff9800';
+                        } else {
+                            itemHeaderClass = 'item-status-gray';
+                            itemStatusText = '⏳ ОЖИДАЕТ';
+                            headerBgColor = '#232830';
+                            headerBorderColor = '#6c757d';
+                        }
+                        
+                        const itemDiv = document.createElement('div');
+                        itemDiv.style.marginBottom = '20px';
+                        itemDiv.style.border = '1px solid #2a2f38';
+                        itemDiv.style.borderRadius = '8px';
+                        itemDiv.style.overflow = 'hidden';
 
-                const itemHeader = document.createElement('div');
-                itemHeader.className = `item-header ${itemHeaderClass}`;
-                itemHeader.style.padding = '10px 15px';
-                itemHeader.style.cursor = 'pointer';
-                itemHeader.style.display = 'flex';
-                itemHeader.style.justifyContent = 'space-between';
-                itemHeader.style.transition = 'all 0.2s';
-                
-                // Добавляем цвет фона в зависимости от статуса
-                if (itemStatus === 'completed') {
-                    itemHeader.style.background = 'linear-gradient(135deg, #1a3a1a, #0f2a0f)';
-                    itemHeader.style.borderLeft = '4px solid #2ecc71';
-                } else if (itemStatus === 'in_progress') {
-                    itemHeader.style.background = 'linear-gradient(135deg, #3a2a1a, #2a1f0f)';
-                    itemHeader.style.borderLeft = '4px solid #ff9800';
-                } else {
-                    itemHeader.style.background = '#232830';
-                    itemHeader.style.borderLeft = '4px solid #6c757d';
-                }
-                
-                itemHeader.innerHTML = `
-                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 8px;">
-                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                            <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
-                            <span style="font-size: 11px; color: #4cd964;">${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
-                            ${item.ral ? `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>` : ''}
-                            <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: ${itemStatus === 'completed' ? '#2ecc71' : (itemStatus === 'in_progress' ? '#ff9800' : '#6c757d')}; color: #1a1e24; font-weight: 600;">
-                                ${itemStatusText}
-                            </span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
-                                📋 Отчёт
-                            </button>
-                            <span id="arrow-${order.id}-${itemIndex}" style="cursor: pointer; color: #a0a0a0;">▼</span>
-                        </div>
-                    </div>
-                `;
-
-                const itemContent = document.createElement('div');
-                itemContent.className = 'item-content';
-                itemContent.style.padding = '15px';
-                itemContent.style.display = 'none';
-
-                let bracketsHtml = item.brackets && item.brackets.length > 0 ? 
-                    item.brackets.map(b => `<span>${b.type}: ${b.quantity} шт</span>`).join(', ') : 'нет';
-
-                let lyresHtml = item.lyres && item.lyres.length > 0 ? 
-                    item.lyres.map(l => `<span>${l.type}: ${l.quantity} шт</span>`).join(', ') : 'нет';
-
-                const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
-                const profiles = (item.details || []).filter(d => d.type === 'profile');
-
-                let regularDetailsHtml = regularDetails.length > 0 ? 
-                    regularDetails.map(d => `<span>${d.name}: ${d.quantity} шт</span>`).join(', ') : '';
-
-                let profilesHtml = profiles.length > 0 ? 
-                    profiles.map(p => `<span>${p.name}: ${p.lengthMm}мм x ${p.quantity} шт</span>`).join(', ') : '';
-
-                itemContent.innerHTML = `
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 25px; margin-bottom: 20px;">
-                        <div>
-                            <div style="margin-bottom: 12px;">
-                                <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">РАЗМЕР</div>
-                                <div><strong>${escapeHtml(item.size?.name || '-')}</strong> <span style="color: #4cd964;">× ${item.size?.quantity || 0} шт</span></div>
+                        const itemHeader = document.createElement('div');
+                        itemHeader.className = `item-header ${itemHeaderClass}`;
+                        itemHeader.style.padding = '10px 15px';
+                        itemHeader.style.cursor = 'pointer';
+                        itemHeader.style.display = 'flex';
+                        itemHeader.style.justifyContent = 'space-between';
+                        itemHeader.style.background = headerBgColor;
+                        itemHeader.style.borderLeft = `4px solid ${headerBorderColor}`;
+                        
+                        itemHeader.innerHTML = `
+                            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 8px;">
+                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                    <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
+                                    <span style="font-size: 11px; color: #4cd964;">${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
+                                    ${item.ral ? `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>` : ''}
+                                    <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: ${itemStatus === 'completed' ? '#2ecc71' : (itemStatus === 'in_progress' ? '#ff9800' : '#6c757d')}; color: #1a1e24; font-weight: 600;">
+                                        ${itemStatusText}
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
+                                        📋 Отчёт
+                                    </button>
+                                    <span id="arrow-${order.id}-${itemIndex}" style="cursor: pointer; color: #a0a0a0;">▼</span>
+                                </div>
                             </div>
-                            <div style="margin-bottom: 12px;">
-                                <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">ПОКРЫТИЕ</div>
-                                <div><strong>${escapeHtml(item.ral || '-')}</strong> / ${escapeHtml(item.texture || '-')}</div>
-                            </div>
-                        </div>
-                        <div>
-                            <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">ПРОФИЛИ</div>
-                            ${profiles.length > 0 ? 
-                                profiles.map(p => `
-                                    <div style="margin-bottom: 8px;">
-                                        <div>• ${escapeHtml(p.name)}</div>
-                                        <div style="margin-left: 12px; color: #a0a0a0; font-size: 12px;">
-                                            <span style="color: #ff9800;">${p.lengthMm} мм</span> <span style="color: #4cd964;">× ${p.quantity} шт</span>
-                                        </div>
+                        `;
+
+                        const itemContent = document.createElement('div');
+                        itemContent.className = 'item-content';
+                        itemContent.style.padding = '15px';
+                        itemContent.style.display = 'none';
+
+                        const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
+                        const profiles = (item.details || []).filter(d => d.type === 'profile');
+
+                        itemContent.innerHTML = `
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 25px; margin-bottom: 20px;">
+                                <div>
+                                    <div style="margin-bottom: 12px;">
+                                        <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">РАЗМЕР</div>
+                                        <div><strong>${escapeHtml(item.size?.name || '-')}</strong> <span style="color: #4cd964;">× ${item.size?.quantity || 0} шт</span></div>
                                     </div>
-                                `).join('') : 
-                                '<div style="color: #6c757d;">— нет —</div>'}
-                        </div>
-                        <div>
-                            <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">ДЕТАЛИ</div>
-                            ${(() => {
-                                const allDetails = [];
-                                if (item.brackets && item.brackets.length > 0) {
-                                    item.brackets.forEach(b => {
-                                        allDetails.push({ name: `Кронштейн ${b.type}`, quantity: b.quantity });
-                                    });
-                                }
-                                if (item.lyres && item.lyres.length > 0) {
-                                    item.lyres.forEach(l => {
-                                        allDetails.push({ name: `Лира ${l.type}`, quantity: l.quantity });
-                                    });
-                                }
-                                if (regularDetails.length > 0) {
-                                    regularDetails.forEach(d => {
-                                        allDetails.push({ name: d.name, quantity: d.quantity });
-                                    });
-                                }
-                                return allDetails.length > 0 ? 
-                                    allDetails.map(d => `
-                                        <div style="margin-bottom: 6px;">
-                                            • ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span>
-                                        </div>
-                                    `).join('') : 
-                                    '<div style="color: #6c757d;">— нет —</div>';
-                            })()}
-                        </div>
-                    </div>
-                    
-                    <div id="sites-${order.id}-${itemIndex}" class="sites-section">
-                        <h4 style="margin-bottom: 12px;">ПРОИЗВОДСТВЕННЫЕ УЧАСТКИ</h4>
-                        <div class="sites-grid">
-                            ${createSiteRow('Токарный', order, itemIndex, 'tokarniy')}
-                            ${createSiteRow('Слесарный', order, itemIndex, 'slesarniy')}
-                            ${createSiteRow('Фрезерный', order, itemIndex, 'frezerniy')}
-                            ${createSiteRow('Лазерно-гибочный', order, itemIndex, 'lazerno')}
-                            ${createSiteRow('Полимерный', order, itemIndex, 'polimerniy')}
-                        </div>
-                    </div>
-                `;
+                                    <div style="margin-bottom: 12px;">
+                                        <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 4px;">ПОКРЫТИЕ</div>
+                                        <div><strong>${escapeHtml(item.ral || '-')}</strong> / ${escapeHtml(item.texture || '-')}</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">ПРОФИЛИ</div>
+                                    ${profiles.length > 0 ? 
+                                        profiles.map(p => `
+                                            <div style="margin-bottom: 8px;">
+                                                <div>• ${escapeHtml(p.name)}</div>
+                                                <div style="margin-left: 12px; color: #a0a0a0; font-size: 12px;">
+                                                    <span style="color: #ff9800;">${p.lengthMm} мм</span> <span style="color: #4cd964;">× ${p.quantity} шт</span>
+                                                </div>
+                                            </div>
+                                        `).join('') : 
+                                        '<div style="color: #6c757d;">— нет —</div>'}
+                                </div>
+                                <div>
+                                    <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">ДЕТАЛИ</div>
+                                    ${regularDetails.length > 0 ? 
+                                        regularDetails.map(d => `
+                                            <div style="margin-bottom: 6px;">
+                                                • ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span>
+                                            </div>
+                                        `).join('') : 
+                                        '<div style="color: #6c757d;">— нет —</div>'}
+                                </div>
+                            </div>
+                            
+                            <div id="sites-${order.id}-${itemIndex}" class="sites-section">
+                                <h4 style="margin-bottom: 12px;">ПРОИЗВОДСТВЕННЫЕ УЧАСТКИ</h4>
+                                <div class="sites-grid">
+                                    ${createSiteRow('Токарный', order, itemIndex, 'tokarniy')}
+                                    ${createSiteRow('Слесарный', order, itemIndex, 'slesarniy')}
+                                    ${createSiteRow('Фрезерный', order, itemIndex, 'frezerniy')}
+                                    ${createSiteRow('Лазерно-гибочный', order, itemIndex, 'lazerno')}
+                                    ${createSiteRow('Полимерный', order, itemIndex, 'polimerniy')}
+                                </div>
+                            </div>
+                        `;
 
-                itemHeader.onclick = (e) => {
+                        itemHeader.onclick = (e) => {
+                            if (e.target.tagName === 'BUTTON') return;
+                            const isVisible = itemContent.style.display !== 'none';
+                            itemContent.style.display = isVisible ? 'none' : 'block';
+                            const arrowSpan = document.getElementById(`arrow-${order.id}-${itemIndex}`);
+                            if (arrowSpan) {
+                                arrowSpan.textContent = isVisible ? '▼' : '▲';
+                            }
+                            saveMainOpenItemsState();
+                        };
+
+                        itemDiv.appendChild(itemHeader);
+                        itemDiv.appendChild(itemContent);
+                        content.appendChild(itemDiv);
+                    });
+                }
+
+                header.onclick = (e) => {
                     if (e.target.tagName === 'BUTTON') return;
-                    const isVisible = itemContent.style.display !== 'none';
-                    itemContent.style.display = isVisible ? 'none' : 'block';
-                    const arrowSpan = document.getElementById(`arrow-${order.id}-${itemIndex}`);
-                    if (arrowSpan) {
-                        arrowSpan.textContent = isVisible ? '▼' : '▲';
-                    }
-                    saveMainOpenItemsState();
+                    const isVisible = content.style.display !== 'none';
+                    content.style.display = isVisible ? 'none' : 'block';
+                    saveMainOpenCardsState();
                 };
 
-                itemDiv.appendChild(itemHeader);
-                itemDiv.appendChild(itemContent);
-                content.appendChild(itemDiv);
+                card.appendChild(header);
+                card.appendChild(content);
+                ordersList.appendChild(card);
             });
+
+            restoreMainOpenCardsState();
+            restoreMainOpenItemsState();
         }
-
-        header.onclick = (e) => {
-            if (e.target.tagName === 'BUTTON') return;
-            const isVisible = content.style.display !== 'none';
-            content.style.display = isVisible ? 'none' : 'block';
-            saveMainOpenCardsState();
-        };
-
-        card.appendChild(header);
-        card.appendChild(content);
-        ordersList.appendChild(card);
-    });
-
-    restoreMainOpenCardsState();
-    restoreMainOpenItemsState();
-}
 
         // ============== СТАТИСТИКА ==============
         function updateStatistics() {
@@ -2743,144 +2435,140 @@ body.light-theme .spinner {
 
         // ============== ОТЧЁТ ПО ИЗДЕЛИЮ ==============
         function showItemReport(orderId, itemIndex) {
-    const orders = loadOrdersFromStorage();
-    const order = orders.find(o => o.id == orderId);
-    if (!order || !order.items[itemIndex]) {
-        alert('Изделие не найдено');
-        return;
-    }
-    
-    const item = order.items[itemIndex];
-    const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-    
-    // Формируем itemKey так же, как в polimerniy.html
-    const itemKey = `${order.id}_item${itemIndex}_${item.product}_${item.size?.name || ''}_${item.ral || ''}`;
-    
-    const itemReports = allReports.filter(report => {
-        // Проверяем по itemKey
-        if (report.isItemReport && report.itemKey === itemKey) {
-            return true;
-        }
-        // Проверяем по orderId + product + size
-        if (report.isItemReport && report.orderId == orderId && 
-            report.product === item.product && 
-            report.size === item.size?.name) {
-            return true;
-        }
-        // Проверяем по taskId
-        if (report.taskId) {
-            const parts = report.taskId.split('_');
-            return parts.length >= 3 && parts[0] == orderId && parts[2] == itemIndex;
-        }
-        return false;
-    });
-    
-    const siteNames = {
-        'polimerniy': '🎨 ПОЛИМЕРНЫЙ УЧАСТОК',
-        'slesarniy': '🔩 СЛЕСАРНЫЙ УЧАСТОК',
-        'frezerniy': '⚙️ ФРЕЗЕРНЫЙ УЧАСТОК',
-        'tokarniy': '🔧 ТОКАРНЫЙ УЧАСТОК',
-        'lazerno': '✨ ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
-    };
-    
-    const reportsBySite = {};
-    
-    itemReports.forEach(report => {
-        if (report.siteKey && report.rows && report.rows.length > 0) {
-            if (!reportsBySite[report.siteKey]) {
-                reportsBySite[report.siteKey] = [];
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order || !order.items[itemIndex]) {
+                alert('Изделие не найдено');
+                return;
             }
-            reportsBySite[report.siteKey].push(...report.rows);
-        }
-    });
-    
-    let html = `
-        <div style="padding: 12px;">
-            <div style="margin-bottom: 12px; border-bottom: 1px solid #2a2f38; padding-bottom: 6px;">
-                <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;">
-                    <h2 style="color: #ff3b3b; margin: 0; font-size: 18px;">📋 ОТЧЁТ ПО ИЗДЕЛИЮ</h2>
-                    <h3 style="margin: 0; font-size: 16px;">${escapeHtml(item.product)}</h3>
-                </div>
-                <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; font-size: 12px; color: #a0a0a0;">
-                    <span>📁 ${escapeHtml(order.groupName)}</span>
-                    <span>📏 ${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
-                    <span>🎨 ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</span>
-                </div>
-            </div>
-    `;
-    
-    if (Object.keys(reportsBySite).length === 0) {
-        html += `
-            <div style="text-align: center; padding: 20px; background: #15191f; border-radius: 8px;">
-                <div style="font-size: 32px; margin-bottom: 8px;">📭</div>
-                <p>Нет отчётов по этому изделию</p>
-                <p style="font-size: 11px; color: #6c757d;">Отчёты создаются на участках через кнопку "Отчёт"</p>
-            </div>
-        `;
-    } else {
-        for (const [siteKey, rows] of Object.entries(reportsBySite)) {
-            html += `
-                <div style="margin-bottom: 10px; border: 1px solid #2a2f38; border-radius: 6px; overflow: hidden;">
-                    <div style="background: linear-gradient(135deg, #232830, #1a1e24); padding: 5px 10px;">
-                        <h4 style="margin: 0; color: #ff3b3b; font-size: 12px;">${siteNames[siteKey] || siteKey}</h4>
-                    </div>
-                    <div style="padding: 5px 8px;">
-            `;
             
-            rows.forEach(row => {
-                const расход = row.расход || 0;
-                const количество = row.количество || 0;
-                const комментарий = row.комментарий || '';
-                
-                let text = `Расход: ${расход}, Количество: ${количество}`;
-                if (комментарий) text += `, ${комментарий}`;
-                
-                html += `
-                    <div style="margin-bottom: 3px; padding: 3px 5px; background: #15191f; border-radius: 3px; font-size: 11px;">
-                        ${escapeHtml(text)}
-                    </div>
-                `;
+            const item = order.items[itemIndex];
+            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+            
+            const itemKey = `${order.id}_item${itemIndex}_${item.product}_${item.size?.name || ''}_${item.ral || ''}`;
+            
+            const itemReports = allReports.filter(report => {
+                if (report.isItemReport && report.itemKey === itemKey) {
+                    return true;
+                }
+                if (report.isItemReport && report.orderId == orderId && 
+                    report.product === item.product && 
+                    report.size === item.size?.name) {
+                    return true;
+                }
+                if (report.taskId) {
+                    const parts = report.taskId.split('_');
+                    return parts.length >= 3 && parts[0] == orderId && parts[2] == itemIndex;
+                }
+                return false;
             });
             
-            html += `</div></div>`;
+            const siteNames = {
+                'polimerniy': '🎨 ПОЛИМЕРНЫЙ УЧАСТОК',
+                'slesarniy': '🔩 СЛЕСАРНЫЙ УЧАСТОК',
+                'frezerniy': '⚙️ ФРЕЗЕРНЫЙ УЧАСТОК',
+                'tokarniy': '🔧 ТОКАРНЫЙ УЧАСТОК',
+                'lazerno': '✨ ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
+            };
+            
+            const reportsBySite = {};
+            
+            itemReports.forEach(report => {
+                if (report.siteKey && report.rows && report.rows.length > 0) {
+                    if (!reportsBySite[report.siteKey]) {
+                        reportsBySite[report.siteKey] = [];
+                    }
+                    reportsBySite[report.siteKey].push(...report.rows);
+                }
+            });
+            
+            let html = `
+                <div style="padding: 12px;">
+                    <div style="margin-bottom: 12px; border-bottom: 1px solid #2a2f38; padding-bottom: 6px;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;">
+                            <h2 style="color: #ff3b3b; margin: 0; font-size: 18px;">📋 ОТЧЁТ ПО ИЗДЕЛИЮ</h2>
+                            <h3 style="margin: 0; font-size: 16px;">${escapeHtml(item.product)}</h3>
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; font-size: 12px; color: #a0a0a0;">
+                            <span>📁 ${escapeHtml(order.groupName)}</span>
+                            <span>📏 ${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
+                            <span>🎨 ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</span>
+                        </div>
+                    </div>
+            `;
+            
+            if (Object.keys(reportsBySite).length === 0) {
+                html += `
+                    <div style="text-align: center; padding: 20px; background: #15191f; border-radius: 8px;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">📭</div>
+                        <p>Нет отчётов по этому изделию</p>
+                        <p style="font-size: 11px; color: #6c757d;">Отчёты создаются на участках через кнопку "Отчёт"</p>
+                    </div>
+                `;
+            } else {
+                for (const [siteKey, rows] of Object.entries(reportsBySite)) {
+                    html += `
+                        <div style="margin-bottom: 10px; border: 1px solid #2a2f38; border-radius: 6px; overflow: hidden;">
+                            <div style="background: linear-gradient(135deg, #232830, #1a1e24); padding: 5px 10px;">
+                                <h4 style="margin: 0; color: #ff3b3b; font-size: 12px;">${siteNames[siteKey] || siteKey}</h4>
+                            </div>
+                            <div style="padding: 5px 8px;">
+                    `;
+                    
+                    rows.forEach(row => {
+                        const расход = row.расход || 0;
+                        const количество = row.количество || 0;
+                        const комментарий = row.комментарий || '';
+                        
+                        let text = `Расход: ${расход}, Количество: ${количество}`;
+                        if (комментарий) text += `, ${комментарий}`;
+                        
+                        html += `
+                            <div style="margin-bottom: 3px; padding: 3px 5px; background: #15191f; border-radius: 3px; font-size: 11px;">
+                                ${escapeHtml(text)}
+                            </div>
+                        `;
+                    });
+                    
+                    html += `</div></div>`;
+                }
+            }
+            
+            html += `
+                <div style="display: flex; justify-content: center; gap: 12px; margin-top: 12px; padding-top: 8px; border-top: 1px solid #2a2f38;">
+                    <button class="btn btn-sm btn-primary" onclick="printCurrentReport()">🖨️ Распечатать</button>
+                    <button class="btn btn-sm btn-danger" onclick="closeOrderReportModal()">✖️ Закрыть</button>
+                </div>
+            </div>`;
+            
+            const modal = document.getElementById('orderReportModal');
+            const contentDiv = document.getElementById('orderReportContent');
+            contentDiv.innerHTML = html;
+            modal.style.display = 'block';
+            
+            window.currentReportHtml = html;
         }
-    }
-    
-    html += `
-        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 12px; padding-top: 8px; border-top: 1px solid #2a2f38;">
-            <button class="btn btn-sm btn-primary" onclick="printCurrentReport()">🖨️ Распечатать</button>
-            <button class="btn btn-sm btn-danger" onclick="closeOrderReportModal()">✖️ Закрыть</button>
-        </div>
-    </div>`;
-    
-    const modal = document.getElementById('orderReportModal');
-    const contentDiv = document.getElementById('orderReportContent');
-    contentDiv.innerHTML = html;
-    modal.style.display = 'block';
-    
-    window.currentReportHtml = html;
-}
 
         function printCurrentReport() {
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <html>
-            <head>
-                <title>Отчёт по изделию</title>
-                <style>
-                    body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: white; color: black; }
-                    .btn { display: none; }
-                    @media print {
-                        .btn { display: none; }
-                    }
-                </style>
-            </head>
-            <body>${window.currentReportHtml}</body>
-        </html>
-    `);
-    printWindow.print();
-    printWindow.close();
-}
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Отчёт по изделию</title>
+                        <style>
+                            body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: white; color: black; }
+                            .btn { display: none; }
+                            @media print {
+                                .btn { display: none; }
+                            }
+                        </style>
+                    </head>
+                    <body>${window.currentReportHtml}</body>
+                </html>
+            `);
+            printWindow.print();
+            printWindow.close();
+        }
 
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         async function initMainPage() {
@@ -2921,8 +2609,6 @@ body.light-theme .spinner {
         // Глобальные функции
         window.openGroupModal = openGroupModal;
         window.closeGroupModal = closeGroupModal;
-        window.addBracketField = addBracketField;
-        window.addLyreField = addLyreField;
         window.addItemToGroup = addItemToGroup;
         window.editItemInGroup = editItemInGroup;
         window.createGroupOrder = createGroupOrder;
