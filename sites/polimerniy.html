@@ -341,11 +341,11 @@
         .filter-section {
             display: flex;
             gap: 15px;
-            align-items: center;
+            align-items: flex-end;
             margin-bottom: 20px;
             flex-wrap: wrap;
             background: #15191f;
-            padding: 12px 15px;
+            padding: 15px;
             border-radius: 8px;
             border: 1px solid #2a2f38;
         }
@@ -381,7 +381,15 @@
             background: #6c757d;
             padding: 6px 12px;
             font-size: 12px;
-            margin-top: 18px;
+            height: 32px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background: #5a6268;
         }
 
         /* Статистика */
@@ -565,6 +573,23 @@
             font-size: 11px;
         }
 
+        .btn-report-item {
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-report-item:hover {
+            background: #e68900;
+            transform: scale(1.02);
+        }
+
         /* Светлая тема */
         body.light-theme .filter-section {
             background: #ffffff !important;
@@ -619,6 +644,11 @@
             border: 1px solid #e2e8f0 !important;
             color: #1e293b !important;
         }
+
+        body.light-theme .btn-report-item {
+            background: #ff9800 !important;
+            color: white !important;
+        }
     </style>
 </head>
 <body>
@@ -646,6 +676,12 @@
                 </select>
             </div>
             <div class="filter-group">
+                <label>🔧 ОПЕРАЦИЯ</label>
+                <select id="filterOperation">
+                    <option value="">Все операции</option>
+                </select>
+            </div>
+            <div class="filter-group">
                 <label>🎨 RAL</label>
                 <select id="filterRal">
                     <option value="">Все RAL</option>
@@ -660,7 +696,7 @@
                     <option value="completed">✅ Завершённые</option>
                 </select>
             </div>
-            <button class="btn btn-sm btn-reset" onclick="resetFilters()">🔄 Сбросить</button>
+            <button class="btn-reset" onclick="resetFilters()">🔄 Сбросить</button>
         </div>
 
         <!-- СТАТИСТИКА -->
@@ -755,7 +791,15 @@
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             const groups = new Set();
             const products = new Set();
+            const operations = new Set();
             const rals = new Set();
+            
+            // Собираем уникальные операции из задач
+            if (taskManager && taskManager.tasks) {
+                taskManager.tasks.forEach(task => {
+                    if (task.operation) operations.add(task.operation);
+                });
+            }
             
             allOrders.forEach(order => {
                 if (order.groupName) groups.add(order.groupName);
@@ -783,6 +827,14 @@
                 });
             }
             
+            const operationSelect = document.getElementById('filterOperation');
+            if (operationSelect) {
+                operationSelect.innerHTML = '<option value="">🔧 Все операции</option>';
+                Array.from(operations).sort().forEach(op => {
+                    operationSelect.innerHTML += `<option value="${escapeHtml(op)}">${escapeHtml(op)}</option>`;
+                });
+            }
+            
             const ralSelect = document.getElementById('filterRal');
             if (ralSelect) {
                 ralSelect.innerHTML = '<option value="">🎨 Все RAL</option>';
@@ -795,6 +847,7 @@
         function resetFilters() {
             document.getElementById('filterGroup').value = '';
             document.getElementById('filterProduct').value = '';
+            document.getElementById('filterOperation').value = '';
             document.getElementById('filterRal').value = '';
             document.getElementById('statusFilter').value = 'all';
             loadTasks();
@@ -934,6 +987,7 @@
             // ПОЛУЧАЕМ ЗНАЧЕНИЯ ФИЛЬТРОВ
             const filterGroup = document.getElementById('filterGroup').value;
             const filterProduct = document.getElementById('filterProduct').value;
+            const filterOperation = document.getElementById('filterOperation').value;
             const filterRal = document.getElementById('filterRal').value;
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
@@ -955,10 +1009,13 @@
                 // Фильтр по RAL
                 if (filterRal && item.ral !== filterRal) return false;
                 
+                // Фильтр по операции
+                if (filterOperation && task.operation !== filterOperation) return false;
+                
                 return true;
             });
             
-            const stats = taskManager.getStats();
+            // Обновляем статистику с учётом фильтров
             document.getElementById('totalTasks').textContent = tasks.length;
             document.getElementById('tasksInProgress').textContent = tasks.filter(t => t.status === 'in_progress').length;
             document.getElementById('tasksCompleted').textContent = tasks.filter(t => t.status === 'completed').length;
@@ -1439,7 +1496,7 @@
         
         // ============== ОБНОВЛЕНИЕ ФИЛЬТРОВ ПРИ ИЗМЕНЕНИИ ==============
         function setupFilterListeners() {
-            const inputs = ['filterGroup', 'filterProduct', 'filterRal', 'statusFilter'];
+            const inputs = ['filterGroup', 'filterProduct', 'filterOperation', 'filterRal', 'statusFilter'];
             inputs.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
