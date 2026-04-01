@@ -217,6 +217,41 @@
         let currentReportFullOrder = null;
         let reportRows = [];
         
+        // КЛЮЧ ДЛЯ СОХРАНЕНИЯ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК
+        const OPEN_CARDS_KEY = 'polimerniy_open_cards';
+        
+        // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
+        function saveOpenCardsState() {
+            const openCards = [];
+            document.querySelectorAll('.order-card').forEach(card => {
+                const content = card.querySelector('.order-content');
+                if (content && !content.classList.contains('collapsed')) {
+                    openCards.push(card.dataset.itemKey);
+                }
+            });
+            localStorage.setItem(OPEN_CARDS_KEY, JSON.stringify(openCards));
+        }
+        
+        function restoreOpenCardsState() {
+            const savedOpenCards = localStorage.getItem(OPEN_CARDS_KEY);
+            if (!savedOpenCards) return;
+            const openCardsIds = JSON.parse(savedOpenCards);
+            
+            openCardsIds.forEach(itemKey => {
+                const card = document.querySelector(`.order-card[data-item-key="${itemKey}"]`);
+                if (card) {
+                    const header = card.querySelector('.order-header');
+                    const content = card.querySelector('.order-content');
+                    if (header && content) {
+                        header.classList.remove('collapsed');
+                        content.classList.remove('collapsed');
+                        const arrow = header.querySelector('.collapse-icon');
+                        if (arrow) arrow.textContent = '▲';
+                    }
+                }
+            });
+        }
+        
         // ============== ЗАГРУЗКА ОПЕРАЦИЙ ==============
         async function loadTaskOperationsData() {
             try {
@@ -356,6 +391,11 @@
                         order.tasks[task.id] = taskStatus;
                         localStorage.setItem('masterx_orders', JSON.stringify(orders));
                     }
+                    
+                    // ПЕРЕЗАГРУЗКА СТРАНИЦЫ ДЛЯ ОБНОВЛЕНИЯ СТАТУСОВ
+                    setTimeout(() => {
+                        loadTasks();
+                    }, 100);
                 }
             }
             
@@ -401,6 +441,11 @@
                         orders[orderIndex] = order;
                         localStorage.setItem('masterx_orders', JSON.stringify(orders));
                     }
+                    
+                    // ПЕРЕЗАГРУЗКА СТРАНИЦЫ ДЛЯ ОБНОВЛЕНИЯ СТАТУСОВ
+                    setTimeout(() => {
+                        loadTasks();
+                    }, 100);
                 }
             }
         }
@@ -546,6 +591,7 @@
                     content.classList.toggle('collapsed');
                     const arrow = header.querySelector('.collapse-icon');
                     if (arrow) arrow.textContent = header.classList.contains('collapsed') ? '▼' : '▲';
+                    saveOpenCardsState();
                 });
 
                 itemDiv.appendChild(header);
@@ -554,7 +600,12 @@
             });
 
             updateItemStatusTexts();
-            isLoadingTasks = false;
+            
+            // Восстанавливаем состояние открытых карточек после отрисовки
+            setTimeout(() => {
+                restoreOpenCardsState();
+                isLoadingTasks = false;
+            }, 50);
         }
         
         function updateItemStatusTexts() {
@@ -684,6 +735,7 @@
             quantityInput.disabled = task.status === 'completed' || isShiftEnded;
             quantityInput.onchange = function(e) {
                 taskManager.updateExecutorQuantity(task.id, executor.id, parseInt(e.target.value) || 0);
+                loadTasks();
             };
             div.appendChild(quantityInput);
             
@@ -707,14 +759,7 @@
             endShiftBtn.onclick = function() {
                 if (confirm('Закрыть смену для ' + executor.name + '?')) {
                     taskManager.updateExecutorStatus(task.id, executor.id, 'shift_ended');
-                    const executorList = document.getElementById('executors-' + task.id);
-                    if (executorList) {
-                        executorList.innerHTML = '';
-                        const updatedTask = taskManager.tasks.find(t => t.id === task.id);
-                        if (updatedTask && updatedTask.executors) {
-                            updatedTask.executors.forEach(exec => { executorList.appendChild(createExecutorItem(updatedTask, exec)); });
-                        }
-                    }
+                    loadTasks();
                 }
             };
             div.appendChild(endShiftBtn);
@@ -725,6 +770,7 @@
             removeBtn.disabled = task.status === 'completed' || isShiftEnded;
             removeBtn.onclick = function() {
                 if (confirm('Удалить этого исполнителя?')) taskManager.removeExecutor(task.id, executor.id);
+                loadTasks();
             };
             div.appendChild(removeBtn);
             
@@ -748,14 +794,7 @@
                 if (!name) { alert('Введите ФИО'); return; }
                 if (taskManager.addExecutor(task.id, name)) {
                     formDiv.remove();
-                    const executorList = document.getElementById('executors-' + task.id);
-                    if (executorList) {
-                        executorList.innerHTML = '';
-                        const updatedTask = taskManager.tasks.find(t => t.id === task.id);
-                        if (updatedTask && updatedTask.executors) {
-                            updatedTask.executors.forEach(exec => { executorList.appendChild(createExecutorItem(updatedTask, exec)); });
-                        }
-                    }
+                    loadTasks();
                 } else { alert('Исполнитель уже существует'); }
             };
             const cancelBtn = document.createElement('button');
@@ -1086,6 +1125,11 @@
             populateFilters();
             setupFilterListeners();
             loadTasks();
+            
+            // Сохраняем состояние перед закрытием страницы
+            window.addEventListener('beforeunload', () => {
+                saveOpenCardsState();
+            });
         }
         
         window.resetFilters = resetFilters;
