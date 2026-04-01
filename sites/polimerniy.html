@@ -16,6 +16,11 @@
             transition: all 0.2s;
         }
 
+        .task-card.priority {
+            border: 2px solid #ff3b3b;
+            box-shadow: 0 0 15px rgba(255,59,59,0.3);
+        }
+
         .task-card:hover {
             border-color: #ff3b3b;
         }
@@ -45,6 +50,15 @@
             border-left: 4px solid #2ecc71;
         }
 
+        .task-header.priority {
+            background: linear-gradient(135deg, #4a1a1a, #3a0f0f) !important;
+            border-left: 4px solid #ff3b3b !important;
+        }
+
+        .task-header.priority .task-customer-name {
+            color: #ff6b6b !important;
+        }
+
         .task-header-left {
             flex: 1;
         }
@@ -54,6 +68,20 @@
             color: #ff3b3b;
             font-size: 14px;
             margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .priority-badge {
+            background: #ff3b3b;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            display: inline-block;
         }
 
         .task-product-info {
@@ -608,6 +636,10 @@
             border: 1px solid #e2e8f0 !important;
         }
 
+        body.light-theme .task-card.priority {
+            border: 2px solid #ff3b3b !important;
+        }
+
         body.light-theme .task-header.status-pending {
             background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
         }
@@ -618,6 +650,14 @@
 
         body.light-theme .task-header.status-completed {
             background: linear-gradient(135deg, #e8f5e9, #c8e6c9) !important;
+        }
+
+        body.light-theme .task-header.priority {
+            background: linear-gradient(135deg, #fee2e2, #fecaca) !important;
+        }
+
+        body.light-theme .task-header.priority .task-customer-name {
+            color: #dc2626 !important;
         }
 
         body.light-theme .task-customer-name {
@@ -648,6 +688,10 @@
         body.light-theme .btn-report-item {
             background: #ff9800 !important;
             color: white !important;
+        }
+
+        body.light-theme .priority-badge {
+            background: #ff3b3b !important;
         }
     </style>
 </head>
@@ -990,6 +1034,7 @@
             const filterProduct = document.getElementById('filterProduct').value;
             const filterOperation = document.getElementById('filterOperation').value;
             const filterRal = document.getElementById('filterRal').value;
+            const filterStatus = document.getElementById('statusFilter').value;
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             
@@ -998,23 +1043,36 @@
                 const order = allOrders.find(o => o.id == task.orderId);
                 if (!order) return false;
                 
-                // Фильтр по заказчику
+                // Приоритетные задачи пропускаем через фильтры, но не скрываем их
+                // Они всегда видны, кроме фильтра "Завершённые"
+                if (task.isPriority === true) {
+                    // Если выбран фильтр "Завершённые" и задача не завершена — скрываем
+                    if (filterStatus === 'completed' && task.status !== 'completed') return false;
+                    return true;
+                }
+                
+                // Для обычных задач — все фильтры
                 if (filterCustomer && order.groupName !== filterCustomer) return false;
                 
                 const item = order.items?.[task.itemIndex || 0];
                 if (!item) return false;
                 
-                // Фильтр по изделию
                 if (filterProduct && item.product !== filterProduct) return false;
-                
-                // Фильтр по RAL
                 if (filterRal && item.ral !== filterRal) return false;
-                
-                // Фильтр по операции
                 if (filterOperation && task.operation !== filterOperation) return false;
                 
                 return true;
             });
+            
+            // РАЗДЕЛЯЕМ ЗАДАЧИ: ПРИОРИТЕТНЫЕ ВСЕГДА НАВЕРХУ
+            const priorityTasks = tasks.filter(t => t.isPriority === true);
+            const normalTasks = tasks.filter(t => t.isPriority !== true);
+            
+            // Сортируем приоритетные по дате создания (новые сверху)
+            priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            // Объединяем: сначала приоритетные, потом обычные
+            const sortedTasks = [...priorityTasks, ...normalTasks];
             
             // Обновляем статистику с учётом фильтров
             document.getElementById('totalTasks').textContent = tasks.length;
@@ -1024,14 +1082,14 @@
             const tasksList = document.getElementById('tasksList');
             tasksList.innerHTML = '';
 
-            if (tasks.length === 0) {
+            if (sortedTasks.length === 0) {
                 tasksList.innerHTML = '<div class="no-tasks"><p>📭 Нет задач по выбранным фильтрам</p></div>';
                 isLoadingTasks = false;
                 return;
             }
 
             // РЕНДЕРИМ КАЖДУЮ ЗАДАЧУ ОТДЕЛЬНО
-            tasks.forEach(task => {
+            sortedTasks.forEach(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
                 const item = order?.items?.[task.itemIndex || 0];
                 
@@ -1048,16 +1106,23 @@
                     statusText = '✅ ГОТОВО';
                 }
                 
+                const isPriority = task.isPriority === true;
+                const priorityClass = isPriority ? 'priority' : '';
+                const priorityBadge = isPriority ? '<span class="priority-badge">🔴 ПРИОРИТЕТ</span>' : '';
+                
                 const taskCard = document.createElement('div');
-                taskCard.className = 'task-card';
+                taskCard.className = `task-card ${priorityClass}`;
                 taskCard.dataset.taskId = task.id;
                 
                 // ШАПКА КАРТОЧКИ
                 const header = document.createElement('div');
-                header.className = `task-header ${statusClass} collapsed`;
+                header.className = `task-header ${statusClass} ${priorityClass} collapsed`;
                 header.innerHTML = `
                     <div class="task-header-left">
-                        <div class="task-customer-name">🏢 ${escapeHtml(order.groupName)} | Заказ №${escapeHtml(order.number)}</div>
+                        <div class="task-customer-name">
+                            🏢 ${escapeHtml(order.groupName)} | Заказ №${escapeHtml(order.number)}
+                            ${priorityBadge}
+                        </div>
                         <div class="task-product-info">
                             <span class="task-product-name">📦 ${escapeHtml(item.product)}</span>
                             <span class="task-size">📏 ${escapeHtml(item.size?.name || '-')}</span>
@@ -1306,7 +1371,8 @@
                 quantity: item.size?.quantity,
                 ral: item.ral,
                 texture: item.texture,
-                operation: task.operation
+                operation: task.operation,
+                isPriority: task.isPriority || false
             };
             
             const modal = document.getElementById('rightModal');
@@ -1365,11 +1431,13 @@
                 `;
             });
             
+            const priorityBadge = currentReportTask.isPriority ? '<span style="background: #ff3b3b; color: white; padding: 2px 8px; border-radius: 20px; font-size: 10px; margin-left: 8px;">🔴 ПРИОРИТЕТ</span>' : '';
+            
             container.innerHTML = `
                 <div style="padding: 20px 0;">
                     <div style="margin-bottom: 20px; padding: 12px; background: #15191f; border-radius: 8px; border-left: 3px solid #ff9800;">
                         <div style="font-size: 12px; color: #a0a0a0;">Заказ: ${escapeHtml(currentReportTask.orderNumber)}</div>
-                        <div style="font-size: 14px; font-weight: bold; color: #ff9800; margin: 5px 0;">${escapeHtml(currentReportTask.product)}</div>
+                        <div style="font-size: 14px; font-weight: bold; color: #ff9800; margin: 5px 0;">${escapeHtml(currentReportTask.product)}${priorityBadge}</div>
                         <div style="font-size: 12px;">🏢 ${escapeHtml(currentReportTask.customerName)}</div>
                         <div style="font-size: 12px;">📏 Размер: ${escapeHtml(currentReportTask.size || '-')} × ${currentReportTask.quantity || 0} шт</div>
                         <div style="font-size: 12px;">🎨 Покрытие: ${escapeHtml(currentReportTask.ral || '-')} / ${escapeHtml(currentReportTask.texture || '-')}</div>
@@ -1467,6 +1535,7 @@
                 ral: currentReportTask.ral,
                 texture: currentReportTask.texture,
                 operation: currentReportTask.operation,
+                isPriority: currentReportTask.isPriority,
                 siteKey: 'polimerniy',
                 rows: reportRows.map(row => ({
                     расход: row.расход || 0,
@@ -1510,7 +1579,7 @@
         window.exportToExcel = function() {
             const tasks = taskManager.tasks;
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-            let csv = "Заказ,Заказчик,Изделие,Размер,Количество,RAL,Текстура,Операция,Деталь,Исполнитель,Количество,Статус,План\n";
+            let csv = "Заказ,Заказчик,Изделие,Размер,Количество,RAL,Текстура,Операция,Деталь,Приоритет,Исполнитель,Количество,Статус,План\n";
             
             tasks.forEach(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
@@ -1519,13 +1588,14 @@
                 const siteOps = productOps?.['полимерный'];
                 const operationData = siteOps?.find(op => op.operation === task.operation);
                 const detailName = operationData?.detail || '';
+                const isPriority = task.isPriority ? 'ДА' : 'НЕТ';
                 
                 if (task.executors && task.executors.length > 0) {
                     task.executors.forEach(exec => {
-                        csv += `"${task.orderNumber}","${order?.groupName || ''}","${item?.product || ''}","${item?.size?.name || ''}",${item?.size?.quantity || 0},"${item?.ral || ''}","${item?.texture || ''}","${task.operation}","${detailName}","${exec.name}",${exec.quantity || 0},"${exec.status}",${task.totalQuantity || 1}\n`;
+                        csv += `"${task.orderNumber}","${order?.groupName || ''}","${item?.product || ''}","${item?.size?.name || ''}",${item?.size?.quantity || 0},"${item?.ral || ''}","${item?.texture || ''}","${task.operation}","${detailName}","${isPriority}","${exec.name}",${exec.quantity || 0},"${exec.status}",${task.totalQuantity || 1}\n`;
                     });
                 } else {
-                    csv += `"${task.orderNumber}","${order?.groupName || ''}","${item?.product || ''}","${item?.size?.name || ''}",${item?.size?.quantity || 0},"${item?.ral || ''}","${item?.texture || ''}","${task.operation}","${detailName}","Нет",0,"${task.status}",${task.totalQuantity || 1}\n`;
+                    csv += `"${task.orderNumber}","${order?.groupName || ''}","${item?.product || ''}","${item?.size?.name || ''}",${item?.size?.quantity || 0},"${item?.ral || ''}","${item?.texture || ''}","${task.operation}","${detailName}","${isPriority}","Нет",0,"${task.status}",${task.totalQuantity || 1}\n`;
                 }
             });
             
