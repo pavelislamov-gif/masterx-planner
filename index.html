@@ -393,252 +393,334 @@
             border-left: 4px solid #6c757d !important;
         }
 
-        /* ============== ВЕРТИКАЛЬНОЕ ОТОБРАЖЕНИЕ УЧАСТКОВ (КОМПАКТНЫЙ ВИД) ============== */
-        .sites-section {
-            padding: 20px;
-            background: #15191f;
-            border-top: 1px solid #2a2f38;
-            border-radius: 0 0 12px 12px;
-        }
-
-        .sites-grid {
-            display: flex;
-            flex-direction: row;
-            gap: 16px;
-            overflow-x: auto;
-            padding: 10px 0;
-            align-items: stretch;
-        }
-
-        /* Карточка участка (столбец) */
-        .site-card {
-            min-width: 240px;
-            background: #1a1e24;
-            border: 1px solid #2a2f38;
-            border-radius: 12px;
-            overflow: hidden;
+        /* Стили для кнопок над квадратиками */
+        .operation-wrapper {
             display: flex;
             flex-direction: column;
-            transition: all 0.3s;
+            align-items: center;
+            margin: 0 5px;
         }
 
-        .site-card:hover {
-            border-color: #ff3b3b;
-        }
-
-        /* Шапка карточки */
-        .site-card-header {
-            padding: 12px;
-            text-align: center;
-            background: linear-gradient(135deg, #232830, #1a1e24);
-            border-bottom: 1px solid #2a2f38;
-        }
-
-        .site-name {
-            font-weight: 600;
-            font-size: 14px;
-            color: #ff3b3b;
-            margin-bottom: 4px;
-        }
-
-        .site-stats {
-            font-size: 11px;
-            color: #a0a0a0;
-        }
-
-        .site-stats .completed {
-            color: #4cd964;
-            font-weight: 600;
-        }
-
-        .site-stats .total {
-            color: #ff9800;
-            font-weight: 600;
-        }
-
-        /* Содержимое карточки */
-        .site-card-content {
-            flex: 1;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        /* Строка операции */
-        .operation-row {
+        .op-toggle-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            padding: 6px 0;
-            border-bottom: 1px solid #2a2f38;
-            min-height: 55px;
+            justify-content: center;
+            transition: all 0.2s;
+            background: #2ecc71;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
 
-        .operation-row:last-child {
-            border-bottom: none;
+        .op-toggle-btn.added {
+            background: #e74c3c;
         }
 
-        /* Левая часть — информация */
-        .operation-info {
-            flex: 2;
-            text-align: left;
+        .op-priority-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            background: #dc3545;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            opacity: 0.8;
         }
 
-        .operation-name {
-            font-size: 11px;
-            font-weight: 600;
-            color: #ff9800;
-            line-height: 1.3;
+        .op-priority-btn:hover {
+            opacity: 1;
+            transform: scale(1.05);
         }
 
-        .operation-detail {
-            font-size: 9px;
-            color: #a0a0a0;
-            line-height: 1.2;
-        }
-
-        .operation-detail .thickness {
-            color: #4cd964;
-            background: #1e232b;
-            padding: 1px 4px;
-            border-radius: 3px;
-            font-size: 8px;
-            margin-left: 4px;
-        }
-
-        /* Центральная часть — квадратик */
-        .operation-square {
-            flex-shrink: 0;
-        }
-
-        .square-compact {
-            width: 36px;
-            height: 36px;
-            border-radius: 6px;
+        .square {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
             background: #1e232b;
             border: 2px solid #3a404b;
-            cursor: pointer;
             transition: all 0.2s;
+            cursor: pointer;
         }
 
-        .square-compact.orange {
+        .square.orange {
             background-color: #ff9800;
             border-color: #e65100;
         }
 
-        .square-compact.green {
+        .square.green {
             background-color: #4caf50;
             border-color: #2e7d32;
         }
 
-        .square-compact.red {
+        .square.red {
             background-color: #ff3b3b;
             border-color: #cc2e2e;
         }
 
-        /* Правая часть — кнопка */
-        .operation-action {
-            flex-shrink: 0;
-        }
-
-        .btn-add-op {
-            background: #2ecc71;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 10px;
+        .operation-name-small {
             font-size: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            min-width: 48px;
-        }
-
-        .btn-add-op.added {
-            background: #e74c3c;
-        }
-
-        .btn-add-op:hover {
-            transform: scale(1.02);
-        }
-
-        /* Кнопка дополнительной задачи */
-        .btn-add-extra {
-            background: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 6px 12px;
-            font-size: 11px;
-            cursor: pointer;
-            margin-top: 8px;
-            width: 100%;
-            transition: all 0.2s;
-        }
-
-        .btn-add-extra:hover {
-            background: #5a6268;
-        }
-
-        .empty-operations {
+            margin-top: 4px;
+            color: #a0a0a0;
             text-align: center;
-            padding: 20px;
-            color: #6c757d;
-            font-size: 11px;
+            max-width: 60px;
+            word-break: break-word;
         }
 
-        /* Светлая тема для вертикального отображения */
-        body.light-theme .site-card {
-            background: #ffffff;
-            border-color: #e2e8f0;
+        .squares {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-start;
         }
 
-        body.light-theme .site-card-header {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            border-bottom-color: #e2e8f0;
+        .site-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: #1a1e24;
+            border-radius: 8px;
+            border: 1px solid #2a2f38;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        body.light-theme .operation-row {
-            border-bottom-color: #e2e8f0;
-        }
-
-        body.light-theme .operation-detail {
-            color: #64748b;
-        }
-
-        body.light-theme .operation-detail .thickness {
-            background: #f1f5f9;
-            color: #22c55e;
-        }
-
-        body.light-theme .square-compact {
-            background: #f1f5f9;
-            border-color: #e2e8f0;
-        }
-
-        /* СКРОЛЛБАР ДЛЯ ГОРИЗОНТАЛЬНОЙ ПРОКРУТКИ */
-        .sites-grid::-webkit-scrollbar {
-            height: 6px;
-        }
-
-        .sites-grid::-webkit-scrollbar-track {
+        .detail-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
             background: #1e232b;
-            border-radius: 3px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            border: 1px solid #2a2f38;
         }
 
-        .sites-grid::-webkit-scrollbar-thumb {
-            background: #ff3b3b;
-            border-radius: 3px;
+        .profile-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #1e232b;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            border: 1px solid #2a2f38;
         }
 
-        body.light-theme .sites-grid::-webkit-scrollbar-track {
-            background: #e2e8f0;
+        .profile-name-custom {
+            min-width: 180px;
+            padding: 4px;
+            background: #15191f;
+            border: 1px solid #2a2f38;
+            border-radius: 4px;
+            color: #fff;
         }
 
-        body.light-theme .sites-grid::-webkit-scrollbar-thumb {
-            background: #ff3b3b;
+        .components-title {
+            margin-top: 20px;
+            margin-bottom: 12px;
+            color: #ff3b3b;
+            font-size: 14px;
+            font-weight: 600;
+            border-left: 3px solid #ff3b3b;
+            padding-left: 10px;
+        }
+
+        /* СВЕТЛАЯ ТЕМА */
+        body.light-theme {
+            background-color: #f0f2f5 !important;
+            color: #1e293b !important;
+        }
+
+        body.light-theme .container {
+            background-color: #f0f2f5 !important;
+        }
+
+        body.light-theme header {
+            background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+        }
+
+        body.light-theme .logo-text {
+            color: #1e293b !important;
+        }
+
+        body.light-theme .logo-text .x-red {
+            color: #ff3b3b !important;
+            text-shadow: none !important;
+        }
+
+        body.light-theme .btn {
+            background: #ffffff !important;
+            color: #1e293b !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .btn:hover {
+            background: #f1f5f9 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        body.light-theme .btn-primary {
+            background: linear-gradient(135deg, #0057b3, #003d80) !important;
+            color: white !important;
+            border: none !important;
+        }
+
+        body.light-theme .btn-success {
+            background: linear-gradient(135deg, #1a7f3d, #0e5a2a) !important;
+            color: white !important;
+            border: none !important;
+        }
+
+        body.light-theme .btn-danger {
+            background: linear-gradient(135deg, #b33c3c, #8b2e2e) !important;
+            color: white !important;
+            border: none !important;
+        }
+
+        body.light-theme .order-card {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .order-header {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .order-header h3 {
+            color: #1e293b !important;
+        }
+
+        body.light-theme .order-header.status-green {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9) !important;
+            border-left: 4px solid #2ecc71 !important;
+        }
+
+        body.light-theme .order-header.status-orange {
+            background: linear-gradient(135deg, #fff3e0, #ffe6cc) !important;
+            border-left: 4px solid #ff9800 !important;
+        }
+
+        body.light-theme .order-header.status-gray {
+            background: linear-gradient(135deg, #f5f5f5, #eeeeee) !important;
+            border-left: 4px solid #6c757d !important;
+        }
+
+        body.light-theme .item-header.item-status-green {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9) !important;
+            border-left: 4px solid #2ecc71 !important;
+        }
+
+        body.light-theme .item-header.item-status-orange {
+            background: linear-gradient(135deg, #fff3e0, #ffe6cc) !important;
+            border-left: 4px solid #ff9800 !important;
+        }
+
+        body.light-theme .item-header.item-status-gray {
+            background: linear-gradient(135deg, #f5f5f5, #eeeeee) !important;
+            border-left: 4px solid #6c757d !important;
+        }
+
+        body.light-theme .site-item {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .site-name {
+            color: #1e293b !important;
+        }
+
+        body.light-theme .square {
+            background: #f1f5f9 !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .square.orange {
+            background-color: #ff9800 !important;
+        }
+
+        body.light-theme .square.green {
+            background-color: #4caf50 !important;
+        }
+
+        body.light-theme .order-stats {
+            background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .stat-item {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .stat-label {
+            color: #64748b !important;
+        }
+
+        body.light-theme .sites-navigation {
+            background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .site-link {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #334155 !important;
+        }
+
+        body.light-theme .search-box {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #1e293b !important;
+        }
+
+        body.light-theme .modal-content {
+            background: linear-gradient(135deg, #ffffff, #fefefe) !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .form-group input,
+        body.light-theme .form-group select {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #1e293b !important;
+        }
+
+        body.light-theme .add-item-panel,
+        body.light-theme .items-list-panel {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .item-card {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .item-card-content div {
+            background: #f1f5f9 !important;
+            color: #1e293b !important;
+        }
+
+        body.light-theme .op-priority-btn {
+            background: #dc3545 !important;
         }
     </style>
 </head>
@@ -718,8 +800,9 @@
                 <h2>📁 Создание группы заказов</h2>
 
                 <div class="form-group">
-                    <label>🏷️ Название группы:</label>
-                    <input type="text" id="groupNameInput" placeholder="Например: Санкт Петербург КИ000004020" required>
+                    <label>🏢 ЗАКАЗЧИК / ОБЪЕКТ:</label>
+                    <input type="text" id="groupNameInput" placeholder="Например: ООО Ромашка, Санкт-Петербург, ТЦ Галерея" required>
+                    <small style="color: #a0a0a0; font-size: 10px; margin-top: 4px; display: block;">Укажите название организации или объекта</small>
                 </div>
 
                 <div class="group-modal-layout">
@@ -1664,88 +1747,79 @@
             });
         }
 
-        // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА (ВЕРТИКАЛЬНОЕ ОТОБРАЖЕНИЕ) ==============
+        // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА ==============
         function createSiteRow(name, order, itemIndex, siteKey) {
             const item = order.items[itemIndex];
-            if (!item) return null;
+            if (!item) return '<div>Нет данных</div>';
 
-            const operationsWithDetails = getOperationNamesWithDetails(item.product, siteKey);
-            
-            if (!operationsWithDetails || operationsWithDetails.length === 0) {
-                return null;
+            const operations = getOperationNames(item.product, siteKey);
+
+            if (!operations || operations.length === 0) {
+                return `
+                    <div class="site-item">
+                        <span class="site-name">${name}</span>
+                        <div class="squares">
+                            <div class="square red" title="Нет операций"></div>
+                        </div>
+                        <span>0/0</span>
+                        <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')">➕ Доп.</button>
+                    </div>
+                `;
             }
 
-            let operationsHtml = '';
+            let squaresHtml = '';
             let completedCount = 0;
 
-            operationsWithDetails.forEach((op, idx) => {
-                const operationName = typeof op === 'object' ? op.operation : op;
-                const detailName = typeof op === 'object' ? (op.detail || '') : '';
-                const thickness = typeof op === 'object' ? (op.thickness || '') : '';
-                
-                const taskId = `${order.id}_${siteKey}_${itemIndex}_${idx}`;
-                
+            for (let i = 0; i < operations.length; i++) {
+                const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
+                const operationName = operations[i];
                 let taskStatus = '';
                 let isAdded = false;
-                
+
                 if (order.tasks && order.tasks[taskId]) {
                     taskStatus = order.tasks[taskId];
                     if (taskStatus === 'green') completedCount++;
-                    isAdded = true;
                 }
-                
-                // Формируем отображение детали
-                let detailDisplay = '';
-                if (detailName) {
-                    let shortDetail = detailName;
-                    if (thickness) {
-                        shortDetail = shortDetail.replace(thickness, '').trim();
-                    }
-                    detailDisplay = `<div class="operation-detail">📦 ${escapeHtml(shortDetail)}${thickness ? `<span class="thickness">${escapeHtml(thickness)}</span>` : ''}</div>`;
-                }
-                
-                // Определяем класс квадратика
-                let squareClass = '';
-                if (taskStatus === 'green') squareClass = 'green';
-                else if (taskStatus === 'orange') squareClass = 'orange';
-                
-                operationsHtml += `
-                    <div class="operation-row">
-                        <div class="operation-info">
-                            <div class="operation-name">${escapeHtml(operationName)}</div>
-                            ${detailDisplay}
-                        </div>
-                        <div class="operation-square">
-                            <div class="square-compact ${squareClass}" data-task-id="${taskId}" title="${escapeHtml(operationName)}"></div>
-                        </div>
-                        <div class="operation-action">
-                            <button class="btn-add-op ${isAdded ? 'added' : ''}" 
-                                    onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${idx}, '${escapeHtml(operationName)}')">
+
+                try {
+                    const storageKey = `tasks_${siteKey}`;
+                    const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                    isAdded = tasks.some(t => t.id === taskId);
+                } catch(e) {}
+
+                squaresHtml += `
+                    <div class="operation-wrapper">
+                        <div style="display: flex; gap: 4px; margin-bottom: 4px;">
+                            <button class="op-toggle-btn ${isAdded ? 'added' : ''}" 
+                                    onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', false)">
                                 ${isAdded ? '✓' : '+'}
                             </button>
+                            <button class="op-priority-btn" 
+                                    onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', true)"
+                                    title="Назначить как приоритетную (красная метка)">
+                                🔴
+                            </button>
                         </div>
+                        <div class="square ${taskStatus}" title="${escapeHtml(operationName)}"></div>
+                        <div class="operation-name-small">${escapeHtml(operationName)}</div>
                     </div>
                 `;
-            });
+            }
 
             return `
-                <div class="site-card">
-                    <div class="site-card-header">
-                        <div class="site-name">${name}</div>
-                        <div class="site-stats">
-                            <span class="completed">${completedCount}</span>/<span class="total">${operationsWithDetails.length}</span>
-                        </div>
-                    </div>
-                    <div class="site-card-content">
-                        ${operationsHtml}
-                        <button class="btn-add-extra" onclick="addExtraTask(${order.id}, '${siteKey}')">➕ Доп. задача</button>
+                <div class="site-item">
+                    <span class="site-name">${name}</span>
+                    <div class="squares">${squaresHtml}</div>
+                    <div>
+                        <span>${completedCount}/${operations.length}</span>
+                        <button class="btn btn-sm btn-primary" onclick="addExtraTask(${order.id}, '${siteKey}')" style="margin-left: 10px;">➕ Доп.</button>
                     </div>
                 </div>
             `;
         }
 
-        // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ ==============
-        function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName) {
+        // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ (С ПОДДЕРЖКОЙ ПРИОРИТЕТА) ==============
+        function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName, isPriority = false) {
             const orders = loadOrdersFromStorage();
             const order = orders.find(o => o.id == orderId);
             if (!order) { alert('Заказ не найден'); return; }
@@ -1826,7 +1900,9 @@
                     status: 'pending',
                     executors: [],
                     date: new Date().toISOString().split('T')[0],
-                    isExtra: false
+                    isExtra: false,
+                    isPriority: isPriority,
+                    createdAt: new Date().toISOString()
                 };
 
                 existingTasks.push(newTask);
@@ -1842,7 +1918,7 @@
                 orders[orderIndex] = order;
                 saveOrdersToStorage(orders);
 
-                alert(`✅ Операция "${operationName}" добавлена на участок с планом ${plannedQuantity} шт`);
+                alert(`✅ ${isPriority ? 'ПРИОРИТЕТНАЯ ' : ''}Операция "${operationName}" добавлена на участок с планом ${plannedQuantity} шт`);
                 
                 renderOrdersList();
                 updateStatistics();
@@ -1894,14 +1970,17 @@
                 header.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                         <div>
-                            <h3>📁 ${escapeHtml(order.groupName)}</h3>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <h3 style="margin: 0;">🏢 <span id="group-name-${order.id}">${escapeHtml(order.groupName)}</span></h3>
+                                <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); editGroupName(${order.id})" style="padding: 2px 8px; font-size: 11px;" title="Редактировать название">✏️</button>
+                            </div>
                             <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
-                                Изделий: ${order.items ? order.items.length : 0} | №${order.number || '---'}
+                                Заказ №${order.number || '---'} | Изделий: ${order.items ? order.items.length : 0}
                                 ${groupStatus === 'green' ? ' | ✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? ' | ⚡ В РАБОТЕ' : ' | ⏳ ОЖИДАЕТ')}
                             </div>
                         </div>
                         <div style="display: flex; gap: 8px;">
-                            <button class="btn btn-info" onclick="event.stopPropagation(); editGroup(${order.id})">✏️ Редактировать</button>
+                            <button class="btn btn-info" onclick="event.stopPropagation(); editGroup(${order.id})">✏️ Редактировать состав</button>
                             <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
                         </div>
                     </div>
@@ -2042,13 +2121,13 @@
                             </div>
                             
                             <div id="sites-${order.id}-${itemIndex}" class="sites-section">
-                                <h4 style="margin-bottom: 12px;">🏭 ПРОИЗВОДСТВЕННЫЕ УЧАСТКИ</h4>
+                                <h4 style="margin-bottom: 12px;">ПРОИЗВОДСТВЕННЫЕ УЧАСТКИ</h4>
                                 <div class="sites-grid">
-                                    ${createSiteRow('Токарный', order, itemIndex, 'tokarniy') || ''}
-                                    ${createSiteRow('Слесарный', order, itemIndex, 'slesarniy') || ''}
-                                    ${createSiteRow('Фрезерный', order, itemIndex, 'frezerniy') || ''}
-                                    ${createSiteRow('Лазерно-гибочный', order, itemIndex, 'lazerno') || ''}
-                                    ${createSiteRow('Полимерный', order, itemIndex, 'polimerniy') || ''}
+                                    ${createSiteRow('Токарный', order, itemIndex, 'tokarniy')}
+                                    ${createSiteRow('Слесарный', order, itemIndex, 'slesarniy')}
+                                    ${createSiteRow('Фрезерный', order, itemIndex, 'frezerniy')}
+                                    ${createSiteRow('Лазерно-гибочный', order, itemIndex, 'lazerno')}
+                                    ${createSiteRow('Полимерный', order, itemIndex, 'polimerniy')}
                                 </div>
                             </div>
                         `;
@@ -2084,6 +2163,36 @@
 
             restoreMainOpenCardsState();
             restoreMainOpenItemsState();
+        }
+
+        // ============== ПЕРЕИМЕНОВАНИЕ ГРУППЫ (ЗАКАЗЧИКА) ==============
+        function editGroupName(orderId) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) {
+                alert('Группа не найдена');
+                return;
+            }
+            
+            const newName = prompt('Введите новое название заказчика:', order.groupName);
+            if (!newName || newName.trim() === '') {
+                return;
+            }
+            
+            if (newName === order.groupName) {
+                return;
+            }
+            
+            order.groupName = newName.trim();
+            
+            const orderIndex = orders.findIndex(o => o.id == orderId);
+            orders[orderIndex] = order;
+            saveOrdersToStorage(orders);
+            
+            renderOrdersList();
+            updateStatistics();
+            
+            alert(`✅ Название заказчика изменено на "${newName}"`);
         }
 
         // ============== СТАТИСТИКА ==============
@@ -2572,6 +2681,7 @@
         window.editItemInGroup = editItemInGroup;
         window.createGroupOrder = createGroupOrder;
         window.editGroup = editGroup;
+        window.editGroupName = editGroupName;
         window.exportOrders = exportOrders;
         window.importOrders = importOrders;
         window.showMaterialsReport = showMaterialsReport;
