@@ -49,7 +49,7 @@
             flex: 1;
         }
 
-        .task-group-name {
+        .task-customer-name {
             font-weight: 600;
             color: #ff3b3b;
             font-size: 14px;
@@ -620,7 +620,7 @@
             background: linear-gradient(135deg, #e8f5e9, #c8e6c9) !important;
         }
 
-        body.light-theme .task-group-name {
+        body.light-theme .task-customer-name {
             color: #dc2626 !important;
         }
 
@@ -664,9 +664,9 @@
         <!-- ФИЛЬТРЫ -->
         <div class="filter-section">
             <div class="filter-group">
-                <label>📁 ГРУППА</label>
-                <select id="filterGroup">
-                    <option value="">Все группы</option>
+                <label>🏢 ЗАКАЗЧИК</label>
+                <select id="filterCustomer">
+                    <option value="">Все заказчики</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -789,20 +789,14 @@
         // ============== ЗАПОЛНЕНИЕ ВЫПАДАЮЩИХ СПИСКОВ ==============
         function populateFilters() {
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-            const groups = new Set();
+            const customers = new Set();
             const products = new Set();
             const operations = new Set();
             const rals = new Set();
             
-            // Собираем уникальные операции из задач
-            if (taskManager && taskManager.tasks) {
-                taskManager.tasks.forEach(task => {
-                    if (task.operation) operations.add(task.operation);
-                });
-            }
-            
+            // Собираем уникальных заказчиков из групп
             allOrders.forEach(order => {
-                if (order.groupName) groups.add(order.groupName);
+                if (order.groupName) customers.add(order.groupName);
                 if (order.items) {
                     order.items.forEach(item => {
                         if (item.product) products.add(item.product);
@@ -811,11 +805,18 @@
                 }
             });
             
-            const groupSelect = document.getElementById('filterGroup');
-            if (groupSelect) {
-                groupSelect.innerHTML = '<option value="">📁 Все группы</option>';
-                Array.from(groups).sort().forEach(g => {
-                    groupSelect.innerHTML += `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`;
+            // Собираем уникальные операции из задач
+            if (taskManager && taskManager.tasks) {
+                taskManager.tasks.forEach(task => {
+                    if (task.operation) operations.add(task.operation);
+                });
+            }
+            
+            const customerSelect = document.getElementById('filterCustomer');
+            if (customerSelect) {
+                customerSelect.innerHTML = '<option value="">🏢 Все заказчики</option>';
+                Array.from(customers).sort().forEach(c => {
+                    customerSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
                 });
             }
             
@@ -845,7 +846,7 @@
         }
         
         function resetFilters() {
-            document.getElementById('filterGroup').value = '';
+            document.getElementById('filterCustomer').value = '';
             document.getElementById('filterProduct').value = '';
             document.getElementById('filterOperation').value = '';
             document.getElementById('filterRal').value = '';
@@ -985,7 +986,7 @@
             let tasks = taskManager.getTasksByStatus(document.getElementById('statusFilter').value);
             
             // ПОЛУЧАЕМ ЗНАЧЕНИЯ ФИЛЬТРОВ
-            const filterGroup = document.getElementById('filterGroup').value;
+            const filterCustomer = document.getElementById('filterCustomer').value;
             const filterProduct = document.getElementById('filterProduct').value;
             const filterOperation = document.getElementById('filterOperation').value;
             const filterRal = document.getElementById('filterRal').value;
@@ -997,8 +998,8 @@
                 const order = allOrders.find(o => o.id == task.orderId);
                 if (!order) return false;
                 
-                // Фильтр по группе
-                if (filterGroup && order.groupName !== filterGroup) return false;
+                // Фильтр по заказчику
+                if (filterCustomer && order.groupName !== filterCustomer) return false;
                 
                 const item = order.items?.[task.itemIndex || 0];
                 if (!item) return false;
@@ -1056,7 +1057,7 @@
                 header.className = `task-header ${statusClass} collapsed`;
                 header.innerHTML = `
                     <div class="task-header-left">
-                        <div class="task-group-name">📁 ${escapeHtml(order.groupName)} | Заказ №${escapeHtml(order.number)}</div>
+                        <div class="task-customer-name">🏢 ${escapeHtml(order.groupName)} | Заказ №${escapeHtml(order.number)}</div>
                         <div class="task-product-info">
                             <span class="task-product-name">📦 ${escapeHtml(item.product)}</span>
                             <span class="task-size">📏 ${escapeHtml(item.size?.name || '-')}</span>
@@ -1299,7 +1300,7 @@
                 taskId: task.id,
                 orderId: order.id,
                 orderNumber: order.number,
-                groupName: order.groupName,
+                customerName: order.groupName,
                 product: item.product,
                 size: item.size?.name,
                 quantity: item.size?.quantity,
@@ -1369,7 +1370,7 @@
                     <div style="margin-bottom: 20px; padding: 12px; background: #15191f; border-radius: 8px; border-left: 3px solid #ff9800;">
                         <div style="font-size: 12px; color: #a0a0a0;">Заказ: ${escapeHtml(currentReportTask.orderNumber)}</div>
                         <div style="font-size: 14px; font-weight: bold; color: #ff9800; margin: 5px 0;">${escapeHtml(currentReportTask.product)}</div>
-                        <div style="font-size: 12px;">📁 ${escapeHtml(currentReportTask.groupName)}</div>
+                        <div style="font-size: 12px;">🏢 ${escapeHtml(currentReportTask.customerName)}</div>
                         <div style="font-size: 12px;">📏 Размер: ${escapeHtml(currentReportTask.size || '-')} × ${currentReportTask.quantity || 0} шт</div>
                         <div style="font-size: 12px;">🎨 Покрытие: ${escapeHtml(currentReportTask.ral || '-')} / ${escapeHtml(currentReportTask.texture || '-')}</div>
                         <div style="font-size: 12px; margin-top: 8px;">🔧 Операция: ${escapeHtml(currentReportTask.operation)}</div>
@@ -1459,7 +1460,7 @@
                 taskId: currentReportTask.taskId,
                 orderId: currentReportTask.orderId,
                 orderNumber: currentReportTask.orderNumber,
-                groupName: currentReportTask.groupName,
+                customerName: currentReportTask.customerName,
                 product: currentReportTask.product,
                 size: currentReportTask.size,
                 quantity: currentReportTask.quantity,
@@ -1496,7 +1497,7 @@
         
         // ============== ОБНОВЛЕНИЕ ФИЛЬТРОВ ПРИ ИЗМЕНЕНИИ ==============
         function setupFilterListeners() {
-            const inputs = ['filterGroup', 'filterProduct', 'filterOperation', 'filterRal', 'statusFilter'];
+            const inputs = ['filterCustomer', 'filterProduct', 'filterOperation', 'filterRal', 'statusFilter'];
             inputs.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -1509,7 +1510,7 @@
         window.exportToExcel = function() {
             const tasks = taskManager.tasks;
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-            let csv = "Заказ,Группа,Изделие,Размер,Количество,RAL,Текстура,Операция,Деталь,Исполнитель,Количество,Статус,План\n";
+            let csv = "Заказ,Заказчик,Изделие,Размер,Количество,RAL,Текстура,Операция,Деталь,Исполнитель,Количество,Статус,План\n";
             
             tasks.forEach(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
