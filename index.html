@@ -1633,38 +1633,41 @@
         }
 
         function createGroupOrder() {
-            const groupName = document.getElementById('groupNameInput').value.trim();
-            if (!groupName) {
-                alert('Введите название группы');
-                return;
-            }
-            if (tempItemsList.length === 0) {
-                alert('Добавьте хотя бы одно изделие');
-                return;
-            }
+    const groupName = document.getElementById('groupNameInput').value.trim();
+    if (!groupName) {
+        alert('Введите название группы');
+        return;
+    }
+    if (tempItemsList.length === 0) {
+        alert('Добавьте хотя бы одно изделие');
+        return;
+    }
 
-            const orders = loadOrdersFromStorage();
-            const newOrder = {
-                id: Date.now(),
-                groupName: groupName,
-                date: new Date().toISOString().split('T')[0],
-                number: generateOrderNumber(orders.length + 1),
-                items: JSON.parse(JSON.stringify(tempItemsList)),
-                status: 'active',
-                tasks: {},
-                extraTasks: []
-            };
+    const orders = loadOrdersFromStorage();
+    const newOrder = {
+        id: Date.now(),
+        groupName: groupName,
+        date: new Date().toISOString().split('T')[0],
+        number: generateOrderNumber(orders.length + 1),
+        items: JSON.parse(JSON.stringify(tempItemsList)),
+        status: 'active',
+        tasks: {},
+        extraTasks: []
+    };
 
-            orders.push(newOrder);
-            saveOrdersToStorage(orders);
-
-            console.log(`✅ Группа "${groupName}" успешно создана!`);
-
-            closeGroupModal();
-            renderOrdersList();
-            updateStatistics();
-            alert(`✅ Группа "${groupName}" успешно создана!`);
-        }
+    orders.push(newOrder);
+    saveOrdersToStorage(orders);
+    
+    // СОЗДАЁМ ЗАДАЧИ ДЛЯ ВСЕХ УЧАСТКОВ
+    if (typeof createTasksForOrder === 'function') {
+        createTasksForOrder(newOrder);
+    }
+    
+    closeGroupModal();
+    renderOrdersList();
+    updateStatistics();
+    alert(`✅ Группа "${groupName}" успешно создана!`);
+}
 
         function editGroup(orderId) {
             const orders = loadOrdersFromStorage();
