@@ -2655,22 +2655,25 @@
 }
 
         function printCurrentReport() {
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                    <head>
-                        <title>Отчёт по изделию</title>
-                        <style>
-                            body { font-family: 'Segoe UI', sans-serif; padding: 20px; }
-                            @media print { button { display: none; } }
-                        </style>
-                    </head>
-                    <body>${window.currentReportHtml}</body>
-                </html>
-            `);
-            printWindow.print();
-            printWindow.close();
-        }
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Отчёт по изделию</title>
+                <style>
+                    body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: white; color: black; }
+                    .btn { display: none; }
+                    @media print {
+                        .btn { display: none; }
+                    }
+                </style>
+            </head>
+            <body>${window.currentReportHtml}</body>
+        </html>
+    `);
+    printWindow.print();
+    printWindow.close();
+}
 
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         async function initMainPage() {
