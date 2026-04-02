@@ -108,17 +108,12 @@
             color: #a0a0a0;
         }
 
-        .task-ral {
+        .task-thickness {
             font-size: 11px;
             color: #ff9800;
             background: #1e232b;
             padding: 2px 6px;
             border-radius: 4px;
-        }
-
-        .task-texture {
-            font-size: 11px;
-            color: #a0a0a0;
         }
 
         .task-status-badge {
@@ -832,69 +827,69 @@
         
         // ============== ЗАПОЛНЕНИЕ ВЫПАДАЮЩИХ СПИСКОВ ==============
         function populateFilters() {
-    const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-    const customers = new Set();
-    const products = new Set();
-    const operations = new Set();
-    const thicknesses = new Set();
-    
-    // Собираем уникальных заказчиков из групп
-    allOrders.forEach(order => {
-        if (order.groupName) customers.add(order.groupName);
-        if (order.items) {
-            order.items.forEach(item => {
-                if (item.product) products.add(item.product);
-            });
-        }
-    });
-    
-    // Собираем уникальные операции и толщины из задач
-    if (taskManager && taskManager.tasks) {
-        taskManager.tasks.forEach(task => {
-            if (task.operation) operations.add(task.operation);
+            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+            const customers = new Set();
+            const products = new Set();
+            const operations = new Set();
+            const thicknesses = new Set();
             
-            // Получаем толщину из данных операции
-            const productOps = taskOperationsData[task.product];
-            const siteOps = productOps?.['лазерно-гибочный'];
-            const operationData = siteOps?.find(op => op.operation === task.operation);
-            if (operationData?.thickness) {
-                thicknesses.add(operationData.thickness);
+            // Собираем уникальных заказчиков из групп
+            allOrders.forEach(order => {
+                if (order.groupName) customers.add(order.groupName);
+                if (order.items) {
+                    order.items.forEach(item => {
+                        if (item.product) products.add(item.product);
+                    });
+                }
+            });
+            
+            // Собираем уникальные операции и толщины из задач
+            if (taskManager && taskManager.tasks) {
+                taskManager.tasks.forEach(task => {
+                    if (task.operation) operations.add(task.operation);
+                    
+                    // Получаем толщину из данных операции
+                    const productOps = taskOperationsData[task.product];
+                    const siteOps = productOps?.['лазерно-гибочный'];
+                    const operationData = siteOps?.find(op => op.operation === task.operation);
+                    if (operationData?.thickness) {
+                        thicknesses.add(operationData.thickness);
+                    }
+                });
             }
-        });
-    }
-    
-    const customerSelect = document.getElementById('filterCustomer');
-    if (customerSelect) {
-        customerSelect.innerHTML = '<option value="">🏢 Все заказчики</option>';
-        Array.from(customers).sort().forEach(c => {
-            customerSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
-        });
-    }
-    
-    const productSelect = document.getElementById('filterProduct');
-    if (productSelect) {
-        productSelect.innerHTML = '<option value="">📦 Все изделия</option>';
-        Array.from(products).sort().forEach(p => {
-            productSelect.innerHTML += `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`;
-        });
-    }
-    
-    const operationSelect = document.getElementById('filterOperation');
-    if (operationSelect) {
-        operationSelect.innerHTML = '<option value="">🔧 Все операции</option>';
-        Array.from(operations).sort().forEach(op => {
-            operationSelect.innerHTML += `<option value="${escapeHtml(op)}">${escapeHtml(op)}</option>`;
-        });
-    }
-    
-    const thicknessSelect = document.getElementById('filterThickness');
-    if (thicknessSelect) {
-        thicknessSelect.innerHTML = '<option value="">📊 Все толщины</option>';
-        Array.from(thicknesses).sort().forEach(th => {
-            thicknessSelect.innerHTML += `<option value="${th}">${th}</option>`;
-        });
-    }
-}
+            
+            const customerSelect = document.getElementById('filterCustomer');
+            if (customerSelect) {
+                customerSelect.innerHTML = '<option value="">🏢 Все заказчики</option>';
+                Array.from(customers).sort().forEach(c => {
+                    customerSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
+                });
+            }
+            
+            const productSelect = document.getElementById('filterProduct');
+            if (productSelect) {
+                productSelect.innerHTML = '<option value="">📦 Все изделия</option>';
+                Array.from(products).sort().forEach(p => {
+                    productSelect.innerHTML += `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`;
+                });
+            }
+            
+            const operationSelect = document.getElementById('filterOperation');
+            if (operationSelect) {
+                operationSelect.innerHTML = '<option value="">🔧 Все операции</option>';
+                Array.from(operations).sort().forEach(op => {
+                    operationSelect.innerHTML += `<option value="${escapeHtml(op)}">${escapeHtml(op)}</option>`;
+                });
+            }
+            
+            const thicknessSelect = document.getElementById('filterThickness');
+            if (thicknessSelect) {
+                thicknessSelect.innerHTML = '<option value="">📊 Все толщины</option>';
+                Array.from(thicknesses).sort().forEach(th => {
+                    thicknessSelect.innerHTML += `<option value="${th}">${th}</option>`;
+                });
+            }
+        }
         
         function resetFilters() {
             document.getElementById('filterCustomer').value = '';
@@ -1056,15 +1051,22 @@
         
         // ============== ОСНОВНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==============
         function loadTasks() {
-    if (isLoadingTasks) return;
-    isLoadingTasks = true;
-    
-    taskManager.loadData();
-    
-    // ОБНОВЛЯЕМ ФИЛЬТРЫ ПОСЛЕ ЗАГРУЗКИ ЗАДАЧ
-    populateFilters();
-    
-    let tasks = taskManager.getTasksByStatus(document.getElementById('statusFilter').value);
+            if (isLoadingTasks) return;
+            isLoadingTasks = true;
+            
+            taskManager.loadData();
+            
+            // ОБНОВЛЯЕМ ФИЛЬТРЫ ПОСЛЕ ЗАГРУЗКИ ЗАДАЧ
+            populateFilters();
+            
+            let tasks = taskManager.getTasksByStatus(document.getElementById('statusFilter').value);
+            
+            // ПОЛУЧАЕМ ЗНАЧЕНИЯ ФИЛЬТРОВ
+            const filterCustomer = document.getElementById('filterCustomer').value;
+            const filterProduct = document.getElementById('filterProduct').value;
+            const filterOperation = document.getElementById('filterOperation').value;
+            const filterThickness = document.getElementById('filterThickness').value;
+            const filterStatus = document.getElementById('statusFilter').value;
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             
@@ -1137,6 +1139,12 @@
                 const priorityClass = isPriority ? 'priority' : '';
                 const priorityBadge = isPriority ? '<span class="priority-badge">🔴 ПРИОРИТЕТ</span>' : '';
                 
+                // Получаем толщину операции
+                const productOps = taskOperationsData[item.product];
+                const siteOps = productOps?.['лазерно-гибочный'];
+                const operationData = siteOps?.find(op => op.operation === task.operation);
+                const thickness = operationData?.thickness || '';
+                
                 const taskCard = document.createElement('div');
                 taskCard.className = `task-card ${priorityClass}`;
                 taskCard.dataset.taskId = task.id;
@@ -1153,7 +1161,7 @@
                             <span class="task-product-name">📦 ${escapeHtml(item.product)}</span>
                             <span class="task-size">📏 ${escapeHtml(item.size?.name || '-')}</span>
                             <span class="task-quantity">× ${item.size?.quantity || 1} шт</span>
-                            ${item.ral ? `<span class="task-ral">🎨 ${escapeHtml(item.ral)}</span>` : ''}
+                            ${thickness ? `<span class="task-thickness">📊 ${escapeHtml(thickness)}</span>` : ''}
                         </div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
@@ -1166,11 +1174,7 @@
                 const content = document.createElement('div');
                 content.className = 'task-content collapsed';
                 
-                const productOps = taskOperationsData[item.product];
-                const siteOps = productOps?.['лазерно-гибочный'];
-                const operationData = siteOps?.find(op => op.operation === task.operation);
                 const detailName = operationData?.detail || '';
-                const thickness = operationData?.thickness || '';
                 
                 let detailHtml = '';
                 if (detailName) {
@@ -1625,16 +1629,16 @@
         
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         async function init() {
-    await loadTaskOperationsData();
-    taskManager = new SimpleTaskManager('lazerno'); // или 'polimerniy'
-    window.taskManager = taskManager;
-    loadTasks();  // populateFilters() вызовется внутри loadTasks()
-    setupFilterListeners();
-    
-    window.addEventListener('beforeunload', () => {
-        saveOpenCardsState();
-    });
-}
+            await loadTaskOperationsData();
+            taskManager = new SimpleTaskManager('lazerno');
+            window.taskManager = taskManager;
+            setupFilterListeners();
+            loadTasks();
+            
+            window.addEventListener('beforeunload', () => {
+                saveOpenCardsState();
+            });
+        }
         
         window.resetFilters = resetFilters;
         window.openRightModalForTask = openRightModalForTask;
