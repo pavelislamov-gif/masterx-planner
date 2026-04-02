@@ -832,69 +832,69 @@
         
         // ============== ЗАПОЛНЕНИЕ ВЫПАДАЮЩИХ СПИСКОВ ==============
         function populateFilters() {
-            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-            const customers = new Set();
-            const products = new Set();
-            const operations = new Set();
-            const thicknesses = new Set();
-            
-            // Собираем уникальных заказчиков из групп
-            allOrders.forEach(order => {
-                if (order.groupName) customers.add(order.groupName);
-                if (order.items) {
-                    order.items.forEach(item => {
-                        if (item.product) products.add(item.product);
-                    });
-                }
+    const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+    const customers = new Set();
+    const products = new Set();
+    const operations = new Set();
+    const thicknesses = new Set();
+    
+    // Собираем уникальных заказчиков из групп
+    allOrders.forEach(order => {
+        if (order.groupName) customers.add(order.groupName);
+        if (order.items) {
+            order.items.forEach(item => {
+                if (item.product) products.add(item.product);
             });
-            
-            // Собираем уникальные операции и толщины из задач
-            if (taskManager && taskManager.tasks) {
-                taskManager.tasks.forEach(task => {
-                    if (task.operation) operations.add(task.operation);
-                    
-                    // Собираем толщины из данных операции
-                    const productOps = taskOperationsData[task.product];
-                    const siteOps = productOps?.['лазерно-гибочный'];
-                    const operationData = siteOps?.find(op => op.operation === task.operation);
-                    if (operationData?.thickness) {
-                        thicknesses.add(operationData.thickness);
-                    }
-                });
-            }
-            
-            const customerSelect = document.getElementById('filterCustomer');
-            if (customerSelect) {
-                customerSelect.innerHTML = '<option value="">🏢 Все заказчики</option>';
-                Array.from(customers).sort().forEach(c => {
-                    customerSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
-                });
-            }
-            
-            const productSelect = document.getElementById('filterProduct');
-            if (productSelect) {
-                productSelect.innerHTML = '<option value="">📦 Все изделия</option>';
-                Array.from(products).sort().forEach(p => {
-                    productSelect.innerHTML += `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`;
-                });
-            }
-            
-            const operationSelect = document.getElementById('filterOperation');
-            if (operationSelect) {
-                operationSelect.innerHTML = '<option value="">🔧 Все операции</option>';
-                Array.from(operations).sort().forEach(op => {
-                    operationSelect.innerHTML += `<option value="${escapeHtml(op)}">${escapeHtml(op)}</option>`;
-                });
-            }
-            
-            const thicknessSelect = document.getElementById('filterThickness');
-            if (thicknessSelect) {
-                thicknessSelect.innerHTML = '<option value="">📊 Все толщины</option>';
-                Array.from(thicknesses).sort().forEach(th => {
-                    thicknessSelect.innerHTML += `<option value="${th}">${th}</option>`;
-                });
-            }
         }
+    });
+    
+    // Собираем уникальные операции и толщины из задач
+    if (taskManager && taskManager.tasks) {
+        taskManager.tasks.forEach(task => {
+            if (task.operation) operations.add(task.operation);
+            
+            // Получаем толщину из данных операции
+            const productOps = taskOperationsData[task.product];
+            const siteOps = productOps?.['лазерно-гибочный'];
+            const operationData = siteOps?.find(op => op.operation === task.operation);
+            if (operationData?.thickness) {
+                thicknesses.add(operationData.thickness);
+            }
+        });
+    }
+    
+    const customerSelect = document.getElementById('filterCustomer');
+    if (customerSelect) {
+        customerSelect.innerHTML = '<option value="">🏢 Все заказчики</option>';
+        Array.from(customers).sort().forEach(c => {
+            customerSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
+        });
+    }
+    
+    const productSelect = document.getElementById('filterProduct');
+    if (productSelect) {
+        productSelect.innerHTML = '<option value="">📦 Все изделия</option>';
+        Array.from(products).sort().forEach(p => {
+            productSelect.innerHTML += `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`;
+        });
+    }
+    
+    const operationSelect = document.getElementById('filterOperation');
+    if (operationSelect) {
+        operationSelect.innerHTML = '<option value="">🔧 Все операции</option>';
+        Array.from(operations).sort().forEach(op => {
+            operationSelect.innerHTML += `<option value="${escapeHtml(op)}">${escapeHtml(op)}</option>`;
+        });
+    }
+    
+    const thicknessSelect = document.getElementById('filterThickness');
+    if (thicknessSelect) {
+        thicknessSelect.innerHTML = '<option value="">📊 Все толщины</option>';
+        Array.from(thicknesses).sort().forEach(th => {
+            thicknessSelect.innerHTML += `<option value="${th}">${th}</option>`;
+        });
+    }
+}
         
         function resetFilters() {
             document.getElementById('filterCustomer').value = '';
@@ -1056,18 +1056,15 @@
         
         // ============== ОСНОВНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==============
         function loadTasks() {
-            if (isLoadingTasks) return;
-            isLoadingTasks = true;
-            
-            taskManager.loadData();
-            let tasks = taskManager.getTasksByStatus(document.getElementById('statusFilter').value);
-            
-            // ПОЛУЧАЕМ ЗНАЧЕНИЯ ФИЛЬТРОВ
-            const filterCustomer = document.getElementById('filterCustomer').value;
-            const filterProduct = document.getElementById('filterProduct').value;
-            const filterOperation = document.getElementById('filterOperation').value;
-            const filterThickness = document.getElementById('filterThickness').value;
-            const filterStatus = document.getElementById('statusFilter').value;
+    if (isLoadingTasks) return;
+    isLoadingTasks = true;
+    
+    taskManager.loadData();
+    
+    // ОБНОВЛЯЕМ ФИЛЬТРЫ ПОСЛЕ ЗАГРУЗКИ ЗАДАЧ
+    populateFilters();
+    
+    let tasks = taskManager.getTasksByStatus(document.getElementById('statusFilter').value);
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             
