@@ -832,62 +832,62 @@
         
         // ============== ЗАПОЛНЕНИЕ ВЫПАДАЮЩИХ СПИСКОВ ==============
         function populateFilters() {
-    const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-    const customers = new Set();
-    const products = new Set();
-    const operations = new Set();
-    const rals = new Set();
-    
-    // Собираем уникальных заказчиков из групп
-    allOrders.forEach(order => {
-        if (order.groupName) customers.add(order.groupName);
-        if (order.items) {
-            order.items.forEach(item => {
-                if (item.product) products.add(item.product);
-                if (item.ral && item.ral.trim()) rals.add(item.ral.trim());
+            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+            const customers = new Set();
+            const products = new Set();
+            const operations = new Set();
+            const rals = new Set();
+            
+            // Собираем уникальных заказчиков из групп
+            allOrders.forEach(order => {
+                if (order.groupName) customers.add(order.groupName);
+                if (order.items) {
+                    order.items.forEach(item => {
+                        if (item.product) products.add(item.product);
+                        if (item.ral && item.ral.trim()) rals.add(item.ral.trim());
+                    });
+                }
             });
+            
+            // Собираем уникальные операции из задач
+            if (taskManager && taskManager.tasks) {
+                taskManager.tasks.forEach(task => {
+                    if (task.operation) operations.add(task.operation);
+                });
+            }
+            
+            const customerSelect = document.getElementById('filterCustomer');
+            if (customerSelect) {
+                customerSelect.innerHTML = '<option value="">🏢 Все заказчики</option>';
+                Array.from(customers).sort().forEach(c => {
+                    customerSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
+                });
+            }
+            
+            const productSelect = document.getElementById('filterProduct');
+            if (productSelect) {
+                productSelect.innerHTML = '<option value="">📦 Все изделия</option>';
+                Array.from(products).sort().forEach(p => {
+                    productSelect.innerHTML += `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`;
+                });
+            }
+            
+            const operationSelect = document.getElementById('filterOperation');
+            if (operationSelect) {
+                operationSelect.innerHTML = '<option value="">🔧 Все операции</option>';
+                Array.from(operations).sort().forEach(op => {
+                    operationSelect.innerHTML += `<option value="${escapeHtml(op)}">${escapeHtml(op)}</option>`;
+                });
+            }
+            
+            const ralSelect = document.getElementById('filterRal');
+            if (ralSelect) {
+                ralSelect.innerHTML = '<option value="">🎨 Все RAL</option>';
+                Array.from(rals).sort().forEach(r => {
+                    ralSelect.innerHTML += `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`;
+                });
+            }
         }
-    });
-    
-    // Собираем уникальные операции из задач (если задачи уже загружены)
-    if (taskManager && taskManager.tasks) {
-        taskManager.tasks.forEach(task => {
-            if (task.operation) operations.add(task.operation);
-        });
-    }
-    
-    const customerSelect = document.getElementById('filterCustomer');
-    if (customerSelect) {
-        customerSelect.innerHTML = '<option value="">🏢 Все заказчики</option>';
-        Array.from(customers).sort().forEach(c => {
-            customerSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
-        });
-    }
-    
-    const productSelect = document.getElementById('filterProduct');
-    if (productSelect) {
-        productSelect.innerHTML = '<option value="">📦 Все изделия</option>';
-        Array.from(products).sort().forEach(p => {
-            productSelect.innerHTML += `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`;
-        });
-    }
-    
-    const operationSelect = document.getElementById('filterOperation');
-    if (operationSelect) {
-        operationSelect.innerHTML = '<option value="">🔧 Все операции</option>';
-        Array.from(operations).sort().forEach(op => {
-            operationSelect.innerHTML += `<option value="${escapeHtml(op)}">${escapeHtml(op)}</option>`;
-        });
-    }
-    
-    const ralSelect = document.getElementById('filterRal');
-    if (ralSelect) {
-        ralSelect.innerHTML = '<option value="">🎨 Все RAL</option>';
-        Array.from(rals).sort().forEach(r => {
-            ralSelect.innerHTML += `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`;
-        });
-    }
-}
         
         function resetFilters() {
             document.getElementById('filterCustomer').value = '';
@@ -1023,15 +1023,22 @@
         
         // ============== ОСНОВНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==============
         function loadTasks() {
-    if (isLoadingTasks) return;
-    isLoadingTasks = true;
-    
-    taskManager.loadData();
-    
-    // ОБНОВЛЯЕМ ФИЛЬТРЫ ПОСЛЕ ЗАГРУЗКИ ЗАДАЧ
-    populateFilters();
-    
-    let tasks = taskManager.getTasksByStatus(document.getElementById('statusFilter').value);
+            if (isLoadingTasks) return;
+            isLoadingTasks = true;
+            
+            taskManager.loadData();
+            
+            // ОБНОВЛЯЕМ ФИЛЬТРЫ ПОСЛЕ ЗАГРУЗКИ ЗАДАЧ
+            populateFilters();
+            
+            let tasks = taskManager.getTasksByStatus(document.getElementById('statusFilter').value);
+            
+            // ПОЛУЧАЕМ ЗНАЧЕНИЯ ФИЛЬТРОВ
+            const filterCustomer = document.getElementById('filterCustomer').value;
+            const filterProduct = document.getElementById('filterProduct').value;
+            const filterOperation = document.getElementById('filterOperation').value;
+            const filterRal = document.getElementById('filterRal').value;
+            const filterStatus = document.getElementById('statusFilter').value;
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             
@@ -1041,14 +1048,11 @@
                 if (!order) return false;
                 
                 // Приоритетные задачи пропускаем через фильтры, но не скрываем их
-                // Они всегда видны, кроме фильтра "Завершённые"
                 if (task.isPriority === true) {
-                    // Если выбран фильтр "Завершённые" и задача не завершена — скрываем
                     if (filterStatus === 'completed' && task.status !== 'completed') return false;
                     return true;
                 }
                 
-                // Для обычных задач — все фильтры
                 if (filterCustomer && order.groupName !== filterCustomer) return false;
                 
                 const item = order.items?.[task.itemIndex || 0];
@@ -1065,13 +1069,10 @@
             const priorityTasks = tasks.filter(t => t.isPriority === true);
             const normalTasks = tasks.filter(t => t.isPriority !== true);
             
-            // Сортируем приоритетные по дате создания (новые сверху)
             priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            
-            // Объединяем: сначала приоритетные, потом обычные
             const sortedTasks = [...priorityTasks, ...normalTasks];
             
-            // Обновляем статистику с учётом фильтров
+            // Обновляем статистику
             document.getElementById('totalTasks').textContent = tasks.length;
             document.getElementById('tasksInProgress').textContent = tasks.filter(t => t.status === 'in_progress').length;
             document.getElementById('tasksCompleted').textContent = tasks.filter(t => t.status === 'completed').length;
@@ -1092,7 +1093,6 @@
                 
                 if (!order || !item) return;
                 
-                // Определяем статус задачи
                 let statusClass = 'pending';
                 let statusText = '⏳ ОЖИДАЕТ';
                 if (task.status === 'in_progress') {
@@ -1111,7 +1111,6 @@
                 taskCard.className = `task-card ${priorityClass}`;
                 taskCard.dataset.taskId = task.id;
                 
-                // ШАПКА КАРТОЧКИ
                 const header = document.createElement('div');
                 header.className = `task-header ${statusClass} ${priorityClass} collapsed`;
                 header.innerHTML = `
@@ -1135,11 +1134,9 @@
                     </div>
                 `;
                 
-                // КОНТЕНТ КАРТОЧКИ (информация об операции и исполнители)
                 const content = document.createElement('div');
                 content.className = 'task-content collapsed';
                 
-                // Получаем детали операции из taskOperationsData
                 const productOps = taskOperationsData[item.product];
                 const siteOps = productOps?.['полимерный'];
                 const operationData = siteOps?.find(op => op.operation === task.operation);
@@ -1189,11 +1186,9 @@
                 taskCard.appendChild(content);
                 tasksList.appendChild(taskCard);
                 
-                // Заполняем исполнителей после добавления в DOM
                 renderExecutors(task.id, task);
                 renderActionButtons(task.id, task);
                 
-                // Обработчик кнопки ГОТОВО
                 const readyBtn = document.getElementById(`ready-${task.id}`);
                 if (readyBtn) {
                     readyBtn.onclick = () => completeTask(task.id);
@@ -1608,7 +1603,6 @@
             await loadTaskOperationsData();
             taskManager = new SimpleTaskManager('polimerniy');
             window.taskManager = taskManager;
-            populateFilters();
             setupFilterListeners();
             loadTasks();
             
