@@ -1625,17 +1625,16 @@
         
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         async function init() {
-            await loadTaskOperationsData();
-            taskManager = new SimpleTaskManager('lazerno');
-            window.taskManager = taskManager;
-            populateFilters();
-            setupFilterListeners();
-            loadTasks();
-            
-            window.addEventListener('beforeunload', () => {
-                saveOpenCardsState();
-            });
-        }
+    await loadTaskOperationsData();
+    taskManager = new SimpleTaskManager('lazerno'); // или 'polimerniy'
+    window.taskManager = taskManager;
+    loadTasks();  // populateFilters() вызовется внутри loadTasks()
+    setupFilterListeners();
+    
+    window.addEventListener('beforeunload', () => {
+        saveOpenCardsState();
+    });
+}
         
         window.resetFilters = resetFilters;
         window.openRightModalForTask = openRightModalForTask;
