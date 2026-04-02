@@ -833,7 +833,6 @@
             const operations = new Set();
             const thicknesses = new Set();
             
-            // Собираем уникальных заказчиков из групп
             allOrders.forEach(order => {
                 if (order.groupName) customers.add(order.groupName);
                 if (order.items) {
@@ -843,12 +842,10 @@
                 }
             });
             
-            // Собираем уникальные операции и толщины из задач
             if (taskManager && taskManager.tasks) {
                 taskManager.tasks.forEach(task => {
                     if (task.operation) operations.add(task.operation);
                     
-                    // Получаем толщину из данных операции
                     const productOps = taskOperationsData[task.product];
                     const siteOps = productOps?.['лазерно-гибочный'];
                     const operationData = siteOps?.find(op => op.operation === task.operation);
@@ -860,34 +857,42 @@
             
             const customerSelect = document.getElementById('filterCustomer');
             if (customerSelect) {
+                const currentValue = customerSelect.value;
                 customerSelect.innerHTML = '<option value="">🏢 Все заказчики</option>';
                 Array.from(customers).sort().forEach(c => {
                     customerSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
                 });
+                if (currentValue && customers.has(currentValue)) customerSelect.value = currentValue;
             }
             
             const productSelect = document.getElementById('filterProduct');
             if (productSelect) {
+                const currentValue = productSelect.value;
                 productSelect.innerHTML = '<option value="">📦 Все изделия</option>';
                 Array.from(products).sort().forEach(p => {
                     productSelect.innerHTML += `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`;
                 });
+                if (currentValue && products.has(currentValue)) productSelect.value = currentValue;
             }
             
             const operationSelect = document.getElementById('filterOperation');
             if (operationSelect) {
+                const currentValue = operationSelect.value;
                 operationSelect.innerHTML = '<option value="">🔧 Все операции</option>';
                 Array.from(operations).sort().forEach(op => {
                     operationSelect.innerHTML += `<option value="${escapeHtml(op)}">${escapeHtml(op)}</option>`;
                 });
+                if (currentValue && operations.has(currentValue)) operationSelect.value = currentValue;
             }
             
             const thicknessSelect = document.getElementById('filterThickness');
             if (thicknessSelect) {
+                const currentValue = thicknessSelect.value;
                 thicknessSelect.innerHTML = '<option value="">📊 Все толщины</option>';
                 Array.from(thicknesses).sort().forEach(th => {
                     thicknessSelect.innerHTML += `<option value="${th}">${th}</option>`;
                 });
+                if (currentValue && thicknesses.has(currentValue)) thicknessSelect.value = currentValue;
             }
         }
         
@@ -1059,7 +1064,7 @@
             // ОБНОВЛЯЕМ ФИЛЬТРЫ ПОСЛЕ ЗАГРУЗКИ ЗАДАЧ
             populateFilters();
             
-            let tasks = taskManager.getTasksByStatus(document.getElementById('statusFilter').value);
+            let tasks = taskManager.tasks;
             
             // ПОЛУЧАЕМ ЗНАЧЕНИЯ ФИЛЬТРОВ
             const filterCustomer = document.getElementById('filterCustomer').value;
@@ -1075,18 +1080,21 @@
                 const order = allOrders.find(o => o.id == task.orderId);
                 if (!order) return false;
                 
-                // Приоритетные задачи пропускаем через фильтры, но не скрываем их
-                if (task.isPriority === true) {
-                    if (filterStatus === 'completed' && task.status !== 'completed') return false;
-                    return true;
-                }
+                // Фильтр по статусу
+                if (filterStatus === 'completed' && task.status !== 'completed') return false;
+                if (filterStatus === 'in_progress' && task.status !== 'in_progress') return false;
+                if (filterStatus === 'pending' && task.status !== 'pending') return false;
                 
+                // Фильтр по заказчику
                 if (filterCustomer && order.groupName !== filterCustomer) return false;
                 
                 const item = order.items?.[task.itemIndex || 0];
                 if (!item) return false;
                 
+                // Фильтр по изделию
                 if (filterProduct && item.product !== filterProduct) return false;
+                
+                // Фильтр по операции
                 if (filterOperation && task.operation !== filterOperation) return false;
                 
                 return true;
