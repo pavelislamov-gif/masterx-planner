@@ -2106,11 +2106,11 @@
                                 <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
                                 <span style="font-size: 11px; color: #4cd964;">${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
                                 ${item.ral ? `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>` : ''}
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px;">
                                 <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: ${itemStatus === 'completed' ? '#2ecc71' : (itemStatus === 'in_progress' ? '#ff9800' : '#6c757d')}; color: #1a1e24; font-weight: 600;">
                                     ${itemStatusText}
                                 </span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 8px;">
                                 <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
                                     📋 Отчёт
                                 </button>
@@ -2176,16 +2176,17 @@
                         `;
 
                         itemHeader.onclick = (e) => {
-                            e.stopPropagation();
                             if (e.target.tagName === 'BUTTON') return;
                             
                             const arrowSpan = document.getElementById(`arrow-${order.id}-${itemIndex}`);
-                            const isVisible = itemContent.style.display !== 'none';
-                            itemContent.style.display = isVisible ? 'none' : 'block';
-                            if (arrowSpan) {
-                                arrowSpan.textContent = isVisible ? '▼' : '▲';
+                            if (e.target === arrowSpan || arrowSpan?.contains(e.target)) {
+                                const isVisible = itemContent.style.display !== 'none';
+                                itemContent.style.display = isVisible ? 'none' : 'block';
+                                if (arrowSpan) {
+                                    arrowSpan.textContent = isVisible ? '▼' : '▲';
+                                }
+                                saveMainOpenItemsState();
                             }
-                            saveMainOpenItemsState();
                         };
 
                         itemDiv.appendChild(itemHeader);
