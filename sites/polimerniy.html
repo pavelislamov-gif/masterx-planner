@@ -1023,183 +1023,199 @@
         
         // ============== ОСНОВНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==============
         function loadTasks() {
-            if (isLoadingTasks) return;
-            isLoadingTasks = true;
-            
-            taskManager.loadData();
-            
-            // ОБНОВЛЯЕМ ФИЛЬТРЫ ПОСЛЕ ЗАГРУЗКИ ЗАДАЧ
-            populateFilters();
-            
-            let tasks = taskManager.getTasksByStatus(document.getElementById('statusFilter').value);
-            
-            // ПОЛУЧАЕМ ЗНАЧЕНИЯ ФИЛЬТРОВ
-            const filterCustomer = document.getElementById('filterCustomer').value;
-            const filterProduct = document.getElementById('filterProduct').value;
-            const filterOperation = document.getElementById('filterOperation').value;
-            const filterRal = document.getElementById('filterRal').value;
-            const filterStatus = document.getElementById('statusFilter').value;
-            
-            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-            
-            // ФИЛЬТРАЦИЯ ЗАДАЧ
-            let filteredTasks = tasks.filter(task => {
-                const order = allOrders.find(o => o.id == task.orderId);
-                if (!order) return false;
-                
-                // Приоритетные задачи пропускаем через фильтры, но не скрываем их
-                if (task.isPriority === true) {
-                    if (filterStatus === 'completed' && task.status !== 'completed') return false;
-                    return true;
-                }
-                
-                if (filterCustomer && order.groupName !== filterCustomer) return false;
-                
-                const item = order.items?.[task.itemIndex || 0];
-                if (!item) return false;
-                
-                if (filterProduct && item.product !== filterProduct) return false;
-                if (filterRal && item.ral !== filterRal) return false;
-                if (filterOperation && task.operation !== filterOperation) return false;
-                
-                return true;
-            });
-            
-            // РАЗДЕЛЯЕМ ЗАДАЧИ: ПРИОРИТЕТНЫЕ ВСЕГДА НАВЕРХУ
-            const priorityTasks = filteredTasks.filter(t => t.isPriority === true);
-            const normalTasks = filteredTasks.filter(t => t.isPriority !== true);
-            
-            priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            const sortedTasks = [...priorityTasks, ...normalTasks];
-            
-            // Обновляем статистику (отфильтрованные задачи)
-            document.getElementById('totalTasks').textContent = filteredTasks.length;
-            document.getElementById('tasksInProgress').textContent = filteredTasks.filter(t => t.status === 'in_progress').length;
-            document.getElementById('tasksCompleted').textContent = filteredTasks.filter(t => t.status === 'completed').length;
-
-            const tasksList = document.getElementById('tasksList');
-            tasksList.innerHTML = '';
-
-            if (sortedTasks.length === 0) {
-                tasksList.innerHTML = '<div class="no-tasks"><p>📭 Нет задач по выбранным фильтрам</p></div>';
-                isLoadingTasks = false;
-                return;
-            }
-
-            // РЕНДЕРИМ КАЖДУЮ ЗАДАЧУ ОТДЕЛЬНО
-            sortedTasks.forEach(task => {
-                const order = allOrders.find(o => o.id == task.orderId);
-                const item = order?.items?.[task.itemIndex || 0];
-                
-                if (!order || !item) return;
-                
-                let statusClass = 'pending';
-                let statusText = '⏳ ОЖИДАЕТ';
-                if (task.status === 'in_progress') {
-                    statusClass = 'in-progress';
-                    statusText = '⚡ В РАБОТЕ';
-                } else if (task.status === 'completed') {
-                    statusClass = 'completed';
-                    statusText = '✅ ГОТОВО';
-                }
-                
-                const isPriority = task.isPriority === true;
-                const priorityClass = isPriority ? 'priority' : '';
-                const priorityBadge = isPriority ? '<span class="priority-badge">🔴 ПРИОРИТЕТ</span>' : '';
-                
-                const taskCard = document.createElement('div');
-                taskCard.className = `task-card ${priorityClass}`;
-                taskCard.dataset.taskId = task.id;
-                
-                const header = document.createElement('div');
-                header.className = `task-header ${statusClass} ${priorityClass} collapsed`;
-                header.innerHTML = `
-                    <div class="task-header-left">
-                        <div class="task-customer-name">
-                            🏢 ${escapeHtml(order.groupName)} | Заказ №${escapeHtml(order.number)}
-                            ${priorityBadge}
-                        </div>
-                        <div class="task-product-info">
-                            <span class="task-product-name">📦 ${escapeHtml(item.product)}</span>
-                            <span class="task-size">📏 ${escapeHtml(item.size?.name || '-')}</span>
-                            <span class="task-quantity">× ${item.size?.quantity || 1} шт</span>
-                            ${item.ral ? `<span class="task-ral">🎨 ${escapeHtml(item.ral)}</span>` : ''}
-                            ${item.texture ? `<span class="task-texture">🧵 ${escapeHtml(item.texture)}</span>` : ''}
-                        </div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span class="task-status-badge ${statusClass}">${statusText}</span>
-                        <button class="btn-report-item" onclick="event.stopPropagation(); openRightModalForTask('${task.id}')">📝 Отчёт</button>
-                        <span class="collapse-icon">▼</span>
-                    </div>
-                `;
-                
-                const content = document.createElement('div');
-                content.className = 'task-content collapsed';
-                
-                const productOps = taskOperationsData[item.product];
-                const siteOps = productOps?.['полимерный'];
-                const operationData = siteOps?.find(op => op.operation === task.operation);
-                const detailName = operationData?.detail || '';
-                const thickness = operationData?.thickness || '';
-                
-                let detailHtml = '';
-                if (detailName) {
-                    let detailDisplay = detailName;
-                    if (thickness) {
-                        detailDisplay = detailDisplay.replace(thickness, '').trim();
-                    }
-                    detailHtml = `
-                        <div class="operation-detail">
-                            📦 ${escapeHtml(detailDisplay)} ${thickness ? `<span>${escapeHtml(thickness)}</span>` : ''}
-                        </div>
-                    `;
-                }
-                
-                content.innerHTML = `
-                    <div class="operation-info">
-                        <div class="operation-name">${escapeHtml(task.operation)}</div>
-                        ${detailHtml}
-                        <div class="operation-plan">📋 План: ${task.totalQuantity || 1} шт</div>
-                    </div>
-                    
-                    <div class="executor-header">
-                        <span>ФИО</span><span>Кол-во</span><span>Статус</span><span></span>
-                    </div>
-                    <div class="executor-list" id="executors-${task.id}"></div>
-                    
-                    <div class="action-container" id="action-${task.id}"></div>
-                    
-                    <button class="btn-ready" id="ready-${task.id}" ${task.status === 'completed' ? 'disabled' : ''}>✅ ГОТОВО</button>
-                `;
-                
-                header.addEventListener('click', function(e) {
-                    if (e.target.tagName === 'BUTTON') return;
-                    header.classList.toggle('collapsed');
-                    content.classList.toggle('collapsed');
-                    const arrow = header.querySelector('.collapse-icon');
-                    if (arrow) arrow.textContent = header.classList.contains('collapsed') ? '▼' : '▲';
-                    saveOpenCardsState();
-                });
-                
-                taskCard.appendChild(header);
-                taskCard.appendChild(content);
-                tasksList.appendChild(taskCard);
-                
-                renderExecutors(task.id, task);
-                renderActionButtons(task.id, task);
-                
-                const readyBtn = document.getElementById(`ready-${task.id}`);
-                if (readyBtn) {
-                    readyBtn.onclick = () => completeTask(task.id);
-                }
-            });
-            
-            setTimeout(() => {
-                restoreOpenCardsState();
-                isLoadingTasks = false;
-            }, 50);
+    if (isLoadingTasks) return;
+    isLoadingTasks = true;
+    
+    taskManager.loadData();
+    
+    // ОБНОВЛЯЕМ ФИЛЬТРЫ ПОСЛЕ ЗАГРУЗКИ ЗАДАЧ
+    populateFilters();
+    
+    let tasks = taskManager.getTasksByStatus(document.getElementById('statusFilter').value);
+    
+    // ПОЛУЧАЕМ ЗНАЧЕНИЯ ФИЛЬТРОВ
+    const filterCustomer = document.getElementById('filterCustomer').value;
+    const filterProduct = document.getElementById('filterProduct').value;
+    const filterOperation = document.getElementById('filterOperation').value;
+    const filterRal = document.getElementById('filterRal').value;
+    const filterStatus = document.getElementById('statusFilter').value;
+    
+    const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+    
+    // ДЛЯ ОТЛАДКИ - ПРОВЕРЯЕМ ЗНАЧЕНИЯ ФИЛЬТРОВ
+    console.log('Фильтры:', { filterCustomer, filterProduct, filterOperation, filterRal, filterStatus });
+    
+    // ФИЛЬТРАЦИЯ ЗАДАЧ
+    let filteredTasks = tasks.filter(task => {
+        const order = allOrders.find(o => o.id == task.orderId);
+        if (!order) {
+            console.log('Заказ не найден для задачи:', task.id);
+            return false;
         }
+        
+        // Приоритетные задачи пропускаем через фильтры, но не скрываем их
+        if (task.isPriority === true) {
+            if (filterStatus === 'completed' && task.status !== 'completed') return false;
+            return true;
+        }
+        
+        if (filterCustomer && order.groupName !== filterCustomer) return false;
+        
+        const item = order.items?.[task.itemIndex || 0];
+        if (!item) return false;
+        
+        if (filterProduct && item.product !== filterProduct) return false;
+        
+        // ФИЛЬТР ПО RAL (приводим к строке и убираем пробелы)
+        if (filterRal) {
+            const itemRal = (item.ral || '').trim();
+            const filterRalValue = filterRal.trim();
+            console.log(`Сравнение RAL: itemRal="${itemRal}", filterRal="${filterRalValue}"`);
+            if (itemRal !== filterRalValue) return false;
+        }
+        
+        if (filterOperation && task.operation !== filterOperation) return false;
+        
+        return true;
+    });
+    
+    console.log(`Найдено задач после фильтрации: ${filteredTasks.length} из ${tasks.length}`);
+    
+    // РАЗДЕЛЯЕМ ЗАДАЧИ: ПРИОРИТЕТНЫЕ ВСЕГДА НАВЕРХУ
+    const priorityTasks = filteredTasks.filter(t => t.isPriority === true);
+    const normalTasks = filteredTasks.filter(t => t.isPriority !== true);
+    
+    priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const sortedTasks = [...priorityTasks, ...normalTasks];
+    
+    // Обновляем статистику (отфильтрованные задачи)
+    document.getElementById('totalTasks').textContent = filteredTasks.length;
+    document.getElementById('tasksInProgress').textContent = filteredTasks.filter(t => t.status === 'in_progress').length;
+    document.getElementById('tasksCompleted').textContent = filteredTasks.filter(t => t.status === 'completed').length;
+
+    const tasksList = document.getElementById('tasksList');
+    tasksList.innerHTML = '';
+
+    if (sortedTasks.length === 0) {
+        tasksList.innerHTML = '<div class="no-tasks"><p>📭 Нет задач по выбранным фильтрам</p></div>';
+        isLoadingTasks = false;
+        return;
+    }
+
+    // РЕНДЕРИМ КАЖДУЮ ЗАДАЧУ ОТДЕЛЬНО
+    sortedTasks.forEach(task => {
+        const order = allOrders.find(o => o.id == task.orderId);
+        const item = order?.items?.[task.itemIndex || 0];
+        
+        if (!order || !item) return;
+        
+        let statusClass = 'pending';
+        let statusText = '⏳ ОЖИДАЕТ';
+        if (task.status === 'in_progress') {
+            statusClass = 'in-progress';
+            statusText = '⚡ В РАБОТЕ';
+        } else if (task.status === 'completed') {
+            statusClass = 'completed';
+            statusText = '✅ ГОТОВО';
+        }
+        
+        const isPriority = task.isPriority === true;
+        const priorityClass = isPriority ? 'priority' : '';
+        const priorityBadge = isPriority ? '<span class="priority-badge">🔴 ПРИОРИТЕТ</span>' : '';
+        
+        const taskCard = document.createElement('div');
+        taskCard.className = `task-card ${priorityClass}`;
+        taskCard.dataset.taskId = task.id;
+        
+        const header = document.createElement('div');
+        header.className = `task-header ${statusClass} ${priorityClass} collapsed`;
+        header.innerHTML = `
+            <div class="task-header-left">
+                <div class="task-customer-name">
+                    🏢 ${escapeHtml(order.groupName)} | Заказ №${escapeHtml(order.number)}
+                    ${priorityBadge}
+                </div>
+                <div class="task-product-info">
+                    <span class="task-product-name">📦 ${escapeHtml(item.product)}</span>
+                    <span class="task-size">📏 ${escapeHtml(item.size?.name || '-')}</span>
+                    <span class="task-quantity">× ${item.size?.quantity || 1} шт</span>
+                    ${item.ral ? `<span class="task-ral">🎨 ${escapeHtml(item.ral)}</span>` : ''}
+                    ${item.texture ? `<span class="task-texture">🧵 ${escapeHtml(item.texture)}</span>` : ''}
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="task-status-badge ${statusClass}">${statusText}</span>
+                <button class="btn-report-item" onclick="event.stopPropagation(); openRightModalForTask('${task.id}')">📝 Отчёт</button>
+                <span class="collapse-icon">▼</span>
+            </div>
+        `;
+        
+        const content = document.createElement('div');
+        content.className = 'task-content collapsed';
+        
+        const productOps = taskOperationsData[item.product];
+        const siteOps = productOps?.['полимерный'];
+        const operationData = siteOps?.find(op => op.operation === task.operation);
+        const detailName = operationData?.detail || '';
+        const thickness = operationData?.thickness || '';
+        
+        let detailHtml = '';
+        if (detailName) {
+            let detailDisplay = detailName;
+            if (thickness) {
+                detailDisplay = detailDisplay.replace(thickness, '').trim();
+            }
+            detailHtml = `
+                <div class="operation-detail">
+                    📦 ${escapeHtml(detailDisplay)} ${thickness ? `<span>${escapeHtml(thickness)}</span>` : ''}
+                </div>
+            `;
+        }
+        
+        content.innerHTML = `
+            <div class="operation-info">
+                <div class="operation-name">${escapeHtml(task.operation)}</div>
+                ${detailHtml}
+                <div class="operation-plan">📋 План: ${task.totalQuantity || 1} шт</div>
+            </div>
+            
+            <div class="executor-header">
+                <span>ФИО</span><span>Кол-во</span><span>Статус</span><span></span>
+            </div>
+            <div class="executor-list" id="executors-${task.id}"></div>
+            
+            <div class="action-container" id="action-${task.id}"></div>
+            
+            <button class="btn-ready" id="ready-${task.id}" ${task.status === 'completed' ? 'disabled' : ''}>✅ ГОТОВО</button>
+        `;
+        
+        header.addEventListener('click', function(e) {
+            if (e.target.tagName === 'BUTTON') return;
+            header.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+            const arrow = header.querySelector('.collapse-icon');
+            if (arrow) arrow.textContent = header.classList.contains('collapsed') ? '▼' : '▲';
+            saveOpenCardsState();
+        });
+        
+        taskCard.appendChild(header);
+        taskCard.appendChild(content);
+        tasksList.appendChild(taskCard);
+        
+        renderExecutors(task.id, task);
+        renderActionButtons(task.id, task);
+        
+        const readyBtn = document.getElementById(`ready-${task.id}`);
+        if (readyBtn) {
+            readyBtn.onclick = () => completeTask(task.id);
+        }
+    });
+    
+    setTimeout(() => {
+        restoreOpenCardsState();
+        isLoadingTasks = false;
+    }, 50);
+}
         
         function renderExecutors(taskId, task) {
             const container = document.getElementById(`executors-${taskId}`);
