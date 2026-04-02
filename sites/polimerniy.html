@@ -832,62 +832,62 @@
         
         // ============== ЗАПОЛНЕНИЕ ВЫПАДАЮЩИХ СПИСКОВ ==============
         function populateFilters() {
-            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-            const customers = new Set();
-            const products = new Set();
-            const operations = new Set();
-            const rals = new Set();
-            
-            // Собираем уникальных заказчиков из групп
-            allOrders.forEach(order => {
-                if (order.groupName) customers.add(order.groupName);
-                if (order.items) {
-                    order.items.forEach(item => {
-                        if (item.product) products.add(item.product);
-                        if (item.ral && item.ral.trim()) rals.add(item.ral.trim());
-                    });
-                }
+    const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+    const customers = new Set();
+    const products = new Set();
+    const operations = new Set();
+    const rals = new Set();
+    
+    // Собираем уникальных заказчиков из групп
+    allOrders.forEach(order => {
+        if (order.groupName) customers.add(order.groupName);
+        if (order.items) {
+            order.items.forEach(item => {
+                if (item.product) products.add(item.product);
+                if (item.ral && item.ral.trim()) rals.add(item.ral.trim());
             });
-            
-            // Собираем уникальные операции из задач
-            if (taskManager && taskManager.tasks) {
-                taskManager.tasks.forEach(task => {
-                    if (task.operation) operations.add(task.operation);
-                });
-            }
-            
-            const customerSelect = document.getElementById('filterCustomer');
-            if (customerSelect) {
-                customerSelect.innerHTML = '<option value="">🏢 Все заказчики</option>';
-                Array.from(customers).sort().forEach(c => {
-                    customerSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
-                });
-            }
-            
-            const productSelect = document.getElementById('filterProduct');
-            if (productSelect) {
-                productSelect.innerHTML = '<option value="">📦 Все изделия</option>';
-                Array.from(products).sort().forEach(p => {
-                    productSelect.innerHTML += `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`;
-                });
-            }
-            
-            const operationSelect = document.getElementById('filterOperation');
-            if (operationSelect) {
-                operationSelect.innerHTML = '<option value="">🔧 Все операции</option>';
-                Array.from(operations).sort().forEach(op => {
-                    operationSelect.innerHTML += `<option value="${escapeHtml(op)}">${escapeHtml(op)}</option>`;
-                });
-            }
-            
-            const ralSelect = document.getElementById('filterRal');
-            if (ralSelect) {
-                ralSelect.innerHTML = '<option value="">🎨 Все RAL</option>';
-                Array.from(rals).sort().forEach(r => {
-                    ralSelect.innerHTML += `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`;
-                });
-            }
         }
+    });
+    
+    // Собираем уникальные операции из задач (если задачи уже загружены)
+    if (taskManager && taskManager.tasks) {
+        taskManager.tasks.forEach(task => {
+            if (task.operation) operations.add(task.operation);
+        });
+    }
+    
+    const customerSelect = document.getElementById('filterCustomer');
+    if (customerSelect) {
+        customerSelect.innerHTML = '<option value="">🏢 Все заказчики</option>';
+        Array.from(customers).sort().forEach(c => {
+            customerSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
+        });
+    }
+    
+    const productSelect = document.getElementById('filterProduct');
+    if (productSelect) {
+        productSelect.innerHTML = '<option value="">📦 Все изделия</option>';
+        Array.from(products).sort().forEach(p => {
+            productSelect.innerHTML += `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`;
+        });
+    }
+    
+    const operationSelect = document.getElementById('filterOperation');
+    if (operationSelect) {
+        operationSelect.innerHTML = '<option value="">🔧 Все операции</option>';
+        Array.from(operations).sort().forEach(op => {
+            operationSelect.innerHTML += `<option value="${escapeHtml(op)}">${escapeHtml(op)}</option>`;
+        });
+    }
+    
+    const ralSelect = document.getElementById('filterRal');
+    if (ralSelect) {
+        ralSelect.innerHTML = '<option value="">🎨 Все RAL</option>';
+        Array.from(rals).sort().forEach(r => {
+            ralSelect.innerHTML += `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`;
+        });
+    }
+}
         
         function resetFilters() {
             document.getElementById('filterCustomer').value = '';
