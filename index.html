@@ -2179,14 +2179,12 @@
                             if (e.target.tagName === 'BUTTON') return;
                             
                             const arrowSpan = document.getElementById(`arrow-${order.id}-${itemIndex}`);
-                            if (e.target === arrowSpan || arrowSpan?.contains(e.target)) {
-                                const isVisible = itemContent.style.display !== 'none';
-                                itemContent.style.display = isVisible ? 'none' : 'block';
-                                if (arrowSpan) {
-                                    arrowSpan.textContent = isVisible ? '▼' : '▲';
-                                }
-                                saveMainOpenItemsState();
+                            const isVisible = itemContent.style.display !== 'none';
+                            itemContent.style.display = isVisible ? 'none' : 'block';
+                            if (arrowSpan) {
+                                arrowSpan.textContent = isVisible ? '▼' : '▲';
                             }
+                            saveMainOpenItemsState();
                         };
 
                         itemDiv.appendChild(itemHeader);
