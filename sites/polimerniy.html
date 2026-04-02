@@ -1043,7 +1043,7 @@
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             
             // ФИЛЬТРАЦИЯ ЗАДАЧ
-            tasks = tasks.filter(task => {
+            let filteredTasks = tasks.filter(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
                 if (!order) return false;
                 
@@ -1066,16 +1066,16 @@
             });
             
             // РАЗДЕЛЯЕМ ЗАДАЧИ: ПРИОРИТЕТНЫЕ ВСЕГДА НАВЕРХУ
-            const priorityTasks = tasks.filter(t => t.isPriority === true);
-            const normalTasks = tasks.filter(t => t.isPriority !== true);
+            const priorityTasks = filteredTasks.filter(t => t.isPriority === true);
+            const normalTasks = filteredTasks.filter(t => t.isPriority !== true);
             
             priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             const sortedTasks = [...priorityTasks, ...normalTasks];
             
-            // Обновляем статистику
-            document.getElementById('totalTasks').textContent = tasks.length;
-            document.getElementById('tasksInProgress').textContent = tasks.filter(t => t.status === 'in_progress').length;
-            document.getElementById('tasksCompleted').textContent = tasks.filter(t => t.status === 'completed').length;
+            // Обновляем статистику (отфильтрованные задачи)
+            document.getElementById('totalTasks').textContent = filteredTasks.length;
+            document.getElementById('tasksInProgress').textContent = filteredTasks.filter(t => t.status === 'in_progress').length;
+            document.getElementById('tasksCompleted').textContent = filteredTasks.filter(t => t.status === 'completed').length;
 
             const tasksList = document.getElementById('tasksList');
             tasksList.innerHTML = '';
