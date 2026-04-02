@@ -2038,52 +2038,50 @@
                 if (order.items && order.items.length > 0) {
                     order.items.forEach((item, itemIndex) => {
                         let itemStatus = 'pending';
-                        let allTasksCompleted = true;
-                        let hasInProgress = false;
-                        
-                        if (order.tasks) {
-                            for (const [taskId, taskStatus] of Object.entries(order.tasks)) {
-                                const parts = taskId.split('_');
-                                if (parts.length >= 3 && parseInt(parts[2]) === itemIndex) {
-                                    if (taskStatus === 'orange' || taskStatus === 'in_progress') {
-                                        hasInProgress = true;
-                                        allTasksCompleted = false;
-                                    } else if (taskStatus === 'pending') {
-                                        allTasksCompleted = false;
-                                    }
-                                }
-                            }
-                        }
-                        
-                        if (allTasksCompleted && Object.keys(order.tasks).length > 0) {
-                            itemStatus = 'completed';
-                        } else if (hasInProgress) {
-                            itemStatus = 'in_progress';
-                        } else {
-                            itemStatus = 'pending';
-                        }
-                        
-                        let itemHeaderClass = '';
-                        let itemStatusText = '';
-                        let headerBgColor = '';
-                        let headerBorderColor = '';
-                        
-                        if (itemStatus === 'completed') {
-                            itemHeaderClass = 'item-status-green';
-                            itemStatusText = '✅ ГОТОВО';
-                            headerBgColor = 'linear-gradient(135deg, #1a3a1a, #0f2a0f)';
-                            headerBorderColor = '#2ecc71';
-                        } else if (itemStatus === 'in_progress') {
-                            itemHeaderClass = 'item-status-orange';
-                            itemStatusText = '⚡ В РАБОТЕ';
-                            headerBgColor = 'linear-gradient(135deg, #3a2a1a, #2a1f0f)';
-                            headerBorderColor = '#ff9800';
-                        } else {
-                            itemHeaderClass = 'item-status-gray';
-                            itemStatusText = '⏳ ОЖИДАЕТ';
-                            headerBgColor = '#232830';
-                            headerBorderColor = '#6c757d';
-                        }
+let allTasksCompleted = true;
+let hasInProgress = false;
+let hasAnyTask = false;  // Флаг, есть ли хоть одна назначенная задача
+
+if (order.tasks) {
+    for (const [taskId, taskStatus] of Object.entries(order.tasks)) {
+        const parts = taskId.split('_');
+        if (parts.length >= 3 && parseInt(parts[2]) === itemIndex) {
+            hasAnyTask = true;  // Есть назначенная задача
+            if (taskStatus === 'orange' || taskStatus === 'in_progress') {
+                hasInProgress = true;
+                allTasksCompleted = false;
+            } else if (taskStatus === 'pending') {
+                allTasksCompleted = false;
+            }
+        }
+    }
+}
+
+// Определяем статус
+let itemHeaderClass = '';
+let itemStatusText = '';
+let headerBgColor = '';
+let headerBorderColor = '';
+
+if (hasAnyTask && allTasksCompleted) {
+    itemStatus = 'completed';
+    itemHeaderClass = 'item-status-green';
+    itemStatusText = '✅ ГОТОВО';
+    headerBgColor = 'linear-gradient(135deg, #1a3a1a, #0f2a0f)';
+    headerBorderColor = '#2ecc71';
+} else if (hasInProgress) {
+    itemStatus = 'in_progress';
+    itemHeaderClass = 'item-status-orange';
+    itemStatusText = '⚡ В РАБОТЕ';
+    headerBgColor = 'linear-gradient(135deg, #3a2a1a, #2a1f0f)';
+    headerBorderColor = '#ff9800';
+} else {
+    itemStatus = 'pending';
+    itemHeaderClass = 'item-status-gray';
+    itemStatusText = '⏳ ОЖИДАЕТ';
+    headerBgColor = '#232830';
+    headerBorderColor = '#6c757d';
+}
                         
                         const itemDiv = document.createElement('div');
                         itemDiv.style.marginBottom = '20px';
