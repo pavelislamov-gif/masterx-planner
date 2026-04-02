@@ -379,6 +379,7 @@
         /* СТАТУСЫ ИЗДЕЛИЙ */
         .item-header {
             transition: all 0.2s;
+            cursor: pointer;
         }
         .item-header.item-status-green {
             background: linear-gradient(135deg, #1a3a1a, #0f2a0f) !important;
@@ -1809,7 +1810,6 @@
                     isAdded = true;
                 }
                 
-                // Формируем отображение детали
                 let detailDisplay = '';
                 if (detailName) {
                     let shortDetail = detailName;
@@ -1819,7 +1819,6 @@
                     detailDisplay = `<div class="operation-detail-vertical">📦 ${escapeHtml(shortDetail)}${thickness ? ` <span class="thickness-badge">${escapeHtml(thickness)}</span>` : ''}</div>`;
                 }
                 
-                // Определяем класс квадратика
                 let squareClass = '';
                 if (taskStatus === 'green') squareClass = 'green';
                 else if (taskStatus === 'orange') squareClass = 'orange';
@@ -2038,7 +2037,6 @@
 
                 if (order.items && order.items.length > 0) {
                     order.items.forEach((item, itemIndex) => {
-                        // ОПРЕДЕЛЯЕМ СТАТУС ИЗДЕЛИЯ
                         let itemStatus = 'pending';
                         let allTasksCompleted = true;
                         let hasInProgress = false;
@@ -2101,7 +2099,8 @@
                         itemHeader.style.alignItems = 'center';
                         itemHeader.style.background = headerBgColor;
                         itemHeader.style.borderLeft = `4px solid ${headerBorderColor}`;
-                        
+                        itemHeader.style.cursor = 'pointer';
+
                         itemHeader.innerHTML = `
                             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                                 <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
@@ -2177,20 +2176,16 @@
                         `;
 
                         itemHeader.onclick = (e) => {
-                            // Если клик по кнопке отчёта — ничего не делаем
+                            e.stopPropagation();
                             if (e.target.tagName === 'BUTTON') return;
                             
                             const arrowSpan = document.getElementById(`arrow-${order.id}-${itemIndex}`);
-                            // Если клик по стрелке или её дочерним элементам
-                            if (e.target === arrowSpan || arrowSpan?.contains(e.target)) {
-                                const isVisible = itemContent.style.display !== 'none';
-                                itemContent.style.display = isVisible ? 'none' : 'block';
-                                if (arrowSpan) {
-                                    arrowSpan.textContent = isVisible ? '▼' : '▲';
-                                }
-                                saveMainOpenItemsState();
+                            const isVisible = itemContent.style.display !== 'none';
+                            itemContent.style.display = isVisible ? 'none' : 'block';
+                            if (arrowSpan) {
+                                arrowSpan.textContent = isVisible ? '▼' : '▲';
                             }
-                            // Клик по остальной части шапки не сворачивает содержимое
+                            saveMainOpenItemsState();
                         };
 
                         itemDiv.appendChild(itemHeader);
