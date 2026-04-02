@@ -910,14 +910,17 @@
             if (!thickness) return tasks;
             
             return tasks.filter(task => {
+                // Приоритетные задачи пропускаем фильтр толщины
+                if (task.isPriority === true) return true;
+                
                 const productOps = taskOperationsData[task.product];
                 const siteOps = productOps?.['лазерно-гибочный'];
                 const operationData = siteOps?.find(op => op.operation === task.operation);
                 
                 if (operationData?.thickness === thickness) return true;
                 
-                const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-                const order = allOrders.find(o => o.id == task.orderId);
+                const allOrdersLocal = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+                const order = allOrdersLocal.find(o => o.id == task.orderId);
                 if (order && order.items && order.items[task.itemIndex || 0]) {
                     const item = order.items[task.itemIndex || 0];
                     if (item.details) {
@@ -1075,32 +1078,34 @@
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             
-            // ФИЛЬТРАЦИЯ ЗАДАЧ
+            // ФИЛЬТРАЦИЯ ЗАДАЧ С УЧЁТОМ ПРИОРИТЕТА
             tasks = tasks.filter(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
                 if (!order) return false;
                 
-                // Фильтр по статусу
+                // Фильтр по статусу применяется ко ВСЕМ задачам (включая приоритетные)
                 if (filterStatus === 'completed' && task.status !== 'completed') return false;
                 if (filterStatus === 'in_progress' && task.status !== 'in_progress') return false;
                 if (filterStatus === 'pending' && task.status !== 'pending') return false;
                 
-                // Фильтр по заказчику
+                // ДЛЯ ПРИОРИТЕТНЫХ ЗАДАЧ: пропускаем все остальные фильтры
+                if (task.isPriority === true) {
+                    return true;
+                }
+                
+                // ДЛЯ ОБЫЧНЫХ ЗАДАЧ: применяем все фильтры
                 if (filterCustomer && order.groupName !== filterCustomer) return false;
                 
                 const item = order.items?.[task.itemIndex || 0];
                 if (!item) return false;
                 
-                // Фильтр по изделию
                 if (filterProduct && item.product !== filterProduct) return false;
-                
-                // Фильтр по операции
                 if (filterOperation && task.operation !== filterOperation) return false;
                 
                 return true;
             });
             
-            // ФИЛЬТР ПО ТОЛЩИНЕ
+            // ФИЛЬТР ПО ТОЛЩИНЕ (приоритетные задачи уже пропущены)
             if (filterThickness) {
                 tasks = filterTasksByThickness(tasks, filterThickness);
             }
@@ -1369,12 +1374,42 @@
         function completeTask(taskId) {
             const task = taskManager.tasks.find(t => t.id === taskId);
             if (!task) return;
+            
             const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
+            const planQuantity = task.totalQuantity || 1;
             let operationName = task.operation;
-            if (confirm('Завершить задачу?\nОперация: ' + operationName + '\nВыполнено: ' + totalAssigned + ' шт')) {
-                taskManager.completeTask(taskId);
-                loadTasks();
+            
+            // Если задача приоритетная и выполнена не полностью, предупреждаем
+            if (task.isPriority === true && totalAssigned < planQuantity) {
+                if (!confirm('⚠️ ПРИОРИТЕТНАЯ ЗАДАЧА!\nВыполнено только ' + totalAssigned + ' из ' + planQuantity + ' шт.\n\nВсё равно завершить?')) {
+                    return;
+                }
+            } else {
+                if (!confirm('Завершить задачу?\nОперация: ' + operationName + '\nВыполнено: ' + totalAssigned + ' шт')) {
+                    return;
+                }
             }
+            
+            taskManager.completeTask(taskId);
+            
+            // ВАЖНО: после завершения задачи снимаем приоритет
+            const updatedTask = taskManager.tasks.find(t => t.id === taskId);
+            if (updatedTask && updatedTask.isPriority === true) {
+                updatedTask.isPriority = false;
+                taskManager.saveData();
+                
+                // Обновляем в заказе
+                const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+                const order = orders.find(o => o.id == updatedTask.orderId);
+                if (order && order.tasks) {
+                    if (order.tasks[taskId] === 'in_progress' || order.tasks[taskId] === 'pending') {
+                        order.tasks[taskId] = 'completed';
+                        localStorage.setItem('masterx_orders', JSON.stringify(orders));
+                    }
+                }
+            }
+            
+            loadTasks();
         }
         
         // ============== ОТЧЁТ ПО ЗАДАЧЕ ==============
