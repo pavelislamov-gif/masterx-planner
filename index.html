@@ -522,18 +522,18 @@
         }
 
         .square-vertical.orange {
-            background-color: #ff9800;
-            border-color: #e65100;
+            background-color: #ff9800 !important;
+            border-color: #e65100 !important;
         }
 
         .square-vertical.green {
-            background-color: #4caf50;
-            border-color: #2e7d32;
+            background-color: #4caf50 !important;
+            border-color: #2e7d32 !important;
         }
 
         .square-vertical.red {
-            background-color: #ff3b3b;
-            border-color: #cc2e2e;
+            background-color: #ff3b3b !important;
+            border-color: #cc2e2e !important;
         }
 
         .action-buttons {
@@ -603,6 +603,13 @@
         .sites-grid::-webkit-scrollbar-thumb {
             background: #ff3b3b;
             border-radius: 3px;
+        }
+
+        .no-operations {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 12px;
         }
 
         /* СВЕТЛАЯ ТЕМА */
@@ -734,6 +741,14 @@
         body.light-theme .square-vertical {
             background: #f1f5f9 !important;
             border-color: #e2e8f0 !important;
+        }
+
+        body.light-theme .square-vertical.orange {
+            background-color: #ff9800 !important;
+        }
+
+        body.light-theme .square-vertical.green {
+            background-color: #4caf50 !important;
         }
 
         body.light-theme .op-toggle-btn-vertical {
@@ -1780,36 +1795,59 @@
             });
         }
 
-        // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА (ВЕРТИКАЛЬНОЕ ОТОБРАЖЕНИЕ) ==============
+        // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА ==============
         function createSiteRow(name, order, itemIndex, siteKey) {
             const item = order.items[itemIndex];
             if (!item) return null;
 
+            const operations = getOperationNames(item.product, siteKey);
             const operationsWithDetails = getOperationNamesWithDetails(item.product, siteKey);
-            
-            if (!operationsWithDetails || operationsWithDetails.length === 0) {
-                return null;
+
+            if (!operations || operations.length === 0) {
+                return `
+                    <div class="site-card">
+                        <div class="site-card-header">
+                            <div class="site-name">${name}</div>
+                            <div class="site-stats">0/0</div>
+                        </div>
+                        <div class="site-card-content">
+                            <div class="no-operations">Нет операций</div>
+                            <button class="btn-add-extra" onclick="addExtraTask(${order.id}, '${siteKey}')">➕ Доп. задача</button>
+                        </div>
+                    </div>
+                `;
             }
 
             let operationsHtml = '';
             let completedCount = 0;
 
-            operationsWithDetails.forEach((op, idx) => {
-                const operationName = typeof op === 'object' ? op.operation : op;
-                const detailName = typeof op === 'object' ? (op.detail || '') : '';
-                const thickness = typeof op === 'object' ? (op.thickness || '') : '';
+            for (let i = 0; i < operations.length; i++) {
+                const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
+                const operationName = operations[i];
                 
-                const taskId = `${order.id}_${siteKey}_${itemIndex}_${idx}`;
+                let detailName = '';
+                let thickness = '';
+                if (operationsWithDetails[i] && typeof operationsWithDetails[i] === 'object') {
+                    detailName = operationsWithDetails[i].detail || '';
+                    thickness = operationsWithDetails[i].thickness || '';
+                }
                 
                 let taskStatus = '';
                 let isAdded = false;
-                
+                let squareColor = '';
+
                 if (order.tasks && order.tasks[taskId]) {
                     taskStatus = order.tasks[taskId];
-                    if (taskStatus === 'green') completedCount++;
                     isAdded = true;
+                    
+                    if (taskStatus === 'green' || taskStatus === 'completed') {
+                        squareColor = 'green';
+                        completedCount++;
+                    } else if (taskStatus === 'orange' || taskStatus === 'in_progress') {
+                        squareColor = 'orange';
+                    }
                 }
-                
+
                 let detailDisplay = '';
                 if (detailName) {
                     let shortDetail = detailName;
@@ -1819,10 +1857,6 @@
                     detailDisplay = `<div class="operation-detail-vertical">📦 ${escapeHtml(shortDetail)}${thickness ? ` <span class="thickness-badge">${escapeHtml(thickness)}</span>` : ''}</div>`;
                 }
                 
-                let squareClass = '';
-                if (taskStatus === 'green') squareClass = 'green';
-                else if (taskStatus === 'orange') squareClass = 'orange';
-                
                 operationsHtml += `
                     <div class="operation-vertical-item">
                         <div class="operation-info-vertical">
@@ -1830,14 +1864,14 @@
                             ${detailDisplay}
                         </div>
                         <div class="operation-actions-vertical">
-                            <div class="square-vertical ${squareClass}" data-task-id="${taskId}" title="${escapeHtml(operationName)}"></div>
+                            <div class="square-vertical ${squareColor}" data-task-id="${taskId}" title="${escapeHtml(operationName)}"></div>
                             <div class="action-buttons">
                                 <button class="op-toggle-btn-vertical ${isAdded ? 'added' : ''}" 
-                                        onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${idx}, '${escapeHtml(operationName)}', false)">
+                                        onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', false)">
                                     ${isAdded ? '✓' : '+'}
                                 </button>
                                 <button class="op-priority-btn-vertical" 
-                                        onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${idx}, '${escapeHtml(operationName)}', true)"
+                                        onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', true)"
                                         title="Назначить как приоритетную">
                                     🔴
                                 </button>
@@ -1845,14 +1879,14 @@
                         </div>
                     </div>
                 `;
-            });
+            }
 
             return `
                 <div class="site-card">
                     <div class="site-card-header">
                         <div class="site-name">${name}</div>
                         <div class="site-stats">
-                            <span class="completed">${completedCount}</span>/<span class="total">${operationsWithDetails.length}</span>
+                            <span class="completed">${completedCount}</span>/<span class="total">${operations.length}</span>
                         </div>
                     </div>
                     <div class="site-card-content">
@@ -2038,50 +2072,46 @@
                 if (order.items && order.items.length > 0) {
                     order.items.forEach((item, itemIndex) => {
                         let itemStatus = 'pending';
-let allTasksCompleted = true;
-let hasInProgress = false;
-let hasAnyTask = false;  // Флаг, есть ли хоть одна назначенная задача
-
-if (order.tasks) {
-    for (const [taskId, taskStatus] of Object.entries(order.tasks)) {
-        const parts = taskId.split('_');
-        if (parts.length >= 3 && parseInt(parts[2]) === itemIndex) {
-            hasAnyTask = true;  // Есть назначенная задача
-            if (taskStatus === 'orange' || taskStatus === 'in_progress') {
-                hasInProgress = true;
-                allTasksCompleted = false;
-            } else if (taskStatus === 'pending') {
-                allTasksCompleted = false;
-            }
-        }
-    }
-}
-
-// Определяем статус
-let itemHeaderClass = '';
-let itemStatusText = '';
-let headerBgColor = '';
-let headerBorderColor = '';
-
-if (hasAnyTask && allTasksCompleted) {
-    itemStatus = 'completed';
-    itemHeaderClass = 'item-status-green';
-    itemStatusText = '✅ ГОТОВО';
-    headerBgColor = 'linear-gradient(135deg, #1a3a1a, #0f2a0f)';
-    headerBorderColor = '#2ecc71';
-} else if (hasInProgress) {
-    itemStatus = 'in_progress';
-    itemHeaderClass = 'item-status-orange';
-    itemStatusText = '⚡ В РАБОТЕ';
-    headerBgColor = 'linear-gradient(135deg, #3a2a1a, #2a1f0f)';
-    headerBorderColor = '#ff9800';
-} else {
-    itemStatus = 'pending';
-    itemHeaderClass = 'item-status-gray';
-    itemStatusText = '⏳ ОЖИДАЕТ';
-    headerBgColor = '#232830';
-    headerBorderColor = '#6c757d';
-}
+                        let allTasksCompleted = true;
+                        let hasInProgress = false;
+                        let hasAnyTask = false;
+                        
+                        if (order.tasks) {
+                            for (const [taskId, taskStatus] of Object.entries(order.tasks)) {
+                                const parts = taskId.split('_');
+                                if (parts.length >= 3 && parseInt(parts[2]) === itemIndex) {
+                                    hasAnyTask = true;
+                                    if (taskStatus === 'orange' || taskStatus === 'in_progress') {
+                                        hasInProgress = true;
+                                        allTasksCompleted = false;
+                                    } else if (taskStatus === 'pending') {
+                                        allTasksCompleted = false;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        let itemHeaderClass = '';
+                        let itemStatusText = '';
+                        let headerBgColor = '';
+                        let headerBorderColor = '';
+                        
+                        if (hasAnyTask && allTasksCompleted) {
+                            itemHeaderClass = 'item-status-green';
+                            itemStatusText = '✅ ГОТОВО';
+                            headerBgColor = 'linear-gradient(135deg, #1a3a1a, #0f2a0f)';
+                            headerBorderColor = '#2ecc71';
+                        } else if (hasInProgress) {
+                            itemHeaderClass = 'item-status-orange';
+                            itemStatusText = '⚡ В РАБОТЕ';
+                            headerBgColor = 'linear-gradient(135deg, #3a2a1a, #2a1f0f)';
+                            headerBorderColor = '#ff9800';
+                        } else {
+                            itemHeaderClass = 'item-status-gray';
+                            itemStatusText = '⏳ ОЖИДАЕТ';
+                            headerBgColor = '#232830';
+                            headerBorderColor = '#6c757d';
+                        }
                         
                         const itemDiv = document.createElement('div');
                         itemDiv.style.marginBottom = '20px';
@@ -2177,12 +2207,14 @@ if (hasAnyTask && allTasksCompleted) {
                             if (e.target.tagName === 'BUTTON') return;
                             
                             const arrowSpan = document.getElementById(`arrow-${order.id}-${itemIndex}`);
-                            const isVisible = itemContent.style.display !== 'none';
-                            itemContent.style.display = isVisible ? 'none' : 'block';
-                            if (arrowSpan) {
-                                arrowSpan.textContent = isVisible ? '▼' : '▲';
+                            if (e.target === arrowSpan || arrowSpan?.contains(e.target)) {
+                                const isVisible = itemContent.style.display !== 'none';
+                                itemContent.style.display = isVisible ? 'none' : 'block';
+                                if (arrowSpan) {
+                                    arrowSpan.textContent = isVisible ? '▼' : '▲';
+                                }
+                                saveMainOpenItemsState();
                             }
-                            saveMainOpenItemsState();
                         };
 
                         itemDiv.appendChild(itemHeader);
