@@ -1023,18 +1023,15 @@
         
         // ============== ОСНОВНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==============
         function loadTasks() {
-            if (isLoadingTasks) return;
-            isLoadingTasks = true;
-            
-            taskManager.loadData();
-            let tasks = taskManager.getTasksByStatus(document.getElementById('statusFilter').value);
-            
-            // ПОЛУЧАЕМ ЗНАЧЕНИЯ ФИЛЬТРОВ
-            const filterCustomer = document.getElementById('filterCustomer').value;
-            const filterProduct = document.getElementById('filterProduct').value;
-            const filterOperation = document.getElementById('filterOperation').value;
-            const filterRal = document.getElementById('filterRal').value;
-            const filterStatus = document.getElementById('statusFilter').value;
+    if (isLoadingTasks) return;
+    isLoadingTasks = true;
+    
+    taskManager.loadData();
+    
+    // ОБНОВЛЯЕМ ФИЛЬТРЫ ПОСЛЕ ЗАГРУЗКИ ЗАДАЧ
+    populateFilters();
+    
+    let tasks = taskManager.getTasksByStatus(document.getElementById('statusFilter').value);
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             
