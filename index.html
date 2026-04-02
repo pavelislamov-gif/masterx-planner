@@ -12,7 +12,7 @@
         }
 
         .group-modal-content {
-            max-width: 1200px;
+            max-width: 1400px;
             width: 95%;
         }
 
@@ -405,7 +405,15 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
 
-        /* Модальное окно отчёта по заказу/изделию - УВЕЛИЧЕННОЕ */
+        /* Модальное окно создания группы - ШИРОКОЕ */
+        #groupModal .modal-content {
+            max-width: 1400px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        /* Модальное окно отчёта по заказу/изделию - ШИРОКОЕ */
         #orderReportModal .modal-content {
             max-width: 1400px;
             width: 95%;
@@ -421,124 +429,34 @@
             overflow-y: auto;
         }
 
-        /* Внутри модального окна отчёта - участки без прокрутки */
-        #orderReportModal .sites-section {
-            overflow-x: visible;
-            padding: 15px;
-        }
-
-        #orderReportModal .sites-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 16px;
-            overflow-x: visible;
-        }
-
-        #orderReportModal .site-card {
-            min-width: 240px;
-            max-width: none;
-            flex: 1 1 auto;
-        }
-
-        /* КАРТОЧКИ УЧАСТКОВ ВНУТРИ МОДАЛЬНОГО ОКНА */
-        #orderReportModal .site-card {
-            background: #1a1e24;
-            border: 1px solid #2a2f38;
-            border-radius: 12px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s;
-        }
-
-        #orderReportModal .site-card:hover {
-            border-color: #ff3b3b;
-        }
-
-        #orderReportModal .site-card-header {
-            padding: 10px 12px;
-            text-align: center;
-            background: linear-gradient(135deg, #232830, #1a1e24);
-            border-bottom: 1px solid #2a2f38;
-        }
-
-        #orderReportModal .site-name {
-            font-weight: 700;
-            font-size: 14px;
-            color: #ff3b3b;
-        }
-
-        #orderReportModal .site-stats {
-            font-size: 11px;
-            color: #a0a0a0;
-            margin-top: 2px;
-        }
-
-        #orderReportModal .site-card-content {
-            flex: 1;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        /* Для экранов меньше 1400px */
-        @media (max-width: 1400px) {
-            #orderReportModal .site-card {
-                min-width: 220px;
-            }
-        }
-
-        /* Для экранов меньше 1200px */
-        @media (max-width: 1200px) {
-            #orderReportModal .site-card {
-                min-width: 200px;
-            }
-        }
-
-        /* Для экранов меньше 1000px - возвращаем прокрутку */
-        @media (max-width: 1000px) {
-            #orderReportModal .sites-grid {
-                flex-wrap: nowrap;
-                overflow-x: auto;
-                justify-content: flex-start;
-            }
-            #orderReportModal .site-card {
-                min-width: 260px;
-                flex: 0 0 auto;
-            }
-        }
-
-        /* ============== КОМПАКТНОЕ ОТОБРАЖЕНИЕ УЧАСТКОВ ============== */
+        /* КАРТОЧКИ УЧАСТКОВ НА ГЛАВНОЙ СТРАНИЦЕ */
         .sites-section {
             padding: 15px;
             background: #15191f;
             border-top: 1px solid #2a2f38;
             border-radius: 0 0 12px 12px;
             overflow-x: auto;
+            overflow-y: visible;
         }
 
         .sites-grid {
             display: flex;
             flex-direction: row;
-            gap: 12px;
+            flex-wrap: nowrap;
+            gap: 15px;
             min-width: min-content;
         }
 
-        /* Карточка участка */
         .site-card {
             min-width: 260px;
-            max-width: 280px;
+            max-width: 300px;
+            flex: 1 1 0;
             background: #1a1e24;
             border: 1px solid #2a2f38;
             border-radius: 12px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            flex-shrink: 0;
         }
 
         .site-card-header {
@@ -550,14 +468,14 @@
 
         .site-name {
             font-weight: 700;
-            font-size: 14px;
+            font-size: 15px;
             color: #ff3b3b;
         }
 
         .site-stats {
             font-size: 11px;
             color: #a0a0a0;
-            margin-top: 2px;
+            margin-top: 3px;
         }
 
         .site-stats .completed {
@@ -576,17 +494,16 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 400px;
-            overflow-y: auto;
+            overflow-y: visible;
+            max-height: none;
         }
 
-        /* Операция */
         .operation-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 8px;
-            padding: 8px;
+            gap: 10px;
+            padding: 10px 12px;
             background: #15191f;
             border-radius: 8px;
             border: 1px solid #2a2f38;
@@ -598,46 +515,56 @@
         }
 
         .operation-name {
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 700;
             color: #ff9800;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
+            line-height: 1.3;
         }
 
         .operation-detail {
-            font-size: 10px;
-            color: #a0a0a0;
+            font-size: 12px;
+            color: #b0b0b0;
             word-break: break-word;
+            line-height: 1.4;
         }
 
         .operation-detail .material {
-            color: #fff;
+            color: #ffffff;
+            font-weight: 500;
         }
 
         .operation-detail .thickness {
             color: #4cd964;
             background: #1e232b;
-            padding: 1px 4px;
-            border-radius: 3px;
-            font-size: 9px;
-            margin-left: 4px;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-left: 6px;
+            font-weight: 500;
         }
 
         .operation-controls {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             flex-shrink: 0;
         }
 
         .square-status {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
             background: #1e232b;
             border: 2px solid #3a404b;
             cursor: pointer;
             flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .square-status:hover {
+            transform: scale(1.05);
+            border-color: #ff3b3b;
         }
 
         .square-status.orange {
@@ -652,20 +579,25 @@
 
         .action-buttons {
             display: flex;
-            gap: 4px;
+            gap: 6px;
         }
 
         .action-btn {
-            width: 30px;
-            height: 30px;
-            border-radius: 6px;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
             border: none;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 700;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
         }
 
         .btn-add {
@@ -690,40 +622,134 @@
             background: #6c757d;
             color: white;
             border: none;
-            border-radius: 6px;
-            padding: 6px;
-            font-size: 11px;
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 12px;
+            font-weight: 600;
             cursor: pointer;
-            margin-top: 8px;
+            margin-top: 10px;
             width: 100%;
+            transition: all 0.2s;
+        }
+
+        .btn-add-extra:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        /* УЧАСТКИ ВНУТРИ МОДАЛЬНОГО ОКНА ОТЧЁТА */
+        #orderReportModal .sites-section {
+            overflow-x: auto;
+            overflow-y: visible;
+        }
+
+        #orderReportModal .sites-grid {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: 15px;
+        }
+
+        #orderReportModal .site-card {
+            min-width: 260px;
+            max-width: 300px;
+            flex: 1 1 0;
+        }
+
+        #orderReportModal .site-card-content {
+            overflow-y: visible;
+            max-height: none;
+        }
+
+        #orderReportModal .operation-item {
+            padding: 10px 12px;
+        }
+
+        #orderReportModal .operation-name {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        #orderReportModal .square-status {
+            width: 32px;
+            height: 32px;
+        }
+
+        /* АДАПТАЦИЯ ДЛЯ РАЗНЫХ ЭКРАНОВ */
+        @media (min-width: 1600px) {
+            .site-card {
+                min-width: 300px;
+                max-width: 340px;
+            }
+            .operation-name {
+                font-size: 15px;
+            }
+            .operation-detail {
+                font-size: 13px;
+            }
+        }
+
+        @media (min-width: 1300px) and (max-width: 1599px) {
+            .site-card {
+                min-width: 260px;
+                max-width: 290px;
+            }
+        }
+
+        @media (max-width: 1299px) {
+            .sites-grid {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            .site-card {
+                min-width: 280px;
+                flex: 0 0 auto;
+            }
+            .sites-grid::-webkit-scrollbar {
+                height: 6px;
+            }
+            .sites-grid::-webkit-scrollbar-track {
+                background: #1e232b;
+                border-radius: 3px;
+            }
+            .sites-grid::-webkit-scrollbar-thumb {
+                background: #ff3b3b;
+                border-radius: 3px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .site-card {
+                min-width: 260px;
+            }
+            .operation-name {
+                font-size: 13px;
+            }
+            .operation-detail {
+                font-size: 11px;
+            }
+            .square-status {
+                width: 32px;
+                height: 32px;
+            }
+            .action-btn {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
         }
 
         /* СКРОЛЛБАРЫ */
         .site-card-content::-webkit-scrollbar {
             width: 4px;
         }
-
         .site-card-content::-webkit-scrollbar-track {
             background: #1e232b;
         }
-
         .site-card-content::-webkit-scrollbar-thumb {
             background: #ff3b3b;
             border-radius: 4px;
-        }
-
-        .sites-grid::-webkit-scrollbar {
-            height: 6px;
-        }
-
-        .sites-grid::-webkit-scrollbar-track {
-            background: #1e232b;
-            border-radius: 3px;
-        }
-
-        .sites-grid::-webkit-scrollbar-thumb {
-            background: #ff3b3b;
-            border-radius: 3px;
         }
 
         /* СВЕТЛАЯ ТЕМА */
@@ -755,12 +781,6 @@
             background: #ffffff !important;
             color: #1e293b !important;
             border: 1px solid #e2e8f0 !important;
-        }
-
-        body.light-theme .btn:hover {
-            background: #f1f5f9 !important;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         body.light-theme .btn-primary {
@@ -810,21 +830,6 @@
             border-left: 4px solid #6c757d !important;
         }
 
-        body.light-theme .item-header.item-status-green {
-            background: linear-gradient(135deg, #e8f5e9, #c8e6c9) !important;
-            border-left: 4px solid #2ecc71 !important;
-        }
-
-        body.light-theme .item-header.item-status-orange {
-            background: linear-gradient(135deg, #fff3e0, #ffe6cc) !important;
-            border-left: 4px solid #ff9800 !important;
-        }
-
-        body.light-theme .item-header.item-status-gray {
-            background: linear-gradient(135deg, #f5f5f5, #eeeeee) !important;
-            border-left: 4px solid #6c757d !important;
-        }
-
         body.light-theme .site-card {
             background: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
@@ -856,11 +861,6 @@
             color: #1e293b !important;
         }
 
-        body.light-theme .operation-detail .thickness {
-            background: #f1f5f9 !important;
-            color: #22c55e !important;
-        }
-
         body.light-theme .square-status {
             background: #f1f5f9 !important;
             border-color: #e2e8f0 !important;
@@ -876,26 +876,6 @@
 
         body.light-theme .btn-add-extra {
             background: #6c757d !important;
-        }
-
-        body.light-theme #orderReportModal .modal-content {
-            background: linear-gradient(135deg, #ffffff, #fefefe) !important;
-            border: 1px solid #e2e8f0 !important;
-        }
-
-        body.light-theme #orderReportModal .site-card {
-            background: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-        }
-
-        body.light-theme #orderReportModal .site-card-header {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
-            border-bottom-color: #e2e8f0 !important;
-        }
-
-        body.light-theme #orderReportModal .operation-item {
-            background: #f8fafc !important;
-            border-color: #e2e8f0 !important;
         }
     </style>
 </head>
@@ -1097,6 +1077,68 @@
         let editingOrderId = null;
         let editingItemIndex = null;
 
+        // КЛЮЧИ ДЛЯ СОХРАНЕНИЯ СОСТОЯНИЯ
+        const MAIN_STORAGE_KEY = 'main_open_cards';
+        const MAIN_ITEMS_STORAGE_KEY = 'main_open_items';
+
+        // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
+        function saveMainOpenCardsState() {
+            const openCards = [];
+            document.querySelectorAll('.order-card').forEach(card => {
+                const content = card.querySelector('.order-content');
+                if (content && content.style.display !== 'none') {
+                    openCards.push(card.dataset.orderId);
+                }
+            });
+            localStorage.setItem(MAIN_STORAGE_KEY, JSON.stringify(openCards));
+        }
+
+        function restoreMainOpenCardsState() {
+            const savedOpenCards = localStorage.getItem(MAIN_STORAGE_KEY);
+            if (!savedOpenCards) return;
+            const openCardsIds = JSON.parse(savedOpenCards);
+            openCardsIds.forEach(orderId => {
+                const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
+                if (card) {
+                    const content = card.querySelector('.order-content');
+                    if (content) {
+                        content.style.display = 'block';
+                    }
+                }
+            });
+        }
+
+        function saveMainOpenItemsState() {
+            const openItems = [];
+            document.querySelectorAll('.order-card').forEach(card => {
+                const orderId = card.dataset.orderId;
+                card.querySelectorAll('.item-content').forEach((itemContent, idx) => {
+                    if (itemContent.style.display !== 'none') {
+                        openItems.push({ orderId, itemIndex: idx });
+                    }
+                });
+            });
+            localStorage.setItem(MAIN_ITEMS_STORAGE_KEY, JSON.stringify(openItems));
+        }
+
+        function restoreMainOpenItemsState() {
+            const savedOpenItems = localStorage.getItem(MAIN_ITEMS_STORAGE_KEY);
+            if (!savedOpenItems) return;
+            const openItemsIds = JSON.parse(savedOpenItems);
+            openItemsIds.forEach(({ orderId, itemIndex }) => {
+                const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
+                if (card) {
+                    const itemHeader = card.querySelectorAll('.item-header')[itemIndex];
+                    const itemContent = card.querySelectorAll('.item-content')[itemIndex];
+                    if (itemHeader && itemContent) {
+                        itemContent.style.display = 'block';
+                        const arrowSpan = itemHeader.querySelector('span:last-child');
+                        if (arrowSpan) arrowSpan.textContent = '▲';
+                    }
+                }
+            });
+        }
+
         // ============== ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ==============
         function initThemeToggle() {
             const toggle = document.getElementById('themeToggle');
@@ -1130,11 +1172,11 @@
             let allCompleted = true;
 
             Object.values(order.tasks).forEach(status => {
-                if (status === 'in_progress') {
+                if (status === 'in_progress' || status === 'orange') {
                     hasInProgress = true;
                     allCompleted = false;
                 }
-                if (status === 'pending') {
+                if (status === 'pending' || status === '') {
                     allCompleted = false;
                 }
                 if (status !== 'completed' && status !== 'green') {
@@ -1147,24 +1189,7 @@
             return 'gray';
         }
 
-        // ============== ОБНОВЛЕНИЕ СТАТУСА ЗАДАЧИ В ЗАКАЗЕ ==============
-        function updateOrderTaskStatus(orderId, taskId, status) {
-            const orders = loadOrdersFromStorage();
-            const order = orders.find(o => o.id == orderId);
-            if (!order) return;
-            
-            if (!order.tasks) order.tasks = {};
-            order.tasks[taskId] = status;
-            
-            const orderIndex = orders.findIndex(o => o.id == orderId);
-            orders[orderIndex] = order;
-            saveOrdersToStorage(orders);
-            
-            renderOrdersList();
-            updateStatistics();
-        }
-
-        // ============== ЗАГРУЗКА ДАННЫХ ==============
+        // ============== ЗАГРУЗКА ОПЕРАЦИЙ ==============
         async function loadTaskOperations() {
             try {
                 const response = await fetch('data/taskOperations.json');
@@ -1484,10 +1509,6 @@
                 createBtn.textContent = '📋 Сформировать группу';
                 createBtn.onclick = function() { createGroupOrder(); };
             }
-            const cancelBtn = document.getElementById('cancelEditBtn');
-            if (cancelBtn) {
-                cancelBtn.remove();
-            }
             const addBtn = document.getElementById('addItemBtn');
             if (addBtn) {
                 addBtn.textContent = '✅ Добавить изделие';
@@ -1793,21 +1814,6 @@
                 createBtn.textContent = '💾 Сохранить изменения';
                 createBtn.onclick = function() { updateGroupOrder(); };
             }
-            
-            if (!document.getElementById('cancelEditBtn')) {
-                const cancelEditBtn = document.createElement('button');
-                cancelEditBtn.id = 'cancelEditBtn';
-                cancelEditBtn.className = 'btn btn-warning';
-                cancelEditBtn.textContent = '↩️ Отменить редактирование';
-                cancelEditBtn.onclick = function() {
-                    closeGroupModal();
-                    resetEditMode();
-                };
-                const formActions = document.querySelector('#groupModal .form-actions');
-                if (formActions) {
-                    formActions.insertBefore(cancelEditBtn, formActions.firstChild);
-                }
-            }
         }
 
         function updateGroupOrder() {
@@ -1860,69 +1866,7 @@
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
-        // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
-        const MAIN_STORAGE_KEY = 'main_open_cards';
-        const MAIN_ITEMS_STORAGE_KEY = 'main_open_items';
-
-        function saveMainOpenCardsState() {
-            const openCards = [];
-            document.querySelectorAll('.order-card').forEach(card => {
-                const content = card.querySelector('.order-content');
-                if (content && content.style.display !== 'none') {
-                    openCards.push(card.dataset.orderId);
-                }
-            });
-            localStorage.setItem(MAIN_STORAGE_KEY, JSON.stringify(openCards));
-        }
-
-        function restoreMainOpenCardsState() {
-            const savedOpenCards = localStorage.getItem(MAIN_STORAGE_KEY);
-            if (!savedOpenCards) return;
-            const openCardsIds = JSON.parse(savedOpenCards);
-            openCardsIds.forEach(orderId => {
-                const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
-                if (card) {
-                    const header = card.querySelector('.order-header');
-                    const content = card.querySelector('.order-content');
-                    if (header && content) {
-                        content.style.display = 'block';
-                    }
-                }
-            });
-        }
-
-        function saveMainOpenItemsState() {
-            const openItems = [];
-            document.querySelectorAll('.order-card').forEach(card => {
-                const orderId = card.dataset.orderId;
-                card.querySelectorAll('.item-content').forEach((itemContent, idx) => {
-                    if (itemContent.style.display !== 'none') {
-                        openItems.push({ orderId, itemIndex: idx });
-                    }
-                });
-            });
-            localStorage.setItem(MAIN_ITEMS_STORAGE_KEY, JSON.stringify(openItems));
-        }
-
-        function restoreMainOpenItemsState() {
-            const savedOpenItems = localStorage.getItem(MAIN_ITEMS_STORAGE_KEY);
-            if (!savedOpenItems) return;
-            const openItemsIds = JSON.parse(savedOpenItems);
-            openItemsIds.forEach(({ orderId, itemIndex }) => {
-                const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
-                if (card) {
-                    const itemHeader = card.querySelectorAll('.item-header')[itemIndex];
-                    const itemContent = card.querySelectorAll('.item-content')[itemIndex];
-                    if (itemHeader && itemContent) {
-                        itemContent.style.display = 'block';
-                        const arrowSpan = itemHeader.querySelector('span:last-child');
-                        if (arrowSpan) arrowSpan.textContent = '▲';
-                    }
-                }
-            });
-        }
-
-        // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА (КОМПАКТНОЕ ОТОБРАЖЕНИЕ) ==============
+        // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА ==============
         function createSiteRow(name, order, itemIndex, siteKey) {
             const item = order.items[itemIndex];
             if (!item) return null;
@@ -2012,7 +1956,7 @@
             `;
         }
 
-        // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ (С ПОДДЕРЖКОЙ ПРИОРИТЕТА) ==============
+        // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ ==============
         function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName, isPriority = false) {
             const orders = loadOrdersFromStorage();
             const order = orders.find(o => o.id == orderId);
@@ -2353,7 +2297,7 @@
             restoreMainOpenItemsState();
         }
 
-        // ============== ПЕРЕИМЕНОВАНИЕ ГРУППЫ (ЗАКАЗЧИКА) ==============
+        // ============== ПЕРЕИМЕНОВАНИЕ ГРУППЫ ==============
         function editGroupName(orderId) {
             const orders = loadOrdersFromStorage();
             const order = orders.find(o => o.id == orderId);
@@ -2395,7 +2339,7 @@
             orders.forEach(order => {
                 if (order.tasks) {
                     Object.values(order.tasks).forEach(status => {
-                        if (status === 'in_progress') activeTasks++;
+                        if (status === 'in_progress' || status === 'orange') activeTasks++;
                         if (status === 'completed' || status === 'green') completedTasks++;
                     });
                 }
@@ -2562,133 +2506,6 @@
             alert('✅ Группа удалена');
         }
 
-        // ============== ОТЧЁТ ПО ЗАКАЗУ ==============
-        function showOrderReport(orderId) {
-            const orders = loadOrdersFromStorage();
-            const order = orders.find(o => o.id == orderId);
-            if (!order) {
-                alert('Заказ не найден');
-                return;
-            }
-            
-            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-            
-            const orderReports = allReports.filter(report => {
-                if ((report.isItemReport || report.isOrderReport) && report.orderId == orderId) {
-                    return true;
-                }
-                if (report.taskId) {
-                    const parts = report.taskId.split('_');
-                    return parts[0] == orderId;
-                }
-                return false;
-            });
-            
-            const siteNames = {
-                'polimerniy': '🎨 ПОЛИМЕРНЫЙ УЧАСТОК',
-                'slesarniy': '🔩 СЛЕСАРНЫЙ УЧАСТОК',
-                'frezerniy': '⚙️ ФРЕЗЕРНЫЙ УЧАСТОК',
-                'tokarniy': '🔧 ТОКАРНЫЙ УЧАСТОК',
-                'lazerno': '✨ ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
-            };
-            
-            const reportsBySite = {};
-            
-            orderReports.forEach(report => {
-                if (report.siteKey && report.rows && report.rows.length > 0) {
-                    if (!reportsBySite[report.siteKey]) {
-                        reportsBySite[report.siteKey] = [];
-                    }
-                    reportsBySite[report.siteKey].push(...report.rows);
-                }
-            });
-            
-            let html = `
-                <div style="padding: 12px;">
-                    <div style="margin-bottom: 12px; border-bottom: 1px solid #2a2f38; padding-bottom: 6px;">
-                        <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;">
-                            <h2 style="color: #ff3b3b; margin: 0; font-size: 18px;">📋 ОТЧЁТ ПО ЗАКАЗУ</h2>
-                            <h3 style="margin: 0; font-size: 16px;">${escapeHtml(order.groupName)}</h3>
-                        </div>
-                        <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; font-size: 12px; color: #a0a0a0;">
-                            <span>📅 ${order.date}</span>
-                            <span>📦 Изделий: ${order.items?.length || 0}</span>
-                        </div>
-                    </div>
-            `;
-            
-            if (Object.keys(reportsBySite).length === 0) {
-                html += `
-                    <div style="text-align: center; padding: 20px; background: #15191f; border-radius: 8px;">
-                        <div style="font-size: 32px; margin-bottom: 8px;">📭</div>
-                        <p>Нет отчётов по этому заказу</p>
-                    </div>
-                `;
-            } else {
-                for (const [siteKey, rows] of Object.entries(reportsBySite)) {
-                    html += `
-                        <div style="margin-bottom: 10px; border: 1px solid #2a2f38; border-radius: 6px; overflow: hidden;">
-                            <div style="background: linear-gradient(135deg, #232830, #1a1e24); padding: 5px 10px;">
-                                <h4 style="margin: 0; color: #ff3b3b; font-size: 12px;">${siteNames[siteKey] || siteKey}</h4>
-                            </div>
-                            <div style="padding: 5px 8px;">
-                    `;
-                    
-                    rows.forEach(row => {
-                        const расход = row.расход || 0;
-                        const количество = row.количество || 0;
-                        const комментарий = row.комментарий || '';
-                        
-                        let text = `Расход: ${расход}, Количество: ${количество}`;
-                        if (комментарий) text += `, ${комментарий}`;
-                        
-                        html += `
-                            <div style="margin-bottom: 3px; padding: 3px 5px; background: #15191f; border-radius: 3px; font-size: 11px;">
-                                ${escapeHtml(text)}
-                            </div>
-                        `;
-                    });
-                    
-                    html += `</div></div>`;
-                }
-            }
-            
-            html += `
-                <div style="display: flex; justify-content: center; gap: 12px; margin-top: 12px; padding-top: 8px; border-top: 1px solid #2a2f38;">
-                    <button class="btn btn-sm btn-primary" onclick="printOrderReport()">🖨️ Распечатать</button>
-                    <button class="btn btn-sm btn-danger" onclick="closeOrderReportModal()">✖️ Закрыть</button>
-                </div>
-            </div>`;
-            
-            const modal = document.getElementById('orderReportModal');
-            const contentDiv = document.getElementById('orderReportContent');
-            contentDiv.innerHTML = html;
-            modal.style.display = 'block';
-        }
-
-        function printOrderReport() {
-            const content = document.getElementById('orderReportContent').innerHTML;
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                    <head>
-                        <title>Отчёт по заказу</title>
-                        <style>
-                            body { font-family: 'Segoe UI', sans-serif; padding: 20px; }
-                            @media print { button { display: none; } }
-                        </style>
-                    </head>
-                    <body>${content}</body>
-                </html>
-            `);
-            printWindow.print();
-            printWindow.close();
-        }
-
-        function closeOrderReportModal() {
-            document.getElementById('orderReportModal').style.display = 'none';
-        }
-
         // ============== ОТЧЁТ ПО ИЗДЕЛИЮ ==============
         function showItemReport(orderId, itemIndex) {
             const orders = loadOrdersFromStorage();
@@ -2805,6 +2622,10 @@
             window.currentReportHtml = html;
         }
 
+        function closeOrderReportModal() {
+            document.getElementById('orderReportModal').style.display = 'none';
+        }
+
         function printCurrentReport() {
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
@@ -2880,12 +2701,9 @@
         window.addCustomProfile = addCustomProfile;
         window.removeCustomProfile = removeCustomProfile;
         window.onNewItemProductChange = onNewItemProductChange;
-        window.showOrderReport = showOrderReport;
         window.closeOrderReportModal = closeOrderReportModal;
-        window.printOrderReport = printOrderReport;
         window.showItemReport = showItemReport;
         window.printCurrentReport = printCurrentReport;
-        window.updateOrderTaskStatus = updateOrderTaskStatus;
 
         document.addEventListener('DOMContentLoaded', initMainPage);
     </script>
