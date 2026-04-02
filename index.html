@@ -2183,15 +2183,14 @@
                         itemHeader.onclick = (e) => {
                             if (e.target.tagName === 'BUTTON') return;
                             
+                            const isVisible = itemContent.style.display !== 'none';
+                            itemContent.style.display = isVisible ? 'none' : 'block';
+                            
                             const arrowSpan = document.getElementById(`arrow-${order.id}-${itemIndex}`);
-                            if (e.target === arrowSpan || arrowSpan?.contains(e.target)) {
-                                const isVisible = itemContent.style.display !== 'none';
-                                itemContent.style.display = isVisible ? 'none' : 'block';
-                                if (arrowSpan) {
-                                    arrowSpan.textContent = isVisible ? '▼' : '▲';
-                                }
-                                saveMainOpenItemsState();
+                            if (arrowSpan) {
+                                arrowSpan.textContent = isVisible ? '▼' : '▲';
                             }
+                            saveMainOpenItemsState();
                         };
 
                         itemDiv.appendChild(itemHeader);
