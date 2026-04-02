@@ -812,34 +812,42 @@
             
             const customerSelect = document.getElementById('filterCustomer');
             if (customerSelect) {
+                const currentCustomer = customerSelect.value;
                 customerSelect.innerHTML = '<option value="">🏢 Все заказчики</option>';
                 Array.from(customers).sort().forEach(c => {
                     customerSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
                 });
+                if (currentCustomer) customerSelect.value = currentCustomer;
             }
             
             const productSelect = document.getElementById('filterProduct');
             if (productSelect) {
+                const currentProduct = productSelect.value;
                 productSelect.innerHTML = '<option value="">📦 Все изделия</option>';
                 Array.from(products).sort().forEach(p => {
                     productSelect.innerHTML += `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`;
                 });
+                if (currentProduct) productSelect.value = currentProduct;
             }
             
             const operationSelect = document.getElementById('filterOperation');
             if (operationSelect) {
+                const currentOperation = operationSelect.value;
                 operationSelect.innerHTML = '<option value="">🔧 Все операции</option>';
                 Array.from(operations).sort().forEach(op => {
                     operationSelect.innerHTML += `<option value="${escapeHtml(op)}">${escapeHtml(op)}</option>`;
                 });
+                if (currentOperation) operationSelect.value = currentOperation;
             }
             
             const ralSelect = document.getElementById('filterRal');
             if (ralSelect) {
+                const currentRal = ralSelect.value;
                 ralSelect.innerHTML = '<option value="">🎨 Все RAL</option>';
                 Array.from(rals).sort().forEach(r => {
                     ralSelect.innerHTML += `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`;
                 });
+                if (currentRal) ralSelect.value = currentRal;
             }
         }
         
@@ -918,7 +926,7 @@
                         order.tasks[task.id] = taskStatus;
                         localStorage.setItem('masterx_orders', JSON.stringify(orders));
                     }
-                    setTimeout(() => { loadTasks(); }, 100);
+                    loadTasks();
                 }
             }
             
@@ -962,22 +970,18 @@
                         orders[orderIndex] = order;
                         localStorage.setItem('masterx_orders', JSON.stringify(orders));
                     }
-                    setTimeout(() => { loadTasks(); }, 100);
+                    loadTasks();
                 }
             }
         }
         
-        function loadTasks() {
+        function applyFiltersAndRender() {
             if (isLoadingTasks) return;
             isLoadingTasks = true;
             
             taskManager.loadData();
             
-            // ОБНОВЛЯЕМ ФИЛЬТРЫ
-            populateFilters();
-            
-            let tasks = taskManager.getTasksByStatus(document.getElementById('statusFilter').value);
-            
+            // Получаем значения фильтров
             const filterCustomer = document.getElementById('filterCustomer').value;
             const filterProduct = document.getElementById('filterProduct').value;
             const filterOperation = document.getElementById('filterOperation').value;
@@ -986,40 +990,47 @@
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             
-            // ФИЛЬТРАЦИЯ
+            // Получаем задачи по статусу
+            let tasks = taskManager.getTasksByStatus(filterStatus);
+            
+            // Применяем фильтры
             let filteredTasks = tasks.filter(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
                 if (!order) return false;
                 
+                // Приоритетные задачи не фильтруем (кроме статуса)
                 if (task.isPriority === true) {
-                    if (filterStatus === 'completed' && task.status !== 'completed') return false;
                     return true;
                 }
                 
+                // Фильтр по заказчику
                 if (filterCustomer && order.groupName !== filterCustomer) return false;
                 
                 const item = order.items?.[task.itemIndex || 0];
                 if (!item) return false;
                 
+                // Фильтр по изделию
                 if (filterProduct && item.product !== filterProduct) return false;
                 
+                // Фильтр по RAL
                 if (filterRal) {
                     const itemRal = (item.ral || '').trim();
                     if (itemRal !== filterRal) return false;
                 }
                 
+                // Фильтр по операции
                 if (filterOperation && task.operation !== filterOperation) return false;
                 
                 return true;
             });
             
-            // СОРТИРОВКА: приоритетные наверх
+            // Сортируем: приоритетные наверх
             const priorityTasks = filteredTasks.filter(t => t.isPriority === true);
             const normalTasks = filteredTasks.filter(t => t.isPriority !== true);
             priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             const sortedTasks = [...priorityTasks, ...normalTasks];
             
-            // СТАТИСТИКА
+            // Обновляем статистику
             document.getElementById('totalTasks').textContent = filteredTasks.length;
             document.getElementById('tasksInProgress').textContent = filteredTasks.filter(t => t.status === 'in_progress').length;
             document.getElementById('tasksCompleted').textContent = filteredTasks.filter(t => t.status === 'completed').length;
@@ -1033,7 +1044,7 @@
                 return;
             }
 
-            // РЕНДЕРИНГ
+            // Рендерим задачи
             sortedTasks.forEach(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
                 const item = order?.items?.[task.itemIndex || 0];
@@ -1147,6 +1158,13 @@
             }, 50);
         }
         
+        function loadTasks() {
+            // Обновляем фильтры перед применением
+            populateFilters();
+            // Применяем фильтры и рендерим
+            applyFiltersAndRender();
+        }
+        
         function renderExecutors(taskId, task) {
             const container = document.getElementById(`executors-${taskId}`);
             if (!container) return;
@@ -1187,8 +1205,7 @@
                         if (isShiftEnded) return;
                         const newStatus = workBtn.classList.contains('active') ? 'pending' : 'in_progress';
                         taskManager.updateExecutorStatus(task.id, executor.id, newStatus);
-                        workBtn.classList.toggle('active');
-                        workBtn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
+                        loadTasks();
                     };
                     div.appendChild(workBtn);
                     
@@ -1480,7 +1497,10 @@
             inputs.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
-                    el.addEventListener('change', () => loadTasks());
+                    el.addEventListener('change', () => {
+                        console.log(`Фильтр ${id} изменён на:`, el.value);
+                        loadTasks();
+                    });
                 }
             });
         }
