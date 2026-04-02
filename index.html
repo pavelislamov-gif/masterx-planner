@@ -394,6 +394,124 @@
             border-left: 4px solid #6c757d !important;
         }
 
+        /* МОДАЛЬНЫЕ ОКНА - УВЕЛИЧЕННЫЕ */
+        .modal-content {
+            background: linear-gradient(135deg, #1a1e24, #0f1217);
+            margin: 2% auto;
+            padding: 30px;
+            border-radius: 12px;
+            position: relative;
+            border: 1px solid #2a2f38;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        /* Модальное окно отчёта по заказу/изделию - УВЕЛИЧЕННОЕ */
+        #orderReportModal .modal-content {
+            max-width: 1400px;
+            width: 95%;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        /* Модальное окно материалов */
+        #materialsModal .modal-content {
+            max-width: 1000px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        /* Внутри модального окна отчёта - участки без прокрутки */
+        #orderReportModal .sites-section {
+            overflow-x: visible;
+            padding: 15px;
+        }
+
+        #orderReportModal .sites-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+            overflow-x: visible;
+        }
+
+        #orderReportModal .site-card {
+            min-width: 240px;
+            max-width: none;
+            flex: 1 1 auto;
+        }
+
+        /* КАРТОЧКИ УЧАСТКОВ ВНУТРИ МОДАЛЬНОГО ОКНА */
+        #orderReportModal .site-card {
+            background: #1a1e24;
+            border: 1px solid #2a2f38;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s;
+        }
+
+        #orderReportModal .site-card:hover {
+            border-color: #ff3b3b;
+        }
+
+        #orderReportModal .site-card-header {
+            padding: 10px 12px;
+            text-align: center;
+            background: linear-gradient(135deg, #232830, #1a1e24);
+            border-bottom: 1px solid #2a2f38;
+        }
+
+        #orderReportModal .site-name {
+            font-weight: 700;
+            font-size: 14px;
+            color: #ff3b3b;
+        }
+
+        #orderReportModal .site-stats {
+            font-size: 11px;
+            color: #a0a0a0;
+            margin-top: 2px;
+        }
+
+        #orderReportModal .site-card-content {
+            flex: 1;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Для экранов меньше 1400px */
+        @media (max-width: 1400px) {
+            #orderReportModal .site-card {
+                min-width: 220px;
+            }
+        }
+
+        /* Для экранов меньше 1200px */
+        @media (max-width: 1200px) {
+            #orderReportModal .site-card {
+                min-width: 200px;
+            }
+        }
+
+        /* Для экранов меньше 1000px - возвращаем прокрутку */
+        @media (max-width: 1000px) {
+            #orderReportModal .sites-grid {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                justify-content: flex-start;
+            }
+            #orderReportModal .site-card {
+                min-width: 260px;
+                flex: 0 0 auto;
+            }
+        }
+
         /* ============== КОМПАКТНОЕ ОТОБРАЖЕНИЕ УЧАСТКОВ ============== */
         .sites-section {
             padding: 15px;
@@ -759,6 +877,26 @@
         body.light-theme .btn-add-extra {
             background: #6c757d !important;
         }
+
+        body.light-theme #orderReportModal .modal-content {
+            background: linear-gradient(135deg, #ffffff, #fefefe) !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme #orderReportModal .site-card {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme #orderReportModal .site-card-header {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
+            border-bottom-color: #e2e8f0 !important;
+        }
+
+        body.light-theme #orderReportModal .operation-item {
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
     </style>
 </head>
 <body>
@@ -929,7 +1067,7 @@
 
         <!-- МОДАЛЬНОЕ ОКНО ДЛЯ ОТЧЁТА ПО ЗАКАЗУ/ИЗДЕЛИЮ -->
         <div id="orderReportModal" class="modal">
-            <div class="modal-content" style="max-width: 800px; max-height: 80vh; overflow-y: auto;">
+            <div class="modal-content">
                 <span class="close" onclick="closeOrderReportModal()">&times;</span>
                 <div id="orderReportContent"></div>
             </div>
@@ -2344,7 +2482,7 @@
 
         function showMaterialsReport(orderId) {
             const orders = loadOrdersFromStorage() || [];
-            const order = orders.find(o => o.id === orderId);
+            const order = orders.find(o => o.id == orderId);
             if (!order) {
                 alert('Группа не найдена');
                 return;
