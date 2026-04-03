@@ -2033,6 +2033,44 @@
             }
         }
 
+        // ============== СИНХРОНИЗАЦИЯ ВСЕХ ЗАДАЧ ПРИ ЗАГРУЗКЕ ==============
+        function syncAllTasksToOrders() {
+            const orders = loadOrdersFromStorage();
+            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+            let updated = false;
+            
+            orders.forEach(order => {
+                if (!order.tasks) order.tasks = {};
+                
+                sites.forEach(site => {
+                    // Проверяем все возможные даты, связанные с заказом
+                    const orderDate = order.date;
+                    const storageKey = `tasks_${site}_${orderDate}`;
+                    const tasksJson = localStorage.getItem(storageKey);
+                    if (tasksJson) {
+                        const tasks = JSON.parse(tasksJson);
+                        tasks.forEach(task => {
+                            if (task.orderId == order.id) {
+                                const taskId = `${order.id}_${site}_${task.itemIndex}_${task.index}`;
+                                let squareColor = '';
+                                if (task.status === 'completed') squareColor = 'green';
+                                else if (task.status === 'in_progress') squareColor = 'orange';
+                                else if (task.status === 'pending') squareColor = '';
+                                if (squareColor && order.tasks[taskId] !== squareColor) {
+                                    order.tasks[taskId] = squareColor;
+                                    updated = true;
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+            
+            if (updated) {
+                saveOrdersToStorage(orders);
+            }
+        }
+
         // ============== ОТОБРАЖЕНИЕ СПИСКА ГРУПП ==============
         function renderOrdersList() {
             const ordersList = document.getElementById('ordersList');
@@ -2627,6 +2665,9 @@
 
             populateNewItemSelects();
             initThemeToggle();
+
+            // Синхронизация всех задач перед отображением
+            syncAllTasksToOrders();
 
             renderOrdersList();
             updateStatistics();
