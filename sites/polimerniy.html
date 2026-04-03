@@ -740,12 +740,8 @@
         let currentReportTask = null;
         let reportRows = [];
         
-        // Хранилище состояния свёрнутости карточек
-        let collapsedCardsState = {};
-        
         const OPEN_CARDS_KEY = 'polimerniy_open_tasks';
         
-        // Сохраняем состояние всех карточек
         function saveAllCardsState() {
             const openCards = [];
             document.querySelectorAll('.task-card').forEach(card => {
@@ -757,7 +753,6 @@
             localStorage.setItem(OPEN_CARDS_KEY, JSON.stringify(openCards));
         }
         
-        // Восстанавливаем состояние карточек
         function restoreAllCardsState() {
             const savedOpenCards = localStorage.getItem(OPEN_CARDS_KEY);
             if (!savedOpenCards) return;
@@ -769,7 +764,6 @@
                     const header = card.querySelector('.task-header');
                     const content = card.querySelector('.task-content');
                     if (header && content) {
-                        // Делаем карточку СВЁРНУТОЙ (collapsed)
                         header.classList.add('collapsed');
                         content.classList.add('collapsed');
                         const arrow = header.querySelector('.collapse-icon');
@@ -779,7 +773,6 @@
             });
         }
         
-        // Сохраняем состояние конкретной карточки при сворачивании/разворачивании
         function toggleCardState(header, content, taskId) {
             const isCollapsing = !header.classList.contains('collapsed');
             if (isCollapsing) {
@@ -791,8 +784,6 @@
             }
             const arrow = header.querySelector('.collapse-icon');
             if (arrow) arrow.textContent = isCollapsing ? '▼' : '▲';
-            
-            // Сохраняем состояние всех карточек
             saveAllCardsState();
         }
         
@@ -881,7 +872,7 @@
             document.getElementById('filterOperation').value = '';
             document.getElementById('filterRal').value = '';
             document.getElementById('statusFilter').value = 'all';
-            loadTasks();
+            renderTasks();
         }
         
         // ============== КЛАСС УПРАВЛЕНИЯ ЗАДАЧАМИ ==============
@@ -925,6 +916,7 @@
                     if (executor) {
                         executor.quantity = quantity;
                         this.saveData();
+                        updateSingleTaskCard(taskId);
                     }
                 }
             }
@@ -936,10 +928,8 @@
                 const executor = task.executors.find(e => e.id === executorId);
                 if (executor) {
                     executor.status = status;
-                    this.saveData();
-
-                    let taskStatus = 'pending';
                     
+                    let taskStatus = 'pending';
                     const hasInProgress = task.executors.some(e => e.status === 'in_progress');
                     const allShiftEnded = task.executors.length > 0 && task.executors.every(e => e.status === 'shift_ended');
                     const allCompleted = task.executors.length > 0 && task.executors.every(e => e.status === 'completed');
@@ -966,8 +956,7 @@
                         localStorage.setItem('masterx_orders', JSON.stringify(orders));
                     }
                     
-                    // Обновляем список задач без полной перерисовки
-                    refreshTasksList();
+                    updateSingleTaskCard(taskId);
                 }
             }
             
@@ -983,6 +972,7 @@
                         status: 'pending'
                     });
                     this.saveData();
+                    renderTasks();
                     return true;
                 }
                 return false;
@@ -993,6 +983,7 @@
                 if (task && task.executors) {
                     task.executors = task.executors.filter(e => e.id !== executorId);
                     this.saveData();
+                    renderTasks();
                 }
             }
             
@@ -1021,18 +1012,154 @@
                         localStorage.setItem('masterx_orders', JSON.stringify(orders));
                     }
                     
-                    refreshTasksList();
+                    updateSingleTaskCard(taskId);
                 }
             }
         }
         
-        // Функция обновления списка задач без потери состояния свёрнутости
-        function refreshTasksList() {
+        // Обновление только одной карточки
+        function updateSingleTaskCard(taskId) {
+            const task = taskManager.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            const taskCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+            if (!taskCard) return;
+            
+            // Обновляем статус в шапке
+            const statusBadge = taskCard.querySelector('.task-status-badge');
+            const taskHeader = taskCard.querySelector('.task-header');
+            
+            if (statusBadge) {
+                let statusClass = 'pending';
+                let statusText = '⏳ ОЖИДАЕТ';
+                if (task.status === 'in_progress') {
+                    statusClass = 'in-progress';
+                    statusText = '⚡ В РАБОТЕ';
+                } else if (task.status === 'completed') {
+                    statusClass = 'completed';
+                    statusText = '✅ ГОТОВО';
+                }
+                
+                statusBadge.className = `task-status-badge ${statusClass}`;
+                statusBadge.textContent = statusText;
+                
+                if (taskHeader) {
+                    taskHeader.classList.remove('status-pending', 'status-in-progress', 'status-completed');
+                    taskHeader.classList.add(`status-${statusClass}`);
+                }
+            }
+            
+            // Обновляем список исполнителей
+            const executorList = taskCard.querySelector('.executor-list');
+            if (executorList) {
+                const wasCollapsed = taskCard.querySelector('.task-content')?.classList.contains('collapsed');
+                
+                executorList.innerHTML = '';
+                if (task.executors && task.executors.length > 0) {
+                    task.executors.forEach(executor => {
+                        executorList.appendChild(createExecutorItemElement(task, executor));
+                    });
+                } else {
+                    const noExecutors = document.createElement('p');
+                    noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 11px;';
+                    noExecutors.textContent = 'Нет исполнителей';
+                    executorList.appendChild(noExecutors);
+                }
+                
+                // Обновляем кнопку "ГОТОВО"
+                const readyBtn = taskCard.querySelector('.btn-ready');
+                if (readyBtn) {
+                    if (task.status === 'completed') {
+                        readyBtn.disabled = true;
+                    } else {
+                        readyBtn.disabled = false;
+                    }
+                }
+                
+                if (wasCollapsed) {
+                    const content = taskCard.querySelector('.task-content');
+                    const header = taskCard.querySelector('.task-header');
+                    if (content && header) {
+                        content.classList.add('collapsed');
+                        header.classList.add('collapsed');
+                    }
+                }
+            }
+        }
+        
+        function createExecutorItemElement(task, executor) {
+            const isShiftEnded = executor.status === 'shift_ended';
+            const isTaskCompleted = task.status === 'completed';
+            const canEdit = !isTaskCompleted && !isShiftEnded;
+            
+            const div = document.createElement('div');
+            div.className = 'executor-item';
+            div.dataset.executorId = executor.id;
+            
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.className = 'executor-name';
+            nameInput.value = executor.name;
+            nameInput.disabled = isTaskCompleted || isShiftEnded;
+            div.appendChild(nameInput);
+            
+            const quantityInput = document.createElement('input');
+            quantityInput.type = 'number';
+            quantityInput.className = 'executor-quantity';
+            quantityInput.value = executor.quantity || 0;
+            quantityInput.min = 0;
+            quantityInput.disabled = !canEdit;
+            quantityInput.onchange = function(e) {
+                e.stopPropagation();
+                if (!canEdit) return;
+                taskManager.updateExecutorQuantity(task.id, executor.id, parseInt(this.value) || 0);
+            };
+            div.appendChild(quantityInput);
+            
+            const workBtn = document.createElement('button');
+            workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''}`;
+            workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : (isShiftEnded ? 'СМЕНА ЗАКРЫТА' : 'НАЧАТЬ');
+            workBtn.disabled = !canEdit;
+            workBtn.onclick = function(e) {
+                e.stopPropagation();
+                if (!canEdit) return;
+                const newStatus = workBtn.classList.contains('active') ? 'pending' : 'in_progress';
+                taskManager.updateExecutorStatus(task.id, executor.id, newStatus);
+            };
+            div.appendChild(workBtn);
+            
+            const endShiftBtn = document.createElement('button');
+            endShiftBtn.className = 'btn-end-shift';
+            endShiftBtn.innerHTML = isShiftEnded ? '✅ СМЕНА ЗАКРЫТА' : '🕒 ЗАКРЫТЬ';
+            endShiftBtn.disabled = isTaskCompleted || isShiftEnded;
+            endShiftBtn.onclick = function(e) {
+                e.stopPropagation();
+                if (confirm(`Закрыть смену для ${executor.name}?`)) {
+                    taskManager.updateExecutorStatus(task.id, executor.id, 'shift_ended');
+                }
+            };
+            div.appendChild(endShiftBtn);
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'btn btn-danger btn-sm';
+            removeBtn.innerHTML = '✕';
+            removeBtn.disabled = !canEdit;
+            removeBtn.onclick = function(e) {
+                e.stopPropagation();
+                if (confirm('Удалить этого исполнителя?')) {
+                    taskManager.removeExecutor(task.id, executor.id);
+                }
+            };
+            div.appendChild(removeBtn);
+            
+            return div;
+        }
+        
+        function renderTasks() {
             if (isLoadingTasks) return;
+            isLoadingTasks = true;
             
-            // Сохраняем текущее состояние свёрнутости перед обновлением
             saveAllCardsState();
-            
             taskManager.loadData();
             
             const filterCustomer = document.getElementById('filterCustomer').value;
@@ -1082,14 +1209,12 @@
             document.getElementById('tasksCompleted').textContent = tasks.filter(t => t.status === 'completed').length;
 
             const tasksList = document.getElementById('tasksList');
-            
-            // Сохраняем текущую позицию прокрутки
             const scrollPosition = tasksList.scrollTop;
-            
             tasksList.innerHTML = '';
 
             if (sortedTasks.length === 0) {
                 tasksList.innerHTML = '<div class="no-tasks"><p>📭 Нет задач по выбранным фильтрам</p></div>';
+                isLoadingTasks = false;
                 return;
             }
 
@@ -1178,7 +1303,6 @@
                     <button class="btn-ready" id="ready-${task.id}" ${task.status === 'completed' ? 'disabled' : ''} onclick="event.stopPropagation(); completeTask('${task.id}')">✅ ГОТОВО</button>
                 `;
                 
-                // Обработчик клика по заголовку для сворачивания/разворачивания
                 header.addEventListener('click', function(e) {
                     if (e.target.tagName === 'BUTTON') return;
                     toggleCardState(header, content, task.id);
@@ -1188,130 +1312,33 @@
                 taskCard.appendChild(content);
                 tasksList.appendChild(taskCard);
                 
-                renderExecutors(task.id, task);
-                renderActionButtons(task.id, task);
+                // Заполняем исполнителей
+                const executorContainer = document.getElementById(`executors-${task.id}`);
+                if (executorContainer && task.executors) {
+                    executorContainer.innerHTML = '';
+                    task.executors.forEach(executor => {
+                        executorContainer.appendChild(createExecutorItemElement(task, executor));
+                    });
+                }
+                
+                // Заполняем кнопку добавления исполнителя
+                const actionContainer = document.getElementById(`action-${task.id}`);
+                if (actionContainer && task.status !== 'completed') {
+                    actionContainer.innerHTML = '';
+                    const addBtn = document.createElement('button');
+                    addBtn.className = 'btn-add-executor';
+                    addBtn.textContent = '+ Добавить исполнителя';
+                    addBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        showAddExecutorForm(task, actionContainer);
+                    };
+                    actionContainer.appendChild(addBtn);
+                }
             });
             
-            // Восстанавливаем состояние свёрнутости
             restoreAllCardsState();
-            
-            // Восстанавливаем позицию прокрутки
             tasksList.scrollTop = scrollPosition;
-        }
-        
-        function loadTasks() {
-            if (isLoadingTasks) return;
-            isLoadingTasks = true;
-            
-            taskManager.loadData();
-            populateFilters();
-            refreshTasksList();
-            
-            setTimeout(() => {
-                isLoadingTasks = false;
-            }, 100);
-        }
-        
-        // ============== ОТОБРАЖЕНИЕ ИСПОЛНИТЕЛЕЙ ==============
-        function renderExecutors(taskId, task) {
-            const container = document.getElementById(`executors-${taskId}`);
-            if (!container) return;
-            
-            container.innerHTML = '';
-            
-            if (task.executors && task.executors.length > 0) {
-                task.executors.forEach(executor => {
-                    const isShiftEnded = executor.status === 'shift_ended';
-                    const isTaskCompleted = task.status === 'completed';
-                    const canEdit = !isTaskCompleted && !isShiftEnded;
-                    
-                    const div = document.createElement('div');
-                    div.className = 'executor-item';
-                    div.dataset.executorId = executor.id;
-                    
-                    const nameInput = document.createElement('input');
-                    nameInput.type = 'text';
-                    nameInput.className = 'executor-name';
-                    nameInput.value = executor.name;
-                    nameInput.disabled = isTaskCompleted || isShiftEnded;
-                    div.appendChild(nameInput);
-                    
-                    const quantityInput = document.createElement('input');
-                    quantityInput.type = 'number';
-                    quantityInput.className = 'executor-quantity';
-                    quantityInput.value = executor.quantity || 0;
-                    quantityInput.min = 0;
-                    quantityInput.disabled = !canEdit;
-                    quantityInput.onchange = function(e) {
-                        e.stopPropagation();
-                        if (!canEdit) return;
-                        taskManager.updateExecutorQuantity(task.id, executor.id, parseInt(this.value) || 0);
-                    };
-                    div.appendChild(quantityInput);
-                    
-                    const workBtn = document.createElement('button');
-                    workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''}`;
-                    workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : (isShiftEnded ? 'СМЕНА ЗАКРЫТА' : 'НАЧАТЬ');
-                    workBtn.disabled = !canEdit;
-                    workBtn.onclick = function(e) {
-                        e.stopPropagation();
-                        if (!canEdit) return;
-                        const newStatus = workBtn.classList.contains('active') ? 'pending' : 'in_progress';
-                        taskManager.updateExecutorStatus(task.id, executor.id, newStatus);
-                    };
-                    div.appendChild(workBtn);
-                    
-                    const endShiftBtn = document.createElement('button');
-                    endShiftBtn.className = 'btn-end-shift';
-                    endShiftBtn.innerHTML = isShiftEnded ? '✅ СМЕНА ЗАКРЫТА' : '🕒 ЗАКРЫТЬ';
-                    endShiftBtn.disabled = isTaskCompleted || isShiftEnded;
-                    endShiftBtn.onclick = function(e) {
-                        e.stopPropagation();
-                        if (confirm(`Закрыть смену для ${executor.name}?`)) {
-                            taskManager.updateExecutorStatus(task.id, executor.id, 'shift_ended');
-                        }
-                    };
-                    div.appendChild(endShiftBtn);
-                    
-                    const removeBtn = document.createElement('button');
-                    removeBtn.className = 'btn btn-danger btn-sm';
-                    removeBtn.innerHTML = '✕';
-                    removeBtn.disabled = !canEdit;
-                    removeBtn.onclick = function(e) {
-                        e.stopPropagation();
-                        if (confirm('Удалить этого исполнителя?')) {
-                            taskManager.removeExecutor(task.id, executor.id);
-                            refreshTasksList();
-                        }
-                    };
-                    div.appendChild(removeBtn);
-                    
-                    container.appendChild(div);
-                });
-            } else {
-                const noExecutors = document.createElement('p');
-                noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 11px;';
-                noExecutors.textContent = 'Нет исполнителей';
-                container.appendChild(noExecutors);
-            }
-        }
-        
-        function renderActionButtons(taskId, task) {
-            const container = document.getElementById(`action-${taskId}`);
-            if (!container) return;
-            
-            container.innerHTML = '';
-            
-            if (task.status !== 'completed') {
-                const addBtn = document.createElement('button');
-                addBtn.className = 'btn-add-executor';
-                addBtn.textContent = '+ Добавить исполнителя';
-                addBtn.onclick = function(e) {
-                    e.stopPropagation();
-                    showAddExecutorForm(task, container);
-                };
-                container.appendChild(addBtn);
-            }
+            isLoadingTasks = false;
         }
         
         function showAddExecutorForm(task, container) {
@@ -1332,7 +1359,7 @@
                 if (!name) { alert('Введите ФИО'); return; }
                 if (taskManager.addExecutor(task.id, name)) {
                     formDiv.remove();
-                    refreshTasksList();
+                    renderTasks();
                 } else { alert('Исполнитель уже существует'); }
             };
             const cancelBtn = document.createElement('button');
@@ -1587,7 +1614,7 @@
             inputs.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
-                    el.addEventListener('change', () => loadTasks());
+                    el.addEventListener('change', () => renderTasks());
                 }
             });
         }
@@ -1624,7 +1651,7 @@
             taskManager = new SimpleTaskManager('polimerniy');
             window.taskManager = taskManager;
             setupFilterListeners();
-            loadTasks();
+            renderTasks();
             window.addEventListener('beforeunload', () => { saveAllCardsState(); });
         }
         
