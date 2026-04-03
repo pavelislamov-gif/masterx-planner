@@ -440,334 +440,269 @@
 
         /* КАРТОЧКИ УЧАСТКОВ НА ГЛАВНОЙ СТРАНИЦЕ */
         .sites-section {
-    padding: 15px;
-    background: #15191f;
-    border-top: 1px solid #2a2f38;
-    border-radius: 0 0 12px 12px;
-    overflow-x: auto;
-    overflow-y: visible;
-    width: 100%;
-}
+            padding: 15px;
+            background: #15191f;
+            border-top: 1px solid #2a2f38;
+            border-radius: 0 0 12px 12px;
+            overflow-x: auto;
+            overflow-y: visible;
+            width: 100%;
+        }
 
-.sites-grid {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: 12px;
-    width: 100%;
-}
+        .sites-grid {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: 12px;
+            width: 100%;
+        }
 
-.site-card {
-    flex: 1 1 0;
-    min-width: 0;
-    background: #1a1e24;
-    border: 1px solid #2a2f38;
-    border-radius: 12px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
+        .site-card {
+            flex: 1 1 0;
+            min-width: 240px;
+            background: #1a1e24;
+            border: 1px solid #2a2f38;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
 
-.site-card-header {
-    padding: 8px 10px;
-    text-align: center;
-    background: linear-gradient(135deg, #232830, #1a1e24);
-    border-bottom: 1px solid #2a2f38;
-}
+        .site-card-header {
+            padding: 8px 10px;
+            text-align: center;
+            background: linear-gradient(135deg, #232830, #1a1e24);
+            border-bottom: 1px solid #2a2f38;
+        }
 
-.site-name {
-    font-weight: 700;
-    font-size: 14px;
-    color: #ff3b3b;
-    white-space: nowrap;
-    overflow-x: hidden;
-    text-overflow: ellipsis;
-}
+        .site-name {
+            font-weight: 700;
+            font-size: 14px;
+            color: #ff3b3b;
+            white-space: nowrap;
+            overflow-x: hidden;
+            text-overflow: ellipsis;
+        }
 
-.site-stats {
-    font-size: 11px;
-    color: #a0a0a0;
-    margin-top: 2px;
-}
+        .site-stats {
+            font-size: 11px;
+            color: #a0a0a0;
+            margin-top: 2px;
+        }
 
-.site-card-content {
-    flex: 1;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    overflow-y: auto;
-    max-height: 500px;
-}
+        .site-card-content {
+            flex: 1;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            max-height: 500px;
+        }
 
-/* Операция - компактная, без переноса строк */
-.operation-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    background: #15191f;
-    border-radius: 6px;
-    border: 1px solid #2a2f38;
-    width: 100%;
-    min-width: 0;
-}
+        .operation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 6px 8px;
+            background: #15191f;
+            border-radius: 6px;
+            border: 1px solid #2a2f38;
+            width: 100%;
+        }
 
-.operation-info {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-}
+        .operation-info {
+            flex: 1;
+            min-width: 0;
+        }
 
-/* Название операции - одна строка */
-.operation-name {
-    font-size: 12px;
-    font-weight: 700;
-    color: #ff9800;
-    margin-bottom: 2px;
-    white-space: nowrap;
-    overflow-x: hidden;
-    text-overflow: ellipsis;
-}
+        .operation-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: #ff9800;
+            margin-bottom: 3px;
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.3;
+        }
 
-/* Детали операции - одна строка, не переносим */
-.sites-section {
-    padding: 15px;
-    background: #15191f;
-    border-top: 1px solid #2a2f38;
-    border-radius: 0 0 12px 12px;
-    overflow-x: auto;
-    overflow-y: visible;
-    width: 100%;
-}
+        .operation-detail {
+            font-size: 10px;
+            color: #b0b0b0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
 
-.sites-grid {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: 12px;
-    width: 100%;
-}
+        .operation-detail .material {
+            color: #ffffff;
+            font-weight: 500;
+            white-space: normal;
+            word-break: break-word;
+        }
 
-.site-card {
-    flex: 1 1 0;
-    min-width: 240px;  /* Увеличено с 0 до 240px */
-    background: #1a1e24;
-    border: 1px solid #2a2f38;
-    border-radius: 12px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
+        .operation-detail .thickness {
+            color: #4cd964;
+            background: #1e232b;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 9px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
 
-.site-card-header {
-    padding: 8px 10px;
-    text-align: center;
-    background: linear-gradient(135deg, #232830, #1a1e24);
-    border-bottom: 1px solid #2a2f38;
-}
+        .operation-controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
 
-.site-name {
-    font-weight: 700;
-    font-size: 14px;
-    color: #ff3b3b;
-    white-space: nowrap;
-    overflow-x: hidden;
-    text-overflow: ellipsis;
-}
+        .square-status {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: #1e232b;
+            border: 1px solid #3a404b;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
 
-.site-stats {
-    font-size: 11px;
-    color: #a0a0a0;
-    margin-top: 2px;
-}
+        .square-status:hover {
+            transform: scale(1.02);
+            border-color: #ff3b3b;
+        }
 
-.site-card-content {
-    flex: 1;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    overflow-y: auto;
-    max-height: 500px;
-}
+        .square-status.orange {
+            background-color: #ff9800 !important;
+            border-color: #e65100 !important;
+        }
 
-/* Операция */
-.operation-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;  /* Выравнивание по верхнему краю */
-    gap: 8px;
-    padding: 6px 8px;
-    background: #15191f;
-    border-radius: 6px;
-    border: 1px solid #2a2f38;
-    width: 100%;
-}
+        .square-status.green {
+            background-color: #4caf50 !important;
+            border-color: #2e7d32 !important;
+        }
 
-.operation-info {
-    flex: 1;
-    min-width: 0;
-}
+        .action-buttons {
+            display: flex;
+            gap: 3px;
+            flex-shrink: 0;
+        }
 
-/* Название операции - разрешаем перенос */
-.operation-name {
-    font-size: 12px;
-    font-weight: 700;
-    color: #ff9800;
-    margin-bottom: 3px;
-    white-space: normal;
-    word-break: break-word;
-    line-height: 1.3;
-}
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: none;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
 
-/* Детали операции - разрешаем перенос */
-.operation-detail {
-    font-size: 10px;
-    color: #b0b0b0;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    flex-wrap: wrap;
-}
+        .action-btn:hover {
+            transform: scale(1.02);
+        }
 
-.operation-detail .material {
-    color: #ffffff;
-    font-weight: 500;
-    white-space: normal;
-    word-break: break-word;
-}
+        .btn-add {
+            background: #2ecc71;
+            color: white;
+        }
 
-.operation-detail .thickness {
-    color: #4cd964;
-    background: #1e232b;
-    padding: 1px 4px;
-    border-radius: 3px;
-    font-size: 9px;
-    white-space: nowrap;
-    flex-shrink: 0;
-}
+        .btn-add.added {
+            background: #e74c3c;
+        }
 
-/* КОНТРОЛЛЫ - фиксированной ширины */
-.operation-controls {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    flex-shrink: 0;
-}
+        .btn-priority {
+            background: #dc3545;
+            color: white;
+        }
 
-.square-status {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    background: #1e232b;
-    border: 1px solid #3a404b;
-    cursor: pointer;
-    flex-shrink: 0;
-}
+        .btn-priority:hover {
+            background: #c82333;
+        }
 
-.square-status:hover {
-    transform: scale(1.02);
-    border-color: #ff3b3b;
-}
+        .btn-add-extra {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
 
-.square-status.orange {
-    background-color: #ff9800 !important;
-    border-color: #e65100 !important;
-}
+        .btn-add-extra:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
 
-.square-status.green {
-    background-color: #4caf50 !important;
-    border-color: #2e7d32 !important;
-}
+        .btn-file {
+            background: #0077ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
 
-.action-buttons {
-    display: flex;
-    gap: 3px;
-    flex-shrink: 0;
-}
+        .btn-file:hover {
+            background: #005fcc;
+            transform: translateY(-1px);
+        }
 
-.action-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    border: none;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    flex-shrink: 0;
-}
+        .file-path-info {
+            font-size: 10px;
+            color: #4cd964;
+            margin-top: 4px;
+            padding: 4px;
+            background: #1e232b;
+            border-radius: 4px;
+            word-break: break-all;
+        }
 
-.action-btn:hover {
-    transform: scale(1.02);
-}
+        .btn-sm {
+            padding: 2px 6px;
+            font-size: 9px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+        }
 
-.btn-add {
-    background: #2ecc71;
-    color: white;
-}
+        /* Адаптация для узких экранов */
+        @media (max-width: 1300px) {
+            .sites-grid {
+                min-width: 1000px;
+                width: auto;
+                overflow-x: auto;
+            }
+            .site-card {
+                flex: 0 0 auto;
+                width: 240px;
+            }
+        }
 
-.btn-add.added {
-    background: #e74c3c;
-}
-
-.btn-priority {
-    background: #dc3545;
-    color: white;
-}
-
-.btn-priority:hover {
-    background: #c82333;
-}
-
-.btn-add-extra {
-    background: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 6px;
-    font-size: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 8px;
-    width: 100%;
-    transition: all 0.2s;
-}
-
-.btn-add-extra:hover {
-    background: #5a6268;
-    transform: translateY(-1px);
-}
-
-/* Адаптация для узких экранов */
-@media (max-width: 1300px) {
-    .sites-grid {
-        min-width: 1000px;
-        width: auto;
-        overflow-x: auto;
-    }
-    .site-card {
-        flex: 0 0 auto;
-        width: 240px;
-    }
-}
-
-/* СКРОЛЛБАРЫ */
-.site-card-content::-webkit-scrollbar {
-    width: 4px;
-}
-.site-card-content::-webkit-scrollbar-track {
-    background: #1e232b;
-}
-.site-card-content::-webkit-scrollbar-thumb {
-    background: #ff3b3b;
-    border-radius: 4px;
-}
+        .site-card-content::-webkit-scrollbar {
+            width: 4px;
+        }
+        .site-card-content::-webkit-scrollbar-track {
+            background: #1e232b;
+        }
+        .site-card-content::-webkit-scrollbar-thumb {
+            background: #ff3b3b;
+            border-radius: 4px;
+        }
 
         .btn {
             padding: 10px 20px;
@@ -782,7 +717,6 @@
             border: 1px solid #3a404b;
         }
 
-        /* Стили для горизонтального расположения деталей в карточке изделия */
         .details-chips {
             display: flex;
             flex-wrap: wrap;
@@ -955,6 +889,10 @@
 
         body.light-theme .btn-add-extra {
             background: #6c757d !important;
+        }
+
+        body.light-theme .btn-file {
+            background: #0077ff !important;
         }
 
         body.light-theme .detail-chip,
@@ -1870,7 +1808,8 @@
                 items: JSON.parse(JSON.stringify(tempItemsList)),
                 status: 'active',
                 tasks: {},
-                extraTasks: []
+                extraTasks: [],
+                siteFiles: {}
             };
 
             orders.push(newOrder);
@@ -1968,6 +1907,131 @@
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
+        // ============== РАБОТА С ФАЙЛАМИ ==============
+        function addSiteFile(orderId, siteKey) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) {
+                alert('Группа не найдена');
+                return;
+            }
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.style.zIndex = '3000';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 500px;">
+                    <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                    <h3 style="color: #ff3b3b; margin-bottom: 20px;">📎 Добавить файл/ссылку</h3>
+                    <div class="form-group">
+                        <label>📁 Название файла (необязательно):</label>
+                        <input type="text" id="fileNameInput" placeholder="Например: Чертеж детали">
+                    </div>
+                    <div class="form-group">
+                        <label>🔗 Путь к файлу или ссылка:</label>
+                        <input type="text" id="filePathInput" placeholder="\\\\server\\share\\file.pdf  или  https://...">
+                        <small style="color: #a0a0a0; font-size: 10px;">Поддерживаются: сетевые пути, локальные пути, URL</small>
+                    </div>
+                    <div class="form-group">
+                        <label>💬 Комментарий (необязательно):</label>
+                        <textarea id="fileCommentInput" rows="2" placeholder="Дополнительная информация..."></textarea>
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button class="btn btn-danger" onclick="this.closest('.modal').remove()">Отмена</button>
+                        <button class="btn btn-success" onclick="saveSiteFile(${orderId}, '${siteKey}')">💾 Сохранить</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        function saveSiteFile(orderId, siteKey) {
+            const fileName = document.getElementById('fileNameInput')?.value.trim();
+            const filePath = document.getElementById('filePathInput')?.value.trim();
+            const comment = document.getElementById('fileCommentInput')?.value.trim();
+            
+            if (!filePath) {
+                alert('Введите путь к файлу или ссылку');
+                return;
+            }
+            
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) {
+                alert('Группа не найдена');
+                return;
+            }
+            
+            if (!order.siteFiles) order.siteFiles = {};
+            if (!order.siteFiles[siteKey]) order.siteFiles[siteKey] = [];
+            
+            order.siteFiles[siteKey].push({
+                id: Date.now(),
+                name: fileName || filePath.split(/[\\/]/).pop() || 'Файл',
+                path: filePath,
+                comment: comment || '',
+                createdAt: new Date().toISOString()
+            });
+            
+            saveOrdersToStorage(orders);
+            
+            const modal = document.querySelector('.modal');
+            if (modal) modal.remove();
+            
+            renderOrdersList();
+            alert('✅ Файл добавлен!');
+        }
+
+        function removeSiteFile(orderId, siteKey, fileIndex) {
+            if (!confirm('Удалить этот файл?')) return;
+            
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) return;
+            
+            if (order.siteFiles && order.siteFiles[siteKey]) {
+                order.siteFiles[siteKey].splice(fileIndex, 1);
+                if (order.siteFiles[siteKey].length === 0) {
+                    delete order.siteFiles[siteKey];
+                }
+                saveOrdersToStorage(orders);
+                renderOrdersList();
+            }
+        }
+
+        function openLocalFile(filePath) {
+            if (!filePath) return;
+            
+            try {
+                if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+                    window.open(filePath, '_blank');
+                } else {
+                    const link = document.createElement('a');
+                    link.href = filePath;
+                    link.target = '_blank';
+                    link.click();
+                }
+            } catch (error) {
+                console.error('Ошибка открытия:', error);
+                alert('Не удалось открыть файл. Попробуйте скопировать путь и открыть вручную.\n\nПуть: ' + filePath);
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ Путь скопирован в буфер обмена:\n' + text);
+            }).catch(() => {
+                alert('❌ Не удалось скопировать');
+            });
+        }
+
         // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА С event.stopPropagation() ==============
         function createSiteRow(name, order, itemIndex, siteKey) {
             const item = order.items[itemIndex];
@@ -2042,6 +2106,31 @@
                 `;
             }
 
+            // Получаем список файлов для этого участка
+            const files = order.siteFiles?.[siteKey] || [];
+            
+            let filesHtml = '';
+            if (files.length > 0) {
+                filesHtml = `
+                    <div style="margin-top: 8px; border-top: 1px solid #2a2f38; padding-top: 8px;">
+                        <div style="font-size: 10px; color: #ff9800; margin-bottom: 6px;">📎 ПРИКРЕПЛЁННЫЕ ФАЙЛЫ:</div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            ${files.map((file, idx) => `
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; background: #1e232b; padding: 4px 6px; border-radius: 4px;">
+                                    <span style="font-size: 10px; color: #4cd964; word-break: break-all; flex: 1;" title="${escapeHtml(file.comment || '')}">📄 ${escapeHtml(file.name || file.path)}</span>
+                                    <div style="display: flex; gap: 4px;">
+                                        <button class="btn-sm" style="background: #28a745; padding: 2px 6px; font-size: 9px;" onclick="event.stopPropagation(); openLocalFile('${escapeHtml(file.path).replace(/'/g, "\\'")}')">📂</button>
+                                        <button class="btn-sm" style="background: #ff9800; padding: 2px 6px; font-size: 9px;" onclick="event.stopPropagation(); copyToClipboard('${escapeHtml(file.path).replace(/'/g, "\\'")}')">📋</button>
+                                        <button class="btn-sm" style="background: #dc3545; padding: 2px 6px; font-size: 9px;" onclick="event.stopPropagation(); removeSiteFile(${order.id}, '${siteKey}', ${idx})">✕</button>
+                                    </div>
+                                </div>
+                                ${file.comment ? `<div style="font-size: 9px; color: #a0a0a0; margin-left: 20px; margin-bottom: 4px;">💬 ${escapeHtml(file.comment)}</div>` : ''}
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
             return `
                 <div class="site-card">
                     <div class="site-card-header">
@@ -2052,7 +2141,11 @@
                     </div>
                     <div class="site-card-content">
                         ${operationsHtml}
-                        <button class="btn-add-extra" onclick="event.stopPropagation(); addExtraTask(${order.id}, '${siteKey}')">➕ Доп. задача</button>
+                        <div style="display: flex; gap: 8px; margin-top: 8px;">
+                            <button class="btn-add-extra" style="flex: 1;" onclick="event.stopPropagation(); addExtraTask(${order.id}, '${siteKey}')">➕ Доп. задача</button>
+                            <button class="btn-file" style="flex: 1;" onclick="event.stopPropagation(); addSiteFile(${order.id}, '${siteKey}')">📎 Добавить файл</button>
+                        </div>
+                        ${filesHtml}
                     </div>
                 </div>
             `;
@@ -2651,120 +2744,120 @@
 
         // ============== ОТЧЁТ ПО ИЗДЕЛИЮ ==============
         function showItemReport(orderId, itemIndex) {
-    const orders = loadOrdersFromStorage();
-    const order = orders.find(o => o.id == orderId);
-    if (!order || !order.items[itemIndex]) {
-        alert('Изделие не найдено');
-        return;
-    }
-    
-    const item = order.items[itemIndex];
-    const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-    
-    const itemKey = `${order.id}_item${itemIndex}_${item.product}_${item.size?.name || ''}_${item.ral || ''}`;
-    
-    const itemReports = allReports.filter(report => {
-        if (report.isItemReport && report.itemKey === itemKey) {
-            return true;
-        }
-        if (report.isItemReport && report.orderId == orderId && 
-            report.product === item.product && 
-            report.size === item.size?.name) {
-            return true;
-        }
-        if (report.taskId) {
-            const parts = report.taskId.split('_');
-            return parts.length >= 3 && parts[0] == orderId && parts[2] == itemIndex;
-        }
-        return false;
-    });
-    
-    const siteNames = {
-        'polimerniy': '🎨 ПОЛИМЕРНЫЙ УЧАСТОК',
-        'slesarniy': '🔩 СЛЕСАРНЫЙ УЧАСТОК',
-        'frezerniy': '⚙️ ФРЕЗЕРНЫЙ УЧАСТОК',
-        'tokarniy': '🔧 ТОКАРНЫЙ УЧАСТОК',
-        'lazerno': '✨ ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
-    };
-    
-    const reportsBySite = {};
-    
-    itemReports.forEach(report => {
-        if (report.siteKey && report.rows && report.rows.length > 0) {
-            if (!reportsBySite[report.siteKey]) {
-                reportsBySite[report.siteKey] = [];
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order || !order.items[itemIndex]) {
+                alert('Изделие не найдено');
+                return;
             }
-            reportsBySite[report.siteKey].push(...report.rows);
-        }
-    });
-    
-    let html = `
-        <div style="padding: 12px;">
-            <div style="margin-bottom: 12px; border-bottom: 1px solid #2a2f38; padding-bottom: 6px;">
-                <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;">
-                    <h2 style="color: #ff3b3b; margin: 0; font-size: 18px;">📋 ОТЧЁТ ПО ИЗДЕЛИЮ</h2>
-                    <h3 style="margin: 0; font-size: 16px;">${escapeHtml(item.product)}</h3>
-                </div>
-                <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; font-size: 12px; color: #a0a0a0;">
-                    <span>📁 ${escapeHtml(order.groupName)}</span>
-                    <span>📏 ${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
-                    <span>🎨 ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</span>
-                </div>
-            </div>
-    `;
-    
-    if (Object.keys(reportsBySite).length === 0) {
-        html += `
-            <div style="text-align: center; padding: 20px; background: #15191f; border-radius: 8px;">
-                <div style="font-size: 32px; margin-bottom: 8px;">📭</div>
-                <p>Нет отчётов по этому изделию</p>
-                <p style="font-size: 11px; color: #6c757d;">Отчёты создаются на участках через кнопку "Отчёт"</p>
-            </div>
-        `;
-    } else {
-        for (const [siteKey, rows] of Object.entries(reportsBySite)) {
-            html += `
-                <div style="margin-bottom: 10px; border: 1px solid #2a2f38; border-radius: 6px; overflow: hidden;">
-                    <div style="background: linear-gradient(135deg, #232830, #1a1e24); padding: 5px 10px;">
-                        <h4 style="margin: 0; color: #ff3b3b; font-size: 12px;">${siteNames[siteKey] || siteKey}</h4>
-                    </div>
-                    <div style="padding: 5px 8px;">
-            `;
             
-            rows.forEach(row => {
-                const расход = row.расход || 0;
-                const единица = row.единица || 'гр';
-                const количество = row.количество || 0;
-                const комментарий = row.комментарий || '';
-                
-                let text = `Расход: ${расход} ${единица}, Количество: ${количество} шт`;
-                if (комментарий) text += `, ${комментарий}`;
-                
-                html += `
-                    <div style="margin-bottom: 3px; padding: 3px 5px; background: #15191f; border-radius: 3px; font-size: 11px;">
-                        ${escapeHtml(text)}
-                    </div>
-                `;
+            const item = order.items[itemIndex];
+            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+            
+            const itemKey = `${order.id}_item${itemIndex}_${item.product}_${item.size?.name || ''}_${item.ral || ''}`;
+            
+            const itemReports = allReports.filter(report => {
+                if (report.isItemReport && report.itemKey === itemKey) {
+                    return true;
+                }
+                if (report.isItemReport && report.orderId == orderId && 
+                    report.product === item.product && 
+                    report.size === item.size?.name) {
+                    return true;
+                }
+                if (report.taskId) {
+                    const parts = report.taskId.split('_');
+                    return parts.length >= 3 && parts[0] == orderId && parts[2] == itemIndex;
+                }
+                return false;
             });
             
-            html += `</div></div>`;
+            const siteNames = {
+                'polimerniy': '🎨 ПОЛИМЕРНЫЙ УЧАСТОК',
+                'slesarniy': '🔩 СЛЕСАРНЫЙ УЧАСТОК',
+                'frezerniy': '⚙️ ФРЕЗЕРНЫЙ УЧАСТОК',
+                'tokarniy': '🔧 ТОКАРНЫЙ УЧАСТОК',
+                'lazerno': '✨ ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
+            };
+            
+            const reportsBySite = {};
+            
+            itemReports.forEach(report => {
+                if (report.siteKey && report.rows && report.rows.length > 0) {
+                    if (!reportsBySite[report.siteKey]) {
+                        reportsBySite[report.siteKey] = [];
+                    }
+                    reportsBySite[report.siteKey].push(...report.rows);
+                }
+            });
+            
+            let html = `
+                <div style="padding: 12px;">
+                    <div style="margin-bottom: 12px; border-bottom: 1px solid #2a2f38; padding-bottom: 6px;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;">
+                            <h2 style="color: #ff3b3b; margin: 0; font-size: 18px;">📋 ОТЧЁТ ПО ИЗДЕЛИЮ</h2>
+                            <h3 style="margin: 0; font-size: 16px;">${escapeHtml(item.product)}</h3>
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; font-size: 12px; color: #a0a0a0;">
+                            <span>📁 ${escapeHtml(order.groupName)}</span>
+                            <span>📏 ${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
+                            <span>🎨 ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</span>
+                        </div>
+                    </div>
+            `;
+            
+            if (Object.keys(reportsBySite).length === 0) {
+                html += `
+                    <div style="text-align: center; padding: 20px; background: #15191f; border-radius: 8px;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">📭</div>
+                        <p>Нет отчётов по этому изделию</p>
+                        <p style="font-size: 11px; color: #6c757d;">Отчёты создаются на участках через кнопку "Отчёт"</p>
+                    </div>
+                `;
+            } else {
+                for (const [siteKey, rows] of Object.entries(reportsBySite)) {
+                    html += `
+                        <div style="margin-bottom: 10px; border: 1px solid #2a2f38; border-radius: 6px; overflow: hidden;">
+                            <div style="background: linear-gradient(135deg, #232830, #1a1e24); padding: 5px 10px;">
+                                <h4 style="margin: 0; color: #ff3b3b; font-size: 12px;">${siteNames[siteKey] || siteKey}</h4>
+                            </div>
+                            <div style="padding: 5px 8px;">
+                    `;
+                    
+                    rows.forEach(row => {
+                        const расход = row.расход || 0;
+                        const единица = row.единица || 'гр';
+                        const количество = row.количество || 0;
+                        const комментарий = row.комментарий || '';
+                        
+                        let text = `Расход: ${расход} ${единица}, Количество: ${количество} шт`;
+                        if (комментарий) text += `, ${комментарий}`;
+                        
+                        html += `
+                            <div style="margin-bottom: 3px; padding: 3px 5px; background: #15191f; border-radius: 3px; font-size: 11px;">
+                                ${escapeHtml(text)}
+                            </div>
+                        `;
+                    });
+                    
+                    html += `</div></div>`;
+                }
+            }
+            
+            html += `
+                <div style="display: flex; justify-content: center; gap: 12px; margin-top: 12px; padding-top: 8px; border-top: 1px solid #2a2f38;">
+                    <button class="btn btn-sm btn-primary" onclick="printCurrentReport()">🖨️ Распечатать</button>
+                    <button class="btn btn-sm btn-danger" onclick="closeOrderReportModal()">✖️ Закрыть</button>
+                </div>
+            </div>`;
+            
+            const modal = document.getElementById('orderReportModal');
+            const contentDiv = document.getElementById('orderReportContent');
+            contentDiv.innerHTML = html;
+            modal.style.display = 'block';
+            
+            window.currentReportHtml = html;
         }
-    }
-    
-    html += `
-        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 12px; padding-top: 8px; border-top: 1px solid #2a2f38;">
-            <button class="btn btn-sm btn-primary" onclick="printCurrentReport()">🖨️ Распечатать</button>
-            <button class="btn btn-sm btn-danger" onclick="closeOrderReportModal()">✖️ Закрыть</button>
-        </div>
-    </div>`;
-    
-    const modal = document.getElementById('orderReportModal');
-    const contentDiv = document.getElementById('orderReportContent');
-    contentDiv.innerHTML = html;
-    modal.style.display = 'block';
-    
-    window.currentReportHtml = html;
-}
 
         function closeOrderReportModal() {
             document.getElementById('orderReportModal').style.display = 'none';
@@ -2802,7 +2895,6 @@
             populateNewItemSelects();
             initThemeToggle();
 
-            // Синхронизация всех задач перед отображением
             syncAllTasksToOrders();
 
             renderOrdersList();
@@ -2851,6 +2943,10 @@
         window.closeOrderReportModal = closeOrderReportModal;
         window.showItemReport = showItemReport;
         window.printCurrentReport = printCurrentReport;
+        window.addSiteFile = addSiteFile;
+        window.removeSiteFile = removeSiteFile;
+        window.openLocalFile = openLocalFile;
+        window.copyToClipboard = copyToClipboard;
 
         document.addEventListener('DOMContentLoaded', initMainPage);
     </script>
