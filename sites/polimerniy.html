@@ -853,7 +853,6 @@
             const thicknesses = new Set();
             const sizes = new Set();
             
-            // Собираем данные из заказов
             allOrders.forEach(order => {
                 if (order.groupName) customers.add(order.groupName);
                 if (order.items) {
@@ -865,7 +864,6 @@
                 }
             });
             
-            // Собираем данные из задач
             if (taskManager && taskManager.tasks) {
                 console.log(`📊 Задач в taskManager: ${taskManager.tasks.length}`);
                 taskManager.tasks.forEach(task => {
@@ -880,7 +878,6 @@
             
             console.log(`📋 Найдено: заказчиков=${customers.size}, изделий=${products.size}, операций=${operations.size}, RAL=${rals.size}, толщин=${thicknesses.size}, размеров=${sizes.size}`);
             
-            // Заказчики
             const customerSelect = document.getElementById('filterCustomer');
             if (customerSelect) {
                 const currentCustomer = customerSelect.value;
@@ -891,7 +888,6 @@
                 if (currentCustomer && customers.has(currentCustomer)) customerSelect.value = currentCustomer;
             }
             
-            // Изделия
             const productSelect = document.getElementById('filterProduct');
             if (productSelect) {
                 const currentProduct = productSelect.value;
@@ -902,7 +898,6 @@
                 if (currentProduct && products.has(currentProduct)) productSelect.value = currentProduct;
             }
             
-            // Операции
             const operationSelect = document.getElementById('filterOperation');
             if (operationSelect) {
                 const currentOperation = operationSelect.value;
@@ -913,7 +908,6 @@
                 if (currentOperation && operations.has(currentOperation)) operationSelect.value = currentOperation;
             }
             
-            // RAL
             const ralSelect = document.getElementById('filterRal');
             if (ralSelect) {
                 const currentRal = ralSelect.value;
@@ -924,7 +918,6 @@
                 if (currentRal && rals.has(currentRal)) ralSelect.value = currentRal;
             }
             
-            // Толщины
             const thicknessSelect = document.getElementById('filterThickness');
             if (thicknessSelect) {
                 const currentThickness = thicknessSelect.value;
@@ -935,7 +928,6 @@
                 if (currentThickness && thicknesses.has(currentThickness)) thicknessSelect.value = currentThickness;
             }
             
-            // Размеры
             const sizeSelect = document.getElementById('filterSize');
             if (sizeSelect) {
                 const currentSize = sizeSelect.value;
@@ -964,14 +956,10 @@
             renderTasks();
         }
         
-        // ============== СОРТИРОВКА ЗАДАЧ ==============
         function sortTasks(tasks, sortType, allOrders) {
             const tasksCopy = [...tasks];
-            
-            // Сначала разделяем приоритетные и обычные
             const priorityTasks = tasksCopy.filter(t => t.isPriority === true);
             const normalTasks = tasksCopy.filter(t => t.isPriority !== true);
-            
             let sortedNormal = [...normalTasks];
             
             switch(sortType) {
@@ -1032,13 +1020,10 @@
                     return [...priorityTasks, ...sortedNormal];
             }
             
-            // Для остальных типов сортировки приоритетные тоже сортируем по дате и ставим сверху
             priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            
             return [...priorityTasks, ...sortedNormal];
         }
         
-        // ============== КЛАСС УПРАВЛЕНИЯ ЗАДАЧАМИ ==============
         class SimpleTaskManager {
             constructor(siteKey) {
                 this.siteKey = siteKey;
@@ -1180,7 +1165,6 @@
             }
         }
         
-        // Обновление только одной карточки
         function updateSingleTaskCard(taskId) {
             const task = taskManager.tasks.find(t => t.id === taskId);
             if (!task) return;
@@ -1243,7 +1227,6 @@
             }
         }
         
-        // Обновление только списка исполнителей
         function updateExecutorList(taskId) {
             const task = taskManager.tasks.find(t => t.id === taskId);
             if (!task) return;
@@ -1344,7 +1327,6 @@
             return div;
         }
         
-        // Восстановление цвета фона шапки после загрузки
         function restoreTaskHeaderColors() {
             const taskCards = document.querySelectorAll('.task-card');
             taskCards.forEach(card => {
@@ -1384,7 +1366,6 @@
             saveAllCardsState();
             taskManager.loadData();
             
-            // Заполняем фильтры на основе загруженных задач
             populateFilters();
             
             const filterCustomer = document.getElementById('filterCustomer').value;
@@ -1400,7 +1381,6 @@
             
             let tasks = taskManager.tasks;
             
-            // ФИЛЬТРАЦИЯ
             tasks = tasks.filter(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
                 if (!order) return false;
@@ -1434,10 +1414,8 @@
                 return true;
             });
             
-            // СОРТИРОВКА
             tasks = sortTasks(tasks, sortType, allOrders);
             
-            // Обновляем статистику
             document.getElementById('totalTasks').textContent = tasks.length;
             document.getElementById('tasksInProgress').textContent = tasks.filter(t => t.status === 'in_progress').length;
             document.getElementById('tasksCompleted').textContent = tasks.filter(t => t.status === 'completed').length;
@@ -1633,7 +1611,7 @@
             taskManager.completeTask(taskId);
         }
         
-        // ============== ОТЧЁТ ПО ЗАДАЧЕ ==============
+        // ============== ОТЧЁТ ПО ЗАДАЧЕ С ЕДИНИЦАМИ ИЗМЕРЕНИЯ ==============
         function openRightModalForTask(taskId) {
             const task = taskManager.tasks.find(t => t.id === taskId);
             if (!task) {
@@ -1673,7 +1651,7 @@
             if (savedData && savedData.rows) {
                 reportRows = [...savedData.rows];
             } else {
-                reportRows = [{ расход: 0, количество: 0, комментарий: '' }];
+                reportRows = [{ расход: 0, единица: 'г', количество: 0, комментарий: '' }];
             }
             
             renderReportForm(contentDiv);
@@ -1691,10 +1669,26 @@
                     allRows.push(...report.rows);
                 }
             });
-            return { rows: allRows, savedAt: taskReports[taskReports.length - 1]?.savedAt };
+            return { 
+                rows: allRows.map(row => ({
+                    расход: row.расход || 0,
+                    единица: row.единица || 'г',
+                    количество: row.количество || 0,
+                    комментарий: row.комментарий || ''
+                })),
+                savedAt: taskReports[taskReports.length - 1]?.savedAt 
+            };
         }
         
         function renderReportForm(container) {
+            let totalQuantity = 0;
+            if (currentReportTask && currentReportTask.taskId) {
+                const task = taskManager.tasks.find(t => t.id === currentReportTask.taskId);
+                if (task && task.executors) {
+                    totalQuantity = task.executors.reduce((sum, exec) => sum + (exec.quantity || 0), 0);
+                }
+            }
+            
             let rowsHtml = '';
             reportRows.forEach((row, index) => {
                 rowsHtml += `
@@ -1703,14 +1697,23 @@
                             <span style="font-size: 12px; color: #ff9800;">📝 Запись ${index + 1}</span>
                             <button type="button" class="btn-remove-row" onclick="removeReportRowItem(${index})">✖️</button>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div style="display: grid; grid-template-columns: 1fr 0.5fr 1fr; gap: 10px; margin-bottom: 10px;">
                             <div>
                                 <label style="font-size: 11px; color: #a0a0a0;">📊 Расход:</label>
-                                <input type="number" class="report-input report-expense" data-row="${index}" value="${row.расход || 0}" step="0.1" placeholder="0">
+                                <input type="number" class="report-input report-expense" data-row="${index}" value="${row.расход || 0}" step="0.01" placeholder="0">
                             </div>
                             <div>
-                                <label style="font-size: 11px; color: #a0a0a0;">📦 Количество:</label>
-                                <input type="number" class="report-input report-quantity" data-row="${index}" value="${row.количество || 0}" step="1" placeholder="0">
+                                <label style="font-size: 11px; color: #a0a0a0;">📏 Ед. изм.:</label>
+                                <select class="report-input report-unit" data-row="${index}">
+                                    <option value="г" ${row.единица === 'г' ? 'selected' : ''}>г</option>
+                                    <option value="кг" ${row.единица === 'кг' ? 'selected' : ''}>кг</option>
+                                    <option value="мм" ${row.единица === 'мм' ? 'selected' : ''}>мм</option>
+                                    <option value="м2" ${row.единица === 'м2' ? 'selected' : ''}>м²</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; color: #a0a0a0;">📦 Количество (шт):</label>
+                                <input type="number" class="report-input report-quantity" data-row="${index}" value="${row.количество || totalQuantity || 0}" step="1" placeholder="0">
                             </div>
                         </div>
                         <div>
@@ -1732,9 +1735,14 @@
                         <div style="font-size: 12px;">📏 Размер: ${escapeHtml(currentReportTask.size || '-')} × ${currentReportTask.quantity || 0} шт</div>
                         <div style="font-size: 12px;">🎨 Покрытие: ${escapeHtml(currentReportTask.ral || '-')} / ${escapeHtml(currentReportTask.texture || '-')}</div>
                         <div style="font-size: 12px; margin-top: 8px;">🔧 Операция: ${escapeHtml(currentReportTask.operation)}</div>
+                        <div style="font-size: 12px; margin-top: 8px; color: #4cd964;">📦 Выполнено: ${totalQuantity} шт</div>
                     </div>
-                    <div id="reportRowsContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;">${rowsHtml}</div>
-                    <div style="margin-bottom: 15px;"><button type="button" class="btn-add-row" onclick="addReportRowItem()">➕ Добавить строку</button></div>
+                    <div id="reportRowsContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
+                        ${rowsHtml}
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <button type="button" class="btn-add-row" onclick="addReportRowItem()">➕ Добавить строку</button>
+                    </div>
                     <div style="display: flex; gap: 10px; margin-top: 20px;">
                         <button type="button" class="btn btn-success" onclick="saveReportDataForTask()" style="flex: 1;">💾 Сохранить</button>
                         <button type="button" class="btn btn-danger" onclick="closeRightModal()" style="flex: 1;">✖️ Закрыть</button>
@@ -1750,6 +1758,16 @@
                     }
                 });
             });
+            
+            document.querySelectorAll('.report-unit').forEach(select => {
+                select.addEventListener('change', function() {
+                    const rowIndex = parseInt(this.dataset.row);
+                    if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                        reportRows[rowIndex].единица = this.value;
+                    }
+                });
+            });
+            
             document.querySelectorAll('.report-quantity').forEach(input => {
                 input.addEventListener('change', function() {
                     const rowIndex = parseInt(this.dataset.row);
@@ -1758,6 +1776,7 @@
                     }
                 });
             });
+            
             document.querySelectorAll('.report-comment').forEach(textarea => {
                 textarea.addEventListener('change', function() {
                     const rowIndex = parseInt(this.dataset.row);
@@ -1769,7 +1788,7 @@
         }
         
         function addReportRowItem() {
-            reportRows.push({ расход: 0, количество: 0, комментарий: '' });
+            reportRows.push({ расход: 0, единица: 'г', количество: 0, комментарий: '' });
             const container = document.getElementById('rightModalContent');
             renderReportForm(container);
         }
@@ -1777,7 +1796,7 @@
         function removeReportRowItem(rowIndex) {
             if (reportRows.length <= 1) {
                 if (!confirm('Удалить последнюю строку? Будет создана пустая строка.')) return;
-                reportRows = [{ расход: 0, количество: 0, комментарий: '' }];
+                reportRows = [{ расход: 0, единица: 'г', количество: 0, комментарий: '' }];
             } else {
                 reportRows.splice(rowIndex, 1);
             }
@@ -1794,12 +1813,21 @@
                     reportRows[rowIndex].расход = parseFloat(input.value) || 0;
                 }
             });
+            
+            document.querySelectorAll('.report-unit').forEach(select => {
+                const rowIndex = parseInt(select.dataset.row);
+                if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                    reportRows[rowIndex].единица = select.value;
+                }
+            });
+            
             document.querySelectorAll('.report-quantity').forEach(input => {
                 const rowIndex = parseInt(input.dataset.row);
                 if (!isNaN(rowIndex) && reportRows[rowIndex]) {
                     reportRows[rowIndex].количество = parseFloat(input.value) || 0;
                 }
             });
+            
             document.querySelectorAll('.report-comment').forEach(textarea => {
                 const rowIndex = parseInt(textarea.dataset.row);
                 if (!isNaN(rowIndex) && reportRows[rowIndex]) {
@@ -1823,6 +1851,7 @@
                 siteKey: currentReportTask.siteKey,
                 rows: reportRows.map(row => ({
                     расход: row.расход || 0,
+                    единица: row.единица || 'г',
                     количество: row.количество || 0,
                     комментарий: row.комментарий || ''
                 })),
