@@ -120,6 +120,17 @@
             color: #a0a0a0;
         }
 
+        .file-indicator {
+            background: #1e232b;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            color: #4cd964;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         .task-status-badge {
             font-weight: 600;
             padding: 4px 12px;
@@ -385,7 +396,7 @@
             border: none;
         }
 
-        /* Фильтры - расширенные в одну строку */
+        /* Фильтры */
         .filter-section {
             display: flex;
             gap: 12px;
@@ -874,8 +885,6 @@
         }
         
         function populateFilters() {
-            console.log('🔄 Заполнение фильтров...');
-            
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             const customers = new Set();
             const products = new Set();
@@ -896,7 +905,6 @@
             });
             
             if (taskManager && taskManager.tasks) {
-                console.log(`📊 Задач в taskManager: ${taskManager.tasks.length}`);
                 taskManager.tasks.forEach(task => {
                     if (task.operation) operations.add(task.operation);
                     
@@ -906,8 +914,6 @@
                     if (operationData?.thickness) thicknesses.add(operationData.thickness);
                 });
             }
-            
-            console.log(`📋 Найдено: заказчиков=${customers.size}, изделий=${products.size}, операций=${operations.size}, RAL=${rals.size}, толщин=${thicknesses.size}, размеров=${sizes.size}`);
             
             const customerSelect = document.getElementById('filterCustomer');
             if (customerSelect) {
@@ -1527,6 +1533,9 @@
                 const siteFiles = order.siteFiles?.['polimerniy'] || [];
                 const hasFiles = siteFiles.length > 0;
                 
+                // Индикатор файлов в шапке
+                const filesIndicator = hasFiles ? `<span class="file-indicator">📎 Файлы: ${siteFiles.length}</span>` : '';
+                
                 const taskCard = document.createElement('div');
                 taskCard.className = `task-card ${priorityClass}`;
                 taskCard.dataset.taskId = task.id;
@@ -1545,7 +1554,7 @@
                             <span class="task-quantity">× ${item.size?.quantity || 1} шт</span>
                             ${item.ral ? `<span class="task-ral">🎨 ${escapeHtml(item.ral)}</span>` : ''}
                             ${item.texture ? `<span class="task-texture">🧵 ${escapeHtml(item.texture)}</span>` : ''}
-                            ${hasFiles ? `<span style="background: #1e232b; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #4cd964;">📎 Файлы: ${siteFiles.length}</span>` : ''}
+                            ${filesIndicator}
                         </div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
@@ -1578,7 +1587,7 @@
                     `;
                 }
                 
-                // Список файлов внутри карточки (для открытия по отдельности)
+                // Список файлов внутри карточки
                 let filesListHtml = '';
                 if (hasFiles) {
                     filesListHtml = `
