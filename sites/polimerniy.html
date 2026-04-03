@@ -359,6 +359,14 @@
             transform: scale(1.02);
         }
 
+        .btn-sm {
+            padding: 2px 6px;
+            font-size: 9px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+        }
+
         /* Фильтры - расширенные в одну строку */
         .filter-section {
             display: flex;
@@ -683,7 +691,7 @@
             <h1 style="margin:0; color: white; font-size:18px;">🎨 Полимерный участок</h1>
         </header>
 
-        <!-- ФИЛЬТРЫ - ВСЕ НА ОДНОМ УРОВНЕ -->
+        <!-- ФИЛЬТРЫ - РАСШИРЕННЫЕ В ОДНУ СТРОКУ -->
         <div class="filter-section">
             <div class="filter-group">
                 <label>🏢 ЗАКАЗЧИК</label>
@@ -1359,6 +1367,31 @@
             });
         }
         
+        // ============== РАБОТА С ФАЙЛАМИ НА УЧАСТКЕ ==============
+        function openLocalFile(filePath) {
+            if (!filePath) return;
+            try {
+                if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+                    window.open(filePath, '_blank');
+                } else {
+                    const link = document.createElement('a');
+                    link.href = filePath;
+                    link.target = '_blank';
+                    link.click();
+                }
+            } catch (error) {
+                alert('Не удалось открыть файл. Путь: ' + filePath);
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ Путь скопирован в буфер обмена');
+            }).catch(() => {
+                alert('❌ Не удалось скопировать');
+            });
+        }
+        
         function renderTasks() {
             if (isLoadingTasks) return;
             isLoadingTasks = true;
@@ -1498,13 +1531,36 @@
                     `;
                 }
                 
+                // Получаем файлы для этого заказа и участка
+                const siteFiles = order.siteFiles?.['polimerniy'] || [];
+                let filesHtml = '';
+                if (siteFiles.length > 0) {
+                    filesHtml = `
+                        <div style="margin-top: 10px; padding: 8px; background: #15191f; border-radius: 6px; border: 1px solid #2a2f38;">
+                            <div style="font-size: 11px; color: #ff9800; margin-bottom: 6px;">📎 ПРИКРЕПЛЁННЫЕ ФАЙЛЫ:</div>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                ${siteFiles.map(file => `
+                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #1e232b; padding: 5px 8px; border-radius: 4px;">
+                                        <span style="font-size: 11px; color: #4cd964; word-break: break-all; flex: 1;">📄 ${escapeHtml(file.name)}</span>
+                                        <div style="display: flex; gap: 6px;">
+                                            <button class="btn-sm" style="background: #28a745; padding: 2px 8px; font-size: 10px;" onclick="event.stopPropagation(); openLocalFile('${escapeHtml(file.path).replace(/'/g, "\\'")}')">📂 Открыть</button>
+                                            <button class="btn-sm" style="background: #ff9800; padding: 2px 8px; font-size: 10px;" onclick="event.stopPropagation(); copyToClipboard('${escapeHtml(file.path).replace(/'/g, "\\'")}')">📋 Копировать путь</button>
+                                        </div>
+                                    </div>
+                                    ${file.comment ? `<div style="font-size: 10px; color: #a0a0a0; margin-left: 15px;">💬 ${escapeHtml(file.comment)}</div>` : ''}
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                
                 content.innerHTML = `
                     <div class="operation-info">
                         <div class="operation-name">${escapeHtml(task.operation)}</div>
                         ${detailHtml}
                         <div class="operation-plan">📋 План: ${task.totalQuantity || 1} шт</div>
                     </div>
-                    
+                    ${filesHtml}
                     <div class="executor-header">
                         <span>ФИО</span><span>Кол-во</span><span>Статус</span><span></span>
                     </div>
@@ -1611,7 +1667,7 @@
             taskManager.completeTask(taskId);
         }
         
-        // ============== ОТЧЁТ ПО ЗАДАЧЕ С ЕДИНИЦАМИ ИЗМЕРЕНИЯ ==============
+        // ============== ОТЧЁТ ПО ЗАДАЧЕ ==============
         function openRightModalForTask(taskId) {
             const task = taskManager.tasks.find(t => t.id === taskId);
             if (!task) {
@@ -1651,7 +1707,7 @@
             if (savedData && savedData.rows) {
                 reportRows = [...savedData.rows];
             } else {
-                reportRows = [{ расход: 0, единица: 'г', количество: 0, комментарий: '' }];
+                reportRows = [{ расход: 0, единица: 'гр', количество: 0, комментарий: '' }];
             }
             
             renderReportForm(contentDiv);
@@ -1672,7 +1728,7 @@
             return { 
                 rows: allRows.map(row => ({
                     расход: row.расход || 0,
-                    единица: row.единица || 'г',
+                    единица: row.единица || 'гр',
                     количество: row.количество || 0,
                     комментарий: row.комментарий || ''
                 })),
@@ -1705,7 +1761,7 @@
                             <div>
                                 <label style="font-size: 11px; color: #a0a0a0;">📏 Ед. изм.:</label>
                                 <select class="report-input report-unit" data-row="${index}">
-                                    <option value="г" ${row.единица === 'г' ? 'selected' : ''}>г</option>
+                                    <option value="гр" ${row.единица === 'гр' ? 'selected' : ''}>гр</option>
                                     <option value="кг" ${row.единица === 'кг' ? 'selected' : ''}>кг</option>
                                     <option value="мм" ${row.единица === 'мм' ? 'selected' : ''}>мм</option>
                                     <option value="м2" ${row.единица === 'м2' ? 'selected' : ''}>м²</option>
@@ -1788,7 +1844,7 @@
         }
         
         function addReportRowItem() {
-            reportRows.push({ расход: 0, единица: 'г', количество: 0, комментарий: '' });
+            reportRows.push({ расход: 0, единица: 'гр', количество: 0, комментарий: '' });
             const container = document.getElementById('rightModalContent');
             renderReportForm(container);
         }
@@ -1796,7 +1852,7 @@
         function removeReportRowItem(rowIndex) {
             if (reportRows.length <= 1) {
                 if (!confirm('Удалить последнюю строку? Будет создана пустая строка.')) return;
-                reportRows = [{ расход: 0, единица: 'г', количество: 0, комментарий: '' }];
+                reportRows = [{ расход: 0, единица: 'гр', количество: 0, комментарий: '' }];
             } else {
                 reportRows.splice(rowIndex, 1);
             }
@@ -1851,7 +1907,7 @@
                 siteKey: currentReportTask.siteKey,
                 rows: reportRows.map(row => ({
                     расход: row.расход || 0,
-                    единица: row.единица || 'г',
+                    единица: row.единица || 'гр',
                     количество: row.количество || 0,
                     комментарий: row.комментарий || ''
                 })),
