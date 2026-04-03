@@ -972,7 +972,7 @@
                         status: 'pending'
                     });
                     this.saveData();
-                    renderTasks();
+                    updateExecutorList(taskId);
                     return true;
                 }
                 return false;
@@ -983,7 +983,7 @@
                 if (task && task.executors) {
                     task.executors = task.executors.filter(e => e.id !== executorId);
                     this.saveData();
-                    renderTasks();
+                    updateExecutorList(taskId);
                 }
             }
             
@@ -1083,6 +1083,39 @@
                         content.classList.add('collapsed');
                         header.classList.add('collapsed');
                     }
+                }
+            }
+        }
+        
+        // ============== ОБНОВЛЕНИЕ ТОЛЬКО СПИСКА ИСПОЛНИТЕЛЕЙ ==============
+        function updateExecutorList(taskId) {
+            const task = taskManager.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            const executorList = document.getElementById(`executors-${taskId}`);
+            if (!executorList) return;
+            
+            const taskCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+            const wasCollapsed = taskCard?.querySelector('.task-content')?.classList.contains('collapsed');
+            
+            executorList.innerHTML = '';
+            if (task.executors && task.executors.length > 0) {
+                task.executors.forEach(executor => {
+                    executorList.appendChild(createExecutorItemElement(task, executor));
+                });
+            } else {
+                const noExecutors = document.createElement('p');
+                noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 11px;';
+                noExecutors.textContent = 'Нет исполнителей';
+                executorList.appendChild(noExecutors);
+            }
+            
+            if (wasCollapsed && taskCard) {
+                const content = taskCard.querySelector('.task-content');
+                const header = taskCard.querySelector('.task-header');
+                if (content && header) {
+                    content.classList.add('collapsed');
+                    header.classList.add('collapsed');
                 }
             }
         }
@@ -1399,8 +1432,9 @@
                 if (!name) { alert('Введите ФИО'); return; }
                 if (taskManager.addExecutor(task.id, name)) {
                     formDiv.remove();
-                    renderTasks();
-                } else { alert('Исполнитель уже существует'); }
+                } else { 
+                    alert('Исполнитель уже существует'); 
+                }
             };
             const cancelBtn = document.createElement('button');
             cancelBtn.className = 'btn btn-danger';
