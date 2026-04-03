@@ -770,6 +770,7 @@
                     <option value="pending">⏳ Ожидают</option>
                     <option value="in_progress">⚡ В работе</option>
                     <option value="completed">✅ Завершённые</option>
+                    <option value="priority">🔴 Приоритетные</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -1462,37 +1463,44 @@
             let tasks = taskManager.tasks;
             
             tasks = tasks.filter(task => {
-                const order = allOrders.find(o => o.id == task.orderId);
-                if (!order) return false;
-                
-                if (filterStatus === 'completed' && task.status !== 'completed') return false;
-                if (filterStatus === 'in_progress' && task.status !== 'in_progress') return false;
-                if (filterStatus === 'pending' && task.status !== 'pending') return false;
-                
-                if (task.isPriority === true) return true;
-                
-                if (filterCustomer && order.groupName !== filterCustomer) return false;
-                
-                const item = order.items?.[task.itemIndex || 0];
-                if (!item) return false;
-                
-                if (filterProduct && item.product !== filterProduct) return false;
-                if (filterOperation && task.operation !== filterOperation) return false;
-                if (filterRal) {
-                    const itemRal = (item.ral || '').trim();
-                    if (itemRal !== filterRal) return false;
-                }
-                if (filterSize && item.size?.name !== filterSize) return false;
-                
-                if (filterThickness) {
-                    const productOps = taskOperationsData[item.product];
-                    const siteOps = productOps?.['полимерный'];
-                    const operationData = siteOps?.find(op => op.operation === task.operation);
-                    if (operationData?.thickness !== filterThickness) return false;
-                }
-                
-                return true;
-            });
+    const order = allOrders.find(o => o.id == task.orderId);
+    if (!order) return false;
+    
+    // Фильтр "Приоритетные" - показывает только задачи с isPriority = true
+    if (filterStatus === 'priority') {
+        return task.isPriority === true;
+    }
+    
+    // Обычные фильтры статусов
+    if (filterStatus === 'completed' && task.status !== 'completed') return false;
+    if (filterStatus === 'in_progress' && task.status !== 'in_progress') return false;
+    if (filterStatus === 'pending' && task.status !== 'pending') return false;
+    
+    // Приоритетные задачи не фильтруются по остальным критериям
+    if (task.isPriority === true) return true;
+    
+    if (filterCustomer && order.groupName !== filterCustomer) return false;
+    
+    const item = order.items?.[task.itemIndex || 0];
+    if (!item) return false;
+    
+    if (filterProduct && item.product !== filterProduct) return false;
+    if (filterOperation && task.operation !== filterOperation) return false;
+    if (filterRal) {
+        const itemRal = (item.ral || '').trim();
+        if (itemRal !== filterRal) return false;
+    }
+    if (filterSize && item.size?.name !== filterSize) return false;
+    
+    if (filterThickness) {
+        const productOps = taskOperationsData[item.product];
+        const siteOps = productOps?.['полимерный'];
+        const operationData = siteOps?.find(op => op.operation === task.operation);
+        if (operationData?.thickness !== filterThickness) return false;
+    }
+    
+    return true;
+});
             
             tasks = sortTasks(tasks, sortType, allOrders);
             
