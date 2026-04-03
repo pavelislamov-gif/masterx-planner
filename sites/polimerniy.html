@@ -860,6 +860,7 @@
             loadTasks();
         }
         
+        // ============== КЛАСС УПРАВЛЕНИЯ ЗАДАЧАМИ С ИСПРАВЛЕННОЙ ЛОГИКОЙ ==============
         class SimpleTaskManager {
             constructor(siteKey) {
                 this.siteKey = siteKey;
@@ -907,26 +908,45 @@
             updateExecutorStatus(taskId, executorId, status) {
                 const task = this.tasks.find(t => t.id === taskId);
                 if (!task || !task.executors) return;
+
                 const executor = task.executors.find(e => e.id === executorId);
                 if (executor) {
                     executor.status = status;
                     this.saveData();
+
+                    // ПРАВИЛЬНАЯ ЛОГИКА ОПРЕДЕЛЕНИЯ СТАТУСА ЗАДАЧИ:
+                    // shift_ended НЕ переводит задачу в completed
                     let taskStatus = 'pending';
-                    if (task.executors.some(e => e.status === 'in_progress')) {
-                        taskStatus = 'in_progress';
-                    } else if (task.executors.every(e => e.status === 'shift_ended' || e.status === 'completed')) {
+                    
+                    const hasInProgress = task.executors.some(e => e.status === 'in_progress');
+                    const allShiftEnded = task.executors.length > 0 && task.executors.every(e => e.status === 'shift_ended');
+                    const allCompleted = task.executors.length > 0 && task.executors.every(e => e.status === 'completed');
+                    
+                    if (allCompleted) {
                         taskStatus = 'completed';
+                    } else if (hasInProgress) {
+                        taskStatus = 'in_progress';
+                    } else if (allShiftEnded) {
+                        // Все закрыли смену, но задача НЕ завершена
+                        taskStatus = 'in_progress';
+                    } else {
+                        taskStatus = 'pending';
                     }
+
                     task.status = taskStatus;
                     this.saveData();
+
+                    // Обновляем в заказе
                     const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
                     const order = orders.find(o => o.id == task.orderId);
                     if (order) {
                         if (!order.tasks) order.tasks = {};
-                        order.tasks[task.id] = taskStatus;
+                        const squareColor = taskStatus === 'completed' ? 'green' : (taskStatus === 'in_progress' ? 'orange' : '');
+                        order.tasks[task.id] = squareColor;
                         localStorage.setItem('masterx_orders', JSON.stringify(orders));
                     }
-                    loadTasks();
+                    
+                    setTimeout(() => { loadTasks(); }, 100);
                 }
             }
             
@@ -958,30 +978,45 @@
             completeTask(taskId) {
                 const task = this.tasks.find(t => t.id === taskId);
                 if (task && task.status !== 'completed') {
+                    // Устанавливаем всем исполнителям статус 'completed'
+                    if (task.executors) {
+                        task.executors.forEach(executor => {
+                            executor.status = 'completed';
+                        });
+                    }
                     task.status = 'completed';
                     task.completedAt = new Date().toISOString();
+                    
+                    // Снимаем приоритет
+                    if (task.isPriority === true) {
+                        task.isPriority = false;
+                    }
+                    
                     this.saveData();
+                    
                     const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
                     const order = orders.find(o => o.id == task.orderId);
                     if (order) {
                         if (!order.tasks) order.tasks = {};
-                        order.tasks[task.id] = 'completed';
-                        const orderIndex = orders.findIndex(o => o.id == task.orderId);
-                        orders[orderIndex] = order;
+                        order.tasks[task.id] = 'green';
                         localStorage.setItem('masterx_orders', JSON.stringify(orders));
                     }
-                    loadTasks();
+                    
+                    setTimeout(() => { loadTasks(); }, 100);
                 }
             }
         }
         
-        function applyFiltersAndRender() {
+        function loadTasks() {
             if (isLoadingTasks) return;
             isLoadingTasks = true;
             
             taskManager.loadData();
             
-            // Получаем значения фильтров
+            populateFilters();
+            
+            let tasks = taskManager.tasks;
+            
             const filterCustomer = document.getElementById('filterCustomer').value;
             const filterProduct = document.getElementById('filterProduct').value;
             const filterOperation = document.getElementById('filterOperation').value;
@@ -990,50 +1025,44 @@
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             
-            // Получаем задачи по статусу
-            let tasks = taskManager.getTasksByStatus(filterStatus);
-            
-            // Применяем фильтры
-            let filteredTasks = tasks.filter(task => {
+            // ФИЛЬТРАЦИЯ С УЧЁТОМ ПРИОРИТЕТА
+            tasks = tasks.filter(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
                 if (!order) return false;
                 
-                // Приоритетные задачи не фильтруем (кроме статуса)
+                if (filterStatus === 'completed' && task.status !== 'completed') return false;
+                if (filterStatus === 'in_progress' && task.status !== 'in_progress') return false;
+                if (filterStatus === 'pending' && task.status !== 'pending') return false;
+                
+                // Приоритетные задачи пропускаем остальные фильтры
                 if (task.isPriority === true) {
                     return true;
                 }
                 
-                // Фильтр по заказчику
                 if (filterCustomer && order.groupName !== filterCustomer) return false;
                 
                 const item = order.items?.[task.itemIndex || 0];
                 if (!item) return false;
                 
-                // Фильтр по изделию
                 if (filterProduct && item.product !== filterProduct) return false;
-                
-                // Фильтр по RAL
+                if (filterOperation && task.operation !== filterOperation) return false;
                 if (filterRal) {
                     const itemRal = (item.ral || '').trim();
                     if (itemRal !== filterRal) return false;
                 }
                 
-                // Фильтр по операции
-                if (filterOperation && task.operation !== filterOperation) return false;
-                
                 return true;
             });
             
-            // Сортируем: приоритетные наверх
-            const priorityTasks = filteredTasks.filter(t => t.isPriority === true);
-            const normalTasks = filteredTasks.filter(t => t.isPriority !== true);
+            // Приоритетные задачи наверх
+            const priorityTasks = tasks.filter(t => t.isPriority === true);
+            const normalTasks = tasks.filter(t => t.isPriority !== true);
             priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             const sortedTasks = [...priorityTasks, ...normalTasks];
             
-            // Обновляем статистику
-            document.getElementById('totalTasks').textContent = filteredTasks.length;
-            document.getElementById('tasksInProgress').textContent = filteredTasks.filter(t => t.status === 'in_progress').length;
-            document.getElementById('tasksCompleted').textContent = filteredTasks.filter(t => t.status === 'completed').length;
+            document.getElementById('totalTasks').textContent = tasks.length;
+            document.getElementById('tasksInProgress').textContent = tasks.filter(t => t.status === 'in_progress').length;
+            document.getElementById('tasksCompleted').textContent = tasks.filter(t => t.status === 'completed').length;
 
             const tasksList = document.getElementById('tasksList');
             tasksList.innerHTML = '';
@@ -1044,7 +1073,6 @@
                 return;
             }
 
-            // Рендерим задачи
             sortedTasks.forEach(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
                 const item = order?.items?.[task.itemIndex || 0];
@@ -1158,22 +1186,23 @@
             }, 50);
         }
         
-        function loadTasks() {
-            // Обновляем фильтры перед применением
-            populateFilters();
-            // Применяем фильтры и рендерим
-            applyFiltersAndRender();
-        }
-        
+        // ============== ОТОБРАЖЕНИЕ ИСПОЛНИТЕЛЕЙ (С ПРАВИЛЬНОЙ ЛОГИКОЙ) ==============
         function renderExecutors(taskId, task) {
             const container = document.getElementById(`executors-${taskId}`);
             if (!container) return;
+            
             container.innerHTML = '';
             
             if (task.executors && task.executors.length > 0) {
                 task.executors.forEach(executor => {
                     const isShiftEnded = executor.status === 'shift_ended';
-                    const isCompleted = task.status === 'completed';
+                    const isTaskCompleted = task.status === 'completed';
+                    
+                    // Исполнитель может редактировать количество, ТОЛЬКО если:
+                    // 1. Задача не завершена И
+                    // 2. Смена у исполнителя не закрыта
+                    const canEdit = !isTaskCompleted && !isShiftEnded;
+                    
                     const div = document.createElement('div');
                     div.className = 'executor-item';
                     div.dataset.executorId = executor.id;
@@ -1182,7 +1211,7 @@
                     nameInput.type = 'text';
                     nameInput.className = 'executor-name';
                     nameInput.value = executor.name;
-                    nameInput.disabled = isCompleted || isShiftEnded;
+                    nameInput.disabled = isTaskCompleted || isShiftEnded;
                     div.appendChild(nameInput);
                     
                     const quantityInput = document.createElement('input');
@@ -1190,8 +1219,9 @@
                     quantityInput.className = 'executor-quantity';
                     quantityInput.value = executor.quantity || 0;
                     quantityInput.min = 0;
-                    quantityInput.disabled = isCompleted || isShiftEnded;
+                    quantityInput.disabled = !canEdit;
                     quantityInput.onchange = function() {
+                        if (!canEdit) return;
                         taskManager.updateExecutorQuantity(task.id, executor.id, parseInt(this.value) || 0);
                         loadTasks();
                     };
@@ -1200,9 +1230,9 @@
                     const workBtn = document.createElement('button');
                     workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''}`;
                     workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : (isShiftEnded ? 'СМЕНА ЗАКРЫТА' : 'НАЧАТЬ');
-                    workBtn.disabled = isCompleted || isShiftEnded;
+                    workBtn.disabled = !canEdit;
                     workBtn.onclick = function() {
-                        if (isShiftEnded) return;
+                        if (!canEdit) return;
                         const newStatus = workBtn.classList.contains('active') ? 'pending' : 'in_progress';
                         taskManager.updateExecutorStatus(task.id, executor.id, newStatus);
                         loadTasks();
@@ -1212,9 +1242,9 @@
                     const endShiftBtn = document.createElement('button');
                     endShiftBtn.className = 'btn-end-shift';
                     endShiftBtn.innerHTML = isShiftEnded ? '✅ СМЕНА ЗАКРЫТА' : '🕒 ЗАКРЫТЬ';
-                    endShiftBtn.disabled = isCompleted || isShiftEnded;
+                    endShiftBtn.disabled = isTaskCompleted || isShiftEnded;
                     endShiftBtn.onclick = function() {
-                        if (confirm('Закрыть смену для ' + executor.name + '?')) {
+                        if (confirm(`Закрыть смену для ${executor.name}?`)) {
                             taskManager.updateExecutorStatus(task.id, executor.id, 'shift_ended');
                             loadTasks();
                         }
@@ -1224,12 +1254,15 @@
                     const removeBtn = document.createElement('button');
                     removeBtn.className = 'btn btn-danger btn-sm';
                     removeBtn.innerHTML = '✕';
-                    removeBtn.disabled = isCompleted || isShiftEnded;
+                    removeBtn.disabled = !canEdit;
                     removeBtn.onclick = function() {
-                        if (confirm('Удалить этого исполнителя?')) taskManager.removeExecutor(task.id, executor.id);
-                        loadTasks();
+                        if (confirm('Удалить этого исполнителя?')) {
+                            taskManager.removeExecutor(task.id, executor.id);
+                            loadTasks();
+                        }
                     };
                     div.appendChild(removeBtn);
+                    
                     container.appendChild(div);
                 });
             } else {
@@ -1243,7 +1276,9 @@
         function renderActionButtons(taskId, task) {
             const container = document.getElementById(`action-${taskId}`);
             if (!container) return;
+            
             container.innerHTML = '';
+            
             if (task.status !== 'completed') {
                 const addBtn = document.createElement('button');
                 addBtn.className = 'btn-add-executor';
@@ -1256,6 +1291,7 @@
         function showAddExecutorForm(task, container) {
             const oldForm = container.querySelector('.new-executor-form');
             if (oldForm) oldForm.remove();
+            
             const formDiv = document.createElement('div');
             formDiv.className = 'new-executor-form';
             const input = document.createElement('input');
@@ -1285,27 +1321,42 @@
         function completeTask(taskId) {
             const task = taskManager.tasks.find(t => t.id === taskId);
             if (!task) return;
+            
             const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
+            const planQuantity = task.totalQuantity || 1;
             let operationName = task.operation;
-            if (confirm('Завершить задачу?\nОперация: ' + operationName + '\nВыполнено: ' + totalAssigned + ' шт')) {
-                taskManager.completeTask(taskId);
-                loadTasks();
+            
+            if (totalAssigned < planQuantity) {
+                if (!confirm('⚠️ Выполнено только ' + totalAssigned + ' из ' + planQuantity + ' шт.\n\nВсё равно завершить задачу?')) {
+                    return;
+                }
+            } else {
+                if (!confirm('✅ Завершить задачу?\nОперация: ' + operationName + '\nВыполнено: ' + totalAssigned + ' из ' + planQuantity + ' шт')) {
+                    return;
+                }
             }
+            
+            taskManager.completeTask(taskId);
+            loadTasks();
         }
         
+        // ============== ОТЧЁТ ПО ЗАДАЧЕ ==============
         function openRightModalForTask(taskId) {
             const task = taskManager.tasks.find(t => t.id === taskId);
             if (!task) {
                 alert('Задача не найдена');
                 return;
             }
+            
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             const order = allOrders.find(o => o.id == task.orderId);
             const item = order?.items?.[task.itemIndex || 0];
+            
             if (!order || !item) {
                 alert('Данные заказа не найдены');
                 return;
             }
+            
             currentReportTask = {
                 taskId: task.id,
                 orderId: order.id,
@@ -1319,15 +1370,18 @@
                 operation: task.operation,
                 isPriority: task.isPriority || false
             };
+            
             const modal = document.getElementById('rightModal');
             const overlay = document.getElementById('rightModalOverlay');
             const contentDiv = document.getElementById('rightModalContent');
+            
             const savedData = getSavedReportDataForTask(task.id);
             if (savedData && savedData.rows) {
                 reportRows = [...savedData.rows];
             } else {
                 reportRows = [{ расход: 0, количество: 0, комментарий: '' }];
             }
+            
             renderReportForm(contentDiv);
             modal.classList.add('open');
             overlay.classList.add('show');
@@ -1372,7 +1426,9 @@
                     </div>
                 `;
             });
+            
             const priorityBadge = currentReportTask.isPriority ? '<span style="background: #ff3b3b; color: white; padding: 2px 8px; border-radius: 20px; font-size: 10px; margin-left: 8px;">🔴 ПРИОРИТЕТ</span>' : '';
+            
             container.innerHTML = `
                 <div style="padding: 20px 0;">
                     <div style="margin-bottom: 20px; padding: 12px; background: #15191f; border-radius: 8px; border-left: 3px solid #ff9800;">
@@ -1391,6 +1447,7 @@
                     </div>
                 </div>
             `;
+            
             document.querySelectorAll('.report-expense').forEach(input => {
                 input.addEventListener('change', function() {
                     const rowIndex = parseInt(this.dataset.row);
@@ -1436,6 +1493,7 @@
         
         function saveReportDataForTask() {
             if (!currentReportTask) return;
+            
             document.querySelectorAll('.report-expense').forEach(input => {
                 const rowIndex = parseInt(input.dataset.row);
                 if (!isNaN(rowIndex) && reportRows[rowIndex]) {
@@ -1454,6 +1512,7 @@
                     reportRows[rowIndex].комментарий = textarea.value;
                 }
             });
+            
             const reportData = {
                 taskId: currentReportTask.taskId,
                 orderId: currentReportTask.orderId,
@@ -1475,10 +1534,12 @@
                 savedAt: new Date().toISOString(),
                 isTaskReport: true
             };
+            
             let allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
             allReports = allReports.filter(r => r.taskId !== currentReportTask.taskId);
             allReports.push(reportData);
             localStorage.setItem('material_reports', JSON.stringify(allReports));
+            
             alert('✅ Отчёт сохранён!');
             closeRightModal();
         }
@@ -1497,10 +1558,7 @@
             inputs.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
-                    el.addEventListener('change', () => {
-                        console.log(`Фильтр ${id} изменён на:`, el.value);
-                        loadTasks();
-                    });
+                    el.addEventListener('change', () => loadTasks());
                 }
             });
         }
