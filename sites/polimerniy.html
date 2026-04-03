@@ -359,6 +359,24 @@
             transform: scale(1.02);
         }
 
+        .btn-copy-path {
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-left: 8px;
+        }
+
+        .btn-copy-path:hover {
+            background: #218838;
+            transform: scale(1.02);
+        }
+
         .btn-sm {
             padding: 2px 6px;
             font-size: 9px;
@@ -676,6 +694,11 @@
             color: white !important;
         }
 
+        body.light-theme .btn-copy-path {
+            background: #28a745 !important;
+            color: white !important;
+        }
+
         body.light-theme .priority-badge {
             background: #ff3b3b !important;
         }
@@ -691,7 +714,7 @@
             <h1 style="margin:0; color: white; font-size:18px;">🎨 Полимерный участок</h1>
         </header>
 
-        <!-- ФИЛЬТРЫ - РАСШИРЕННЫЕ В ОДНУ СТРОКУ -->
+        <!-- ФИЛЬТРЫ -->
         <div class="filter-section">
             <div class="filter-group">
                 <label>🏢 ЗАКАЗЧИК</label>
@@ -1392,6 +1415,24 @@
             });
         }
         
+        function copyAllFilePaths(taskId) {
+            const task = taskManager.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+            const order = allOrders.find(o => o.id == task.orderId);
+            if (!order) return;
+            
+            const siteFiles = order.siteFiles?.['polimerniy'] || [];
+            if (siteFiles.length === 0) {
+                alert('Нет прикреплённых файлов');
+                return;
+            }
+            
+            const paths = siteFiles.map(f => f.path).join('\n');
+            copyToClipboard(paths);
+        }
+        
         function renderTasks() {
             if (isLoadingTasks) return;
             isLoadingTasks = true;
@@ -1482,6 +1523,10 @@
                 const priorityClass = isPriority ? 'priority' : '';
                 const priorityBadge = isPriority ? '<span class="priority-badge">🔴 ПРИОРИТЕТ</span>' : '';
                 
+                // Получаем файлы для этого заказа и участка
+                const siteFiles = order.siteFiles?.['polimerniy'] || [];
+                const hasFiles = siteFiles.length > 0;
+                
                 const taskCard = document.createElement('div');
                 taskCard.className = `task-card ${priorityClass}`;
                 taskCard.dataset.taskId = task.id;
@@ -1500,11 +1545,13 @@
                             <span class="task-quantity">× ${item.size?.quantity || 1} шт</span>
                             ${item.ral ? `<span class="task-ral">🎨 ${escapeHtml(item.ral)}</span>` : ''}
                             ${item.texture ? `<span class="task-texture">🧵 ${escapeHtml(item.texture)}</span>` : ''}
+                            ${hasFiles ? `<span style="background: #1e232b; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #4cd964;">📎 Файлы: ${siteFiles.length}</span>` : ''}
                         </div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span class="task-status-badge ${statusClass}">${statusText}</span>
                         <button class="btn-report-item" onclick="event.stopPropagation(); openRightModalForTask('${task.id}')">📝 Отчёт</button>
+                        ${hasFiles ? `<button class="btn-copy-path" onclick="event.stopPropagation(); copyAllFilePaths('${task.id}')">📋 Копировать пути</button>` : ''}
                         <span class="collapse-icon">▼</span>
                     </div>
                 `;
@@ -1531,11 +1578,10 @@
                     `;
                 }
                 
-                // Получаем файлы для этого заказа и участка
-                const siteFiles = order.siteFiles?.['polimerniy'] || [];
-                let filesHtml = '';
-                if (siteFiles.length > 0) {
-                    filesHtml = `
+                // Список файлов внутри карточки (для открытия по отдельности)
+                let filesListHtml = '';
+                if (hasFiles) {
+                    filesListHtml = `
                         <div style="margin-top: 10px; padding: 8px; background: #15191f; border-radius: 6px; border: 1px solid #2a2f38;">
                             <div style="font-size: 11px; color: #ff9800; margin-bottom: 6px;">📎 ПРИКРЕПЛЁННЫЕ ФАЙЛЫ:</div>
                             <div style="display: flex; flex-direction: column; gap: 4px;">
@@ -1544,7 +1590,7 @@
                                         <span style="font-size: 11px; color: #4cd964; word-break: break-all; flex: 1;">📄 ${escapeHtml(file.name)}</span>
                                         <div style="display: flex; gap: 6px;">
                                             <button class="btn-sm" style="background: #28a745; padding: 2px 8px; font-size: 10px;" onclick="event.stopPropagation(); openLocalFile('${escapeHtml(file.path).replace(/'/g, "\\'")}')">📂 Открыть</button>
-                                            <button class="btn-sm" style="background: #ff9800; padding: 2px 8px; font-size: 10px;" onclick="event.stopPropagation(); copyToClipboard('${escapeHtml(file.path).replace(/'/g, "\\'")}')">📋 Копировать путь</button>
+                                            <button class="btn-sm" style="background: #ff9800; padding: 2px 8px; font-size: 10px;" onclick="event.stopPropagation(); copyToClipboard('${escapeHtml(file.path).replace(/'/g, "\\'")}')">📋 Копировать</button>
                                         </div>
                                     </div>
                                     ${file.comment ? `<div style="font-size: 10px; color: #a0a0a0; margin-left: 15px;">💬 ${escapeHtml(file.comment)}</div>` : ''}
@@ -1560,7 +1606,7 @@
                         ${detailHtml}
                         <div class="operation-plan">📋 План: ${task.totalQuantity || 1} шт</div>
                     </div>
-                    ${filesHtml}
+                    ${filesListHtml}
                     <div class="executor-header">
                         <span>ФИО</span><span>Кол-во</span><span>Статус</span><span></span>
                     </div>
