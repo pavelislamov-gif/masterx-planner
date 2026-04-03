@@ -90,16 +90,19 @@
         }
 
         .item-card-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
             font-size: 14px;
         }
 
-        .item-card-content div {
+        .item-card-content > div {
             background: #15191f;
-            padding: 6px 8px;
+            padding: 6px 12px;
             border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .remove-item-btn {
@@ -527,29 +530,23 @@
         }
 
         .operation-detail {
-    font-size: 8px;
-    color: #b0b0b0;
-    line-height: 1.3;
-    display: flex;         /* Элементы в ряд */
-    align-items: center;   /* Выравнивание по центру */
-    gap: 8px;              /* Отступ между текстом и толщиной */
-    width: max-content;    /* Контейнер расширится под длину текста */
-}
+            font-size: 13px;
+            color: #b0b0b0;
+            line-height: 1.3;
+        }
 
         .operation-detail .material {
-    color: #ffffff;
-    font-weight: 500;
-    font-size: 13px;
-    white-space: nowrap;
-    flex-shrink: 0; /* ЗАПРЕЩАЕТ блоку сжиматься, заставляя родителя расширяться */
-}
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 13px;
+        }
 
         .operation-detail .thickness {
             color: #4cd964;
             background: #1e232b;
             padding: 2px 6px;
             border-radius: 4px;
-            font-size: 8px;
+            font-size: 11px;
             margin-left: 6px;
         }
 
@@ -729,6 +726,56 @@
             border: 1px solid #3a404b;
         }
 
+        /* Стили для горизонтального расположения деталей в карточке изделия */
+        .details-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .detail-chip {
+            background: #1e232b;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            white-space: nowrap;
+            border: 1px solid #2a2f38;
+        }
+
+        .detail-chip .detail-name {
+            color: #ff9800;
+        }
+
+        .detail-chip .detail-quantity {
+            color: #4cd964;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        .profile-chip {
+            background: #1e232b;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            white-space: nowrap;
+            border: 1px solid #2a2f38;
+        }
+
+        .profile-chip .profile-name {
+            color: #ff9800;
+        }
+
+        .profile-chip .profile-length {
+            color: #00d4ff;
+            margin-left: 5px;
+        }
+
+        .profile-chip .profile-quantity {
+            color: #4cd964;
+            margin-left: 5px;
+        }
+
         body.light-theme {
             background-color: #f0f2f5 !important;
             color: #1e293b !important;
@@ -852,6 +899,16 @@
 
         body.light-theme .btn-add-extra {
             background: #6c757d !important;
+        }
+
+        body.light-theme .detail-chip,
+        body.light-theme .profile-chip {
+            background: #f1f5f9 !important;
+            border-color: #e2e8f0 !important;
+        }
+
+        body.light-theme .detail-chip .detail-name {
+            color: #f97316 !important;
         }
     </style>
 </head>
@@ -1532,12 +1589,6 @@
                 const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
                 const profiles = (item.details || []).filter(d => d.type === 'profile');
 
-                let regularDetailsHtml = regularDetails.length > 0 ? 
-                    regularDetails.map(d => `<span>${d.name}: ${d.quantity} шт</span>`).join(', ') : '';
-
-                let profilesHtml = profiles.length > 0 ? 
-                    profiles.map(p => `<span>${p.name}: ${p.lengthMm}мм x ${p.quantity} шт</span>`).join(', ') : '';
-
                 html += `
                     <div class="item-card" data-item-index="${index}">
                         <div class="item-card-header">
@@ -1550,8 +1601,27 @@
                         <div class="item-card-content">
                             <div>📏 Размер: ${escapeHtml(item.size?.name || '-')} x ${item.size?.quantity || 0} шт</div>
                             <div>🎨 RAL: ${item.ral || '-'} / ${item.texture || '-'}</div>
-                            ${regularDetailsHtml ? `<div>🔩 Детали: ${regularDetailsHtml}</div>` : ''}
-                            ${profilesHtml ? `<div>📐 Профили: ${profilesHtml}</div>` : ''}
+                            ${regularDetails.length > 0 ? `
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                                    ${regularDetails.map(d => `
+                                        <span class="detail-chip">
+                                            <span class="detail-name">${escapeHtml(d.name)}</span>
+                                            <span class="detail-quantity">${d.quantity} шт</span>
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            ` : '<div>🔩 Детали: — нет —</div>'}
+                            ${profiles.length > 0 ? `
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                                    ${profiles.map(p => `
+                                        <span class="profile-chip">
+                                            <span class="profile-name">📐 ${escapeHtml(p.name)}</span>
+                                            <span class="profile-length">${p.lengthMm} мм</span>
+                                            <span class="profile-quantity">× ${p.quantity} шт</span>
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            ` : '<div>📐 Профили: — нет —</div>'}
                         </div>
                     </div>
                 `;
@@ -2049,7 +2119,6 @@
                 if (!order.tasks) order.tasks = {};
                 
                 sites.forEach(site => {
-                    // Проверяем все возможные даты, связанные с заказом
                     const orderDate = order.date;
                     const storageKey = `tasks_${site}_${orderDate}`;
                     const tasksJson = localStorage.getItem(storageKey);
@@ -2242,24 +2311,28 @@
                                 <div>
                                     <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">ПРОФИЛИ</div>
                                     ${profiles.length > 0 ? 
-                                        profiles.map(p => `
-                                            <div style="margin-bottom: 8px;">
-                                                <div>• ${escapeHtml(p.name)}</div>
-                                                <div style="margin-left: 12px; color: #a0a0a0; font-size: 12px;">
-                                                    <span style="color: #ff9800;">${p.lengthMm} мм</span> <span style="color: #4cd964;">× ${p.quantity} шт</span>
-                                                </div>
-                                            </div>
-                                        `).join('') : 
+                                        `<div class="details-chips">
+                                            ${profiles.map(p => `
+                                                <span class="profile-chip">
+                                                    <span class="profile-name">📐 ${escapeHtml(p.name)}</span>
+                                                    <span class="profile-length">${p.lengthMm} мм</span>
+                                                    <span class="profile-quantity">× ${p.quantity} шт</span>
+                                                </span>
+                                            `).join('')}
+                                        </div>` : 
                                         '<div style="color: #6c757d;">— нет —</div>'}
                                 </div>
                                 <div>
                                     <div style="color: #a0a0a0; font-size: 12px; margin-bottom: 8px;">ДЕТАЛИ</div>
                                     ${regularDetails.length > 0 ? 
-                                        regularDetails.map(d => `
-                                            <div style="margin-bottom: 6px;">
-                                                • ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span>
-                                            </div>
-                                        `).join('') : 
+                                        `<div class="details-chips">
+                                            ${regularDetails.map(d => `
+                                                <span class="detail-chip">
+                                                    <span class="detail-name">🔩 ${escapeHtml(d.name)}</span>
+                                                    <span class="detail-quantity">${d.quantity} шт</span>
+                                                </span>
+                                            `).join('')}
+                                        </div>` : 
                                         '<div style="color: #6c757d;">— нет —</div>'}
                                 </div>
                             </div>
