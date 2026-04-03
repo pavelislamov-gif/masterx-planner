@@ -359,7 +359,7 @@
             transform: scale(1.02);
         }
 
-        /* Фильтры */
+        /* Фильтры - расширенные */
         .filter-section {
             display: flex;
             gap: 15px;
@@ -384,7 +384,7 @@
             letter-spacing: 0.5px;
         }
 
-        .filter-group select {
+        .filter-group select, .filter-group input {
             padding: 6px 10px;
             background: #1e232b;
             border: 1px solid #2a2f38;
@@ -394,7 +394,7 @@
             min-width: 150px;
         }
 
-        .filter-group select:focus {
+        .filter-group select:focus, .filter-group input:focus {
             outline: none;
             border-color: #ff3b3b;
         }
@@ -599,7 +599,8 @@
             border: 1px solid #e2e8f0 !important;
         }
 
-        body.light-theme .filter-group select {
+        body.light-theme .filter-group select,
+        body.light-theme .filter-group input {
             background: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
             color: #1e293b !important;
@@ -608,6 +609,10 @@
         body.light-theme .task-card {
             background: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
+        }
+
+        body.light-theme .task-card.priority {
+            border: 2px solid #ff3b3b !important;
         }
 
         body.light-theme .task-header.status-pending {
@@ -624,6 +629,10 @@
 
         body.light-theme .task-header.priority {
             background: linear-gradient(135deg, #fee2e2, #fecaca) !important;
+        }
+
+        body.light-theme .task-header.priority .task-customer-name {
+            color: #dc2626 !important;
         }
 
         body.light-theme .task-customer-name {
@@ -655,6 +664,10 @@
             background: #ff9800 !important;
             color: white !important;
         }
+
+        body.light-theme .priority-badge {
+            background: #ff3b3b !important;
+        }
     </style>
 </head>
 <body>
@@ -667,7 +680,7 @@
             <h1 style="margin:0; color: white; font-size:18px;">🎨 Полимерный участок</h1>
         </header>
 
-        <!-- ФИЛЬТРЫ -->
+        <!-- ФИЛЬТРЫ - РАСШИРЕННЫЕ -->
         <div class="filter-section">
             <div class="filter-group">
                 <label>🏢 ЗАКАЗЧИК</label>
@@ -692,6 +705,16 @@
                 <select id="filterRal">
                     <option value="">Все RAL</option>
                 </select>
+            </div>
+            <div class="filter-group">
+                <label>📏 ТОЛЩИНА (мм)</label>
+                <select id="filterThickness">
+                    <option value="">Все толщины</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>📐 РАЗМЕР</label>
+                <input type="text" id="filterSize" placeholder="Поиск по размеру...">
             </div>
             <div class="filter-group">
                 <label>📊 СТАТУС</label>
@@ -806,15 +829,16 @@
             const products = new Set();
             const operations = new Set();
             const rals = new Set();
+            const thicknesses = new Set();
+            const sizes = new Set();
             
             allOrders.forEach(order => {
                 if (order.groupName) customers.add(order.groupName);
                 if (order.items) {
                     order.items.forEach(item => {
                         if (item.product) products.add(item.product);
-                        if (item.ral && item.ral.trim()) {
-                            rals.add(item.ral.trim());
-                        }
+                        if (item.ral && item.ral.trim()) rals.add(item.ral.trim());
+                        if (item.size?.name) sizes.add(item.size.name);
                     });
                 }
             });
@@ -822,6 +846,11 @@
             if (taskManager && taskManager.tasks) {
                 taskManager.tasks.forEach(task => {
                     if (task.operation) operations.add(task.operation);
+                    
+                    const productOps = taskOperationsData[task.product];
+                    const siteOps = productOps?.['полимерный'];
+                    const operationData = siteOps?.find(op => op.operation === task.operation);
+                    if (operationData?.thickness) thicknesses.add(operationData.thickness);
                 });
             }
             
@@ -832,7 +861,7 @@
                 Array.from(customers).sort().forEach(c => {
                     customerSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
                 });
-                if (currentCustomer) customerSelect.value = currentCustomer;
+                if (currentCustomer && customers.has(currentCustomer)) customerSelect.value = currentCustomer;
             }
             
             const productSelect = document.getElementById('filterProduct');
@@ -842,7 +871,7 @@
                 Array.from(products).sort().forEach(p => {
                     productSelect.innerHTML += `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`;
                 });
-                if (currentProduct) productSelect.value = currentProduct;
+                if (currentProduct && products.has(currentProduct)) productSelect.value = currentProduct;
             }
             
             const operationSelect = document.getElementById('filterOperation');
@@ -852,7 +881,7 @@
                 Array.from(operations).sort().forEach(op => {
                     operationSelect.innerHTML += `<option value="${escapeHtml(op)}">${escapeHtml(op)}</option>`;
                 });
-                if (currentOperation) operationSelect.value = currentOperation;
+                if (currentOperation && operations.has(currentOperation)) operationSelect.value = currentOperation;
             }
             
             const ralSelect = document.getElementById('filterRal');
@@ -862,7 +891,17 @@
                 Array.from(rals).sort().forEach(r => {
                     ralSelect.innerHTML += `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`;
                 });
-                if (currentRal) ralSelect.value = currentRal;
+                if (currentRal && rals.has(currentRal)) ralSelect.value = currentRal;
+            }
+            
+            const thicknessSelect = document.getElementById('filterThickness');
+            if (thicknessSelect) {
+                const currentThickness = thicknessSelect.value;
+                thicknessSelect.innerHTML = '<option value="">📏 Все толщины</option>';
+                Array.from(thicknesses).sort().forEach(th => {
+                    thicknessSelect.innerHTML += `<option value="${th}">${th}</option>`;
+                });
+                if (currentThickness && thicknesses.has(currentThickness)) thicknessSelect.value = currentThickness;
             }
         }
         
@@ -871,6 +910,8 @@
             document.getElementById('filterProduct').value = '';
             document.getElementById('filterOperation').value = '';
             document.getElementById('filterRal').value = '';
+            document.getElementById('filterThickness').value = '';
+            document.getElementById('filterSize').value = '';
             document.getElementById('statusFilter').value = 'all';
             renderTasks();
         }
@@ -1025,7 +1066,6 @@
             const taskCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
             if (!taskCard) return;
             
-            // Обновляем статус в шапке
             const statusBadge = taskCard.querySelector('.task-status-badge');
             const taskHeader = taskCard.querySelector('.task-header');
             
@@ -1049,7 +1089,6 @@
                 }
             }
             
-            // Обновляем список исполнителей
             const executorList = taskCard.querySelector('.executor-list');
             if (executorList) {
                 const wasCollapsed = taskCard.querySelector('.task-content')?.classList.contains('collapsed');
@@ -1066,14 +1105,9 @@
                     executorList.appendChild(noExecutors);
                 }
                 
-                // Обновляем кнопку "ГОТОВО"
                 const readyBtn = taskCard.querySelector('.btn-ready');
                 if (readyBtn) {
-                    if (task.status === 'completed') {
-                        readyBtn.disabled = true;
-                    } else {
-                        readyBtn.disabled = false;
-                    }
+                    readyBtn.disabled = task.status === 'completed';
                 }
                 
                 if (wasCollapsed) {
@@ -1087,7 +1121,7 @@
             }
         }
         
-        // ============== ОБНОВЛЕНИЕ ТОЛЬКО СПИСКА ИСПОЛНИТЕЛЕЙ ==============
+        // Обновление только списка исполнителей
         function updateExecutorList(taskId) {
             const task = taskManager.tasks.find(t => t.id === taskId);
             if (!task) return;
@@ -1188,11 +1222,9 @@
             return div;
         }
         
-        // ============== ВОССТАНОВЛЕНИЕ ЦВЕТА ФОНА ШАПКИ ПОСЛЕ ЗАГРУЗКИ ==============
+        // Восстановление цвета фона шапки после загрузки
         function restoreTaskHeaderColors() {
             const taskCards = document.querySelectorAll('.task-card');
-            console.log(`🔄 Восстановление цветов фона для ${taskCards.length} задач`);
-            
             taskCards.forEach(card => {
                 const taskId = card.dataset.taskId;
                 const task = taskManager.tasks.find(t => t.id === taskId);
@@ -1234,6 +1266,8 @@
             const filterProduct = document.getElementById('filterProduct').value;
             const filterOperation = document.getElementById('filterOperation').value;
             const filterRal = document.getElementById('filterRal').value;
+            const filterThickness = document.getElementById('filterThickness').value;
+            const filterSize = document.getElementById('filterSize').value.toLowerCase();
             const filterStatus = document.getElementById('statusFilter').value;
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
@@ -1248,9 +1282,7 @@
                 if (filterStatus === 'in_progress' && task.status !== 'in_progress') return false;
                 if (filterStatus === 'pending' && task.status !== 'pending') return false;
                 
-                if (task.isPriority === true) {
-                    return true;
-                }
+                if (task.isPriority === true) return true;
                 
                 if (filterCustomer && order.groupName !== filterCustomer) return false;
                 
@@ -1262,6 +1294,15 @@
                 if (filterRal) {
                     const itemRal = (item.ral || '').trim();
                     if (itemRal !== filterRal) return false;
+                }
+                if (filterSize && item.size?.name && !item.size.name.toLowerCase().includes(filterSize)) return false;
+                
+                // Фильтр по толщине
+                if (filterThickness) {
+                    const productOps = taskOperationsData[item.product];
+                    const siteOps = productOps?.['полимерный'];
+                    const operationData = siteOps?.find(op => op.operation === task.operation);
+                    if (operationData?.thickness !== filterThickness) return false;
                 }
                 
                 return true;
@@ -1380,7 +1421,6 @@
                 taskCard.appendChild(content);
                 tasksList.appendChild(taskCard);
                 
-                // Заполняем исполнителей
                 const executorContainer = document.getElementById(`executors-${task.id}`);
                 if (executorContainer && task.executors) {
                     executorContainer.innerHTML = '';
@@ -1389,7 +1429,6 @@
                     });
                 }
                 
-                // Заполняем кнопку добавления исполнителя
                 const actionContainer = document.getElementById(`action-${task.id}`);
                 if (actionContainer && task.status !== 'completed') {
                     actionContainer.innerHTML = '';
@@ -1408,7 +1447,6 @@
             tasksList.scrollTop = scrollPosition;
             isLoadingTasks = false;
             
-            // Восстанавливаем цвета фона шапок задач
             setTimeout(() => {
                 restoreTaskHeaderColors();
             }, 50);
@@ -1470,7 +1508,7 @@
             taskManager.completeTask(taskId);
         }
         
-        // ============== ОТЧЁТ ПО ЗАДАЧЕ ==============
+        // ============== ОТЧЁТ ПО ЗАДАЧЕ (С ПРАВИЛЬНЫМ ХРАНЕНИЕМ) ==============
         function openRightModalForTask(taskId) {
             const task = taskManager.tasks.find(t => t.id === taskId);
             if (!task) {
@@ -1498,7 +1536,8 @@
                 ral: item.ral,
                 texture: item.texture,
                 operation: task.operation,
-                isPriority: task.isPriority || false
+                isPriority: task.isPriority || false,
+                siteKey: 'polimerniy'
             };
             
             const modal = document.getElementById('rightModal');
@@ -1519,7 +1558,7 @@
         
         function getSavedReportDataForTask(taskId) {
             const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-            const taskReports = allReports.filter(r => r.taskId === taskId);
+            const taskReports = allReports.filter(r => r.taskId === taskId && r.siteKey === 'polimerniy');
             if (taskReports.length === 0) return null;
             const allRows = [];
             taskReports.forEach(report => {
@@ -1644,6 +1683,7 @@
             });
             
             const reportData = {
+                id: Date.now(),
                 taskId: currentReportTask.taskId,
                 orderId: currentReportTask.orderId,
                 orderNumber: currentReportTask.orderNumber,
@@ -1655,7 +1695,7 @@
                 texture: currentReportTask.texture,
                 operation: currentReportTask.operation,
                 isPriority: currentReportTask.isPriority,
-                siteKey: 'polimerniy',
+                siteKey: currentReportTask.siteKey,
                 rows: reportRows.map(row => ({
                     расход: row.расход || 0,
                     количество: row.количество || 0,
@@ -1666,7 +1706,7 @@
             };
             
             let allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-            allReports = allReports.filter(r => r.taskId !== currentReportTask.taskId);
+            allReports = allReports.filter(r => !(r.taskId === currentReportTask.taskId && r.siteKey === currentReportTask.siteKey));
             allReports.push(reportData);
             localStorage.setItem('material_reports', JSON.stringify(allReports));
             
@@ -1684,7 +1724,7 @@
         }
         
         function setupFilterListeners() {
-            const inputs = ['filterCustomer', 'filterProduct', 'filterOperation', 'filterRal', 'statusFilter'];
+            const inputs = ['filterCustomer', 'filterProduct', 'filterOperation', 'filterRal', 'filterThickness', 'filterSize', 'statusFilter'];
             inputs.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -1696,7 +1736,7 @@
         window.exportToExcel = function() {
             const tasks = taskManager.tasks;
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-            let csv = "Заказ,Заказчик,Изделие,Размер,Количество,RAL,Текстура,Операция,Деталь,Приоритет,Исполнитель,Количество,Статус,План\n";
+            let csv = "Заказ,Заказчик,Изделие,Размер,Количество,RAL,Текстура,Операция,Деталь,Толщина,Приоритет,Исполнитель,Количество,Статус,План\n";
             tasks.forEach(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
                 const item = order?.items?.[task.itemIndex || 0];
@@ -1704,13 +1744,14 @@
                 const siteOps = productOps?.['полимерный'];
                 const operationData = siteOps?.find(op => op.operation === task.operation);
                 const detailName = operationData?.detail || '';
+                const thickness = operationData?.thickness || '';
                 const isPriority = task.isPriority ? 'ДА' : 'НЕТ';
                 if (task.executors && task.executors.length > 0) {
                     task.executors.forEach(exec => {
-                        csv += `"${task.orderNumber}","${order?.groupName || ''}","${item?.product || ''}","${item?.size?.name || ''}",${item?.size?.quantity || 0},"${item?.ral || ''}","${item?.texture || ''}","${task.operation}","${detailName}","${isPriority}","${exec.name}",${exec.quantity || 0},"${exec.status}",${task.totalQuantity || 1}\n`;
+                        csv += `"${task.orderNumber}","${order?.groupName || ''}","${item?.product || ''}","${item?.size?.name || ''}",${item?.size?.quantity || 0},"${item?.ral || ''}","${item?.texture || ''}","${task.operation}","${detailName}","${thickness}","${isPriority}","${exec.name}",${exec.quantity || 0},"${exec.status}",${task.totalQuantity || 1}\n`;
                     });
                 } else {
-                    csv += `"${task.orderNumber}","${order?.groupName || ''}","${item?.product || ''}","${item?.size?.name || ''}",${item?.size?.quantity || 0},"${item?.ral || ''}","${item?.texture || ''}","${task.operation}","${detailName}","${isPriority}","Нет",0,"${task.status}",${task.totalQuantity || 1}\n`;
+                    csv += `"${task.orderNumber}","${order?.groupName || ''}","${item?.product || ''}","${item?.size?.name || ''}",${item?.size?.quantity || 0},"${item?.ral || ''}","${item?.texture || ''}","${task.operation}","${detailName}","${thickness}","${isPriority}","Нет",0,"${task.status}",${task.totalQuantity || 1}\n`;
                 }
             });
             const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
