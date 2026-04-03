@@ -936,136 +936,144 @@
         
         // ============== КЛАСС УПРАВЛЕНИЯ ЗАДАЧАМИ ==============
         class SimpleTaskManager {
-            constructor(siteKey) {
-                this.siteKey = siteKey;
-                this.tasks = [];
-                this.storageKey = `tasks_${siteKey}`;
-            }
-            
-            loadData() {
-                const saved = localStorage.getItem(this.storageKey);
-                if (saved) {
-                    this.tasks = JSON.parse(saved);
-                } else {
-                    this.tasks = [];
-                }
-                return this.tasks;
-            }
-            
-            saveData() {
-                localStorage.setItem(this.storageKey, JSON.stringify(this.tasks));
-            }
-            
-            getTasksByStatus(status) {
-                if (status === 'all') return this.tasks;
-                return this.tasks.filter(t => t.status === status);
-            }
-            
-            getStats() {
-                const total = this.tasks.length;
-                const inProgress = this.tasks.filter(t => t.status === 'in_progress').length;
-                const completed = this.tasks.filter(t => t.status === 'completed').length;
-                return { total, inProgress, completed };
-            }
-            
-            updateExecutorQuantity(taskId, executorId, quantity) {
-                const task = this.tasks.find(t => t.id === taskId);
-                if (task && task.executors) {
-                    const executor = task.executors.find(e => e.id === executorId);
-                    if (executor) {
-                        executor.quantity = quantity;
-                        this.saveData();
-                    }
-                }
-            }
-            
-            updateExecutorStatus(taskId, executorId, status) {
-                const task = this.tasks.find(t => t.id === taskId);
-                if (!task || !task.executors) return;
-
-                const executor = task.executors.find(e => e.id === executorId);
-                if (executor) {
-                    executor.status = status;
-                    this.saveData();
-
-                    // Определяем статус задачи:
-                    // - "shift_ended" НЕ считается как выполнение
-                    // - Задача завершается только когда все исполнители имеют статус "shift_ended" ИЛИ "completed"
-                    let taskStatus = 'pending';
-                    
-                    // Если есть хотя бы один исполнитель "in_progress" - задача в работе
-                    if (task.executors.some(e => e.status === 'in_progress')) {
-                        taskStatus = 'in_progress';
-                    }
-                    
-                    // Если все исполнители имеют статус "shift_ended" ИЛИ "completed" - задача завершена
-                    const allFinished = task.executors.every(e => e.status === 'shift_ended' || e.status === 'completed');
-                    if (allFinished && task.executors.length > 0) {
-                        taskStatus = 'completed';
-                    }
-
-                    task.status = taskStatus;
-                    this.saveData();
-
-                    // Обновляем в заказе
-                    const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-                    const order = orders.find(o => o.id == task.orderId);
-                    if (order) {
-                        if (!order.tasks) order.tasks = {};
-                        order.tasks[task.id] = taskStatus;
-                        localStorage.setItem('masterx_orders', JSON.stringify(orders));
-                    }
-                    
-                    setTimeout(() => { loadTasks(); }, 100);
-                }
-            }
-            
-            addExecutor(taskId, name) {
-                const task = this.tasks.find(t => t.id === taskId);
-                if (task) {
-                    if (!task.executors) task.executors = [];
-                    if (task.executors.some(e => e.name === name)) return false;
-                    task.executors.push({
-                        id: Date.now(),
-                        name: name,
-                        quantity: 0,
-                        status: 'pending'
-                    });
-                    this.saveData();
-                    return true;
-                }
-                return false;
-            }
-            
-            removeExecutor(taskId, executorId) {
-                const task = this.tasks.find(t => t.id === taskId);
-                if (task && task.executors) {
-                    task.executors = task.executors.filter(e => e.id !== executorId);
-                    this.saveData();
-                }
-            }
-            
-            completeTask(taskId) {
-                const task = this.tasks.find(t => t.id === taskId);
-                if (task && task.status !== 'completed') {
-                    task.status = 'completed';
-                    task.completedAt = new Date().toISOString();
-                    this.saveData();
-                    
-                    const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-                    const order = orders.find(o => o.id == task.orderId);
-                    if (order) {
-                        if (!order.tasks) order.tasks = {};
-                        order.tasks[task.id] = 'completed';
-                        const orderIndex = orders.findIndex(o => o.id == task.orderId);
-                        orders[orderIndex] = order;
-                        localStorage.setItem('masterx_orders', JSON.stringify(orders));
-                    }
-                    
-                    setTimeout(() => { loadTasks(); }, 100);
-                }
+    constructor(siteKey) {
+        this.siteKey = siteKey;
+        this.tasks = [];
+        this.storageKey = `tasks_${siteKey}`;
+    }
+    
+    loadData() {
+        const saved = localStorage.getItem(this.storageKey);
+        if (saved) {
+            this.tasks = JSON.parse(saved);
+        } else {
+            this.tasks = [];
+        }
+        return this.tasks;
+    }
+    
+    saveData() {
+        localStorage.setItem(this.storageKey, JSON.stringify(this.tasks));
+    }
+    
+    getTasksByStatus(status) {
+        if (status === 'all') return this.tasks;
+        return this.tasks.filter(t => t.status === status);
+    }
+    
+    getStats() {
+        const total = this.tasks.length;
+        const inProgress = this.tasks.filter(t => t.status === 'in_progress').length;
+        const completed = this.tasks.filter(t => t.status === 'completed').length;
+        return { total, inProgress, completed };
+    }
+    
+    updateExecutorQuantity(taskId, executorId, quantity) {
+        const task = this.tasks.find(t => t.id === taskId);
+        if (task && task.executors) {
+            const executor = task.executors.find(e => e.id === executorId);
+            if (executor) {
+                executor.quantity = quantity;
+                this.saveData();
             }
         }
+    }
+    
+    updateExecutorStatus(taskId, executorId, status) {
+        const task = this.tasks.find(t => t.id === taskId);
+        if (!task || !task.executors) return;
+
+        const executor = task.executors.find(e => e.id === executorId);
+        if (executor) {
+            executor.status = status;
+            this.saveData();
+
+            // ПРАВИЛЬНАЯ ЛОГИКА:
+            // shift_ended НЕ переводит задачу в completed
+            let taskStatus = 'pending';
+            
+            const hasInProgress = task.executors.some(e => e.status === 'in_progress');
+            const allShiftEnded = task.executors.length > 0 && task.executors.every(e => e.status === 'shift_ended');
+            const allCompleted = task.executors.length > 0 && task.executors.every(e => e.status === 'completed');
+            
+            if (allCompleted) {
+                taskStatus = 'completed';
+            } else if (hasInProgress) {
+                taskStatus = 'in_progress';
+            } else if (allShiftEnded) {
+                // Все закрыли смену, но задача НЕ завершена
+                taskStatus = 'in_progress';
+            } else {
+                taskStatus = 'pending';
+            }
+
+            task.status = taskStatus;
+            this.saveData();
+
+            // Обновляем цвет квадратика в заказе
+            const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+            const order = orders.find(o => o.id == task.orderId);
+            if (order) {
+                if (!order.tasks) order.tasks = {};
+                const squareColor = taskStatus === 'completed' ? 'green' : (taskStatus === 'in_progress' ? 'orange' : '');
+                order.tasks[task.id] = squareColor;
+                localStorage.setItem('masterx_orders', JSON.stringify(orders));
+            }
+            
+            setTimeout(() => { loadTasks(); }, 100);
+        }
+    }
+    
+    addExecutor(taskId, name) {
+        const task = this.tasks.find(t => t.id === taskId);
+        if (task) {
+            if (!task.executors) task.executors = [];
+            if (task.executors.some(e => e.name === name)) return false;
+            task.executors.push({
+                id: Date.now(),
+                name: name,
+                quantity: 0,
+                status: 'pending'
+            });
+            this.saveData();
+            return true;
+        }
+        return false;
+    }
+    
+    removeExecutor(taskId, executorId) {
+        const task = this.tasks.find(t => t.id === taskId);
+        if (task && task.executors) {
+            task.executors = task.executors.filter(e => e.id !== executorId);
+            this.saveData();
+        }
+    }
+    
+    completeTask(taskId) {
+        const task = this.tasks.find(t => t.id === taskId);
+        if (task && task.status !== 'completed') {
+            // Устанавливаем всем исполнителям статус 'completed'
+            if (task.executors) {
+                task.executors.forEach(executor => {
+                    executor.status = 'completed';
+                });
+            }
+            task.status = 'completed';
+            task.completedAt = new Date().toISOString();
+            this.saveData();
+            
+            const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+            const order = orders.find(o => o.id == task.orderId);
+            if (order) {
+                if (!order.tasks) order.tasks = {};
+                order.tasks[task.id] = 'green';
+                localStorage.setItem('masterx_orders', JSON.stringify(orders));
+            }
+            
+            setTimeout(() => { loadTasks(); }, 100);
+        }
+    }
+}
         
         // ============== ОСНОВНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==============
         function loadTasks() {
