@@ -680,7 +680,7 @@
             <h1 style="margin:0; color: white; font-size:18px;">🎨 Полимерный участок</h1>
         </header>
 
-        <!-- ФИЛЬТРЫ - РАСШИРЕННЫЕ -->
+        <!-- ФИЛЬТРЫ - РАСШИРЕННЫЕ С СОРТИРОВКОЙ -->
         <div class="filter-section">
             <div class="filter-group">
                 <label>🏢 ЗАКАЗЧИК</label>
@@ -725,6 +725,20 @@
                     <option value="pending">⏳ Ожидают</option>
                     <option value="in_progress">⚡ В работе</option>
                     <option value="completed">✅ Завершённые</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>🔄 СОРТИРОВКА</label>
+                <select id="sortBy">
+                    <option value="priority_first">🔴 Приоритетные сверху</option>
+                    <option value="date_desc">📅 По дате (новые сначала)</option>
+                    <option value="date_asc">📅 По дате (старые сначала)</option>
+                    <option value="customer_asc">🏢 По заказчику (А-Я)</option>
+                    <option value="customer_desc">🏢 По заказчику (Я-А)</option>
+                    <option value="product_asc">📦 По изделию (А-Я)</option>
+                    <option value="product_desc">📦 По изделию (Я-А)</option>
+                    <option value="status_asc">📊 По статусу (ожид→работа→готово)</option>
+                    <option value="status_desc">📊 По статусу (готово→работа→ожид)</option>
                 </select>
             </div>
             <button class="btn-reset" onclick="resetFilters()">🔄 Сбросить</button>
@@ -936,7 +950,82 @@
             document.getElementById('filterThickness').value = '';
             document.getElementById('filterSize').value = '';
             document.getElementById('statusFilter').value = 'all';
+            document.getElementById('sortBy').value = 'priority_first';
             renderTasks();
+        }
+        
+        // ============== СОРТИРОВКА ЗАДАЧ ==============
+        function sortTasks(tasks, sortType, allOrders) {
+            const tasksCopy = [...tasks];
+            
+            // Сначала разделяем приоритетные и обычные
+            const priorityTasks = tasksCopy.filter(t => t.isPriority === true);
+            const normalTasks = tasksCopy.filter(t => t.isPriority !== true);
+            
+            let sortedNormal = [...normalTasks];
+            
+            switch(sortType) {
+                case 'date_desc':
+                    sortedNormal.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    break;
+                case 'date_asc':
+                    sortedNormal.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                    break;
+                case 'customer_asc':
+                    sortedNormal.sort((a, b) => {
+                        const orderA = allOrders.find(o => o.id == a.orderId);
+                        const orderB = allOrders.find(o => o.id == b.orderId);
+                        const nameA = orderA?.groupName || '';
+                        const nameB = orderB?.groupName || '';
+                        return nameA.localeCompare(nameB);
+                    });
+                    break;
+                case 'customer_desc':
+                    sortedNormal.sort((a, b) => {
+                        const orderA = allOrders.find(o => o.id == a.orderId);
+                        const orderB = allOrders.find(o => o.id == b.orderId);
+                        const nameA = orderA?.groupName || '';
+                        const nameB = orderB?.groupName || '';
+                        return nameB.localeCompare(nameA);
+                    });
+                    break;
+                case 'product_asc':
+                    sortedNormal.sort((a, b) => {
+                        const orderA = allOrders.find(o => o.id == a.orderId);
+                        const orderB = allOrders.find(o => o.id == b.orderId);
+                        const productA = orderA?.items?.[a.itemIndex || 0]?.product || '';
+                        const productB = orderB?.items?.[b.itemIndex || 0]?.product || '';
+                        return productA.localeCompare(productB);
+                    });
+                    break;
+                case 'product_desc':
+                    sortedNormal.sort((a, b) => {
+                        const orderA = allOrders.find(o => o.id == a.orderId);
+                        const orderB = allOrders.find(o => o.id == b.orderId);
+                        const productA = orderA?.items?.[a.itemIndex || 0]?.product || '';
+                        const productB = orderB?.items?.[b.itemIndex || 0]?.product || '';
+                        return productB.localeCompare(productA);
+                    });
+                    break;
+                case 'status_asc':
+                    const statusOrder = { 'pending': 1, 'in_progress': 2, 'completed': 3 };
+                    sortedNormal.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+                    break;
+                case 'status_desc':
+                    const statusOrderDesc = { 'completed': 1, 'in_progress': 2, 'pending': 3 };
+                    sortedNormal.sort((a, b) => statusOrderDesc[a.status] - statusOrderDesc[b.status]);
+                    break;
+                case 'priority_first':
+                default:
+                    priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    sortedNormal.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    return [...priorityTasks, ...sortedNormal];
+            }
+            
+            // Для остальных типов сортировки приоритетные тоже сортируем по дате и ставим сверху
+            priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            return [...priorityTasks, ...sortedNormal];
         }
         
         // ============== КЛАСС УПРАВЛЕНИЯ ЗАДАЧАМИ ==============
@@ -1292,11 +1381,13 @@
             const filterThickness = document.getElementById('filterThickness').value;
             const filterSize = document.getElementById('filterSize').value;
             const filterStatus = document.getElementById('statusFilter').value;
+            const sortType = document.getElementById('sortBy').value;
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             
             let tasks = taskManager.tasks;
             
+            // ФИЛЬТРАЦИЯ
             tasks = tasks.filter(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
                 if (!order) return false;
@@ -1330,11 +1421,10 @@
                 return true;
             });
             
-            const priorityTasks = tasks.filter(t => t.isPriority === true);
-            const normalTasks = tasks.filter(t => t.isPriority !== true);
-            priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            const sortedTasks = [...priorityTasks, ...normalTasks];
+            // СОРТИРОВКА
+            tasks = sortTasks(tasks, sortType, allOrders);
             
+            // Обновляем статистику
             document.getElementById('totalTasks').textContent = tasks.length;
             document.getElementById('tasksInProgress').textContent = tasks.filter(t => t.status === 'in_progress').length;
             document.getElementById('tasksCompleted').textContent = tasks.filter(t => t.status === 'completed').length;
@@ -1343,13 +1433,13 @@
             const scrollPosition = tasksList.scrollTop;
             tasksList.innerHTML = '';
 
-            if (sortedTasks.length === 0) {
+            if (tasks.length === 0) {
                 tasksList.innerHTML = '<div class="no-tasks"><p>📭 Нет задач по выбранным фильтрам</p></div>';
                 isLoadingTasks = false;
                 return;
             }
 
-            sortedTasks.forEach(task => {
+            tasks.forEach(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
                 const item = order?.items?.[task.itemIndex || 0];
                 if (!order || !item) return;
@@ -1530,7 +1620,7 @@
             taskManager.completeTask(taskId);
         }
         
-        // ============== ОТЧЁТ ПО ЗАДАЧЕ (С ПРАВИЛЬНЫМ ХРАНЕНИЕМ) ==============
+        // ============== ОТЧЁТ ПО ЗАДАЧЕ ==============
         function openRightModalForTask(taskId) {
             const task = taskManager.tasks.find(t => t.id === taskId);
             if (!task) {
@@ -1746,7 +1836,7 @@
         }
         
         function setupFilterListeners() {
-            const inputs = ['filterCustomer', 'filterProduct', 'filterOperation', 'filterRal', 'filterThickness', 'filterSize', 'statusFilter'];
+            const inputs = ['filterCustomer', 'filterProduct', 'filterOperation', 'filterRal', 'filterThickness', 'filterSize', 'statusFilter', 'sortBy'];
             inputs.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
