@@ -773,7 +773,6 @@
                     <option value="priority">🔴 Приоритетные</option>
                 </select>
             </div>
-
             <button class="btn-reset" onclick="resetFilters()">🔄 Сбросить</button>
         </div>
 
@@ -980,74 +979,7 @@
             renderTasks();
         }
         
-        function sortTasks(tasks, sortType, allOrders) {
-            const tasksCopy = [...tasks];
-            const priorityTasks = tasksCopy.filter(t => t.isPriority === true);
-            const normalTasks = tasksCopy.filter(t => t.isPriority !== true);
-            let sortedNormal = [...normalTasks];
-            
-            switch(sortType) {
-                case 'date_desc':
-                    sortedNormal.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                    break;
-                case 'date_asc':
-                    sortedNormal.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-                    break;
-                case 'customer_asc':
-                    sortedNormal.sort((a, b) => {
-                        const orderA = allOrders.find(o => o.id == a.orderId);
-                        const orderB = allOrders.find(o => o.id == b.orderId);
-                        const nameA = orderA?.groupName || '';
-                        const nameB = orderB?.groupName || '';
-                        return nameA.localeCompare(nameB);
-                    });
-                    break;
-                case 'customer_desc':
-                    sortedNormal.sort((a, b) => {
-                        const orderA = allOrders.find(o => o.id == a.orderId);
-                        const orderB = allOrders.find(o => o.id == b.orderId);
-                        const nameA = orderA?.groupName || '';
-                        const nameB = orderB?.groupName || '';
-                        return nameB.localeCompare(nameA);
-                    });
-                    break;
-                case 'product_asc':
-                    sortedNormal.sort((a, b) => {
-                        const orderA = allOrders.find(o => o.id == a.orderId);
-                        const orderB = allOrders.find(o => o.id == b.orderId);
-                        const productA = orderA?.items?.[a.itemIndex || 0]?.product || '';
-                        const productB = orderB?.items?.[b.itemIndex || 0]?.product || '';
-                        return productA.localeCompare(productB);
-                    });
-                    break;
-                case 'product_desc':
-                    sortedNormal.sort((a, b) => {
-                        const orderA = allOrders.find(o => o.id == a.orderId);
-                        const orderB = allOrders.find(o => o.id == b.orderId);
-                        const productA = orderA?.items?.[a.itemIndex || 0]?.product || '';
-                        const productB = orderB?.items?.[b.itemIndex || 0]?.product || '';
-                        return productB.localeCompare(productA);
-                    });
-                    break;
-                case 'status_asc':
-                    const statusOrder = { 'pending': 1, 'in_progress': 2, 'completed': 3 };
-                    sortedNormal.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
-                    break;
-                case 'status_desc':
-                    const statusOrderDesc = { 'completed': 1, 'in_progress': 2, 'pending': 3 };
-                    sortedNormal.sort((a, b) => statusOrderDesc[a.status] - statusOrderDesc[b.status]);
-                    break;
-                case 'priority_first':
-                default:
-                    priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                    sortedNormal.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                    return [...priorityTasks, ...sortedNormal];
-            }
-            
-            priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            return [...priorityTasks, ...sortedNormal];
-        }
-        
+        // ============== КЛАСС УПРАВЛЕНИЯ ЗАДАЧАМИ ==============
         class SimpleTaskManager {
             constructor(siteKey) {
                 this.siteKey = siteKey;
@@ -1447,47 +1379,51 @@
             
             let tasks = taskManager.tasks;
             
+            // ФИЛЬТРАЦИЯ
             tasks = tasks.filter(task => {
-    const order = allOrders.find(o => o.id == task.orderId);
-    if (!order) return false;
-    
-    // Фильтр "Приоритетные" - показывает только задачи с isPriority = true
-    if (filterStatus === 'priority') {
-        return task.isPriority === true;
-    }
-    
-    // Обычные фильтры статусов
-    if (filterStatus === 'completed' && task.status !== 'completed') return false;
-    if (filterStatus === 'in_progress' && task.status !== 'in_progress') return false;
-    if (filterStatus === 'pending' && task.status !== 'pending') return false;
-    
-    // Приоритетные задачи не фильтруются по остальным критериям
-    if (task.isPriority === true) return true;
-    
-    if (filterCustomer && order.groupName !== filterCustomer) return false;
-    
-    const item = order.items?.[task.itemIndex || 0];
-    if (!item) return false;
-    
-    if (filterProduct && item.product !== filterProduct) return false;
-    if (filterOperation && task.operation !== filterOperation) return false;
-    if (filterRal) {
-        const itemRal = (item.ral || '').trim();
-        if (itemRal !== filterRal) return false;
-    }
-    if (filterSize && item.size?.name !== filterSize) return false;
-    
-    if (filterThickness) {
-        const productOps = taskOperationsData[item.product];
-        const siteOps = productOps?.['полимерный'];
-        const operationData = siteOps?.find(op => op.operation === task.operation);
-        if (operationData?.thickness !== filterThickness) return false;
-    }
-    
-    return true;
-});
+                const order = allOrders.find(o => o.id == task.orderId);
+                if (!order) return false;
+                
+                // Фильтр "Приоритетные"
+                if (filterStatus === 'priority') {
+                    return task.isPriority === true;
+                }
+                
+                if (filterStatus === 'completed' && task.status !== 'completed') return false;
+                if (filterStatus === 'in_progress' && task.status !== 'in_progress') return false;
+                if (filterStatus === 'pending' && task.status !== 'pending') return false;
+                
+                if (task.isPriority === true) return true;
+                
+                if (filterCustomer && order.groupName !== filterCustomer) return false;
+                
+                const item = order.items?.[task.itemIndex || 0];
+                if (!item) return false;
+                
+                if (filterProduct && item.product !== filterProduct) return false;
+                if (filterOperation && task.operation !== filterOperation) return false;
+                if (filterRal) {
+                    const itemRal = (item.ral || '').trim();
+                    if (itemRal !== filterRal) return false;
+                }
+                if (filterSize && item.size?.name !== filterSize) return false;
+                
+                if (filterThickness) {
+                    const productOps = taskOperationsData[item.product];
+                    const siteOps = productOps?.['полимерный'];
+                    const operationData = siteOps?.find(op => op.operation === task.operation);
+                    if (operationData?.thickness !== filterThickness) return false;
+                }
+                
+                return true;
+            });
             
-            tasks = sortTasks(tasks, sortType, allOrders);
+            // СОРТИРОВКА (приоритетные сверху, остальные по дате)
+            const priorityTasks = tasks.filter(t => t.isPriority === true);
+            const normalTasks = tasks.filter(t => t.isPriority !== true);
+            priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            normalTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            tasks = [...priorityTasks, ...normalTasks];
             
             document.getElementById('totalTasks').textContent = tasks.length;
             document.getElementById('tasksInProgress').textContent = tasks.filter(t => t.status === 'in_progress').length;
