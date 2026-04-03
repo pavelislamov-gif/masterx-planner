@@ -988,16 +988,26 @@
                     executor.status = status;
                     this.saveData();
 
+                    // Определяем статус задачи:
+                    // - "shift_ended" НЕ считается как выполнение
+                    // - Задача завершается только когда все исполнители имеют статус "shift_ended" ИЛИ "completed"
                     let taskStatus = 'pending';
+                    
+                    // Если есть хотя бы один исполнитель "in_progress" - задача в работе
                     if (task.executors.some(e => e.status === 'in_progress')) {
                         taskStatus = 'in_progress';
-                    } else if (task.executors.every(e => e.status === 'shift_ended' || e.status === 'completed')) {
+                    }
+                    
+                    // Если все исполнители имеют статус "shift_ended" ИЛИ "completed" - задача завершена
+                    const allFinished = task.executors.every(e => e.status === 'shift_ended' || e.status === 'completed');
+                    if (allFinished && task.executors.length > 0) {
                         taskStatus = 'completed';
                     }
 
                     task.status = taskStatus;
                     this.saveData();
 
+                    // Обновляем в заказе
                     const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
                     const order = orders.find(o => o.id == task.orderId);
                     if (order) {
@@ -1247,6 +1257,7 @@
             }, 50);
         }
         
+        // ============== ОТОБРАЖЕНИЕ ИСПОЛНИТЕЛЕЙ (С ПРАВИЛЬНОЙ ЛОГИКОЙ ЗАКРЫТИЯ СМЕНЫ) ==============
         function renderExecutors(taskId, task) {
             const container = document.getElementById(`executors-${taskId}`);
             if (!container) return;
@@ -1256,63 +1267,78 @@
             if (task.executors && task.executors.length > 0) {
                 task.executors.forEach(executor => {
                     const isShiftEnded = executor.status === 'shift_ended';
-                    const isCompleted = task.status === 'completed';
+                    const isTaskCompleted = task.status === 'completed';
+                    
+                    // Исполнитель может редактировать количество, ТОЛЬКО если:
+                    // 1. Задача не завершена И
+                    // 2. Смена у исполнителя не закрыта
+                    const canEdit = !isTaskCompleted && !isShiftEnded;
                     
                     const div = document.createElement('div');
                     div.className = 'executor-item';
                     div.dataset.executorId = executor.id;
                     
+                    // ФИО - только для чтения если смена закрыта или задача завершена
                     const nameInput = document.createElement('input');
                     nameInput.type = 'text';
                     nameInput.className = 'executor-name';
                     nameInput.value = executor.name;
-                    nameInput.disabled = isCompleted || isShiftEnded;
+                    nameInput.disabled = isTaskCompleted || isShiftEnded;
                     div.appendChild(nameInput);
                     
+                    // КОЛИЧЕСТВО - блокируется если смена закрыта ИЛИ задача завершена
                     const quantityInput = document.createElement('input');
                     quantityInput.type = 'number';
                     quantityInput.className = 'executor-quantity';
                     quantityInput.value = executor.quantity || 0;
                     quantityInput.min = 0;
-                    quantityInput.disabled = isCompleted || isShiftEnded;
+                    quantityInput.disabled = !canEdit;
                     quantityInput.onchange = function() {
+                        if (!canEdit) return;
                         taskManager.updateExecutorQuantity(task.id, executor.id, parseInt(this.value) || 0);
                         loadTasks();
                     };
                     div.appendChild(quantityInput);
                     
+                    // КНОПКА "НАЧАТЬ/В РАБОТЕ" - блокируется если смена закрыта
                     const workBtn = document.createElement('button');
                     workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''}`;
                     workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : (isShiftEnded ? 'СМЕНА ЗАКРЫТА' : 'НАЧАТЬ');
-                    workBtn.disabled = isCompleted || isShiftEnded;
+                    workBtn.disabled = !canEdit;
                     workBtn.onclick = function() {
-                        if (isShiftEnded) return;
+                        if (!canEdit) return;
                         const newStatus = workBtn.classList.contains('active') ? 'pending' : 'in_progress';
                         taskManager.updateExecutorStatus(task.id, executor.id, newStatus);
-                        workBtn.classList.toggle('active');
-                        workBtn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
+                        loadTasks();
                     };
                     div.appendChild(workBtn);
                     
+                    // КНОПКА "ЗАКРЫТЬ СМЕНУ" - меняется статус на shift_ended
                     const endShiftBtn = document.createElement('button');
                     endShiftBtn.className = 'btn-end-shift';
                     endShiftBtn.innerHTML = isShiftEnded ? '✅ СМЕНА ЗАКРЫТА' : '🕒 ЗАКРЫТЬ';
-                    endShiftBtn.disabled = isCompleted || isShiftEnded;
+                    // Кнопка "Закрыть смену" активна только если:
+                    // 1. Задача не завершена
+                    // 2. Смена ещё не закрыта
+                    endShiftBtn.disabled = isTaskCompleted || isShiftEnded;
                     endShiftBtn.onclick = function() {
-                        if (confirm('Закрыть смену для ' + executor.name + '?')) {
+                        if (confirm(`Закрыть смену для ${executor.name}?`)) {
                             taskManager.updateExecutorStatus(task.id, executor.id, 'shift_ended');
                             loadTasks();
                         }
                     };
                     div.appendChild(endShiftBtn);
                     
+                    // КНОПКА УДАЛЕНИЯ - блокируется если смена закрыта
                     const removeBtn = document.createElement('button');
                     removeBtn.className = 'btn btn-danger btn-sm';
                     removeBtn.innerHTML = '✕';
-                    removeBtn.disabled = isCompleted || isShiftEnded;
+                    removeBtn.disabled = !canEdit;
                     removeBtn.onclick = function() {
-                        if (confirm('Удалить этого исполнителя?')) taskManager.removeExecutor(task.id, executor.id);
-                        loadTasks();
+                        if (confirm('Удалить этого исполнителя?')) {
+                            taskManager.removeExecutor(task.id, executor.id);
+                            loadTasks();
+                        }
                     };
                     div.appendChild(removeBtn);
                     
@@ -1392,13 +1418,12 @@
             
             taskManager.completeTask(taskId);
             
-            // ВАЖНО: после завершения задачи снимаем приоритет
+            // После завершения задачи снимаем приоритет
             const updatedTask = taskManager.tasks.find(t => t.id === taskId);
             if (updatedTask && updatedTask.isPriority === true) {
                 updatedTask.isPriority = false;
                 taskManager.saveData();
                 
-                // Обновляем в заказе
                 const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
                 const order = orders.find(o => o.id == updatedTask.orderId);
                 if (order && order.tasks) {
