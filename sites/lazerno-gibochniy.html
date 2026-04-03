@@ -776,42 +776,53 @@
         let currentReportTask = null;
         let reportRows = [];
         
-        // КЛЮЧ ДЛЯ СОХРАНЕНИЯ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК
         const OPEN_CARDS_KEY = 'lazerno_open_tasks';
         
-        // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
-        function saveOpenCardsState() {
+        function saveAllCardsState() {
             const openCards = [];
             document.querySelectorAll('.task-card').forEach(card => {
                 const content = card.querySelector('.task-content');
-                if (content && !content.classList.contains('collapsed')) {
+                if (content && content.classList.contains('collapsed')) {
                     openCards.push(card.dataset.taskId);
                 }
             });
             localStorage.setItem(OPEN_CARDS_KEY, JSON.stringify(openCards));
         }
         
-        function restoreOpenCardsState() {
+        function restoreAllCardsState() {
             const savedOpenCards = localStorage.getItem(OPEN_CARDS_KEY);
             if (!savedOpenCards) return;
-            const openCardsIds = JSON.parse(savedOpenCards);
+            const collapsedCardsIds = JSON.parse(savedOpenCards);
             
-            openCardsIds.forEach(taskId => {
+            collapsedCardsIds.forEach(taskId => {
                 const card = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
                 if (card) {
                     const header = card.querySelector('.task-header');
                     const content = card.querySelector('.task-content');
                     if (header && content) {
-                        header.classList.remove('collapsed');
-                        content.classList.remove('collapsed');
+                        header.classList.add('collapsed');
+                        content.classList.add('collapsed');
                         const arrow = header.querySelector('.collapse-icon');
-                        if (arrow) arrow.textContent = '▲';
+                        if (arrow) arrow.textContent = '▼';
                     }
                 }
             });
         }
         
-        // ============== ЗАГРУЗКА ОПЕРАЦИЙ ==============
+        function toggleCardState(header, content, taskId) {
+            const isCollapsing = !header.classList.contains('collapsed');
+            if (isCollapsing) {
+                header.classList.add('collapsed');
+                content.classList.add('collapsed');
+            } else {
+                header.classList.remove('collapsed');
+                content.classList.remove('collapsed');
+            }
+            const arrow = header.querySelector('.collapse-icon');
+            if (arrow) arrow.textContent = isCollapsing ? '▼' : '▲';
+            saveAllCardsState();
+        }
+        
         async function loadTaskOperationsData() {
             try {
                 const response = await fetch('../data/taskOperations.json');
@@ -825,7 +836,6 @@
             }
         }
         
-        // ============== ЗАПОЛНЕНИЕ ВЫПАДАЮЩИХ СПИСКОВ ==============
         function populateFilters() {
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             const customers = new Set();
@@ -902,192 +912,300 @@
             document.getElementById('filterOperation').value = '';
             document.getElementById('filterThickness').value = '';
             document.getElementById('statusFilter').value = 'all';
-            loadTasks();
+            renderTasks();
         }
         
-        // ============== ФИЛЬТРАЦИЯ ПО ТОЛЩИНЕ ==============
         function filterTasksByThickness(tasks, thickness) {
             if (!thickness) return tasks;
-            
             return tasks.filter(task => {
-                // Приоритетные задачи пропускаем фильтр толщины
                 if (task.isPriority === true) return true;
-                
                 const productOps = taskOperationsData[task.product];
                 const siteOps = productOps?.['лазерно-гибочный'];
                 const operationData = siteOps?.find(op => op.operation === task.operation);
-                
                 if (operationData?.thickness === thickness) return true;
-                
-                const allOrdersLocal = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-                const order = allOrdersLocal.find(o => o.id == task.orderId);
-                if (order && order.items && order.items[task.itemIndex || 0]) {
-                    const item = order.items[task.itemIndex || 0];
-                    if (item.details) {
-                        for (const detail of item.details) {
-                            if (detail.thickness === thickness) return true;
-                        }
-                    }
-                }
-                
                 return false;
             });
         }
         
         // ============== КЛАСС УПРАВЛЕНИЯ ЗАДАЧАМИ ==============
         class SimpleTaskManager {
-    constructor(siteKey) {
-        this.siteKey = siteKey;
-        this.tasks = [];
-        this.storageKey = `tasks_${siteKey}`;
-    }
-    
-    loadData() {
-        const saved = localStorage.getItem(this.storageKey);
-        if (saved) {
-            this.tasks = JSON.parse(saved);
-        } else {
-            this.tasks = [];
-        }
-        return this.tasks;
-    }
-    
-    saveData() {
-        localStorage.setItem(this.storageKey, JSON.stringify(this.tasks));
-    }
-    
-    getTasksByStatus(status) {
-        if (status === 'all') return this.tasks;
-        return this.tasks.filter(t => t.status === status);
-    }
-    
-    getStats() {
-        const total = this.tasks.length;
-        const inProgress = this.tasks.filter(t => t.status === 'in_progress').length;
-        const completed = this.tasks.filter(t => t.status === 'completed').length;
-        return { total, inProgress, completed };
-    }
-    
-    updateExecutorQuantity(taskId, executorId, quantity) {
-        const task = this.tasks.find(t => t.id === taskId);
-        if (task && task.executors) {
-            const executor = task.executors.find(e => e.id === executorId);
-            if (executor) {
-                executor.quantity = quantity;
-                this.saveData();
+            constructor(siteKey) {
+                this.siteKey = siteKey;
+                this.tasks = [];
+                this.storageKey = `tasks_${siteKey}`;
             }
-        }
-    }
-    
-    updateExecutorStatus(taskId, executorId, status) {
-        const task = this.tasks.find(t => t.id === taskId);
-        if (!task || !task.executors) return;
+            
+            loadData() {
+                const saved = localStorage.getItem(this.storageKey);
+                if (saved) {
+                    this.tasks = JSON.parse(saved);
+                } else {
+                    this.tasks = [];
+                }
+                return this.tasks;
+            }
+            
+            saveData() {
+                localStorage.setItem(this.storageKey, JSON.stringify(this.tasks));
+            }
+            
+            getTasksByStatus(status) {
+                if (status === 'all') return this.tasks;
+                return this.tasks.filter(t => t.status === status);
+            }
+            
+            getStats() {
+                const total = this.tasks.length;
+                const inProgress = this.tasks.filter(t => t.status === 'in_progress').length;
+                const completed = this.tasks.filter(t => t.status === 'completed').length;
+                return { total, inProgress, completed };
+            }
+            
+            updateExecutorQuantity(taskId, executorId, quantity) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (task && task.executors) {
+                    const executor = task.executors.find(e => e.id === executorId);
+                    if (executor) {
+                        executor.quantity = quantity;
+                        this.saveData();
+                        updateSingleTaskCard(taskId);
+                    }
+                }
+            }
+            
+            updateExecutorStatus(taskId, executorId, status) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (!task || !task.executors) return;
 
-        const executor = task.executors.find(e => e.id === executorId);
-        if (executor) {
-            executor.status = status;
-            this.saveData();
+                const executor = task.executors.find(e => e.id === executorId);
+                if (executor) {
+                    executor.status = status;
+                    
+                    let taskStatus = 'pending';
+                    const hasInProgress = task.executors.some(e => e.status === 'in_progress');
+                    const allShiftEnded = task.executors.length > 0 && task.executors.every(e => e.status === 'shift_ended');
+                    const allCompleted = task.executors.length > 0 && task.executors.every(e => e.status === 'completed');
+                    
+                    if (allCompleted) {
+                        taskStatus = 'completed';
+                    } else if (hasInProgress) {
+                        taskStatus = 'in_progress';
+                    } else if (allShiftEnded) {
+                        taskStatus = 'in_progress';
+                    } else {
+                        taskStatus = 'pending';
+                    }
 
-            // ПРАВИЛЬНАЯ ЛОГИКА:
-            // shift_ended НЕ переводит задачу в completed
-            let taskStatus = 'pending';
-            
-            const hasInProgress = task.executors.some(e => e.status === 'in_progress');
-            const allShiftEnded = task.executors.length > 0 && task.executors.every(e => e.status === 'shift_ended');
-            const allCompleted = task.executors.length > 0 && task.executors.every(e => e.status === 'completed');
-            
-            if (allCompleted) {
-                taskStatus = 'completed';
-            } else if (hasInProgress) {
-                taskStatus = 'in_progress';
-            } else if (allShiftEnded) {
-                // Все закрыли смену, но задача НЕ завершена
-                taskStatus = 'in_progress';
-            } else {
-                taskStatus = 'pending';
-            }
+                    task.status = taskStatus;
+                    this.saveData();
 
-            task.status = taskStatus;
-            this.saveData();
-
-            // Обновляем цвет квадратика в заказе
-            const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-            const order = orders.find(o => o.id == task.orderId);
-            if (order) {
-                if (!order.tasks) order.tasks = {};
-                const squareColor = taskStatus === 'completed' ? 'green' : (taskStatus === 'in_progress' ? 'orange' : '');
-                order.tasks[task.id] = squareColor;
-                localStorage.setItem('masterx_orders', JSON.stringify(orders));
+                    const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+                    const order = orders.find(o => o.id == task.orderId);
+                    if (order) {
+                        if (!order.tasks) order.tasks = {};
+                        const squareColor = taskStatus === 'completed' ? 'green' : (taskStatus === 'in_progress' ? 'orange' : '');
+                        order.tasks[task.id] = squareColor;
+                        localStorage.setItem('masterx_orders', JSON.stringify(orders));
+                    }
+                    
+                    updateSingleTaskCard(taskId);
+                }
             }
             
-            setTimeout(() => { loadTasks(); }, 100);
-        }
-    }
-    
-    addExecutor(taskId, name) {
-        const task = this.tasks.find(t => t.id === taskId);
-        if (task) {
-            if (!task.executors) task.executors = [];
-            if (task.executors.some(e => e.name === name)) return false;
-            task.executors.push({
-                id: Date.now(),
-                name: name,
-                quantity: 0,
-                status: 'pending'
-            });
-            this.saveData();
-            return true;
-        }
-        return false;
-    }
-    
-    removeExecutor(taskId, executorId) {
-        const task = this.tasks.find(t => t.id === taskId);
-        if (task && task.executors) {
-            task.executors = task.executors.filter(e => e.id !== executorId);
-            this.saveData();
-        }
-    }
-    
-    completeTask(taskId) {
-        const task = this.tasks.find(t => t.id === taskId);
-        if (task && task.status !== 'completed') {
-            // Устанавливаем всем исполнителям статус 'completed'
-            if (task.executors) {
-                task.executors.forEach(executor => {
-                    executor.status = 'completed';
-                });
-            }
-            task.status = 'completed';
-            task.completedAt = new Date().toISOString();
-            this.saveData();
-            
-            const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-            const order = orders.find(o => o.id == task.orderId);
-            if (order) {
-                if (!order.tasks) order.tasks = {};
-                order.tasks[task.id] = 'green';
-                localStorage.setItem('masterx_orders', JSON.stringify(orders));
+            addExecutor(taskId, name) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (task) {
+                    if (!task.executors) task.executors = [];
+                    if (task.executors.some(e => e.name === name)) return false;
+                    task.executors.push({
+                        id: Date.now(),
+                        name: name,
+                        quantity: 0,
+                        status: 'pending'
+                    });
+                    this.saveData();
+                    renderTasks();
+                    return true;
+                }
+                return false;
             }
             
-            setTimeout(() => { loadTasks(); }, 100);
+            removeExecutor(taskId, executorId) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (task && task.executors) {
+                    task.executors = task.executors.filter(e => e.id !== executorId);
+                    this.saveData();
+                    renderTasks();
+                }
+            }
+            
+            completeTask(taskId) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (task && task.status !== 'completed') {
+                    if (task.executors) {
+                        task.executors.forEach(executor => {
+                            executor.status = 'completed';
+                        });
+                    }
+                    task.status = 'completed';
+                    task.completedAt = new Date().toISOString();
+                    
+                    if (task.isPriority === true) {
+                        task.isPriority = false;
+                    }
+                    
+                    this.saveData();
+                    
+                    const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+                    const order = orders.find(o => o.id == task.orderId);
+                    if (order) {
+                        if (!order.tasks) order.tasks = {};
+                        order.tasks[task.id] = 'green';
+                        localStorage.setItem('masterx_orders', JSON.stringify(orders));
+                    }
+                    
+                    updateSingleTaskCard(taskId);
+                }
+            }
         }
-    }
-}
         
-        // ============== ОСНОВНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==============
-        function loadTasks() {
+        function updateSingleTaskCard(taskId) {
+            const task = taskManager.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            const taskCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+            if (!taskCard) return;
+            
+            const statusBadge = taskCard.querySelector('.task-status-badge');
+            const taskHeader = taskCard.querySelector('.task-header');
+            
+            if (statusBadge) {
+                let statusClass = 'pending';
+                let statusText = '⏳ ОЖИДАЕТ';
+                if (task.status === 'in_progress') {
+                    statusClass = 'in-progress';
+                    statusText = '⚡ В РАБОТЕ';
+                } else if (task.status === 'completed') {
+                    statusClass = 'completed';
+                    statusText = '✅ ГОТОВО';
+                }
+                
+                statusBadge.className = `task-status-badge ${statusClass}`;
+                statusBadge.textContent = statusText;
+                
+                if (taskHeader) {
+                    taskHeader.classList.remove('status-pending', 'status-in-progress', 'status-completed');
+                    taskHeader.classList.add(`status-${statusClass}`);
+                }
+            }
+            
+            const executorList = taskCard.querySelector('.executor-list');
+            if (executorList) {
+                const wasCollapsed = taskCard.querySelector('.task-content')?.classList.contains('collapsed');
+                
+                executorList.innerHTML = '';
+                if (task.executors && task.executors.length > 0) {
+                    task.executors.forEach(executor => {
+                        executorList.appendChild(createExecutorItemElement(task, executor));
+                    });
+                } else {
+                    const noExecutors = document.createElement('p');
+                    noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 11px;';
+                    noExecutors.textContent = 'Нет исполнителей';
+                    executorList.appendChild(noExecutors);
+                }
+                
+                const readyBtn = taskCard.querySelector('.btn-ready');
+                if (readyBtn) {
+                    readyBtn.disabled = task.status === 'completed';
+                }
+                
+                if (wasCollapsed) {
+                    const content = taskCard.querySelector('.task-content');
+                    const header = taskCard.querySelector('.task-header');
+                    if (content && header) {
+                        content.classList.add('collapsed');
+                        header.classList.add('collapsed');
+                    }
+                }
+            }
+        }
+        
+        function createExecutorItemElement(task, executor) {
+            const isShiftEnded = executor.status === 'shift_ended';
+            const isTaskCompleted = task.status === 'completed';
+            const canEdit = !isTaskCompleted && !isShiftEnded;
+            
+            const div = document.createElement('div');
+            div.className = 'executor-item';
+            div.dataset.executorId = executor.id;
+            
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.className = 'executor-name';
+            nameInput.value = executor.name;
+            nameInput.disabled = isTaskCompleted || isShiftEnded;
+            div.appendChild(nameInput);
+            
+            const quantityInput = document.createElement('input');
+            quantityInput.type = 'number';
+            quantityInput.className = 'executor-quantity';
+            quantityInput.value = executor.quantity || 0;
+            quantityInput.min = 0;
+            quantityInput.disabled = !canEdit;
+            quantityInput.onchange = function(e) {
+                e.stopPropagation();
+                if (!canEdit) return;
+                taskManager.updateExecutorQuantity(task.id, executor.id, parseInt(this.value) || 0);
+            };
+            div.appendChild(quantityInput);
+            
+            const workBtn = document.createElement('button');
+            workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''}`;
+            workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : (isShiftEnded ? 'СМЕНА ЗАКРЫТА' : 'НАЧАТЬ');
+            workBtn.disabled = !canEdit;
+            workBtn.onclick = function(e) {
+                e.stopPropagation();
+                if (!canEdit) return;
+                const newStatus = workBtn.classList.contains('active') ? 'pending' : 'in_progress';
+                taskManager.updateExecutorStatus(task.id, executor.id, newStatus);
+            };
+            div.appendChild(workBtn);
+            
+            const endShiftBtn = document.createElement('button');
+            endShiftBtn.className = 'btn-end-shift';
+            endShiftBtn.innerHTML = isShiftEnded ? '✅ СМЕНА ЗАКРЫТА' : '🕒 ЗАКРЫТЬ';
+            endShiftBtn.disabled = isTaskCompleted || isShiftEnded;
+            endShiftBtn.onclick = function(e) {
+                e.stopPropagation();
+                if (confirm(`Закрыть смену для ${executor.name}?`)) {
+                    taskManager.updateExecutorStatus(task.id, executor.id, 'shift_ended');
+                }
+            };
+            div.appendChild(endShiftBtn);
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'btn btn-danger btn-sm';
+            removeBtn.innerHTML = '✕';
+            removeBtn.disabled = !canEdit;
+            removeBtn.onclick = function(e) {
+                e.stopPropagation();
+                if (confirm('Удалить этого исполнителя?')) {
+                    taskManager.removeExecutor(task.id, executor.id);
+                }
+            };
+            div.appendChild(removeBtn);
+            
+            return div;
+        }
+        
+        function renderTasks() {
             if (isLoadingTasks) return;
             isLoadingTasks = true;
             
+            saveAllCardsState();
             taskManager.loadData();
             
-            // ОБНОВЛЯЕМ ФИЛЬТРЫ ПОСЛЕ ЗАГРУЗКИ ЗАДАЧ
-            populateFilters();
-            
-            let tasks = taskManager.tasks;
-            
-            // ПОЛУЧАЕМ ЗНАЧЕНИЯ ФИЛЬТРОВ
             const filterCustomer = document.getElementById('filterCustomer').value;
             const filterProduct = document.getElementById('filterProduct').value;
             const filterOperation = document.getElementById('filterOperation').value;
@@ -1096,22 +1214,20 @@
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             
-            // ФИЛЬТРАЦИЯ ЗАДАЧ С УЧЁТОМ ПРИОРИТЕТА
+            let tasks = taskManager.tasks;
+            
             tasks = tasks.filter(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
                 if (!order) return false;
                 
-                // Фильтр по статусу применяется ко ВСЕМ задачам (включая приоритетные)
                 if (filterStatus === 'completed' && task.status !== 'completed') return false;
                 if (filterStatus === 'in_progress' && task.status !== 'in_progress') return false;
                 if (filterStatus === 'pending' && task.status !== 'pending') return false;
                 
-                // ДЛЯ ПРИОРИТЕТНЫХ ЗАДАЧ: пропускаем все остальные фильтры
                 if (task.isPriority === true) {
                     return true;
                 }
                 
-                // ДЛЯ ОБЫЧНЫХ ЗАДАЧ: применяем все фильтры
                 if (filterCustomer && order.groupName !== filterCustomer) return false;
                 
                 const item = order.items?.[task.itemIndex || 0];
@@ -1123,24 +1239,21 @@
                 return true;
             });
             
-            // ФИЛЬТР ПО ТОЛЩИНЕ (приоритетные задачи уже пропущены)
             if (filterThickness) {
                 tasks = filterTasksByThickness(tasks, filterThickness);
             }
             
-            // РАЗДЕЛЯЕМ ЗАДАЧИ: ПРИОРИТЕТНЫЕ ВСЕГДА НАВЕРХУ
             const priorityTasks = tasks.filter(t => t.isPriority === true);
             const normalTasks = tasks.filter(t => t.isPriority !== true);
-            
             priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             const sortedTasks = [...priorityTasks, ...normalTasks];
             
-            // Обновляем статистику
             document.getElementById('totalTasks').textContent = tasks.length;
             document.getElementById('tasksInProgress').textContent = tasks.filter(t => t.status === 'in_progress').length;
             document.getElementById('tasksCompleted').textContent = tasks.filter(t => t.status === 'completed').length;
 
             const tasksList = document.getElementById('tasksList');
+            const scrollPosition = tasksList.scrollTop;
             tasksList.innerHTML = '';
 
             if (sortedTasks.length === 0) {
@@ -1149,11 +1262,9 @@
                 return;
             }
 
-            // РЕНДЕРИМ КАЖДУЮ ЗАДАЧУ ОТДЕЛЬНО
             sortedTasks.forEach(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
                 const item = order?.items?.[task.itemIndex || 0];
-                
                 if (!order || !item) return;
                 
                 let statusClass = 'pending';
@@ -1170,7 +1281,6 @@
                 const priorityClass = isPriority ? 'priority' : '';
                 const priorityBadge = isPriority ? '<span class="priority-badge">🔴 ПРИОРИТЕТ</span>' : '';
                 
-                // Получаем толщину операции
                 const productOps = taskOperationsData[item.product];
                 const siteOps = productOps?.['лазерно-гибочный'];
                 const operationData = siteOps?.find(op => op.operation === task.operation);
@@ -1234,145 +1344,43 @@
                     
                     <div class="action-container" id="action-${task.id}"></div>
                     
-                    <button class="btn-ready" id="ready-${task.id}" ${task.status === 'completed' ? 'disabled' : ''}>✅ ГОТОВО</button>
+                    <button class="btn-ready" id="ready-${task.id}" ${task.status === 'completed' ? 'disabled' : ''} onclick="event.stopPropagation(); completeTask('${task.id}')">✅ ГОТОВО</button>
                 `;
                 
                 header.addEventListener('click', function(e) {
                     if (e.target.tagName === 'BUTTON') return;
-                    header.classList.toggle('collapsed');
-                    content.classList.toggle('collapsed');
-                    const arrow = header.querySelector('.collapse-icon');
-                    if (arrow) arrow.textContent = header.classList.contains('collapsed') ? '▼' : '▲';
-                    saveOpenCardsState();
+                    toggleCardState(header, content, task.id);
                 });
                 
                 taskCard.appendChild(header);
                 taskCard.appendChild(content);
                 tasksList.appendChild(taskCard);
                 
-                renderExecutors(task.id, task);
-                renderActionButtons(task.id, task);
+                const executorContainer = document.getElementById(`executors-${task.id}`);
+                if (executorContainer && task.executors) {
+                    executorContainer.innerHTML = '';
+                    task.executors.forEach(executor => {
+                        executorContainer.appendChild(createExecutorItemElement(task, executor));
+                    });
+                }
                 
-                const readyBtn = document.getElementById(`ready-${task.id}`);
-                if (readyBtn) {
-                    readyBtn.onclick = () => completeTask(task.id);
+                const actionContainer = document.getElementById(`action-${task.id}`);
+                if (actionContainer && task.status !== 'completed') {
+                    actionContainer.innerHTML = '';
+                    const addBtn = document.createElement('button');
+                    addBtn.className = 'btn-add-executor';
+                    addBtn.textContent = '+ Добавить исполнителя';
+                    addBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        showAddExecutorForm(task, actionContainer);
+                    };
+                    actionContainer.appendChild(addBtn);
                 }
             });
             
-            setTimeout(() => {
-                restoreOpenCardsState();
-                isLoadingTasks = false;
-            }, 50);
-        }
-        
-        // ============== ОТОБРАЖЕНИЕ ИСПОЛНИТЕЛЕЙ (С ПРАВИЛЬНОЙ ЛОГИКОЙ ЗАКРЫТИЯ СМЕНЫ) ==============
-        function renderExecutors(taskId, task) {
-            const container = document.getElementById(`executors-${taskId}`);
-            if (!container) return;
-            
-            container.innerHTML = '';
-            
-            if (task.executors && task.executors.length > 0) {
-                task.executors.forEach(executor => {
-                    const isShiftEnded = executor.status === 'shift_ended';
-                    const isTaskCompleted = task.status === 'completed';
-                    
-                    // Исполнитель может редактировать количество, ТОЛЬКО если:
-                    // 1. Задача не завершена И
-                    // 2. Смена у исполнителя не закрыта
-                    const canEdit = !isTaskCompleted && !isShiftEnded;
-                    
-                    const div = document.createElement('div');
-                    div.className = 'executor-item';
-                    div.dataset.executorId = executor.id;
-                    
-                    // ФИО - только для чтения если смена закрыта или задача завершена
-                    const nameInput = document.createElement('input');
-                    nameInput.type = 'text';
-                    nameInput.className = 'executor-name';
-                    nameInput.value = executor.name;
-                    nameInput.disabled = isTaskCompleted || isShiftEnded;
-                    div.appendChild(nameInput);
-                    
-                    // КОЛИЧЕСТВО - блокируется если смена закрыта ИЛИ задача завершена
-                    const quantityInput = document.createElement('input');
-                    quantityInput.type = 'number';
-                    quantityInput.className = 'executor-quantity';
-                    quantityInput.value = executor.quantity || 0;
-                    quantityInput.min = 0;
-                    quantityInput.disabled = !canEdit;
-                    quantityInput.onchange = function() {
-                        if (!canEdit) return;
-                        taskManager.updateExecutorQuantity(task.id, executor.id, parseInt(this.value) || 0);
-                        loadTasks();
-                    };
-                    div.appendChild(quantityInput);
-                    
-                    // КНОПКА "НАЧАТЬ/В РАБОТЕ" - блокируется если смена закрыта
-                    const workBtn = document.createElement('button');
-                    workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''}`;
-                    workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : (isShiftEnded ? 'СМЕНА ЗАКРЫТА' : 'НАЧАТЬ');
-                    workBtn.disabled = !canEdit;
-                    workBtn.onclick = function() {
-                        if (!canEdit) return;
-                        const newStatus = workBtn.classList.contains('active') ? 'pending' : 'in_progress';
-                        taskManager.updateExecutorStatus(task.id, executor.id, newStatus);
-                        loadTasks();
-                    };
-                    div.appendChild(workBtn);
-                    
-                    // КНОПКА "ЗАКРЫТЬ СМЕНУ" - меняется статус на shift_ended
-                    const endShiftBtn = document.createElement('button');
-                    endShiftBtn.className = 'btn-end-shift';
-                    endShiftBtn.innerHTML = isShiftEnded ? '✅ СМЕНА ЗАКРЫТА' : '🕒 ЗАКРЫТЬ';
-                    // Кнопка "Закрыть смену" активна только если:
-                    // 1. Задача не завершена
-                    // 2. Смена ещё не закрыта
-                    endShiftBtn.disabled = isTaskCompleted || isShiftEnded;
-                    endShiftBtn.onclick = function() {
-                        if (confirm(`Закрыть смену для ${executor.name}?`)) {
-                            taskManager.updateExecutorStatus(task.id, executor.id, 'shift_ended');
-                            loadTasks();
-                        }
-                    };
-                    div.appendChild(endShiftBtn);
-                    
-                    // КНОПКА УДАЛЕНИЯ - блокируется если смена закрыта
-                    const removeBtn = document.createElement('button');
-                    removeBtn.className = 'btn btn-danger btn-sm';
-                    removeBtn.innerHTML = '✕';
-                    removeBtn.disabled = !canEdit;
-                    removeBtn.onclick = function() {
-                        if (confirm('Удалить этого исполнителя?')) {
-                            taskManager.removeExecutor(task.id, executor.id);
-                            loadTasks();
-                        }
-                    };
-                    div.appendChild(removeBtn);
-                    
-                    container.appendChild(div);
-                });
-            } else {
-                const noExecutors = document.createElement('p');
-                noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 11px;';
-                noExecutors.textContent = 'Нет исполнителей';
-                container.appendChild(noExecutors);
-            }
-        }
-        
-        function renderActionButtons(taskId, task) {
-            const container = document.getElementById(`action-${taskId}`);
-            if (!container) return;
-            
-            container.innerHTML = '';
-            
-            if (task.status !== 'completed') {
-                const addBtn = document.createElement('button');
-                addBtn.className = 'btn-add-executor';
-                addBtn.textContent = '+ Добавить исполнителя';
-                addBtn.onclick = function() { showAddExecutorForm(task, container); };
-                container.appendChild(addBtn);
-            }
+            restoreAllCardsState();
+            tasksList.scrollTop = scrollPosition;
+            isLoadingTasks = false;
         }
         
         function showAddExecutorForm(task, container) {
@@ -1387,18 +1395,22 @@
             const addBtn = document.createElement('button');
             addBtn.className = 'btn btn-success';
             addBtn.textContent = 'Добавить';
-            addBtn.onclick = function() {
+            addBtn.onclick = function(e) {
+                e.stopPropagation();
                 const name = input.value.trim();
                 if (!name) { alert('Введите ФИО'); return; }
                 if (taskManager.addExecutor(task.id, name)) {
                     formDiv.remove();
-                    loadTasks();
+                    renderTasks();
                 } else { alert('Исполнитель уже существует'); }
             };
             const cancelBtn = document.createElement('button');
             cancelBtn.className = 'btn btn-danger';
             cancelBtn.textContent = 'Отмена';
-            cancelBtn.onclick = function() { formDiv.remove(); };
+            cancelBtn.onclick = function(e) {
+                e.stopPropagation();
+                formDiv.remove();
+            };
             formDiv.appendChild(input);
             formDiv.appendChild(addBtn);
             formDiv.appendChild(cancelBtn);
@@ -1413,36 +1425,17 @@
             const planQuantity = task.totalQuantity || 1;
             let operationName = task.operation;
             
-            // Если задача приоритетная и выполнена не полностью, предупреждаем
-            if (task.isPriority === true && totalAssigned < planQuantity) {
-                if (!confirm('⚠️ ПРИОРИТЕТНАЯ ЗАДАЧА!\nВыполнено только ' + totalAssigned + ' из ' + planQuantity + ' шт.\n\nВсё равно завершить?')) {
+            if (totalAssigned < planQuantity) {
+                if (!confirm('⚠️ Выполнено только ' + totalAssigned + ' из ' + planQuantity + ' шт.\n\nВсё равно завершить задачу?')) {
                     return;
                 }
             } else {
-                if (!confirm('Завершить задачу?\nОперация: ' + operationName + '\nВыполнено: ' + totalAssigned + ' шт')) {
+                if (!confirm('✅ Завершить задачу?\nОперация: ' + operationName + '\nВыполнено: ' + totalAssigned + ' из ' + planQuantity + ' шт')) {
                     return;
                 }
             }
             
             taskManager.completeTask(taskId);
-            
-            // После завершения задачи снимаем приоритет
-            const updatedTask = taskManager.tasks.find(t => t.id === taskId);
-            if (updatedTask && updatedTask.isPriority === true) {
-                updatedTask.isPriority = false;
-                taskManager.saveData();
-                
-                const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-                const order = orders.find(o => o.id == updatedTask.orderId);
-                if (order && order.tasks) {
-                    if (order.tasks[taskId] === 'in_progress' || order.tasks[taskId] === 'pending') {
-                        order.tasks[taskId] = 'completed';
-                        localStorage.setItem('masterx_orders', JSON.stringify(orders));
-                    }
-                }
-            }
-            
-            loadTasks();
         }
         
         // ============== ОТЧЁТ ПО ЗАДАЧЕ ==============
@@ -1660,23 +1653,20 @@
             reportRows = [];
         }
         
-        // ============== ОБНОВЛЕНИЕ ФИЛЬТРОВ ПРИ ИЗМЕНЕНИИ ==============
         function setupFilterListeners() {
             const inputs = ['filterCustomer', 'filterProduct', 'filterOperation', 'filterThickness', 'statusFilter'];
             inputs.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
-                    el.addEventListener('change', () => loadTasks());
+                    el.addEventListener('change', () => renderTasks());
                 }
             });
         }
         
-        // ============== ЭКСПОРТ В EXCEL ==============
         window.exportToExcel = function() {
             const tasks = taskManager.tasks;
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             let csv = "Заказ,Заказчик,Изделие,Размер,Количество,Операция,Деталь,Толщина,Приоритет,Исполнитель,Количество,Статус,План\n";
-            
             tasks.forEach(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
                 const item = order?.items?.[task.itemIndex || 0];
@@ -1686,7 +1676,6 @@
                 const detailName = operationData?.detail || '';
                 const thickness = operationData?.thickness || '';
                 const isPriority = task.isPriority ? 'ДА' : 'НЕТ';
-                
                 if (task.executors && task.executors.length > 0) {
                     task.executors.forEach(exec => {
                         csv += `"${task.orderNumber}","${order?.groupName || ''}","${item?.product || ''}","${item?.size?.name || ''}",${item?.size?.quantity || 0},"${task.operation}","${detailName}","${thickness}","${isPriority}","${exec.name}",${exec.quantity || 0},"${exec.status}",${task.totalQuantity || 1}\n`;
@@ -1695,7 +1684,6 @@
                     csv += `"${task.orderNumber}","${order?.groupName || ''}","${item?.product || ''}","${item?.size?.name || ''}",${item?.size?.quantity || 0},"${task.operation}","${detailName}","${thickness}","${isPriority}","Нет",0,"${task.status}",${task.totalQuantity || 1}\n`;
                 }
             });
-            
             const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
@@ -1703,17 +1691,13 @@
             link.click();
         };
         
-        // ============== ИНИЦИАЛИЗАЦИЯ ==============
         async function init() {
             await loadTaskOperationsData();
             taskManager = new SimpleTaskManager('lazerno');
             window.taskManager = taskManager;
             setupFilterListeners();
-            loadTasks();
-            
-            window.addEventListener('beforeunload', () => {
-                saveOpenCardsState();
-            });
+            renderTasks();
+            window.addEventListener('beforeunload', () => { saveAllCardsState(); });
         }
         
         window.resetFilters = resetFilters;
