@@ -740,36 +740,60 @@
         let currentReportTask = null;
         let reportRows = [];
         
+        // Хранилище состояния свёрнутости карточек
+        let collapsedCardsState = {};
+        
         const OPEN_CARDS_KEY = 'polimerniy_open_tasks';
         
-        function saveOpenCardsState() {
+        // Сохраняем состояние всех карточек
+        function saveAllCardsState() {
             const openCards = [];
             document.querySelectorAll('.task-card').forEach(card => {
                 const content = card.querySelector('.task-content');
-                if (content && !content.classList.contains('collapsed')) {
+                if (content && content.classList.contains('collapsed')) {
                     openCards.push(card.dataset.taskId);
                 }
             });
             localStorage.setItem(OPEN_CARDS_KEY, JSON.stringify(openCards));
         }
         
-        function restoreOpenCardsState() {
+        // Восстанавливаем состояние карточек
+        function restoreAllCardsState() {
             const savedOpenCards = localStorage.getItem(OPEN_CARDS_KEY);
             if (!savedOpenCards) return;
-            const openCardsIds = JSON.parse(savedOpenCards);
-            openCardsIds.forEach(taskId => {
+            const collapsedCardsIds = JSON.parse(savedOpenCards);
+            
+            collapsedCardsIds.forEach(taskId => {
                 const card = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
                 if (card) {
                     const header = card.querySelector('.task-header');
                     const content = card.querySelector('.task-content');
                     if (header && content) {
-                        header.classList.remove('collapsed');
-                        content.classList.remove('collapsed');
+                        // Делаем карточку СВЁРНУТОЙ (collapsed)
+                        header.classList.add('collapsed');
+                        content.classList.add('collapsed');
                         const arrow = header.querySelector('.collapse-icon');
-                        if (arrow) arrow.textContent = '▲';
+                        if (arrow) arrow.textContent = '▼';
                     }
                 }
             });
+        }
+        
+        // Сохраняем состояние конкретной карточки при сворачивании/разворачивании
+        function toggleCardState(header, content, taskId) {
+            const isCollapsing = !header.classList.contains('collapsed');
+            if (isCollapsing) {
+                header.classList.add('collapsed');
+                content.classList.add('collapsed');
+            } else {
+                header.classList.remove('collapsed');
+                content.classList.remove('collapsed');
+            }
+            const arrow = header.querySelector('.collapse-icon');
+            if (arrow) arrow.textContent = isCollapsing ? '▼' : '▲';
+            
+            // Сохраняем состояние всех карточек
+            saveAllCardsState();
         }
         
         async function loadTaskOperationsData() {
@@ -942,7 +966,8 @@
                         localStorage.setItem('masterx_orders', JSON.stringify(orders));
                     }
                     
-                    setTimeout(() => { loadTasks(); }, 100);
+                    // Обновляем список задач без полной перерисовки
+                    refreshTasksList();
                 }
             }
             
@@ -996,20 +1021,19 @@
                         localStorage.setItem('masterx_orders', JSON.stringify(orders));
                     }
                     
-                    setTimeout(() => { loadTasks(); }, 100);
+                    refreshTasksList();
                 }
             }
         }
         
-        function loadTasks() {
+        // Функция обновления списка задач без потери состояния свёрнутости
+        function refreshTasksList() {
             if (isLoadingTasks) return;
-            isLoadingTasks = true;
+            
+            // Сохраняем текущее состояние свёрнутости перед обновлением
+            saveAllCardsState();
             
             taskManager.loadData();
-            
-            populateFilters();
-            
-            let tasks = taskManager.tasks;
             
             const filterCustomer = document.getElementById('filterCustomer').value;
             const filterProduct = document.getElementById('filterProduct').value;
@@ -1018,6 +1042,8 @@
             const filterStatus = document.getElementById('statusFilter').value;
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+            
+            let tasks = taskManager.tasks;
             
             tasks = tasks.filter(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
@@ -1056,11 +1082,14 @@
             document.getElementById('tasksCompleted').textContent = tasks.filter(t => t.status === 'completed').length;
 
             const tasksList = document.getElementById('tasksList');
+            
+            // Сохраняем текущую позицию прокрутки
+            const scrollPosition = tasksList.scrollTop;
+            
             tasksList.innerHTML = '';
 
             if (sortedTasks.length === 0) {
                 tasksList.innerHTML = '<div class="no-tasks"><p>📭 Нет задач по выбранным фильтрам</p></div>';
-                isLoadingTasks = false;
                 return;
             }
 
@@ -1149,13 +1178,10 @@
                     <button class="btn-ready" id="ready-${task.id}" ${task.status === 'completed' ? 'disabled' : ''} onclick="event.stopPropagation(); completeTask('${task.id}')">✅ ГОТОВО</button>
                 `;
                 
+                // Обработчик клика по заголовку для сворачивания/разворачивания
                 header.addEventListener('click', function(e) {
                     if (e.target.tagName === 'BUTTON') return;
-                    header.classList.toggle('collapsed');
-                    content.classList.toggle('collapsed');
-                    const arrow = header.querySelector('.collapse-icon');
-                    if (arrow) arrow.textContent = header.classList.contains('collapsed') ? '▼' : '▲';
-                    saveOpenCardsState();
+                    toggleCardState(header, content, task.id);
                 });
                 
                 taskCard.appendChild(header);
@@ -1166,13 +1192,27 @@
                 renderActionButtons(task.id, task);
             });
             
-            setTimeout(() => {
-                restoreOpenCardsState();
-                isLoadingTasks = false;
-            }, 50);
+            // Восстанавливаем состояние свёрнутости
+            restoreAllCardsState();
+            
+            // Восстанавливаем позицию прокрутки
+            tasksList.scrollTop = scrollPosition;
         }
         
-        // ============== ОТОБРАЖЕНИЕ ИСПОЛНИТЕЛЕЙ (С stopPropagation) ==============
+        function loadTasks() {
+            if (isLoadingTasks) return;
+            isLoadingTasks = true;
+            
+            taskManager.loadData();
+            populateFilters();
+            refreshTasksList();
+            
+            setTimeout(() => {
+                isLoadingTasks = false;
+            }, 100);
+        }
+        
+        // ============== ОТОБРАЖЕНИЕ ИСПОЛНИТЕЛЕЙ ==============
         function renderExecutors(taskId, task) {
             const container = document.getElementById(`executors-${taskId}`);
             if (!container) return;
@@ -1206,7 +1246,6 @@
                         e.stopPropagation();
                         if (!canEdit) return;
                         taskManager.updateExecutorQuantity(task.id, executor.id, parseInt(this.value) || 0);
-                        loadTasks();
                     };
                     div.appendChild(quantityInput);
                     
@@ -1219,7 +1258,6 @@
                         if (!canEdit) return;
                         const newStatus = workBtn.classList.contains('active') ? 'pending' : 'in_progress';
                         taskManager.updateExecutorStatus(task.id, executor.id, newStatus);
-                        loadTasks();
                     };
                     div.appendChild(workBtn);
                     
@@ -1231,7 +1269,6 @@
                         e.stopPropagation();
                         if (confirm(`Закрыть смену для ${executor.name}?`)) {
                             taskManager.updateExecutorStatus(task.id, executor.id, 'shift_ended');
-                            loadTasks();
                         }
                     };
                     div.appendChild(endShiftBtn);
@@ -1244,7 +1281,7 @@
                         e.stopPropagation();
                         if (confirm('Удалить этого исполнителя?')) {
                             taskManager.removeExecutor(task.id, executor.id);
-                            loadTasks();
+                            refreshTasksList();
                         }
                     };
                     div.appendChild(removeBtn);
@@ -1295,7 +1332,7 @@
                 if (!name) { alert('Введите ФИО'); return; }
                 if (taskManager.addExecutor(task.id, name)) {
                     formDiv.remove();
-                    loadTasks();
+                    refreshTasksList();
                 } else { alert('Исполнитель уже существует'); }
             };
             const cancelBtn = document.createElement('button');
@@ -1330,7 +1367,6 @@
             }
             
             taskManager.completeTask(taskId);
-            loadTasks();
         }
         
         // ============== ОТЧЁТ ПО ЗАДАЧЕ ==============
@@ -1589,7 +1625,7 @@
             window.taskManager = taskManager;
             setupFilterListeners();
             loadTasks();
-            window.addEventListener('beforeunload', () => { saveOpenCardsState(); });
+            window.addEventListener('beforeunload', () => { saveAllCardsState(); });
         }
         
         window.resetFilters = resetFilters;
