@@ -532,24 +532,111 @@
 }
 
 /* Детали операции - одна строка, не переносим */
-.operation-detail {
-    font-size: 10px;
-    color: #b0b0b0;
+.sites-section {
+    padding: 15px;
+    background: #15191f;
+    border-top: 1px solid #2a2f38;
+    border-radius: 0 0 12px 12px;
+    overflow-x: auto;
+    overflow-y: visible;
+    width: 100%;
+}
+
+.sites-grid {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 12px;
+    width: 100%;
+}
+
+.site-card {
+    flex: 1 1 0;
+    min-width: 240px;  /* Увеличено с 0 до 240px */
+    background: #1a1e24;
+    border: 1px solid #2a2f38;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.site-card-header {
+    padding: 8px 10px;
+    text-align: center;
+    background: linear-gradient(135deg, #232830, #1a1e24);
+    border-bottom: 1px solid #2a2f38;
+}
+
+.site-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #ff3b3b;
     white-space: nowrap;
     overflow-x: hidden;
     text-overflow: ellipsis;
+}
+
+.site-stats {
+    font-size: 11px;
+    color: #a0a0a0;
+    margin-top: 2px;
+}
+
+.site-card-content {
+    flex: 1;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+    max-height: 500px;
+}
+
+/* Операция */
+.operation-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;  /* Выравнивание по верхнему краю */
+    gap: 8px;
+    padding: 6px 8px;
+    background: #15191f;
+    border-radius: 6px;
+    border: 1px solid #2a2f38;
+    width: 100%;
+}
+
+.operation-info {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Название операции - разрешаем перенос */
+.operation-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #ff9800;
+    margin-bottom: 3px;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.3;
+}
+
+/* Детали операции - разрешаем перенос */
+.operation-detail {
+    font-size: 10px;
+    color: #b0b0b0;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
+    flex-wrap: wrap;
 }
 
 .operation-detail .material {
     color: #ffffff;
     font-weight: 500;
-    white-space: nowrap;
-    overflow-x: hidden;
-    text-overflow: ellipsis;
-    max-width: 120px;
+    white-space: normal;
+    word-break: break-word;
 }
 
 .operation-detail .thickness {
@@ -562,7 +649,7 @@
     flex-shrink: 0;
 }
 
-/* КОНТРОЛЛЫ - фиксированной ширины, не сжимаются */
+/* КОНТРОЛЛЫ - фиксированной ширины */
 .operation-controls {
     display: flex;
     align-items: center;
@@ -657,60 +744,16 @@
     transform: translateY(-1px);
 }
 
-/* Для модального окна отчёта */
-#orderReportModal .sites-section {
-    overflow-x: auto;
-    overflow-y: visible;
-    width: 100%;
-}
-
-#orderReportModal .sites-grid {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: 12px;
-    width: 100%;
-}
-
-#orderReportModal .site-card {
-    flex: 1 1 0;
-    min-width: 0;
-}
-
-#orderReportModal .site-card-content {
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-#orderReportModal .operation-name {
-    font-size: 11px;
-}
-
-#orderReportModal .operation-detail {
-    font-size: 9px;
-}
-
-#orderReportModal .square-status {
-    width: 24px;
-    height: 24px;
-}
-
-#orderReportModal .action-btn {
-    width: 24px;
-    height: 24px;
-    font-size: 11px;
-}
-
 /* Адаптация для узких экранов */
-@media (max-width: 1100px) {
+@media (max-width: 1300px) {
     .sites-grid {
-        min-width: 850px;
+        min-width: 1000px;
         width: auto;
         overflow-x: auto;
     }
     .site-card {
         flex: 0 0 auto;
-        width: 200px;
+        width: 240px;
     }
 }
 
