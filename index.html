@@ -12,8 +12,8 @@
         }
 
         .group-modal-content {
-            max-width: 1400px;
-            width: 95%;
+            max-width: 1600px;
+            width: 98%;
         }
 
         .group-modal-layout {
@@ -37,6 +37,7 @@
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 1px solid #2a2f38;
+            font-size: 20px;
         }
 
         .items-list-panel {
@@ -56,6 +57,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-size: 20px;
         }
 
         .items-list-container {
@@ -84,14 +86,14 @@
         .item-card-title {
             font-weight: 600;
             color: #ff3b3b;
-            font-size: 16px;
+            font-size: 18px;
         }
 
         .item-card-content {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 8px;
-            font-size: 12px;
+            font-size: 14px;
         }
 
         .item-card-content div {
@@ -121,18 +123,18 @@
         .form-group label {
             display: block;
             margin-bottom: 5px;
-            font-size: 12px;
+            font-size: 13px;
             color: #a0a0a0;
         }
 
         .form-group input, .form-group select {
             width: 100%;
-            padding: 8px 10px;
+            padding: 10px 12px;
             background: #1e232b;
             border: 1px solid #2a2f38;
             border-radius: 6px;
             color: #fff;
-            font-size: 13px;
+            font-size: 14px;
         }
 
         .size-quantity-row {
@@ -152,10 +154,10 @@
             background: transparent;
             border: 1px solid #2a2f38;
             color: #a0a0a0;
-            padding: 6px 12px;
+            padding: 8px 12px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
             margin-top: 5px;
         }
 
@@ -258,7 +260,7 @@
         }
 
         .stat-value {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 700;
             background: linear-gradient(135deg, #00d4ff, #0077ff);
             -webkit-background-clip: text;
@@ -283,12 +285,12 @@
         }
 
         .search-box {
-            padding: 10px 15px;
+            padding: 12px 18px;
             background: #1a1e24;
             border: 1px solid #2a2f38;
             border-radius: 8px;
-            width: 300px;
-            font-size: 14px;
+            width: 350px;
+            font-size: 15px;
             color: #e0e0e0;
         }
 
@@ -301,6 +303,10 @@
             border: 1px solid #2a2f38;
         }
 
+        .sites-navigation h3 {
+            font-size: 18px;
+        }
+
         .sites-links {
             display: flex;
             gap: 15px;
@@ -309,14 +315,14 @@
         }
 
         .site-link {
-            padding: 8px 20px;
+            padding: 10px 24px;
             background: #1a1e24;
             border: 1px solid #2a2f38;
             border-radius: 8px;
             text-decoration: none;
             color: #e0e0e0;
             transition: all 0.3s;
-            font-size: 14px;
+            font-size: 15px;
         }
 
         .site-link:hover {
@@ -407,16 +413,16 @@
 
         /* Модальное окно создания группы - ШИРОКОЕ */
         #groupModal .modal-content {
-            max-width: 1400px;
-            width: 95%;
+            max-width: 1600px;
+            width: 98%;
             max-height: 90vh;
             overflow-y: auto;
         }
 
         /* Модальное окно отчёта по заказу/изделию - ШИРОКОЕ */
         #orderReportModal .modal-content {
-            max-width: 1400px;
-            width: 95%;
+            max-width: 1600px;
+            width: 98%;
             max-height: 85vh;
             overflow-y: auto;
         }
@@ -431,259 +437,292 @@
 
         /* КАРТОЧКИ УЧАСТКОВ НА ГЛАВНОЙ СТРАНИЦЕ */
         .sites-section {
-    padding: 15px;
-    background: #15191f;
-    border-top: 1px solid #2a2f38;
-    border-radius: 0 0 12px 12px;
-    overflow-x: auto;
-    overflow-y: visible;
-    width: 100%;
-}
+            padding: 15px;
+            background: #15191f;
+            border-top: 1px solid #2a2f38;
+            border-radius: 0 0 12px 12px;
+            overflow-x: auto;
+            overflow-y: visible;
+            width: 100%;
+        }
 
-.sites-grid {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: 12px;
-    width: 100%;
-}
+        .sites-section h4 {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
 
-.site-card {
-    flex: 1 1 0;           /* Равномерно растягиваются */
-    min-width: 0;           /* Позволяем сжиматься меньше содержимого */
-    background: #1a1e24;
-    border: 1px solid #2a2f38;
-    border-radius: 12px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
+        .sites-grid {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: 15px;
+            width: 100%;
+        }
 
-.site-card-header {
-    padding: 8px 10px;
-    text-align: center;
-    background: linear-gradient(135deg, #232830, #1a1e24);
-    border-bottom: 1px solid #2a2f38;
-}
+        .site-card {
+            flex: 1 1 0;
+            min-width: 0;
+            background: #1a1e24;
+            border: 1px solid #2a2f38;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
 
-.site-name {
-    font-weight: 700;
-    font-size: 13px;
-    color: #ff3b3b;
-    white-space: nowrap;
-    overflow-x: hidden;
-    text-overflow: ellipsis;
-}
+        .site-card-header {
+            padding: 12px 15px;
+            text-align: center;
+            background: linear-gradient(135deg, #232830, #1a1e24);
+            border-bottom: 1px solid #2a2f38;
+        }
 
-.site-stats {
-    font-size: 10px;
-    color: #a0a0a0;
-    margin-top: 2px;
-}
+        .site-name {
+            font-weight: 700;
+            font-size: 18px;
+            color: #ff3b3b;
+            white-space: nowrap;
+            overflow-x: hidden;
+            text-overflow: ellipsis;
+        }
 
-.site-card-content {
-    flex: 1;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    overflow-y: auto;
-    max-height: 400px;
-}
+        .site-stats {
+            font-size: 14px;
+            color: #a0a0a0;
+            margin-top: 5px;
+        }
 
-/* Операция */
-.operation-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 4px;
-    padding: 5px 6px;
-    background: #15191f;
-    border-radius: 5px;
-    border: 1px solid #2a2f38;
-}
+        .site-card-content {
+            flex: 1;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            max-height: 600px;
+        }
 
-.operation-info {
-    flex: 2;
-    min-width: 0;
-}
+        .operation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: #15191f;
+            border-radius: 8px;
+            border: 1px solid #2a2f38;
+        }
 
-.operation-name {
-    font-size: 11px;
-    font-weight: 600;
-    color: #ff9800;
-    margin-bottom: 2px;
-    white-space: nowrap;
-    overflow-x: hidden;
-    text-overflow: ellipsis;
-}
+        .operation-info {
+            flex: 2;
+            min-width: 0;
+        }
 
-.operation-detail {
-    font-size: 8px;
-    color: #b0b0b0;
-    white-space: nowrap;
-    overflow-x: hidden;
-    text-overflow: ellipsis;
-}
+        .operation-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #ff9800;
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
 
-.operation-detail .material {
-    color: #ffffff;
-}
+        .operation-detail {
+            font-size: 13px;
+            color: #b0b0b0;
+            line-height: 1.3;
+        }
 
-.operation-detail .thickness {
-    color: #4cd964;
-    background: #1e232b;
-    padding: 1px 3px;
-    border-radius: 3px;
-    font-size: 8px;
-    margin-left: 3px;
-}
+        .operation-detail .material {
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 13px;
+        }
 
-.operation-controls {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    flex-shrink: 0;
-}
+        .operation-detail .thickness {
+            color: #4cd964;
+            background: #1e232b;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: 6px;
+        }
 
-.square-status {
-    width: 24px;
-    height: 24px;
-    border-radius: 5px;
-    background: #1e232b;
-    border: 1px solid #3a404b;
-    cursor: pointer;
-    flex-shrink: 0;
-}
+        .operation-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
 
-.square-status:hover {
-    transform: scale(1.02);
-    border-color: #ff3b3b;
-}
+        .square-status {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            background: #1e232b;
+            border: 2px solid #3a404b;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
 
-.square-status.orange {
-    background-color: #ff9800 !important;
-    border-color: #e65100 !important;
-}
+        .square-status:hover {
+            transform: scale(1.05);
+            border-color: #ff3b3b;
+        }
 
-.square-status.green {
-    background-color: #4caf50 !important;
-    border-color: #2e7d32 !important;
-}
+        .square-status.orange {
+            background-color: #ff9800 !important;
+            border-color: #e65100 !important;
+        }
 
-.action-buttons {
-    display: flex;
-    gap: 2px;
-}
+        .square-status.green {
+            background-color: #4caf50 !important;
+            border-color: #2e7d32 !important;
+        }
 
-.action-btn {
-    width: 24px;
-    height: 24px;
-    border-radius: 5px;
-    border: none;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
 
-.btn-add {
-    background: #2ecc71;
-    color: white;
-}
+        .action-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
 
-.btn-add.added {
-    background: #e74c3c;
-}
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
 
-.btn-priority {
-    background: #dc3545;
-    color: white;
-}
+        .btn-add {
+            background: #2ecc71;
+            color: white;
+        }
 
-.btn-priority:hover {
-    background: #c82333;
-}
+        .btn-add.added {
+            background: #e74c3c;
+        }
 
-.btn-add-extra {
-    background: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 5px;
-    font-size: 9px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 6px;
-    width: 100%;
-}
+        .btn-priority {
+            background: #dc3545;
+            color: white;
+        }
 
-/* Для модального окна отчёта */
-#orderReportModal .sites-section {
-    overflow-x: auto;
-    overflow-y: visible;
-    width: 100%;
-}
+        .btn-priority:hover {
+            background: #c82333;
+        }
 
-#orderReportModal .sites-grid {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: 10px;
-    width: 100%;
-}
+        .btn-add-extra {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            transition: all 0.2s;
+        }
 
-#orderReportModal .site-card {
-    flex: 1 1 0;
-    min-width: 0;
-}
+        .btn-add-extra:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
 
-#orderReportModal .site-card-content {
-    max-height: 350px;
-    overflow-y: auto;
-}
+        /* Для модального окна отчёта */
+        #orderReportModal .sites-section {
+            overflow-x: auto;
+            overflow-y: visible;
+            width: 100%;
+        }
 
-#orderReportModal .operation-name {
-    font-size: 10px;
-}
+        #orderReportModal .sites-grid {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: 15px;
+            width: 100%;
+        }
 
-#orderReportModal .square-status {
-    width: 22px;
-    height: 22px;
-}
+        #orderReportModal .site-card {
+            flex: 1 1 0;
+            min-width: 0;
+        }
 
-/* Если экран слишком узкий - добавляем горизонтальную прокрутку */
-@media (max-width: 900px) {
-    .sites-grid {
-        min-width: 750px;  /* Минимальная ширина для 5 колонок */
-        width: auto;
-    }
-    
-    .sites-section {
-        overflow-x: auto;
-    }
-    
-    .site-card {
-        flex: 0 0 auto;
-        width: 140px;
-    }
-}
+        #orderReportModal .site-card-content {
+            max-height: 450px;
+            overflow-y: auto;
+        }
 
-        /* СКРОЛЛБАРЫ */
+        #orderReportModal .operation-name {
+            font-size: 14px;
+        }
+
+        #orderReportModal .operation-detail {
+            font-size: 12px;
+        }
+
+        #orderReportModal .square-status {
+            width: 34px;
+            height: 34px;
+        }
+
+        #orderReportModal .action-btn {
+            width: 34px;
+            height: 34px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 1100px) {
+            .sites-grid {
+                min-width: 850px;
+                width: auto;
+            }
+            .sites-section {
+                overflow-x: auto;
+            }
+            .site-card {
+                flex: 0 0 auto;
+                width: 200px;
+            }
+        }
+
         .site-card-content::-webkit-scrollbar {
-            width: 4px;
+            width: 5px;
         }
         .site-card-content::-webkit-scrollbar-track {
             background: #1e232b;
+            border-radius: 3px;
         }
         .site-card-content::-webkit-scrollbar-thumb {
             background: #ff3b3b;
-            border-radius: 4px;
+            border-radius: 3px;
         }
 
-        /* СВЕТЛАЯ ТЕМА */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: #2a2f38;
+            color: #e0e0e0;
+            border: 1px solid #3a404b;
+        }
+
         body.light-theme {
             background-color: #f0f2f5 !important;
             color: #1e293b !important;
@@ -883,12 +922,12 @@
         <div id="groupModal" class="modal">
             <div class="modal-content group-modal-content">
                 <span class="close" onclick="closeGroupModal()">&times;</span>
-                <h2>📁 Создание группы заказов</h2>
+                <h2 style="font-size: 24px;">📁 Создание группы заказов</h2>
 
                 <div class="form-group">
                     <label>🏢 ЗАКАЗЧИК / ОБЪЕКТ:</label>
                     <input type="text" id="groupNameInput" placeholder="Например: ООО Ромашка, Санкт-Петербург, ТЦ Галерея" required>
-                    <small style="color: #a0a0a0; font-size: 10px; margin-top: 4px; display: block;">Укажите название организации или объекта</small>
+                    <small style="color: #a0a0a0; font-size: 11px; margin-top: 4px; display: block;">Укажите название организации или объекта</small>
                 </div>
 
                 <div class="group-modal-layout">
@@ -914,14 +953,14 @@
 
                         <!-- ПРОФИЛИ -->
                         <div id="profilesContainer" style="display: none;">
-                            <div class="components-title">📐 ПРОФИЛИ:</div>
+                            <div class="components-title" style="color: #ff3b3b; font-size: 14px; margin-bottom: 10px;">📐 ПРОФИЛИ:</div>
                             <div id="profilesList"></div>
                             <button type="button" class="btn-outline" onclick="addCustomProfile()" style="margin-top: 5px; width: 100%;">+ Добавить профиль</button>
                         </div>
 
                         <!-- ДЕТАЛИ -->
                         <div id="detailsContainer" style="display: none;">
-                            <div class="components-title">🔧 ДЕТАЛИ:</div>
+                            <div class="components-title" style="color: #ff3b3b; font-size: 14px; margin-bottom: 10px;">🔧 ДЕТАЛИ:</div>
                             <div id="detailsList"></div>
                         </div>
 
@@ -949,13 +988,13 @@
                     <div class="items-list-panel">
                         <h3>
                             📦 Добавленные изделия
-                            <span id="itemsCount" style="font-size: 12px; color: #ff3b3b;">0</span>
+                            <span id="itemsCount" style="font-size: 14px; color: #ff3b3b;">0</span>
                         </h3>
                         <div id="itemsListContainer" class="items-list-container">
                             <div class="empty-items">
-                                <div style="font-size: 40px; margin-bottom: 10px;">📭</div>
+                                <div style="font-size: 48px; margin-bottom: 10px;">📭</div>
                                 <p>Нет добавленных изделий</p>
-                                <p style="font-size: 12px;">Заполните форму слева и нажмите "Добавить изделие"</p>
+                                <p style="font-size: 13px;">Заполните форму слева и нажмите "Добавить изделие"</p>
                             </div>
                         </div>
                     </div>
@@ -970,7 +1009,7 @@
 
         <!-- МОДАЛЬНОЕ ОКНО МАТЕРИАЛОВ -->
         <div id="materialsModal" class="modal">
-            <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-content" style="max-width: 1000px;">
                 <span class="close" onclick="closeMaterialsModal()">&times;</span>
                 <div id="materialsReport"></div>
             </div>
@@ -1219,28 +1258,28 @@
             tempProfiles.forEach((profile, idx) => {
                 if (profile.isCustom) {
                     profilesHtml += `
-                        <div class="profile-item" data-profile-index="${idx}">
+                        <div class="profile-item" data-profile-index="${idx}" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                             <input type="text" 
                                    class="profile-name-custom" 
                                    data-profile-index="${idx}"
                                    value="${escapeHtml(profile.name)}"
                                    placeholder="Название профиля"
-                                   style="min-width: 180px; padding: 4px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
+                                   style="flex: 2; padding: 6px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
                                 <input type="number" 
                                        class="profile-length-custom" 
                                        data-profile-index="${idx}"
                                        value="${profile.lengthMm}" 
                                        min="0" 
                                        step="1"
-                                       style="width: 90px; padding: 4px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                                       style="width: 80px; padding: 6px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
                                 <span style="color: #a0a0a0;">мм</span>
                                 <input type="number" 
                                        class="profile-qty-custom" 
                                        data-profile-index="${idx}"
                                        value="${profile.quantity}" 
                                        min="0" 
-                                       style="width: 70px; padding: 4px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                                       style="width: 60px; padding: 6px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
                                 <span style="color: #a0a0a0;">шт</span>
                                 <button class="remove-profile-btn" onclick="removeCustomProfile(${idx})" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer;">✕</button>
                             </div>
@@ -1248,23 +1287,23 @@
                     `;
                 } else {
                     profilesHtml += `
-                        <div class="profile-item" data-profile-index="${idx}">
-                            <span style="font-size: 13px; min-width: 180px;">${escapeHtml(profile.name)}</span>
-                            <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="profile-item" data-profile-index="${idx}" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <span style="flex: 2; font-size: 14px;">${escapeHtml(profile.name)}</span>
+                            <div style="display: flex; align-items: center; gap: 6px;">
                                 <input type="number" 
                                        class="profile-length" 
                                        data-profile-index="${idx}"
                                        value="${profile.lengthMm}" 
                                        min="0" 
                                        step="1"
-                                       style="width: 90px; padding: 4px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                                       style="width: 80px; padding: 6px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
                                 <span style="color: #a0a0a0;">мм</span>
                                 <input type="number" 
                                        class="profile-qty" 
                                        data-profile-index="${idx}"
                                        value="${profile.quantity}" 
                                        min="0" 
-                                       style="width: 70px; padding: 4px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                                       style="width: 60px; padding: 6px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
                                 <span style="color: #a0a0a0;">шт</span>
                             </div>
                         </div>
@@ -1346,17 +1385,17 @@
                 let detailsHtml = '';
                 regularDetails.forEach((detail) => {
                     detailsHtml += `
-                        <div class="detail-item">
-                            <span style="font-size: 13px;">${escapeHtml(detail.name)}</span>
-                            <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="detail-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 6px; background: #15191f; border-radius: 6px;">
+                            <span style="font-size: 14px;">${escapeHtml(detail.name)}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
                                 <input type="number" 
                                        class="detail-qty" 
                                        data-detail-name="${detail.name}"
                                        data-detail-material="${detail.material}"
                                        value="${detail.quantity}" 
                                        min="0" 
-                                       style="width: 70px; padding: 4px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
-                                <span style="color: #a0a0a0; font-size: 11px;">шт</span>
+                                       style="width: 70px; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                                <span style="color: #a0a0a0;">шт</span>
                             </div>
                         </div>
                     `;
@@ -1471,9 +1510,9 @@
             if (tempItemsList.length === 0) {
                 container.innerHTML = `
                     <div class="empty-items">
-                        <div style="font-size: 40px; margin-bottom: 10px;">📭</div>
+                        <div style="font-size: 48px; margin-bottom: 10px;">📭</div>
                         <p>Нет добавленных изделий</p>
-                        <p style="font-size: 12px;">Заполните форму слева и нажмите "Добавить изделие"</p>
+                        <p style="font-size: 13px;">Заполните форму слева и нажмите "Добавить изделие"</p>
                     </div>
                 `;
                 if (countSpan) countSpan.textContent = '0';
@@ -1488,10 +1527,10 @@
                 const profiles = (item.details || []).filter(d => d.type === 'profile');
 
                 let regularDetailsHtml = regularDetails.length > 0 ? 
-                    regularDetails.map(d => `<span>${d.name}: ${d.quantity} шт</span>`).join('') : '';
+                    regularDetails.map(d => `<span>${d.name}: ${d.quantity} шт</span>`).join(', ') : '';
 
                 let profilesHtml = profiles.length > 0 ? 
-                    profiles.map(p => `<span>${p.name}: ${p.lengthMm}мм x ${p.quantity} шт</span>`).join('') : '';
+                    profiles.map(p => `<span>${p.name}: ${p.lengthMm}мм x ${p.quantity} шт</span>`).join(', ') : '';
 
                 html += `
                     <div class="item-card" data-item-index="${index}">
@@ -1546,17 +1585,17 @@
                     let detailsHtml = '';
                     regularDetails.forEach((detail) => {
                         detailsHtml += `
-                            <div class="detail-item">
-                                <span style="font-size: 13px;">${escapeHtml(detail.name)}</span>
-                                <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="detail-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 6px; background: #15191f; border-radius: 6px;">
+                                <span style="font-size: 14px;">${escapeHtml(detail.name)}</span>
+                                <div style="display: flex; align-items: center; gap: 8px;">
                                     <input type="number" 
                                            class="detail-qty" 
                                            data-detail-name="${detail.name}"
                                            data-detail-material="${detail.material}"
                                            value="${detail.quantity}" 
                                            min="0" 
-                                           style="width: 70px; padding: 4px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
-                                    <span style="color: #a0a0a0; font-size: 11px;">шт</span>
+                                           style="width: 70px; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                                    <span style="color: #a0a0a0;">шт</span>
                                 </div>
                             </div>
                         `;
@@ -1797,7 +1836,7 @@
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
-        // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА ==============
+        // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА С event.stopPropagation() ==============
         function createSiteRow(name, order, itemIndex, siteKey) {
             const item = order.items[itemIndex];
             if (!item) return null;
@@ -1858,11 +1897,11 @@
                             <div class="square-status ${squareClass}" data-task-id="${taskId}"></div>
                             <div class="action-buttons">
                                 <button class="action-btn btn-add ${isAdded ? 'added' : ''}" 
-                                        onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', false)">
+                                        onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', false)">
                                     ${isAdded ? '✓' : '+'}
                                 </button>
                                 <button class="action-btn btn-priority" 
-                                        onclick="toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', true)">
+                                        onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', true)">
                                     🔴
                                 </button>
                             </div>
@@ -1881,7 +1920,7 @@
                     </div>
                     <div class="site-card-content">
                         ${operationsHtml}
-                        <button class="btn-add-extra" onclick="addExtraTask(${order.id}, '${siteKey}')">➕ Доп. задача</button>
+                        <button class="btn-add-extra" onclick="event.stopPropagation(); addExtraTask(${order.id}, '${siteKey}')">➕ Доп. задача</button>
                     </div>
                 </div>
             `;
