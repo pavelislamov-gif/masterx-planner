@@ -1155,6 +1155,41 @@
             return div;
         }
         
+        // ============== ВОССТАНОВЛЕНИЕ ЦВЕТА ФОНА ШАПКИ ПОСЛЕ ЗАГРУЗКИ ==============
+        function restoreTaskHeaderColors() {
+            const taskCards = document.querySelectorAll('.task-card');
+            console.log(`🔄 Восстановление цветов фона для ${taskCards.length} задач`);
+            
+            taskCards.forEach(card => {
+                const taskId = card.dataset.taskId;
+                const task = taskManager.tasks.find(t => t.id === taskId);
+                if (task) {
+                    const statusBadge = card.querySelector('.task-status-badge');
+                    const taskHeader = card.querySelector('.task-header');
+                    
+                    if (statusBadge) {
+                        let statusClass = 'pending';
+                        let statusText = '⏳ ОЖИДАЕТ';
+                        if (task.status === 'in_progress') {
+                            statusClass = 'in-progress';
+                            statusText = '⚡ В РАБОТЕ';
+                        } else if (task.status === 'completed') {
+                            statusClass = 'completed';
+                            statusText = '✅ ГОТОВО';
+                        }
+                        
+                        statusBadge.className = `task-status-badge ${statusClass}`;
+                        statusBadge.textContent = statusText;
+                        
+                        if (taskHeader) {
+                            taskHeader.classList.remove('status-pending', 'status-in-progress', 'status-completed');
+                            taskHeader.classList.add(`status-${statusClass}`);
+                        }
+                    }
+                }
+            });
+        }
+        
         function renderTasks() {
             if (isLoadingTasks) return;
             isLoadingTasks = true;
@@ -1339,6 +1374,11 @@
             restoreAllCardsState();
             tasksList.scrollTop = scrollPosition;
             isLoadingTasks = false;
+            
+            // Восстанавливаем цвета фона шапок задач
+            setTimeout(() => {
+                restoreTaskHeaderColors();
+            }, 50);
         }
         
         function showAddExecutorForm(task, container) {
