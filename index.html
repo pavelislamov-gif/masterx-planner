@@ -662,22 +662,27 @@
             transform: translateY(-1px);
         }
 
-        .file-path-info {
-            font-size: 10px;
-            color: #4cd964;
-            margin-top: 4px;
-            padding: 4px;
-            background: #1e232b;
-            border-radius: 4px;
-            word-break: break-all;
-        }
-
         .btn-sm {
             padding: 2px 6px;
             font-size: 9px;
             border-radius: 4px;
             cursor: pointer;
             border: none;
+        }
+
+        .file-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 6px;
+            padding: 4px 8px;
+            background: #1e232b;
+            border-radius: 4px;
+        }
+
+        .file-indicator span {
+            font-size: 10px;
+            color: #4cd964;
         }
 
         /* Адаптация для узких экранов */
@@ -1954,13 +1959,16 @@
 
         function saveSiteFile(orderId, siteKey) {
             const fileName = document.getElementById('fileNameInput')?.value.trim();
-            const filePath = document.getElementById('filePathInput')?.value.trim();
+            let filePath = document.getElementById('filePathInput')?.value.trim();
             const comment = document.getElementById('fileCommentInput')?.value.trim();
             
             if (!filePath) {
                 alert('Введите путь к файлу или ссылку');
                 return;
             }
+            
+            // Сохраняем путь как есть, без изменений
+            // Для корректного отображения в HTML экранируем только при выводе
             
             const orders = loadOrdersFromStorage();
             const order = orders.find(o => o.id == orderId);
@@ -1989,50 +1997,22 @@
             alert('✅ Файл добавлен!');
         }
 
-        function removeSiteFile(orderId, siteKey, fileIndex) {
-            if (!confirm('Удалить этот файл?')) return;
+        function clearAllSiteFiles(orderId, siteKey) {
+            if (!confirm('Удалить все прикреплённые файлы для этого участка?')) return;
             
             const orders = loadOrdersFromStorage();
             const order = orders.find(o => o.id == orderId);
             if (!order) return;
             
             if (order.siteFiles && order.siteFiles[siteKey]) {
-                order.siteFiles[siteKey].splice(fileIndex, 1);
-                if (order.siteFiles[siteKey].length === 0) {
-                    delete order.siteFiles[siteKey];
-                }
+                delete order.siteFiles[siteKey];
                 saveOrdersToStorage(orders);
                 renderOrdersList();
+                alert('✅ Все файлы удалены');
             }
         }
 
-        function openLocalFile(filePath) {
-            if (!filePath) return;
-            
-            try {
-                if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
-                    window.open(filePath, '_blank');
-                } else {
-                    const link = document.createElement('a');
-                    link.href = filePath;
-                    link.target = '_blank';
-                    link.click();
-                }
-            } catch (error) {
-                console.error('Ошибка открытия:', error);
-                alert('Не удалось открыть файл. Попробуйте скопировать путь и открыть вручную.\n\nПуть: ' + filePath);
-            }
-        }
-
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert('✅ Путь скопирован в буфер обмена:\n' + text);
-            }).catch(() => {
-                alert('❌ Не удалось скопировать');
-            });
-        }
-
-        // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА С event.stopPropagation() ==============
+        // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА ==============
         function createSiteRow(name, order, itemIndex, siteKey) {
             const item = order.items[itemIndex];
             if (!item) return null;
@@ -2108,25 +2088,14 @@
 
             // Получаем список файлов для этого участка
             const files = order.siteFiles?.[siteKey] || [];
+            const hasFiles = files.length > 0;
             
-            let filesHtml = '';
-            if (files.length > 0) {
-                filesHtml = `
-                    <div style="margin-top: 8px; border-top: 1px solid #2a2f38; padding-top: 8px;">
-                        <div style="font-size: 10px; color: #ff9800; margin-bottom: 6px;">📎 ПРИКРЕПЛЁННЫЕ ФАЙЛЫ:</div>
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            ${files.map((file, idx) => `
-                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; background: #1e232b; padding: 4px 6px; border-radius: 4px;">
-                                    <span style="font-size: 10px; color: #4cd964; word-break: break-all; flex: 1;" title="${escapeHtml(file.comment || '')}">📄 ${escapeHtml(file.name || file.path)}</span>
-                                    <div style="display: flex; gap: 4px;">
-                                        <button class="btn-sm" style="background: #28a745; padding: 2px 6px; font-size: 9px;" onclick="event.stopPropagation(); openLocalFile('${escapeHtml(file.path).replace(/'/g, "\\'")}')">📂</button>
-                                        <button class="btn-sm" style="background: #ff9800; padding: 2px 6px; font-size: 9px;" onclick="event.stopPropagation(); copyToClipboard('${escapeHtml(file.path).replace(/'/g, "\\'")}')">📋</button>
-                                        <button class="btn-sm" style="background: #dc3545; padding: 2px 6px; font-size: 9px;" onclick="event.stopPropagation(); removeSiteFile(${order.id}, '${siteKey}', ${idx})">✕</button>
-                                    </div>
-                                </div>
-                                ${file.comment ? `<div style="font-size: 9px; color: #a0a0a0; margin-left: 20px; margin-bottom: 4px;">💬 ${escapeHtml(file.comment)}</div>` : ''}
-                            `).join('')}
-                        </div>
+            let filesIndicatorHtml = '';
+            if (hasFiles) {
+                filesIndicatorHtml = `
+                    <div class="file-indicator">
+                        <span>📎 Файлы: ${files.length} шт</span>
+                        <button class="btn-sm" style="background: #dc3545; padding: 2px 8px; font-size: 9px;" onclick="event.stopPropagation(); clearAllSiteFiles(${order.id}, '${siteKey}')">✕ Очистить</button>
                     </div>
                 `;
             }
@@ -2145,7 +2114,7 @@
                             <button class="btn-add-extra" style="flex: 1;" onclick="event.stopPropagation(); addExtraTask(${order.id}, '${siteKey}')">➕ Доп. задача</button>
                             <button class="btn-file" style="flex: 1;" onclick="event.stopPropagation(); addSiteFile(${order.id}, '${siteKey}')">📎 Добавить файл</button>
                         </div>
-                        ${filesHtml}
+                        ${filesIndicatorHtml}
                     </div>
                 </div>
             `;
@@ -2944,9 +2913,7 @@
         window.showItemReport = showItemReport;
         window.printCurrentReport = printCurrentReport;
         window.addSiteFile = addSiteFile;
-        window.removeSiteFile = removeSiteFile;
-        window.openLocalFile = openLocalFile;
-        window.copyToClipboard = copyToClipboard;
+        window.clearAllSiteFiles = clearAllSiteFiles;
 
         document.addEventListener('DOMContentLoaded', initMainPage);
     </script>
