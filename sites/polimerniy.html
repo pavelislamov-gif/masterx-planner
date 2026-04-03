@@ -977,7 +977,6 @@
             document.getElementById('filterThickness').value = '';
             document.getElementById('filterSize').value = '';
             document.getElementById('statusFilter').value = 'all';
-            document.getElementById('sortBy').value = 'priority_first';
             renderTasks();
         }
         
@@ -1443,7 +1442,6 @@
             const filterThickness = document.getElementById('filterThickness').value;
             const filterSize = document.getElementById('filterSize').value;
             const filterStatus = document.getElementById('statusFilter').value;
-            const sortType = document.getElementById('sortBy').value;
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             
@@ -1984,7 +1982,7 @@
         }
         
         function setupFilterListeners() {
-            const inputs = ['filterCustomer', 'filterProduct', 'filterOperation', 'filterRal', 'filterThickness', 'filterSize', 'statusFilter', 'sortBy'];
+            const inputs = ['filterCustomer', 'filterProduct', 'filterOperation', 'filterRal', 'filterThickness', 'filterSize', 'statusFilter'];
             inputs.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
