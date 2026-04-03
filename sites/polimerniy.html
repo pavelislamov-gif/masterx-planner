@@ -359,10 +359,10 @@
             transform: scale(1.02);
         }
 
-        /* Фильтры - расширенные */
+        /* Фильтры - расширенные в одну строку */
         .filter-section {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             align-items: flex-end;
             margin-bottom: 20px;
             flex-wrap: wrap;
@@ -376,12 +376,14 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
+            min-width: 130px;
         }
 
         .filter-group label {
             font-size: 10px;
             color: #a0a0a0;
             letter-spacing: 0.5px;
+            white-space: nowrap;
         }
 
         .filter-group select, .filter-group input {
@@ -391,7 +393,7 @@
             border-radius: 6px;
             color: #fff;
             font-size: 12px;
-            min-width: 150px;
+            min-width: 140px;
         }
 
         .filter-group select:focus, .filter-group input:focus {
@@ -408,6 +410,7 @@
             border: none;
             border-radius: 6px;
             color: white;
+            margin-top: 20px;
         }
 
         .btn-reset:hover {
@@ -680,7 +683,7 @@
             <h1 style="margin:0; color: white; font-size:18px;">🎨 Полимерный участок</h1>
         </header>
 
-        <!-- ФИЛЬТРЫ - РАСШИРЕННЫЕ С СОРТИРОВКОЙ -->
+        <!-- ФИЛЬТРЫ - ВСЕ НА ОДНОМ УРОВНЕ -->
         <div class="filter-section">
             <div class="filter-group">
                 <label>🏢 ЗАКАЗЧИК</label>
@@ -840,6 +843,8 @@
         }
         
         function populateFilters() {
+            console.log('🔄 Заполнение фильтров...');
+            
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             const customers = new Set();
             const products = new Set();
@@ -848,6 +853,7 @@
             const thicknesses = new Set();
             const sizes = new Set();
             
+            // Собираем данные из заказов
             allOrders.forEach(order => {
                 if (order.groupName) customers.add(order.groupName);
                 if (order.items) {
@@ -859,7 +865,9 @@
                 }
             });
             
+            // Собираем данные из задач
             if (taskManager && taskManager.tasks) {
+                console.log(`📊 Задач в taskManager: ${taskManager.tasks.length}`);
                 taskManager.tasks.forEach(task => {
                     if (task.operation) operations.add(task.operation);
                     
@@ -869,6 +877,8 @@
                     if (operationData?.thickness) thicknesses.add(operationData.thickness);
                 });
             }
+            
+            console.log(`📋 Найдено: заказчиков=${customers.size}, изделий=${products.size}, операций=${operations.size}, RAL=${rals.size}, толщин=${thicknesses.size}, размеров=${sizes.size}`);
             
             // Заказчики
             const customerSelect = document.getElementById('filterCustomer');
@@ -1373,6 +1383,9 @@
             
             saveAllCardsState();
             taskManager.loadData();
+            
+            // Заполняем фильтры на основе загруженных задач
+            populateFilters();
             
             const filterCustomer = document.getElementById('filterCustomer').value;
             const filterProduct = document.getElementById('filterProduct').value;
