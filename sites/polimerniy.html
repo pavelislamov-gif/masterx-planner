@@ -714,7 +714,9 @@
             </div>
             <div class="filter-group">
                 <label>📐 РАЗМЕР</label>
-                <input type="text" id="filterSize" placeholder="Поиск по размеру...">
+                <select id="filterSize">
+                    <option value="">Все размеры</option>
+                </select>
             </div>
             <div class="filter-group">
                 <label>📊 СТАТУС</label>
@@ -854,6 +856,7 @@
                 });
             }
             
+            // Заказчики
             const customerSelect = document.getElementById('filterCustomer');
             if (customerSelect) {
                 const currentCustomer = customerSelect.value;
@@ -864,6 +867,7 @@
                 if (currentCustomer && customers.has(currentCustomer)) customerSelect.value = currentCustomer;
             }
             
+            // Изделия
             const productSelect = document.getElementById('filterProduct');
             if (productSelect) {
                 const currentProduct = productSelect.value;
@@ -874,6 +878,7 @@
                 if (currentProduct && products.has(currentProduct)) productSelect.value = currentProduct;
             }
             
+            // Операции
             const operationSelect = document.getElementById('filterOperation');
             if (operationSelect) {
                 const currentOperation = operationSelect.value;
@@ -884,6 +889,7 @@
                 if (currentOperation && operations.has(currentOperation)) operationSelect.value = currentOperation;
             }
             
+            // RAL
             const ralSelect = document.getElementById('filterRal');
             if (ralSelect) {
                 const currentRal = ralSelect.value;
@@ -894,6 +900,7 @@
                 if (currentRal && rals.has(currentRal)) ralSelect.value = currentRal;
             }
             
+            // Толщины
             const thicknessSelect = document.getElementById('filterThickness');
             if (thicknessSelect) {
                 const currentThickness = thicknessSelect.value;
@@ -902,6 +909,22 @@
                     thicknessSelect.innerHTML += `<option value="${th}">${th}</option>`;
                 });
                 if (currentThickness && thicknesses.has(currentThickness)) thicknessSelect.value = currentThickness;
+            }
+            
+            // Размеры
+            const sizeSelect = document.getElementById('filterSize');
+            if (sizeSelect) {
+                const currentSize = sizeSelect.value;
+                sizeSelect.innerHTML = '<option value="">📐 Все размеры</option>';
+                Array.from(sizes).sort((a, b) => {
+                    const aNum = parseInt(a);
+                    const bNum = parseInt(b);
+                    if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+                    return String(a).localeCompare(String(b));
+                }).forEach(s => {
+                    sizeSelect.innerHTML += `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`;
+                });
+                if (currentSize && sizes.has(currentSize)) sizeSelect.value = currentSize;
             }
         }
         
@@ -1267,7 +1290,7 @@
             const filterOperation = document.getElementById('filterOperation').value;
             const filterRal = document.getElementById('filterRal').value;
             const filterThickness = document.getElementById('filterThickness').value;
-            const filterSize = document.getElementById('filterSize').value.toLowerCase();
+            const filterSize = document.getElementById('filterSize').value;
             const filterStatus = document.getElementById('statusFilter').value;
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
@@ -1295,9 +1318,8 @@
                     const itemRal = (item.ral || '').trim();
                     if (itemRal !== filterRal) return false;
                 }
-                if (filterSize && item.size?.name && !item.size.name.toLowerCase().includes(filterSize)) return false;
+                if (filterSize && item.size?.name !== filterSize) return false;
                 
-                // Фильтр по толщине
                 if (filterThickness) {
                     const productOps = taskOperationsData[item.product];
                     const siteOps = productOps?.['полимерный'];
