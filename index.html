@@ -540,9 +540,8 @@
     color: #ffffff;
     font-weight: 500;
     font-size: 13px;
-    white-space: nowrap; /* Запрет переноса */
-    display: inline-block; /* Позволяет корректно рассчитать ширину */
-    min-width: max-content; /* Гарантирует, что блок не будет меньше текста внутри */
+    white-space: nowrap;
+    flex-shrink: 0; /* ЗАПРЕЩАЕТ блоку сжиматься, заставляя родителя расширяться */
 }
 
         .operation-detail .thickness {
