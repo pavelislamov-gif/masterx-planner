@@ -1220,46 +1220,10 @@
             return 'gray';
         }
 
-        // ============== ЗАГРУЗКА ОПЕРАЦИЙ ИЗ TASK_OPERATIONS ==============
+        // ============== ЗАГРУЗКА ОПЕРАЦИЙ ==============
         async function loadTaskOperations() {
-            if (typeof window.TASK_OPERATIONS !== 'undefined') {
-                console.log('✅ Используем TASK_OPERATIONS из task-operations.js');
-                
-                taskOperationsData = {};
-                
-                const siteColumnMap = {
-                    'tokarniy': 'токарно-фрезерный',
-                    'frezerniy': 'фрезерный',
-                    'slesarniy': 'слесарный',
-                    'lazerno': 'лазерно-гибочный',
-                    'polimerniy': 'полимерный'
-                };
-                
-                for (const [siteKey, products] of Object.entries(window.TASK_OPERATIONS)) {
-                    const columnName = siteColumnMap[siteKey];
-                    if (!columnName) continue;
-                    
-                    for (const [productName, operations] of Object.entries(products)) {
-                        if (!taskOperationsData[productName]) {
-                            taskOperationsData[productName] = {};
-                        }
-                        
-                        taskOperationsData[productName][columnName] = operations.map(op => {
-                            if (typeof op === 'string') {
-                                return { operation: op, detail: '', thickness: '' };
-                            }
-                            return op;
-                        });
-                    }
-                }
-                
-                window.taskOperationsData = taskOperationsData;
-                console.log('✅ Загружено операций для', Object.keys(taskOperationsData).length, 'изделий');
-                return;
-            }
-            
             try {
-                const response = await fetch('data/taskOperations.json');
+                const response = await fetch('data/taskOperations.json?_=' + Date.now());
                 if (response.ok) {
                     const data = await response.json();
                     taskOperationsData = data.operations || {};
@@ -2439,11 +2403,12 @@
             const ordersList = document.getElementById('ordersList');
             if (!ordersList) return;
 
-            const orders = loadOrdersFromStorage() || [];
+            // Загружаем свежие данные из localStorage
+            const freshOrdersData = loadOrdersFromStorage() || [];
             const searchText = document.getElementById('searchInput')?.value?.toLowerCase() || '';
             const statusFilter = document.getElementById('statusFilter')?.value || 'all';
 
-            let filteredOrders = orders.filter(order => {
+            let filteredOrders = freshOrdersData.filter(order => {
                 if (!order.groupName) return false;
                 const matchSearch = order.groupName.toLowerCase().includes(searchText) ||
                     (order.items && order.items.some(item => item.product && item.product.toLowerCase().includes(searchText)));
@@ -2544,21 +2509,13 @@
                         const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
                         const profiles = (item.details || []).filter(d => d.type === 'profile');
                         
-                        // Принудительно обновляем item из сохранённых данных (на случай, если item устарел)
-const freshOrders = loadOrdersFromStorage();
-const freshOrder = freshOrders.find(o => o.id === order.id);
-if (freshOrder && freshOrder.items[itemIndex]) {
-    item.ral = freshOrder.items[itemIndex].ral;
-    item.texture = freshOrder.items[itemIndex].texture;
-}
-
-// Формируем отображение RAL и текстуры
-let ralTextureHtml = '';
-if (item.ral || item.texture) {
-    ralTextureHtml = `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</span>`;
-} else {
-    ralTextureHtml = `<span style="font-size: 11px; color: #6c757d;">🎨 не указан</span>`;
-}
+                        // Формируем отображение RAL и текстуры (прямо из item, который уже свежий)
+                        let ralTextureHtml = '';
+                        if (item.ral || item.texture) {
+                            ralTextureHtml = `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</span>`;
+                        } else {
+                            ralTextureHtml = `<span style="font-size: 11px; color: #6c757d;">🎨 не указан</span>`;
+                        }
                         
                         const itemDiv = document.createElement('div');
                         itemDiv.style.marginBottom = '20px';
