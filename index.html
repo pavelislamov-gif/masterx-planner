@@ -2083,110 +2083,139 @@
 
         // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА ==============
         function createSiteRow(name, order, itemIndex, siteKey) {
-            const item = order.items[itemIndex];
-            if (!item) return null;
+    const item = order.items[itemIndex];
+    if (!item) return null;
 
-            const operations = getOperationNames(item.product, siteKey);
-            const operationsWithDetails = getOperationNamesWithDetails(item.product, siteKey);
+    const operationsWithDetails = getOperationNamesWithDetails(item.product, siteKey);
 
-            if (!operations || operations.length === 0) {
-                return null;
+    if (!operationsWithDetails || operationsWithDetails.length === 0) {
+        return null;
+    }
+
+    let operationsHtml = '';
+    let completedCount = 0;
+
+    for (let i = 0; i < operationsWithDetails.length; i++) {
+        const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
+        const opData = operationsWithDetails[i];
+        
+        const operationName = opData.operation || opData;
+        const detailName = opData.detail || '';
+        const thickness = opData.thickness || '';
+        
+        // Формируем название операции с деталью
+        let displayOperationName = operationName;
+        if (detailName) {
+            let cleanDetailName = detailName;
+            if (thickness) {
+                cleanDetailName = detailName.replace(thickness, '').trim();
             }
+            displayOperationName = `${operationName} (${cleanDetailName})`;
+            if (thickness) {
+                displayOperationName += ` ${thickness}`;
+            }
+        }
+        
+        let squareClass = '';
+        let isAdded = false;
 
-            let operationsHtml = '';
-            let completedCount = 0;
-
-            for (let i = 0; i < operations.length; i++) {
-                const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
-                const operationName = operations[i];
-                
-                let detailName = '';
-                let thickness = '';
-                if (operationsWithDetails[i] && typeof operationsWithDetails[i] === 'object') {
-                    detailName = operationsWithDetails[i].detail || '';
-                    thickness = operationsWithDetails[i].thickness || '';
-                }
-                
-                let squareClass = '';
-                let isAdded = false;
-
-                if (order.tasks && order.tasks[taskId]) {
+        if (order.tasks && order.tasks[taskId]) {
+            isAdded = true;
+            const taskStatus = order.tasks[taskId];
+            if (taskStatus === 'green' || taskStatus === 'completed') {
+                squareClass = 'green';
+                completedCount++;
+            } else if (taskStatus === 'orange' || taskStatus === 'in_progress') {
+                squareClass = 'orange';
+            }
+        }
+        
+        // Дополнительная проверка в localStorage
+        try {
+            const storageKey = `tasks_${siteKey}`;
+            const saved = localStorage.getItem(storageKey);
+            if (saved) {
+                const existingTasks = JSON.parse(saved);
+                const existingTask = existingTasks.find(t => t.id === taskId);
+                if (existingTask) {
                     isAdded = true;
-                    const taskStatus = order.tasks[taskId];
-                    if (taskStatus === 'green' || taskStatus === 'completed') {
+                    if (existingTask.status === 'completed') {
                         squareClass = 'green';
                         completedCount++;
-                    } else if (taskStatus === 'orange' || taskStatus === 'in_progress') {
+                    } else if (existingTask.status === 'in_progress') {
                         squareClass = 'orange';
                     }
                 }
+            }
+        } catch(e) { console.error(e); }
 
-                let detailDisplay = '';
-                if (detailName) {
-                    let materialName = detailName;
-                    let thicknessText = '';
-                    if (thickness) {
-                        thicknessText = `<span class="thickness">${escapeHtml(thickness)}</span>`;
-                        materialName = materialName.replace(thickness, '').trim();
-                    }
-                    detailDisplay = `<div class="operation-detail"><span class="material">📦 ${escapeHtml(materialName)}</span> ${thicknessText}</div>`;
+        // Получаем плановое количество для этой детали
+        let plannedQuantity = 1;
+        if (detailName) {
+            const details = item.details || [];
+            for (const detail of details) {
+                if (detail.name === detailName) {
+                    plannedQuantity = detail.quantity;
+                    break;
                 }
-                
-                operationsHtml += `
-                    <div class="operation-item">
-                        <div class="operation-info">
-                            <div class="operation-name">${escapeHtml(operationName)}</div>
-                            ${detailDisplay}
-                        </div>
-                        <div class="operation-controls">
-                            <div class="square-status ${squareClass}" data-task-id="${taskId}"></div>
-                            <div class="action-buttons">
-                                <button class="action-btn btn-add ${isAdded ? 'added' : ''}" 
-                                        onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', false)">
-                                    ${isAdded ? '✓' : '+'}
-                                </button>
-                                <button class="action-btn btn-priority" 
-                                        onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', true)">
-                                    🔴
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
             }
-
-            const files = order.siteFiles?.[siteKey] || [];
-            const hasFiles = files.length > 0;
-            
-            let filesIndicatorHtml = '';
-            if (hasFiles) {
-                filesIndicatorHtml = `
-                    <div class="file-indicator">
-                        <span>📎 Файлы: ${files.length} шт</span>
-                        <button class="btn-sm" style="background: #dc3545; padding: 2px 8px; font-size: 9px;" onclick="event.stopPropagation(); clearAllSiteFiles(${order.id}, '${siteKey}')">✕ Очистить</button>
-                    </div>
-                `;
-            }
-
-            return `
-                <div class="site-card">
-                    <div class="site-card-header">
-                        <div class="site-name">${name}</div>
-                        <div class="site-stats">
-                            <span class="completed">${completedCount}</span>/<span class="total">${operations.length}</span>
-                        </div>
-                    </div>
-                    <div class="site-card-content">
-                        ${operationsHtml}
-                        <div style="display: flex; gap: 8px; margin-top: 8px;">
-                            <button class="btn-add-extra" style="flex: 1;" onclick="event.stopPropagation(); addExtraTask(${order.id}, '${siteKey}')">➕ Доп. задача</button>
-                            <button class="btn-file" style="flex: 1;" onclick="event.stopPropagation(); addSiteFile(${order.id}, '${siteKey}')">📎 Добавить файл</button>
-                        </div>
-                        ${filesIndicatorHtml}
+        }
+        
+        operationsHtml += `
+            <div class="operation-item">
+                <div class="operation-info">
+                    <div class="operation-name">${escapeHtml(displayOperationName)}</div>
+                    <div class="operation-plan">📋 План: ${plannedQuantity} шт</div>
+                </div>
+                <div class="operation-controls">
+                    <div class="square-status ${squareClass}" data-task-id="${taskId}"></div>
+                    <div class="action-buttons">
+                        <button class="action-btn btn-add ${isAdded ? 'added' : ''}" 
+                                onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', false)">
+                            ${isAdded ? '✓' : '+'}
+                        </button>
+                        <button class="action-btn btn-priority" 
+                                onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', true)">
+                            🔴
+                        </button>
                     </div>
                 </div>
-            `;
-        }
+            </div>
+        `;
+    }
+
+    const files = order.siteFiles?.[siteKey] || [];
+    const hasFiles = files.length > 0;
+    
+    let filesIndicatorHtml = '';
+    if (hasFiles) {
+        filesIndicatorHtml = `
+            <div class="file-indicator">
+                <span>📎 Файлы: ${files.length} шт</span>
+                <button class="btn-sm" style="background: #dc3545; padding: 2px 8px; font-size: 9px;" onclick="event.stopPropagation(); clearAllSiteFiles(${order.id}, '${siteKey}')">✕ Очистить</button>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="site-card">
+            <div class="site-card-header">
+                <div class="site-name">${name}</div>
+                <div class="site-stats">
+                    <span class="completed">${completedCount}</span>/<span class="total">${operationsWithDetails.length}</span>
+                </div>
+            </div>
+            <div class="site-card-content">
+                ${operationsHtml}
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button class="btn-add-extra" style="flex: 1;" onclick="event.stopPropagation(); addExtraTask(${order.id}, '${siteKey}')">➕ Доп. задача</button>
+                    <button class="btn-file" style="flex: 1;" onclick="event.stopPropagation(); addSiteFile(${order.id}, '${siteKey}')">📎 Добавить файл</button>
+                </div>
+                ${filesIndicatorHtml}
+            </div>
+        </div>
+    `;
+}
 
         // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ ==============
         function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName, isPriority = false) {
