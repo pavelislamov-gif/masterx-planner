@@ -1967,9 +1967,6 @@
                 return;
             }
             
-            // Сохраняем путь как есть, без изменений
-            // Для корректного отображения в HTML экранируем только при выводе
-            
             const orders = loadOrdersFromStorage();
             const order = orders.find(o => o.id == orderId);
             if (!order) {
@@ -2120,7 +2117,7 @@
             `;
         }
 
-        // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ ==============
+        // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ (С СОХРАНЕНИЕМ ДЕТАЛИ И ТОЛЩИНЫ) ==============
         function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName, isPriority = false) {
             const orders = loadOrdersFromStorage();
             const order = orders.find(o => o.id == orderId);
@@ -2162,6 +2159,8 @@
                 const item = order.items[itemIndex];
 
                 let plannedQuantity = 1;
+                let detailName = '';
+                let thickness = '';
 
                 const siteColumnMap = {
                     'tokarniy': 'токарно-фрезерный',
@@ -2177,12 +2176,17 @@
                 if (productOps && siteColumn && productOps[siteColumn]) {
                     const opData = productOps[siteColumn].find(op => op.operation === operationName);
 
-                    if (opData && opData.detail) {
-                        const details = item.details || [];
-                        for (const detail of details) {
-                            if (detail.name === opData.detail) {
-                                plannedQuantity = detail.quantity;
-                                break;
+                    if (opData) {
+                        detailName = opData.detail || '';
+                        thickness = opData.thickness || '';
+                        
+                        if (opData.detail) {
+                            const details = item.details || [];
+                            for (const detail of details) {
+                                if (detail.name === opData.detail) {
+                                    plannedQuantity = detail.quantity;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -2195,9 +2199,14 @@
                     orderNumber: order.number,
                     product: item.product,
                     size: item.size?.name || 'Стандартный',
+                    sizeQuantity: item.size?.quantity || 1,
                     totalQuantity: plannedQuantity,
                     completedQuantity: 0,
                     operation: operationName,
+                    detail: detailName,
+                    thickness: thickness,
+                    ral: item.ral || '',
+                    texture: item.texture || '',
                     index: opIndex,
                     status: 'pending',
                     executors: [],
