@@ -2238,40 +2238,54 @@
 
         // ============== СИНХРОНИЗАЦИЯ ВСЕХ ЗАДАЧ ПРИ ЗАГРУЗКЕ ==============
         function syncAllTasksToOrders() {
-            const orders = loadOrdersFromStorage();
-            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
-            let updated = false;
-            
-            orders.forEach(order => {
-                if (!order.tasks) order.tasks = {};
-                
-                sites.forEach(site => {
-                    const orderDate = order.date;
-                    const storageKey = `tasks_${site}_${orderDate}`;
-                    const tasksJson = localStorage.getItem(storageKey);
-                    if (tasksJson) {
-                        const tasks = JSON.parse(tasksJson);
-                        tasks.forEach(task => {
-                            if (task.orderId == order.id) {
-                                const taskId = `${order.id}_${site}_${task.itemIndex}_${task.index}`;
-                                let squareColor = '';
-                                if (task.status === 'completed') squareColor = 'green';
-                                else if (task.status === 'in_progress') squareColor = 'orange';
-                                else if (task.status === 'pending') squareColor = '';
-                                if (squareColor && order.tasks[taskId] !== squareColor) {
-                                    order.tasks[taskId] = squareColor;
-                                    updated = true;
-                                }
-                            }
-                        });
+    const orders = loadOrdersFromStorage();
+    const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+    let updated = false;
+    
+    orders.forEach(order => {
+        if (!order.tasks) order.tasks = {};
+        
+        // Собираем актуальные ID задач из localStorage
+        const activeTaskIds = new Set();
+        
+        sites.forEach(site => {
+            const storageKey = `tasks_${site}`;
+            const tasksJson = localStorage.getItem(storageKey);
+            if (tasksJson) {
+                const tasks = JSON.parse(tasksJson);
+                tasks.forEach(task => {
+                    if (task.orderId == order.id) {
+                        const taskId = `${order.id}_${site}_${task.itemIndex}_${task.index}`;
+                        activeTaskIds.add(taskId);
+                        
+                        // Обновляем статус
+                        let squareColor = '';
+                        if (task.status === 'completed') squareColor = 'green';
+                        else if (task.status === 'in_progress') squareColor = 'orange';
+                        
+                        if (squareColor && order.tasks[taskId] !== squareColor) {
+                            order.tasks[taskId] = squareColor;
+                            updated = true;
+                        }
                     }
                 });
-            });
-            
-            if (updated) {
-                saveOrdersToStorage(orders);
+            }
+        });
+        
+        // Удаляем задачи, которых нет в активных
+        for (const taskId in order.tasks) {
+            if (!activeTaskIds.has(taskId)) {
+                delete order.tasks[taskId];
+                updated = true;
+                console.log(`Удалена устаревшая задача: ${taskId}`);
             }
         }
+    });
+    
+    if (updated) {
+        saveOrdersToStorage(orders);
+    }
+}
 
         // ============== ОТОБРАЖЕНИЕ СПИСКА ГРУПП ==============
         function renderOrdersList() {
