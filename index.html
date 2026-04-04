@@ -2472,24 +2472,24 @@
                 const header = document.createElement('div');
                 header.className = `order-header ${statusClass}`;
                 header.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-        <div>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <h3 style="margin: 0;">🏢 <span id="group-name-${order.id}">${escapeHtml(order.groupName)}</span></h3>
-                <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); editGroupName(${order.id})" style="padding: 2px 8px; font-size: 11px;" title="Редактировать название">✏️</button>
-            </div>
-            <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
-                Заказ №${order.number || '---'} | Изделий: ${order.items ? order.items.length : 0}
-                ${groupStatus === 'green' ? ' | ✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? ' | ⚡ В РАБОТЕ' : ' | ⏳ ОЖИДАЕТ')}
-            </div>
-        </div>
-        <div style="display: flex; gap: 8px;">
-            <button class="btn btn-primary" onclick="event.stopPropagation(); showOrderReport(${order.id})" style="background: #0077ff;">📋 Отчёт по заказу</button>
-            <button class="btn btn-info" onclick="event.stopPropagation(); editGroup(${order.id})">✏️ Редактировать состав</button>
-            <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
-        </div>
-    </div>
-`;
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <h3 style="margin: 0;">🏢 <span id="group-name-${order.id}">${escapeHtml(order.groupName)}</span></h3>
+                                <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); editGroupName(${order.id})" style="padding: 2px 8px; font-size: 11px;" title="Редактировать название">✏️</button>
+                            </div>
+                            <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">
+                                Заказ №${order.number || '---'} | Изделий: ${order.items ? order.items.length : 0}
+                                ${groupStatus === 'green' ? ' | ✅ ВЫПОЛНЕНО' : (groupStatus === 'orange' ? ' | ⚡ В РАБОТЕ' : ' | ⏳ ОЖИДАЕТ')}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-primary" onclick="event.stopPropagation(); showOrderReport(${order.id})" style="background: #0077ff;">📋 Отчёт по заказу</button>
+                            <button class="btn btn-info" onclick="event.stopPropagation(); editGroup(${order.id})">✏️ Редактировать состав</button>
+                            <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
+                        </div>
+                    </div>
+                `;
 
                 const content = document.createElement('div');
                 content.className = 'order-content';
@@ -2498,28 +2498,26 @@
                 if (order.items && order.items.length > 0) {
                     order.items.forEach((item, itemIndex) => {
                         // Принудительно обновляем RAL и текстуру из свежих данных
-const freshOrders = loadOrdersFromStorage();
-const freshOrder = freshOrders.find(o => o.id === order.id);
-if (freshOrder && freshOrder.items[itemIndex]) {
-    const freshItem = freshOrder.items[itemIndex];
-    // Обновляем item свежими данными
-    item.ral = freshItem.ral;
-    item.texture = freshItem.texture;
-    // Также обновляем другие поля на всякий случай
-    if (freshItem.size) item.size = freshItem.size;
-    if (freshItem.details) item.details = freshItem.details;
-    if (freshItem.product) item.product = freshItem.product;
-}
+                        const freshOrders = loadOrdersFromStorage();
+                        const freshOrder = freshOrders.find(o => o.id === order.id);
+                        if (freshOrder && freshOrder.items[itemIndex]) {
+                            const freshItem = freshOrder.items[itemIndex];
+                            item.ral = freshItem.ral;
+                            item.texture = freshItem.texture;
+                            if (freshItem.size) item.size = freshItem.size;
+                            if (freshItem.details) item.details = freshItem.details;
+                            if (freshItem.product) item.product = freshItem.product;
+                        }
 
-// Формируем отображение RAL и текстуры
-let ralTextureHtml = '';
-if (item.ral && item.ral.trim() !== '') {
-    ralTextureHtml = `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>`;
-} else if (item.texture && item.texture.trim() !== '') {
-    ralTextureHtml = `<span style="font-size: 11px; color: #ff9800;">🎨 не указан / ${escapeHtml(item.texture)}</span>`;
-} else {
-    ralTextureHtml = `<span style="font-size: 11px; color: #6c757d;">🎨 не указан</span>`;
-}
+                        // Формируем отображение RAL и текстуры (ТОЛЬКО ОДИН РАЗ!)
+                        let ralTextureHtml = '';
+                        if (item.ral && item.ral.trim() !== '') {
+                            ralTextureHtml = `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>`;
+                        } else if (item.texture && item.texture.trim() !== '') {
+                            ralTextureHtml = `<span style="font-size: 11px; color: #ff9800;">🎨 не указан / ${escapeHtml(item.texture)}</span>`;
+                        } else {
+                            ralTextureHtml = `<span style="font-size: 11px; color: #6c757d;">🎨 не указан</span>`;
+                        }
                         
                         // Определяем статус ТОЛЬКО для этого изделия с учётом исполнителей
                         let hasAnyTask = false;
@@ -2581,14 +2579,6 @@ if (item.ral && item.ral.trim() !== '') {
                         
                         const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
                         const profiles = (item.details || []).filter(d => d.type === 'profile');
-                        
-                        // Формируем отображение RAL и текстуры
-                        let ralTextureHtml = '';
-                        if (item.ral || item.texture) {
-                            ralTextureHtml = `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</span>`;
-                        } else {
-                            ralTextureHtml = `<span style="font-size: 11px; color: #6c757d;">🎨 не указан</span>`;
-                        }
                         
                         const itemDiv = document.createElement('div');
                         itemDiv.style.marginBottom = '20px';
@@ -3068,211 +3058,205 @@ if (item.ral && item.ral.trim() !== '') {
         }
 
         // ============== ЕДИНЫЙ ОТЧЁТ ПО ЗАКАЗУ ==============
-function showOrderReport(orderId) {
-    const orders = loadOrdersFromStorage();
-    const order = orders.find(o => o.id == orderId);
-    if (!order) {
-        alert('Заказ не найден');
-        return;
-    }
-    
-    // Собираем все отчёты из localStorage
-    const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-    
-    const siteNames = {
-        'polimerniy': '🎨 ПОЛИМЕРНЫЙ УЧАСТОК',
-        'slesarniy': '🔩 СЛЕСАРНЫЙ УЧАСТОК',
-        'frezerniy': '⚙️ ФРЕЗЕРНЫЙ УЧАСТОК',
-        'tokarniy': '🔧 ТОКАРНЫЙ УЧАСТОК',
-        'lazerno': '✨ ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
-    };
-    
-    // Собираем данные по каждому изделию
-    const itemsData = [];
-    
-    order.items.forEach((item, itemIndex) => {
-        const itemKey = `${order.id}_item${itemIndex}_${item.product}_${item.size?.name || ''}_${item.ral || ''}`;
-        
-        // Находим все отчёты для этого изделия
-        const itemReports = allReports.filter(report => {
-            if (report.isItemReport && report.itemKey === itemKey) return true;
-            if (report.isItemReport && report.orderId == orderId && 
-                report.product === item.product && 
-                report.size === item.size?.name) return true;
-            if (report.taskId) {
-                const parts = report.taskId.split('_');
-                return parts.length >= 3 && parts[0] == orderId && parts[2] == itemIndex;
-            }
-            return false;
-        });
-        
-        const reportsBySite = {};
-        
-        itemReports.forEach(report => {
-            if (report.siteKey && report.rows && report.rows.length > 0) {
-                if (!reportsBySite[report.siteKey]) {
-                    reportsBySite[report.siteKey] = [];
-                }
-                reportsBySite[report.siteKey].push(...report.rows);
-            }
-        });
-        
-        itemsData.push({
-            product: item.product,
-            size: item.size?.name,
-            quantity: item.size?.quantity,
-            ral: item.ral,
-            texture: item.texture,
-            reportsBySite: reportsBySite,
-            details: item.details || []
-        });
-    });
-    
-    // Формируем HTML отчёта
-    let hasAnyData = false;
-    let itemsHtml = '';
-    
-    for (const item of itemsData) {
-        const hasReports = Object.keys(item.reportsBySite).length > 0;
-        
-        if (hasReports) {
-            hasAnyData = true;
-            
-            // Профили и детали
-            const profiles = item.details.filter(d => d.type === 'profile');
-            const details = item.details.filter(d => d.type !== 'profile');
-            
-            let profilesHtml = '';
-            let detailsHtml = '';
-            
-            if (profiles.length > 0) {
-                profilesHtml = `<div style="margin-bottom: 10px;"><strong>📐 Профили:</strong><br>`;
-                profiles.forEach(p => {
-                    profilesHtml += `<span style="display: inline-block; background: #1e232b; padding: 2px 8px; border-radius: 4px; margin: 2px; font-size: 11px;">${escapeHtml(p.name)} ${p.lengthMm || 0}мм × ${p.quantity} шт</span>`;
-                });
-                profilesHtml += `</div>`;
+        function showOrderReport(orderId) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) {
+                alert('Заказ не найден');
+                return;
             }
             
-            if (details.length > 0) {
-                detailsHtml = `<div style="margin-bottom: 10px;"><strong>🔩 Детали:</strong><br>`;
-                details.forEach(d => {
-                    detailsHtml += `<span style="display: inline-block; background: #1e232b; padding: 2px 8px; border-radius: 4px; margin: 2px; font-size: 11px;">${escapeHtml(d.name)} × ${d.quantity} шт</span>`;
-                });
-                detailsHtml += `</div>`;
-            }
+            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
             
-            // Отчёты по участкам
-            let sitesHtml = '';
-            for (const [siteKey, rows] of Object.entries(item.reportsBySite)) {
-                let rowsHtml = '';
-                rows.forEach(row => {
-                    const расход = row.расход || 0;
-                    const единица = row.единица || 'гр';
-                    const количество = row.количество || 0;
-                    const комментарий = row.комментарий || '';
-                    
-                    let text = `📊 Расход: ${расход} ${единица}, 📦 Количество: ${количество} шт`;
-                    if (комментарий) text += `, 💬 ${комментарий}`;
-                    
-                    rowsHtml += `<div style="padding: 4px 0; font-size: 12px; border-bottom: 1px solid #2a2f38;">${escapeHtml(text)}</div>`;
+            const siteNames = {
+                'polimerniy': '🎨 ПОЛИМЕРНЫЙ УЧАСТОК',
+                'slesarniy': '🔩 СЛЕСАРНЫЙ УЧАСТОК',
+                'frezerniy': '⚙️ ФРЕЗЕРНЫЙ УЧАСТОК',
+                'tokarniy': '🔧 ТОКАРНЫЙ УЧАСТОК',
+                'lazerno': '✨ ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
+            };
+            
+            const itemsData = [];
+            
+            order.items.forEach((item, itemIndex) => {
+                const itemKey = `${order.id}_item${itemIndex}_${item.product}_${item.size?.name || ''}_${item.ral || ''}`;
+                
+                const itemReports = allReports.filter(report => {
+                    if (report.isItemReport && report.itemKey === itemKey) return true;
+                    if (report.isItemReport && report.orderId == orderId && 
+                        report.product === item.product && 
+                        report.size === item.size?.name) return true;
+                    if (report.taskId) {
+                        const parts = report.taskId.split('_');
+                        return parts.length >= 3 && parts[0] == orderId && parts[2] == itemIndex;
+                    }
+                    return false;
                 });
                 
-                sitesHtml += `
-                    <div style="margin-top: 15px; border: 1px solid #2a2f38; border-radius: 6px; overflow: hidden;">
-                        <div style="background: linear-gradient(135deg, #1a1e24, #15191f); padding: 6px 10px;">
-                            <h4 style="margin: 0; color: #ff3b3b; font-size: 13px;">${siteNames[siteKey] || siteKey}</h4>
+                const reportsBySite = {};
+                
+                itemReports.forEach(report => {
+                    if (report.siteKey && report.rows && report.rows.length > 0) {
+                        if (!reportsBySite[report.siteKey]) {
+                            reportsBySite[report.siteKey] = [];
+                        }
+                        reportsBySite[report.siteKey].push(...report.rows);
+                    }
+                });
+                
+                itemsData.push({
+                    product: item.product,
+                    size: item.size?.name,
+                    quantity: item.size?.quantity,
+                    ral: item.ral,
+                    texture: item.texture,
+                    reportsBySite: reportsBySite,
+                    details: item.details || []
+                });
+            });
+            
+            let hasAnyData = false;
+            let itemsHtml = '';
+            
+            for (const item of itemsData) {
+                const hasReports = Object.keys(item.reportsBySite).length > 0;
+                
+                if (hasReports) {
+                    hasAnyData = true;
+                    
+                    const profiles = item.details.filter(d => d.type === 'profile');
+                    const details = item.details.filter(d => d.type !== 'profile');
+                    
+                    let profilesHtml = '';
+                    let detailsHtml = '';
+                    
+                    if (profiles.length > 0) {
+                        profilesHtml = `<div style="margin-bottom: 10px;"><strong>📐 Профили:</strong><br>`;
+                        profiles.forEach(p => {
+                            profilesHtml += `<span style="display: inline-block; background: #1e232b; padding: 2px 8px; border-radius: 4px; margin: 2px; font-size: 11px;">${escapeHtml(p.name)} ${p.lengthMm || 0}мм × ${p.quantity} шт</span>`;
+                        });
+                        profilesHtml += `</div>`;
+                    }
+                    
+                    if (details.length > 0) {
+                        detailsHtml = `<div style="margin-bottom: 10px;"><strong>🔩 Детали:</strong><br>`;
+                        details.forEach(d => {
+                            detailsHtml += `<span style="display: inline-block; background: #1e232b; padding: 2px 8px; border-radius: 4px; margin: 2px; font-size: 11px;">${escapeHtml(d.name)} × ${d.quantity} шт</span>`;
+                        });
+                        detailsHtml += `</div>`;
+                    }
+                    
+                    let sitesHtml = '';
+                    for (const [siteKey, rows] of Object.entries(item.reportsBySite)) {
+                        let rowsHtml = '';
+                        rows.forEach(row => {
+                            const расход = row.расход || 0;
+                            const единица = row.единица || 'гр';
+                            const количество = row.количество || 0;
+                            const комментарий = row.комментарий || '';
+                            
+                            let text = `📊 Расход: ${расход} ${единица}, 📦 Количество: ${количество} шт`;
+                            if (комментарий) text += `, 💬 ${комментарий}`;
+                            
+                            rowsHtml += `<div style="padding: 4px 0; font-size: 12px; border-bottom: 1px solid #2a2f38;">${escapeHtml(text)}</div>`;
+                        });
+                        
+                        sitesHtml += `
+                            <div style="margin-top: 15px; border: 1px solid #2a2f38; border-radius: 6px; overflow: hidden;">
+                                <div style="background: linear-gradient(135deg, #1a1e24, #15191f); padding: 6px 10px;">
+                                    <h4 style="margin: 0; color: #ff3b3b; font-size: 13px;">${siteNames[siteKey] || siteKey}</h4>
+                                </div>
+                                <div style="padding: 8px;">${rowsHtml}</div>
+                            </div>
+                        `;
+                    }
+                    
+                    itemsHtml += `
+                        <div style="margin-bottom: 25px; border: 1px solid #2a2f38; border-radius: 8px; overflow: hidden;">
+                            <div style="background: linear-gradient(135deg, #232830, #1a1e24); padding: 10px 15px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                    <div>
+                                        <span style="font-weight: 600; color: #ff3b3b; font-size: 16px;">📦 ${escapeHtml(item.product)}</span>
+                                        <span style="font-size: 12px; color: #4cd964; margin-left: 10px;">${escapeHtml(item.size || '-')} × ${item.quantity || 0} шт</span>
+                                    </div>
+                                    <div>
+                                        <span style="font-size: 12px; color: #ff9800;">🎨 ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="padding: 15px;">
+                                ${profilesHtml}
+                                ${detailsHtml}
+                                ${sitesHtml}
+                            </div>
                         </div>
-                        <div style="padding: 8px;">${rowsHtml}</div>
-                    </div>
-                `;
+                    `;
+                }
             }
             
-            itemsHtml += `
-                <div style="margin-bottom: 25px; border: 1px solid #2a2f38; border-radius: 8px; overflow: hidden;">
-                    <div style="background: linear-gradient(135deg, #232830, #1a1e24); padding: 10px 15px;">
+            let html = `
+                <div style="padding: 20px;">
+                    <div style="margin-bottom: 20px; border-bottom: 2px solid #ff3b3b; padding-bottom: 15px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                             <div>
-                                <span style="font-weight: 600; color: #ff3b3b; font-size: 16px;">📦 ${escapeHtml(item.product)}</span>
-                                <span style="font-size: 12px; color: #4cd964; margin-left: 10px;">${escapeHtml(item.size || '-')} × ${item.quantity || 0} шт</span>
+                                <h2 style="color: #ff3b3b; margin: 0;">📋 ЕДИНЫЙ ОТЧЁТ ПО ЗАКАЗУ</h2>
+                                <h3 style="margin: 5px 0 0 0;">${escapeHtml(order.groupName)}</h3>
                             </div>
-                            <div>
-                                <span style="font-size: 12px; color: #ff9800;">🎨 ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</span>
+                            <div style="text-align: right;">
+                                <div style="font-size: 14px; color: #a0a0a0;">Заказ №${order.number || '---'}</div>
+                                <div style="font-size: 12px; color: #a0a0a0;">Дата: ${order.date}</div>
                             </div>
                         </div>
                     </div>
-                    <div style="padding: 15px;">
-                        ${profilesHtml}
-                        ${detailsHtml}
-                        ${sitesHtml}
-                    </div>
-                </div>
             `;
-        }
-    }
-    
-    let html = `
-        <div style="padding: 20px;">
-            <div style="margin-bottom: 20px; border-bottom: 2px solid #ff3b3b; padding-bottom: 15px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <div>
-                        <h2 style="color: #ff3b3b; margin: 0;">📋 ЕДИНЫЙ ОТЧЁТ ПО ЗАКАЗУ</h2>
-                        <h3 style="margin: 5px 0 0 0;">${escapeHtml(order.groupName)}</h3>
+            
+            if (!hasAnyData) {
+                html += `
+                    <div style="text-align: center; padding: 40px; background: #15191f; border-radius: 8px;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📭</div>
+                        <p>Нет данных по расходу материалов</p>
+                        <p style="font-size: 11px; color: #6c757d;">Данные добавляются на участках через кнопку "Отчёт"</p>
                     </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 14px; color: #a0a0a0;">Заказ №${order.number || '---'}</div>
-                        <div style="font-size: 12px; color: #a0a0a0;">Дата: ${order.date}</div>
-                    </div>
+                `;
+            } else {
+                html += itemsHtml;
+            }
+            
+            html += `
+                <div style="display: flex; justify-content: center; gap: 12px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #2a2f38;">
+                    <button class="btn btn-primary" onclick="printOrderReport()">🖨️ Распечатать</button>
+                    <button class="btn btn-danger" onclick="closeOrderReportModal()">✖️ Закрыть</button>
                 </div>
-            </div>
-    `;
-    
-    if (!hasAnyData) {
-        html += `
-            <div style="text-align: center; padding: 40px; background: #15191f; border-radius: 8px;">
-                <div style="font-size: 48px; margin-bottom: 10px;">📭</div>
-                <p>Нет данных по расходу материалов</p>
-                <p style="font-size: 11px; color: #6c757d;">Данные добавляются на участках через кнопку "Отчёт"</p>
-            </div>
-        `;
-    } else {
-        html += itemsHtml;
-    }
-    
-    html += `
-        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #2a2f38;">
-            <button class="btn btn-primary" onclick="printOrderReport()">🖨️ Распечатать</button>
-            <button class="btn btn-danger" onclick="closeOrderReportModal()">✖️ Закрыть</button>
-        </div>
-    </div>`;
-    
-    const modal = document.getElementById('orderReportModal');
-    const contentDiv = document.getElementById('orderReportContent');
-    contentDiv.innerHTML = html;
-    modal.style.display = 'block';
-    
-    window.currentOrderReportHtml = html;
-}
+            </div>`;
+            
+            const modal = document.getElementById('orderReportModal');
+            const contentDiv = document.getElementById('orderReportContent');
+            contentDiv.innerHTML = html;
+            modal.style.display = 'block';
+            
+            window.currentOrderReportHtml = html;
+        }
 
-function printOrderReport() {
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <html>
-            <head>
-                <title>Отчёт по заказу</title>
-                <style>
-                    body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: white; color: black; }
-                    .btn { display: none; }
-                    @media print {
-                        .btn { display: none; }
-                    }
-                </style>
-            </head>
-            <body>${window.currentOrderReportHtml}</body>
-        </html>
-    `);
-    printWindow.print();
-    printWindow.close();
-}
+        function printOrderReport() {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Отчёт по заказу</title>
+                        <style>
+                            body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: white; color: black; }
+                            .btn { display: none; }
+                            @media print {
+                                .btn { display: none; }
+                            }
+                        </style>
+                    </head>
+                    <body>${window.currentOrderReportHtml}</body>
+                </html>
+            `);
+            printWindow.print();
+            printWindow.close();
+        }
 
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         async function initMainPage() {
@@ -3334,6 +3318,8 @@ function printOrderReport() {
         window.printCurrentReport = printCurrentReport;
         window.addSiteFile = addSiteFile;
         window.clearAllSiteFiles = clearAllSiteFiles;
+        window.showOrderReport = showOrderReport;
+        window.printOrderReport = printOrderReport;
 
         document.addEventListener('DOMContentLoaded', initMainPage);
     </script>
