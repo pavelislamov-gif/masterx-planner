@@ -1091,7 +1091,6 @@
 
     <script src="js/storage.js"></script>
     <script src="js/data-loader.js"></script>
-    <script src="js/task-operations.js"></script>
     <script src="js/materials-report.js"></script>
     <script src="js/task-manager.js"></script>
 
@@ -2545,12 +2544,21 @@
                         const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
                         const profiles = (item.details || []).filter(d => d.type === 'profile');
                         
-                        let ralTextureHtml = '';
-                        if (item.ral || item.texture) {
-                            ralTextureHtml = `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</span>`;
-                        } else {
-                            ralTextureHtml = `<span style="font-size: 11px; color: #6c757d;">🎨 не указан</span>`;
-                        }
+                        // Принудительно обновляем item из сохранённых данных (на случай, если item устарел)
+const freshOrders = loadOrdersFromStorage();
+const freshOrder = freshOrders.find(o => o.id === order.id);
+if (freshOrder && freshOrder.items[itemIndex]) {
+    item.ral = freshOrder.items[itemIndex].ral;
+    item.texture = freshOrder.items[itemIndex].texture;
+}
+
+// Формируем отображение RAL и текстуры
+let ralTextureHtml = '';
+if (item.ral || item.texture) {
+    ralTextureHtml = `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</span>`;
+} else {
+    ralTextureHtml = `<span style="font-size: 11px; color: #6c757d;">🎨 не указан</span>`;
+}
                         
                         const itemDiv = document.createElement('div');
                         itemDiv.style.marginBottom = '20px';
