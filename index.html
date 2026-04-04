@@ -2496,13 +2496,29 @@
 
                 if (order.items && order.items.length > 0) {
                     order.items.forEach((item, itemIndex) => {
-                        // Принудительно обновляем RAL из свежих данных
-                        const freshOrders = loadOrdersFromStorage();
-                        const freshOrder = freshOrders.find(o => o.id === order.id);
-                        if (freshOrder && freshOrder.items[itemIndex]) {
-                            item.ral = freshOrder.items[itemIndex].ral;
-                            item.texture = freshOrder.items[itemIndex].texture;
-                        }
+                        // Принудительно обновляем RAL и текстуру из свежих данных
+const freshOrders = loadOrdersFromStorage();
+const freshOrder = freshOrders.find(o => o.id === order.id);
+if (freshOrder && freshOrder.items[itemIndex]) {
+    const freshItem = freshOrder.items[itemIndex];
+    // Обновляем item свежими данными
+    item.ral = freshItem.ral;
+    item.texture = freshItem.texture;
+    // Также обновляем другие поля на всякий случай
+    if (freshItem.size) item.size = freshItem.size;
+    if (freshItem.details) item.details = freshItem.details;
+    if (freshItem.product) item.product = freshItem.product;
+}
+
+// Формируем отображение RAL и текстуры
+let ralTextureHtml = '';
+if (item.ral && item.ral.trim() !== '') {
+    ralTextureHtml = `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>`;
+} else if (item.texture && item.texture.trim() !== '') {
+    ralTextureHtml = `<span style="font-size: 11px; color: #ff9800;">🎨 не указан / ${escapeHtml(item.texture)}</span>`;
+} else {
+    ralTextureHtml = `<span style="font-size: 11px; color: #6c757d;">🎨 не указан</span>`;
+}
                         
                         // Определяем статус ТОЛЬКО для этого изделия с учётом исполнителей
                         let hasAnyTask = false;
