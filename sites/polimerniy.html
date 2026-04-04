@@ -6,7 +6,6 @@
     <title>MasterX - Полимерный участок</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        /* Карточка операции */
         .task-card {
             background: #1a1e24;
             border-radius: 12px;
@@ -52,10 +51,6 @@
         .task-header.priority {
             background: linear-gradient(135deg, #4a1a1a, #3a0f0f) !important;
             border-left: 4px solid #ff3b3b !important;
-        }
-
-        .task-header.priority .task-customer-name {
-            color: #ff6b6b !important;
         }
 
         .task-header-left {
@@ -194,6 +189,7 @@
         .operation-detail {
             font-size: 12px;
             color: #a0a0a0;
+            margin-bottom: 4px;
         }
 
         .operation-detail span {
@@ -396,7 +392,6 @@
             border: none;
         }
 
-        /* Фильтры */
         .filter-section {
             display: flex;
             gap: 12px;
@@ -431,11 +426,6 @@
             color: #fff;
             font-size: 12px;
             min-width: 140px;
-        }
-
-        .filter-group select:focus, .filter-group input:focus {
-            outline: none;
-            border-color: #ff3b3b;
         }
 
         .btn-reset {
@@ -517,7 +507,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Правая модальная панель */
         .right-modal {
             position: fixed;
             right: -450px;
@@ -634,7 +623,6 @@
             font-size: 11px;
         }
 
-        /* Анимации для уведомлений */
         @keyframes slideInRight {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
@@ -686,10 +674,6 @@
             background: linear-gradient(135deg, #fee2e2, #fecaca) !important;
         }
 
-        body.light-theme .task-header.priority .task-customer-name {
-            color: #dc2626 !important;
-        }
-
         body.light-theme .task-customer-name {
             color: #dc2626 !important;
         }
@@ -724,10 +708,6 @@
             background: #28a745 !important;
             color: white !important;
         }
-
-        body.light-theme .priority-badge {
-            background: #ff3b3b !important;
-        }
     </style>
 </head>
 <body>
@@ -740,7 +720,6 @@
             <h1 style="margin:0; color: white; font-size:18px;">🎨 Полимерный участок</h1>
         </header>
 
-        <!-- ФИЛЬТРЫ -->
         <div class="filter-section">
             <div class="filter-group">
                 <label>🏢 ЗАКАЗЧИК</label>
@@ -874,15 +853,19 @@
         }
         
         async function loadTaskOperationsData() {
+            if (typeof window.TASK_OPERATIONS !== 'undefined' && window.TASK_OPERATIONS.polimerniy) {
+                console.log('✅ Используем TASK_OPERATIONS для полимерного участка');
+                taskOperationsData = window.TASK_OPERATIONS.polimerniy;
+                return;
+            }
             try {
                 const response = await fetch('../data/taskOperations.json');
                 if (response.ok) {
                     const data = await response.json();
-                    taskOperationsData = data.operations || {};
-                    console.log('✅ Загружены операции из taskOperations.json');
+                    taskOperationsData = data.operations?.polimerniy || {};
                 }
             } catch(e) {
-                console.error('Ошибка загрузки taskOperations.json:', e);
+                console.error('Ошибка загрузки:', e);
             }
         }
         
@@ -990,7 +973,6 @@
             renderTasks();
         }
         
-        // ============== УВЕДОМЛЕНИЕ О КОПИРОВАНИИ ==============
         function showCopyNotification(fileName, isMultiple = false) {
             const notification = document.createElement('div');
             notification.className = 'notification success';
@@ -1024,7 +1006,6 @@
             }, 2000);
         }
         
-        // ============== КЛАСС УПРАВЛЕНИЯ ЗАДАЧАМИ ==============
         class SimpleTaskManager {
             constructor(siteKey) {
                 this.siteKey = siteKey;
@@ -1360,29 +1341,8 @@
             });
         }
         
-        // ============== РАБОТА С ФАЙЛАМИ НА УЧАСТКЕ ==============
-        function openLocalFile(filePath) {
-            if (!filePath) return;
-            try {
-                if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
-                    window.open(filePath, '_blank');
-                } else {
-                    const link = document.createElement('a');
-                    link.href = filePath;
-                    link.target = '_blank';
-                    link.click();
-                }
-            } catch (error) {
-                alert('Не удалось открыть файл. Путь: ' + filePath);
-            }
-        }
-
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {}).catch(() => {});
-        }
-        
         function copySingleFilePath(filePath, fileName) {
-            copyToClipboard(filePath);
+            navigator.clipboard.writeText(filePath);
             showCopyNotification(fileName, false);
         }
         
@@ -1401,7 +1361,7 @@
             }
             
             const paths = siteFiles.map(f => f.path).join('\n');
-            copyToClipboard(paths);
+            navigator.clipboard.writeText(paths);
             showCopyNotification(siteFiles.length, true);
         }
         
@@ -1426,7 +1386,6 @@
             
             let tasks = taskManager.tasks;
             
-            // ФИЛЬТРАЦИЯ
             tasks = tasks.filter(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
                 if (!order) return false;
@@ -1453,13 +1412,11 @@
                     if (itemRal !== filterRal) return false;
                 }
                 if (filterSize && item.size?.name !== filterSize) return false;
-                
                 if (filterThickness && task.thickness !== filterThickness) return false;
                 
                 return true;
             });
             
-            // СОРТИРОВКА (приоритетные сверху)
             const priorityTasks = tasks.filter(t => t.isPriority === true);
             const normalTasks = tasks.filter(t => t.isPriority !== true);
             priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -1499,21 +1456,28 @@
                 const priorityClass = isPriority ? 'priority' : '';
                 const priorityBadge = isPriority ? '<span class="priority-badge">🔴 ПРИОРИТЕТ</span>' : '';
                 
-                // Используем сохранённые в задаче данные
+                // Формируем название операции с деталью
+                let displayOperationName = task.operation;
+                if (task.detail) {
+                    let cleanDetailName = task.detail;
+                    if (task.thickness) {
+                        cleanDetailName = task.detail.replace(task.thickness, '').trim();
+                    }
+                    displayOperationName = `${task.operation} (${cleanDetailName})`;
+                    if (task.thickness) {
+                        displayOperationName += ` ${task.thickness}`;
+                    }
+                }
+                
                 let detailDisplay = '';
                 if (task.detail) {
                     let cleanDetailName = task.detail;
                     if (task.thickness) {
                         cleanDetailName = task.detail.replace(task.thickness, '').trim();
                     }
-                    detailDisplay = `
-                        <div class="operation-detail">
-                            📦 ${escapeHtml(cleanDetailName)} ${task.thickness ? `<span>${escapeHtml(task.thickness)}</span>` : ''}
-                        </div>
-                    `;
+                    detailDisplay = `<div class="operation-detail">📦 ${escapeHtml(cleanDetailName)} ${task.thickness ? `<span>${escapeHtml(task.thickness)}</span>` : ''}</div>`;
                 }
                 
-                // Получаем файлы для этого заказа и участка
                 const siteFiles = order.siteFiles?.['polimerniy'] || [];
                 const hasFiles = siteFiles.length > 0;
                 const filesIndicator = hasFiles ? `<span class="file-indicator">📎 Файлы: ${siteFiles.length}</span>` : '';
@@ -1552,7 +1516,7 @@
                 
                 content.innerHTML = `
                     <div class="operation-info">
-                        <div class="operation-name">${escapeHtml(task.operation)}</div>
+                        <div class="operation-name">${escapeHtml(displayOperationName)}</div>
                         ${detailDisplay}
                         <div class="operation-plan">📋 План: ${task.totalQuantity || 1} шт</div>
                     </div>
@@ -1649,13 +1613,16 @@
             const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
             const planQuantity = task.totalQuantity || 1;
             let operationName = task.operation;
+            if (task.detail) {
+                operationName += ` (${task.detail})`;
+            }
             
             if (totalAssigned < planQuantity) {
-                if (!confirm('⚠️ Выполнено только ' + totalAssigned + ' из ' + planQuantity + ' шт.\n\nВсё равно завершить задачу?')) {
+                if (!confirm(`⚠️ Выполнено только ${totalAssigned} из ${planQuantity} шт.\n\nВсё равно завершить задачу?`)) {
                     return;
                 }
             } else {
-                if (!confirm('✅ Завершить задачу?\nОперация: ' + operationName + '\nВыполнено: ' + totalAssigned + ' из ' + planQuantity + ' шт')) {
+                if (!confirm(`✅ Завершить задачу?\nОперация: ${operationName}\nВыполнено: ${totalAssigned} из ${planQuantity} шт`)) {
                     return;
                 }
             }
@@ -1663,7 +1630,6 @@
             taskManager.completeTask(taskId);
         }
         
-        // ============== ОТЧЁТ ПО ЗАДАЧЕ ==============
         function openRightModalForTask(taskId) {
             const task = taskManager.tasks.find(t => t.id === taskId);
             if (!task) {
@@ -1691,6 +1657,8 @@
                 ral: task.ral || item.ral,
                 texture: task.texture || item.texture,
                 operation: task.operation,
+                detail: task.detail,
+                thickness: task.thickness,
                 isPriority: task.isPriority || false,
                 siteKey: 'polimerniy'
             };
@@ -1776,6 +1744,7 @@
                 `;
             });
             
+            const operationDisplay = currentReportTask.operation + (currentReportTask.detail ? ` (${currentReportTask.detail})` : '');
             const priorityBadge = currentReportTask.isPriority ? '<span style="background: #ff3b3b; color: white; padding: 2px 8px; border-radius: 20px; font-size: 10px; margin-left: 8px;">🔴 ПРИОРИТЕТ</span>' : '';
             
             container.innerHTML = `
@@ -1786,7 +1755,7 @@
                         <div style="font-size: 12px;">🏢 ${escapeHtml(currentReportTask.customerName)}</div>
                         <div style="font-size: 12px;">📏 Размер: ${escapeHtml(currentReportTask.size || '-')} × ${currentReportTask.quantity || 0} шт</div>
                         <div style="font-size: 12px;">🎨 Покрытие: ${escapeHtml(currentReportTask.ral || '-')} / ${escapeHtml(currentReportTask.texture || '-')}</div>
-                        <div style="font-size: 12px; margin-top: 8px;">🔧 Операция: ${escapeHtml(currentReportTask.operation)}</div>
+                        <div style="font-size: 12px; margin-top: 8px;">🔧 Операция: ${escapeHtml(operationDisplay)}</div>
                         <div style="font-size: 12px; margin-top: 8px; color: #4cd964;">📦 Выполнено: ${totalQuantity} шт</div>
                     </div>
                     <div id="reportRowsContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
@@ -1899,6 +1868,8 @@
                 ral: currentReportTask.ral,
                 texture: currentReportTask.texture,
                 operation: currentReportTask.operation,
+                detail: currentReportTask.detail,
+                thickness: currentReportTask.thickness,
                 isPriority: currentReportTask.isPriority,
                 siteKey: currentReportTask.siteKey,
                 rows: reportRows.map(row => ({
