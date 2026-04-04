@@ -2206,6 +2206,36 @@
                 if (saved) existingTasks = JSON.parse(saved);
             } catch(e) { console.error(e); }
 
+            // Проверяем, существует ли уже такая задача (для предотвращения дубликатов)
+            const detailNameFromOp = (() => {
+                const siteColumnMap = {
+                    'tokarniy': 'токарно-фрезерный',
+                    'frezerniy': 'фрезерный',
+                    'slesarniy': 'слесарный',
+                    'lazerno': 'лазерно-гибочный',
+                    'polimerniy': 'полимерный'
+                };
+                const siteColumn = siteColumnMap[siteKey];
+                const productOps = taskOperationsData[order.items[itemIndex]?.product];
+                if (productOps && siteColumn && productOps[siteColumn]) {
+                    const opData = productOps[siteColumn].find(op => op.operation === operationName);
+                    return opData?.detail || '';
+                }
+                return '';
+            })();
+
+            const existingTask = existingTasks.find(t => 
+                t.orderId === order.id && 
+                t.itemIndex === itemIndex && 
+                t.operation === operationName &&
+                t.detail === detailNameFromOp
+            );
+
+            if (existingTask) {
+                alert(`⚠️ Операция "${operationName}" для детали "${detailNameFromOp || 'неизвестной'}" уже добавлена на участок!`);
+                return;
+            }
+
             const taskExists = existingTasks.some(t => t.id === taskId);
 
             if (taskExists) {
@@ -2466,7 +2496,17 @@
 
                 if (order.items && order.items.length > 0) {
                     order.items.forEach((item, itemIndex) => {
+                        // Принудительно обновляем RAL из свежих данных
+                        const freshOrders = loadOrdersFromStorage();
+                        const freshOrder = freshOrders.find(o => o.id === order.id);
+                        if (freshOrder && freshOrder.items[itemIndex]) {
+                            item.ral = freshOrder.items[itemIndex].ral;
+                            item.texture = freshOrder.items[itemIndex].texture;
+                        }
+                        
+                        // Определяем статус ТОЛЬКО для этого изделия с учётом исполнителей
                         let hasAnyTask = false;
+                        let hasAnyExecutor = false;
                         let allTasksCompleted = true;
 
                         if (order.tasks && Object.keys(order.tasks).length > 0) {
@@ -2476,6 +2516,19 @@
                                     const taskItemIndex = parseInt(parts[2]);
                                     if (!isNaN(taskItemIndex) && taskItemIndex === itemIndex) {
                                         hasAnyTask = true;
+                                        
+                                        // Проверяем наличие исполнителей
+                                        const siteKey = parts[1];
+                                        const storageKey = `tasks_${siteKey}`;
+                                        const saved = localStorage.getItem(storageKey);
+                                        if (saved) {
+                                            const tasks = JSON.parse(saved);
+                                            const existingTask = tasks.find(t => t.id === taskId);
+                                            if (existingTask && existingTask.executors && existingTask.executors.length > 0) {
+                                                hasAnyExecutor = true;
+                                            }
+                                        }
+                                        
                                         if (taskStatus !== 'green' && taskStatus !== 'completed') {
                                             allTasksCompleted = false;
                                         }
@@ -2489,17 +2542,20 @@
                         let headerBgColor = '';
                         let headerBorderColor = '';
 
-                        if (!hasAnyTask) {
+                        if (!hasAnyTask || !hasAnyExecutor) {
+                            // НЕТ ЗАДАЧ ИЛИ НЕТ ИСПОЛНИТЕЛЕЙ — серый статус "ОЖИДАЕТ"
                             itemHeaderClass = 'item-status-gray';
                             itemStatusText = '⏳ ОЖИДАЕТ';
                             headerBgColor = '#232830';
                             headerBorderColor = '#6c757d';
                         } else if (allTasksCompleted) {
+                            // ЕСТЬ ЗАДАЧИ, ЕСТЬ ИСПОЛНИТЕЛИ, ВСЕ ВЫПОЛНЕНЫ — зелёный статус
                             itemHeaderClass = 'item-status-green';
                             itemStatusText = '✅ ВЫПОЛНЕНО';
                             headerBgColor = 'linear-gradient(135deg, #1a3a1a, #0f2a0f)';
                             headerBorderColor = '#2ecc71';
                         } else {
+                            // ЕСТЬ НЕЗАВЕРШЁННЫЕ ЗАДАЧИ — оранжевый статус
                             itemHeaderClass = 'item-status-orange';
                             itemStatusText = '⚡ В РАБОТЕ';
                             headerBgColor = 'linear-gradient(135deg, #3a2a1a, #2a1f0f)';
@@ -2509,7 +2565,7 @@
                         const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
                         const profiles = (item.details || []).filter(d => d.type === 'profile');
                         
-                        // Формируем отображение RAL и текстуры (прямо из item, который уже свежий)
+                        // Формируем отображение RAL и текстуры
                         let ralTextureHtml = '';
                         if (item.ral || item.texture) {
                             ralTextureHtml = `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</span>`;
@@ -2540,7 +2596,7 @@
                                 ${ralTextureHtml}
                             </div>
                             <div style="display: flex; align-items: center; gap: 12px;">
-                                <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: ${!hasAnyTask ? '#6c757d' : (allTasksCompleted ? '#2ecc71' : '#ff9800')}; color: #1a1e24; font-weight: 600;">
+                                <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: ${(!hasAnyTask || !hasAnyExecutor) ? '#6c757d' : (allTasksCompleted ? '#2ecc71' : '#ff9800')}; color: #1a1e24; font-weight: 600;">
                                     ${itemStatusText}
                                 </span>
                                 <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
