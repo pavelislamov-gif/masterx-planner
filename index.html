@@ -1223,7 +1223,6 @@
 
         // ============== ЗАГРУЗКА ОПЕРАЦИЙ ИЗ TASK_OPERATIONS ==============
         async function loadTaskOperations() {
-            // Используем TASK_OPERATIONS из task-operations.js
             if (typeof window.TASK_OPERATIONS !== 'undefined') {
                 console.log('✅ Используем TASK_OPERATIONS из task-operations.js');
                 
@@ -1260,7 +1259,6 @@
                 return;
             }
             
-            // Fallback на JSON файл
             try {
                 const response = await fetch('data/taskOperations.json');
                 if (response.ok) {
@@ -1318,12 +1316,10 @@
             const siteColumn = siteColumnMap[siteKey];
             if (!siteColumn) return [];
             
-            // Прямое совпадение
             if (taskOperationsData[productName] && taskOperationsData[productName][siteColumn]) {
                 return taskOperationsData[productName][siteColumn];
             }
             
-            // Частичное совпадение
             for (const [prodName, prodOps] of Object.entries(taskOperationsData)) {
                 if (prodOps[siteColumn] && productName && productName.includes(prodName)) {
                     return prodOps[siteColumn];
@@ -1800,7 +1796,6 @@
             }
         }
 
-        // ============== ИСПРАВЛЕННАЯ ФУНКЦИЯ addItemToGroup С ПРОВЕРКОЙ НА ДУБЛИКАТЫ ==============
         function addItemToGroup() {
             if (editingItemIndex !== null) {
                 updateItemInGroup();
@@ -1823,7 +1818,6 @@
             const texture = document.getElementById('newItemTexture').value || '';
             const newQuantity = parseInt(document.getElementById('newItemSizeQuantity').value) || 1;
             
-            // ========== ПРОВЕРКА НА ДУБЛИКАТ ==========
             const existingIndex = tempItemsList.findIndex(item => 
                 item.product === product && 
                 item.size?.name === sizeName &&
@@ -1841,7 +1835,6 @@
                     return;
                 }
             }
-            // ========================================
 
             const details = collectDetailsFromForm();
 
@@ -2083,139 +2076,157 @@
 
         // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА ==============
         function createSiteRow(name, order, itemIndex, siteKey) {
-    const item = order.items[itemIndex];
-    if (!item) return null;
+            const item = order.items[itemIndex];
+            if (!item) return null;
 
-    const operationsWithDetails = getOperationNamesWithDetails(item.product, siteKey);
+            const operationsWithDetails = getOperationNamesWithDetails(item.product, siteKey);
 
-    if (!operationsWithDetails || operationsWithDetails.length === 0) {
-        return null;
-    }
-
-    let operationsHtml = '';
-    let completedCount = 0;
-
-    for (let i = 0; i < operationsWithDetails.length; i++) {
-        const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
-        const opData = operationsWithDetails[i];
-        
-        const operationName = opData.operation || opData;
-        const detailName = opData.detail || '';
-        const thickness = opData.thickness || '';
-        
-        // Формируем название операции с деталью
-        let displayOperationName = operationName;
-        if (detailName) {
-            let cleanDetailName = detailName;
-            if (thickness) {
-                cleanDetailName = detailName.replace(thickness, '').trim();
+            if (!operationsWithDetails || operationsWithDetails.length === 0) {
+                return null;
             }
-            displayOperationName = `${operationName} (${cleanDetailName})`;
-            if (thickness) {
-                displayOperationName += ` ${thickness}`;
-            }
-        }
-        
-        let squareClass = '';
-        let isAdded = false;
 
-        if (order.tasks && order.tasks[taskId]) {
-            isAdded = true;
-            const taskStatus = order.tasks[taskId];
-            if (taskStatus === 'green' || taskStatus === 'completed') {
-                squareClass = 'green';
-                completedCount++;
-            } else if (taskStatus === 'orange' || taskStatus === 'in_progress') {
-                squareClass = 'orange';
-            }
-        }
-        
-        // Дополнительная проверка в localStorage
-        try {
-            const storageKey = `tasks_${siteKey}`;
-            const saved = localStorage.getItem(storageKey);
-            if (saved) {
-                const existingTasks = JSON.parse(saved);
-                const existingTask = existingTasks.find(t => t.id === taskId);
-                if (existingTask) {
+            let operationsHtml = '';
+            let completedCount = 0;
+
+            for (let i = 0; i < operationsWithDetails.length; i++) {
+                const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
+                const opData = operationsWithDetails[i];
+                
+                const operationName = opData.operation || opData;
+                const detailName = opData.detail || '';
+                const thickness = opData.thickness || '';
+                
+                let displayOperationName = operationName;
+                if (detailName) {
+                    let cleanDetailName = detailName;
+                    if (thickness) {
+                        cleanDetailName = detailName.replace(thickness, '').trim();
+                    }
+                    displayOperationName = `${operationName} (${cleanDetailName})`;
+                    if (thickness) {
+                        displayOperationName += ` ${thickness}`;
+                    }
+                }
+                
+                let squareClass = '';
+                let isAdded = false;
+
+                if (order.tasks && order.tasks[taskId]) {
                     isAdded = true;
-                    if (existingTask.status === 'completed') {
+                    const taskStatus = order.tasks[taskId];
+                    if (taskStatus === 'green' || taskStatus === 'completed') {
                         squareClass = 'green';
                         completedCount++;
-                    } else if (existingTask.status === 'in_progress') {
+                    } else if (taskStatus === 'orange' || taskStatus === 'in_progress') {
                         squareClass = 'orange';
                     }
                 }
-            }
-        } catch(e) { console.error(e); }
+                
+                try {
+                    const storageKey = `tasks_${siteKey}`;
+                    const saved = localStorage.getItem(storageKey);
+                    if (saved) {
+                        const existingTasks = JSON.parse(saved);
+                        const existingTask = existingTasks.find(t => t.id === taskId);
+                        if (existingTask) {
+                            isAdded = true;
+                            if (existingTask.status === 'completed') {
+                                squareClass = 'green';
+                                completedCount++;
+                            } else if (existingTask.status === 'in_progress') {
+                                squareClass = 'orange';
+                            }
+                        }
+                    }
+                } catch(e) { console.error(e); }
 
-        // Получаем плановое количество для этой детали
-        let plannedQuantity = 1;
-        if (detailName) {
-            const details = item.details || [];
-            for (const detail of details) {
-                if (detail.name === detailName) {
-                    plannedQuantity = detail.quantity;
-                    break;
+                let plannedQuantity = 0;
+                if (detailName) {
+                    const details = item.details || [];
+                    
+                    for (const detail of details) {
+                        const detailNameFromItem = detail.name || '';
+                        
+                        if (detailNameFromItem === detailName) {
+                            plannedQuantity = detail.quantity;
+                            break;
+                        }
+                        
+                        const cleanDetailName = detailNameFromItem.replace(/\d+мм/g, '').trim();
+                        const cleanOpDetailName = detailName.replace(/\d+мм/g, '').trim();
+                        if (cleanDetailName === cleanOpDetailName) {
+                            plannedQuantity = detail.quantity;
+                            break;
+                        }
+                        
+                        if (detailName.includes(detailNameFromItem) || detailNameFromItem.includes(detailName)) {
+                            plannedQuantity = detail.quantity;
+                            break;
+                        }
+                    }
+                    
+                    if (plannedQuantity === 0) {
+                        plannedQuantity = 1;
+                    }
+                } else {
+                    plannedQuantity = 1;
                 }
+                
+                operationsHtml += `
+                    <div class="operation-item">
+                        <div class="operation-info">
+                            <div class="operation-name">${escapeHtml(displayOperationName)}</div>
+                            <div class="operation-plan">📋 План: ${plannedQuantity} шт</div>
+                        </div>
+                        <div class="operation-controls">
+                            <div class="square-status ${squareClass}" data-task-id="${taskId}"></div>
+                            <div class="action-buttons">
+                                <button class="action-btn btn-add ${isAdded ? 'added' : ''}" 
+                                        onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', false)">
+                                    ${isAdded ? '✓' : '+'}
+                                </button>
+                                <button class="action-btn btn-priority" 
+                                        onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', true)">
+                                    🔴
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
             }
-        }
-        
-        operationsHtml += `
-            <div class="operation-item">
-                <div class="operation-info">
-                    <div class="operation-name">${escapeHtml(displayOperationName)}</div>
-                    <div class="operation-plan">📋 План: ${plannedQuantity} шт</div>
-                </div>
-                <div class="operation-controls">
-                    <div class="square-status ${squareClass}" data-task-id="${taskId}"></div>
-                    <div class="action-buttons">
-                        <button class="action-btn btn-add ${isAdded ? 'added' : ''}" 
-                                onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', false)">
-                            ${isAdded ? '✓' : '+'}
-                        </button>
-                        <button class="action-btn btn-priority" 
-                                onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', true)">
-                            🔴
-                        </button>
+
+            const files = order.siteFiles?.[siteKey] || [];
+            const hasFiles = files.length > 0;
+            
+            let filesIndicatorHtml = '';
+            if (hasFiles) {
+                filesIndicatorHtml = `
+                    <div class="file-indicator">
+                        <span>📎 Файлы: ${files.length} шт</span>
+                        <button class="btn-sm" style="background: #dc3545; padding: 2px 8px; font-size: 9px;" onclick="event.stopPropagation(); clearAllSiteFiles(${order.id}, '${siteKey}')">✕ Очистить</button>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="site-card">
+                    <div class="site-card-header">
+                        <div class="site-name">${name}</div>
+                        <div class="site-stats">
+                            <span class="completed">${completedCount}</span>/<span class="total">${operationsWithDetails.length}</span>
+                        </div>
+                    </div>
+                    <div class="site-card-content">
+                        ${operationsHtml}
+                        <div style="display: flex; gap: 8px; margin-top: 8px;">
+                            <button class="btn-add-extra" style="flex: 1;" onclick="event.stopPropagation(); addExtraTask(${order.id}, '${siteKey}')">➕ Доп. задача</button>
+                            <button class="btn-file" style="flex: 1;" onclick="event.stopPropagation(); addSiteFile(${order.id}, '${siteKey}')">📎 Добавить файл</button>
+                        </div>
+                        ${filesIndicatorHtml}
                     </div>
                 </div>
-            </div>
-        `;
-    }
-
-    const files = order.siteFiles?.[siteKey] || [];
-    const hasFiles = files.length > 0;
-    
-    let filesIndicatorHtml = '';
-    if (hasFiles) {
-        filesIndicatorHtml = `
-            <div class="file-indicator">
-                <span>📎 Файлы: ${files.length} шт</span>
-                <button class="btn-sm" style="background: #dc3545; padding: 2px 8px; font-size: 9px;" onclick="event.stopPropagation(); clearAllSiteFiles(${order.id}, '${siteKey}')">✕ Очистить</button>
-            </div>
-        `;
-    }
-
-    return `
-        <div class="site-card">
-            <div class="site-card-header">
-                <div class="site-name">${name}</div>
-                <div class="site-stats">
-                    <span class="completed">${completedCount}</span>/<span class="total">${operationsWithDetails.length}</span>
-                </div>
-            </div>
-            <div class="site-card-content">
-                ${operationsHtml}
-                <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <button class="btn-add-extra" style="flex: 1;" onclick="event.stopPropagation(); addExtraTask(${order.id}, '${siteKey}')">➕ Доп. задача</button>
-                    <button class="btn-file" style="flex: 1;" onclick="event.stopPropagation(); addSiteFile(${order.id}, '${siteKey}')">📎 Добавить файл</button>
-                </div>
-                ${filesIndicatorHtml}
-            </div>
-        </div>
-    `;
-}
+            `;
+        }
 
         // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ ==============
         function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName, isPriority = false) {
@@ -2280,13 +2291,36 @@
                         detailName = opData.detail || '';
                         thickness = opData.thickness || '';
                         
-                        if (opData.detail) {
+                        if (detailName) {
                             const details = item.details || [];
+                            let found = false;
+                            
                             for (const detail of details) {
-                                if (detail.name === opData.detail) {
+                                const detailNameFromItem = detail.name || '';
+                                
+                                if (detailNameFromItem === detailName) {
                                     plannedQuantity = detail.quantity;
+                                    found = true;
                                     break;
                                 }
+                                
+                                const cleanDetailName = detailNameFromItem.replace(/\d+мм/g, '').trim();
+                                const cleanOpDetailName = detailName.replace(/\d+мм/g, '').trim();
+                                if (cleanDetailName === cleanOpDetailName) {
+                                    plannedQuantity = detail.quantity;
+                                    found = true;
+                                    break;
+                                }
+                                
+                                if (detailName.includes(detailNameFromItem) || detailNameFromItem.includes(detailName)) {
+                                    plannedQuantity = detail.quantity;
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (!found) {
+                                plannedQuantity = 1;
                             }
                         }
                     }
@@ -2329,7 +2363,7 @@
                 orders[orderIndex] = order;
                 saveOrdersToStorage(orders);
 
-                alert(`✅ ${isPriority ? 'ПРИОРИТЕТНАЯ ' : ''}Операция "${operationName}" добавлена на участок с планом ${plannedQuantity} шт`);
+                alert(`✅ ${isPriority ? 'ПРИОРИТЕТНАЯ ' : ''}Операция "${operationName}" добавлена на участок с планом ${plannedQuantity} шт (деталь: ${detailName || 'не указана'})`);
                 
                 renderOrdersList();
                 updateStatistics();
@@ -2353,7 +2387,6 @@
                     if (tasksJson) {
                         let tasks = JSON.parse(tasksJson);
                         
-                        // Очистка дубликатов в задачах
                         const uniqueTasks = [];
                         const seen = new Set();
                         for (const task of tasks) {
@@ -2388,7 +2421,6 @@
                     }
                 });
                 
-                // Удаляем устаревшие задачи
                 for (const taskId in order.tasks) {
                     if (!activeTaskIds.has(taskId)) {
                         delete order.tasks[taskId];
@@ -2470,7 +2502,6 @@
 
                 if (order.items && order.items.length > 0) {
                     order.items.forEach((item, itemIndex) => {
-                        // Определение статуса ТОЛЬКО для этого изделия
                         let hasAnyTask = false;
                         let allTasksCompleted = true;
 
@@ -3036,7 +3067,6 @@
             });
         }
 
-        // Глобальные функции
         window.openGroupModal = openGroupModal;
         window.closeGroupModal = closeGroupModal;
         window.addItemToGroup = addItemToGroup;
