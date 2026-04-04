@@ -909,11 +909,7 @@
             if (taskManager && taskManager.tasks) {
                 taskManager.tasks.forEach(task => {
                     if (task.operation) operations.add(task.operation);
-                    
-                    const productOps = taskOperationsData[task.product];
-                    const siteOps = productOps?.['полимерный'];
-                    const operationData = siteOps?.find(op => op.operation === task.operation);
-                    if (operationData?.thickness) thicknesses.add(operationData.thickness);
+                    if (task.thickness) thicknesses.add(task.thickness);
                 });
             }
             
@@ -1382,11 +1378,7 @@
         }
 
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                // Успешно скопировано
-            }).catch(() => {
-                alert('❌ Не удалось скопировать');
-            });
+            navigator.clipboard.writeText(text).then(() => {}).catch(() => {});
         }
         
         function copySingleFilePath(filePath, fileName) {
@@ -1462,17 +1454,12 @@
                 }
                 if (filterSize && item.size?.name !== filterSize) return false;
                 
-                if (filterThickness) {
-                    const productOps = taskOperationsData[item.product];
-                    const siteOps = productOps?.['полимерный'];
-                    const operationData = siteOps?.find(op => op.operation === task.operation);
-                    if (operationData?.thickness !== filterThickness) return false;
-                }
+                if (filterThickness && task.thickness !== filterThickness) return false;
                 
                 return true;
             });
             
-            // СОРТИРОВКА (приоритетные сверху, остальные по дате)
+            // СОРТИРОВКА (приоритетные сверху)
             const priorityTasks = tasks.filter(t => t.isPriority === true);
             const normalTasks = tasks.filter(t => t.isPriority !== true);
             priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -1512,11 +1499,23 @@
                 const priorityClass = isPriority ? 'priority' : '';
                 const priorityBadge = isPriority ? '<span class="priority-badge">🔴 ПРИОРИТЕТ</span>' : '';
                 
+                // Используем сохранённые в задаче данные
+                let detailDisplay = '';
+                if (task.detail) {
+                    let cleanDetailName = task.detail;
+                    if (task.thickness) {
+                        cleanDetailName = task.detail.replace(task.thickness, '').trim();
+                    }
+                    detailDisplay = `
+                        <div class="operation-detail">
+                            📦 ${escapeHtml(cleanDetailName)} ${task.thickness ? `<span>${escapeHtml(task.thickness)}</span>` : ''}
+                        </div>
+                    `;
+                }
+                
                 // Получаем файлы для этого заказа и участка
                 const siteFiles = order.siteFiles?.['polimerniy'] || [];
                 const hasFiles = siteFiles.length > 0;
-                
-                // Индикатор файлов в шапке
                 const filesIndicator = hasFiles ? `<span class="file-indicator">📎 Файлы: ${siteFiles.length}</span>` : '';
                 
                 const taskCard = document.createElement('div');
@@ -1532,11 +1531,11 @@
                             ${priorityBadge}
                         </div>
                         <div class="task-product-info">
-                            <span class="task-product-name">📦 ${escapeHtml(item.product)}</span>
-                            <span class="task-size">📏 ${escapeHtml(item.size?.name || '-')}</span>
-                            <span class="task-quantity">× ${item.size?.quantity || 1} шт</span>
-                            ${item.ral ? `<span class="task-ral">🎨 ${escapeHtml(item.ral)}</span>` : ''}
-                            ${item.texture ? `<span class="task-texture">🧵 ${escapeHtml(item.texture)}</span>` : ''}
+                            <span class="task-product-name">📦 ${escapeHtml(task.product || item.product)}</span>
+                            <span class="task-size">📏 ${escapeHtml(task.size || item.size?.name || '-')}</span>
+                            <span class="task-quantity">× ${task.sizeQuantity || item.size?.quantity || 1} шт</span>
+                            ${task.ral || item.ral ? `<span class="task-ral">🎨 ${escapeHtml(task.ral || item.ral)}</span>` : ''}
+                            ${task.texture || item.texture ? `<span class="task-texture">🧵 ${escapeHtml(task.texture || item.texture)}</span>` : ''}
                             ${filesIndicator}
                         </div>
                     </div>
@@ -1551,58 +1550,13 @@
                 const content = document.createElement('div');
                 content.className = 'task-content collapsed';
                 
-                const productOps = taskOperationsData[item.product];
-                const siteOps = productOps?.['полимерный'];
-                const operationData = siteOps?.find(op => op.operation === task.operation);
-                const detailName = operationData?.detail || '';
-                const thickness = operationData?.thickness || '';
-                
-                let detailHtml = '';
-                if (detailName) {
-                    let detailDisplay = detailName;
-                    if (thickness) {
-                        detailDisplay = detailDisplay.replace(thickness, '').trim();
-                    }
-                    detailHtml = `
-                        <div class="operation-detail">
-                            📦 ${escapeHtml(detailDisplay)} ${thickness ? `<span>${escapeHtml(thickness)}</span>` : ''}
-                        </div>
-                    `;
-                }
-                
-                // Список файлов внутри карточки
-                let filesListHtml = '';
-                if (hasFiles) {
-                    filesListHtml = `
-                        <div style="margin-top: 10px; padding: 8px; background: #15191f; border-radius: 6px; border: 1px solid #2a2f38;">
-                            <div style="font-size: 11px; color: #ff9800; margin-bottom: 6px;">📎 ПРИКРЕПЛЁННЫЕ ФАЙЛЫ:</div>
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                ${siteFiles.map(file => `
-                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #1e232b; padding: 5px 8px; border-radius: 4px;">
-                                        <span style="font-size: 11px; color: #4cd964; word-break: break-all; flex: 1; cursor: pointer;" 
-                                              onclick="event.stopPropagation(); copySingleFilePath('${escapeHtml(file.path).replace(/'/g, "\\'")}', '${escapeHtml(file.name)}')" 
-                                              title="Нажмите, чтобы скопировать путь">
-                                            📄 ${escapeHtml(file.name)}
-                                        </span>
-                                        <button class="btn-sm" style="background: #28a745; padding: 2px 8px; font-size: 10px;" 
-                                                onclick="event.stopPropagation(); openLocalFile('${escapeHtml(file.path).replace(/'/g, "\\'")}')">
-                                            📂 Открыть
-                                        </button>
-                                    </div>
-                                    ${file.comment ? `<div style="font-size: 10px; color: #a0a0a0; margin-left: 15px;">💬 ${escapeHtml(file.comment)}</div>` : ''}
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-                
                 content.innerHTML = `
                     <div class="operation-info">
                         <div class="operation-name">${escapeHtml(task.operation)}</div>
-                        ${detailHtml}
+                        ${detailDisplay}
                         <div class="operation-plan">📋 План: ${task.totalQuantity || 1} шт</div>
                     </div>
-                    ${filesListHtml}
+                    
                     <div class="executor-header">
                         <span>ФИО</span><span>Кол-во</span><span>Статус</span><span></span>
                     </div>
@@ -1731,11 +1685,11 @@
                 orderId: order.id,
                 orderNumber: order.number,
                 customerName: order.groupName,
-                product: item.product,
-                size: item.size?.name,
-                quantity: item.size?.quantity,
-                ral: item.ral,
-                texture: item.texture,
+                product: task.product || item.product,
+                size: task.size || item.size?.name,
+                quantity: task.sizeQuantity || item.size?.quantity,
+                ral: task.ral || item.ral,
+                texture: task.texture || item.texture,
                 operation: task.operation,
                 isPriority: task.isPriority || false,
                 siteKey: 'polimerniy'
@@ -1992,18 +1946,13 @@
             tasks.forEach(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
                 const item = order?.items?.[task.itemIndex || 0];
-                const productOps = taskOperationsData[item?.product];
-                const siteOps = productOps?.['полимерный'];
-                const operationData = siteOps?.find(op => op.operation === task.operation);
-                const detailName = operationData?.detail || '';
-                const thickness = operationData?.thickness || '';
                 const isPriority = task.isPriority ? 'ДА' : 'НЕТ';
                 if (task.executors && task.executors.length > 0) {
                     task.executors.forEach(exec => {
-                        csv += `"${task.orderNumber}","${order?.groupName || ''}","${item?.product || ''}","${item?.size?.name || ''}",${item?.size?.quantity || 0},"${item?.ral || ''}","${item?.texture || ''}","${task.operation}","${detailName}","${thickness}","${isPriority}","${exec.name}",${exec.quantity || 0},"${exec.status}",${task.totalQuantity || 1}\n`;
+                        csv += `"${task.orderNumber}","${order?.groupName || ''}","${task.product || item?.product || ''}","${task.size || item?.size?.name || ''}",${task.sizeQuantity || item?.size?.quantity || 0},"${task.ral || item?.ral || ''}","${task.texture || item?.texture || ''}","${task.operation}","${task.detail || ''}","${task.thickness || ''}","${isPriority}","${exec.name}",${exec.quantity || 0},"${exec.status}",${task.totalQuantity || 1}\n`;
                     });
                 } else {
-                    csv += `"${task.orderNumber}","${order?.groupName || ''}","${item?.product || ''}","${item?.size?.name || ''}",${item?.size?.quantity || 0},"${item?.ral || ''}","${item?.texture || ''}","${task.operation}","${detailName}","${thickness}","${isPriority}","Нет",0,"${task.status}",${task.totalQuantity || 1}\n`;
+                    csv += `"${task.orderNumber}","${order?.groupName || ''}","${task.product || item?.product || ''}","${task.size || item?.size?.name || ''}",${task.sizeQuantity || item?.size?.quantity || 0},"${task.ral || item?.ral || ''}","${task.texture || item?.texture || ''}","${task.operation}","${task.detail || ''}","${task.thickness || ''}","${isPriority}","Нет",0,"${task.status}",${task.totalQuantity || 1}\n`;
                 }
             });
             const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
