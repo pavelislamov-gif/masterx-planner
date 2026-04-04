@@ -2402,7 +2402,7 @@
         }
 
         // ============== ОТОБРАЖЕНИЕ СПИСКА ГРУПП ==============
-        function renderOrdersList() {
+        
             const ordersList = document.getElementById('ordersList');
             if (!ordersList) return;
 
@@ -2470,19 +2470,10 @@
 
                 if (order.items && order.items.length > 0) {
                     order.items.forEach((item, itemIndex) => {
-                        // Принудительно обновляем RAL и текстуру из свежих данных
-                        const freshOrders = loadOrdersFromStorage();
-                        const freshOrder = freshOrders.find(o => o.id === order.id);
-                        if (freshOrder && freshOrder.items[itemIndex]) {
-                            const freshItem = freshOrder.items[itemIndex];
-                            item.ral = freshItem.ral;
-                            item.texture = freshItem.texture;
-                            if (freshItem.size) item.size = freshItem.size;
-                            if (freshItem.details) item.details = freshItem.details;
-                            if (freshItem.product) item.product = freshItem.product;
-                        }
-
-                        // Формируем отображение RAL и текстуры (ТОЛЬКО ОДИН РАЗ!)
+                        // Используем данные item напрямую, без перезаписи из freshOrder
+                        // Это сохраняет RAL и текстуру
+                        
+                        // Формируем отображение RAL и текстуры
                         let ralTextureHtml = '';
                         if (item.ral && item.ral.trim() !== '') {
                             ralTextureHtml = `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>`;
@@ -2492,7 +2483,7 @@
                             ralTextureHtml = `<span style="font-size: 11px; color: #6c757d;">🎨 не указан</span>`;
                         }
                         
-                        // Определяем статус ТОЛЬКО для этого изделия с учётом исполнителей
+                        // Определяем статус ТОЛЬКО для этого изделия
                         let hasAnyTask = false;
                         let hasAnyExecutor = false;
                         let allTasksCompleted = true;
@@ -2531,19 +2522,16 @@
                         let headerBorderColor = '';
 
                         if (!hasAnyTask || !hasAnyExecutor) {
-                            // НЕТ ЗАДАЧ ИЛИ НЕТ ИСПОЛНИТЕЛЕЙ — серый статус "ОЖИДАЕТ"
                             itemHeaderClass = 'item-status-gray';
                             itemStatusText = '⏳ ОЖИДАЕТ';
                             headerBgColor = '#232830';
                             headerBorderColor = '#6c757d';
                         } else if (allTasksCompleted) {
-                            // ЕСТЬ ЗАДАЧИ, ЕСТЬ ИСПОЛНИТЕЛИ, ВСЕ ВЫПОЛНЕНЫ — зелёный статус
                             itemHeaderClass = 'item-status-green';
                             itemStatusText = '✅ ВЫПОЛНЕНО';
                             headerBgColor = 'linear-gradient(135deg, #1a3a1a, #0f2a0f)';
                             headerBorderColor = '#2ecc71';
                         } else {
-                            // ЕСТЬ НЕЗАВЕРШЁННЫЕ ЗАДАЧИ — оранжевый статус
                             itemHeaderClass = 'item-status-orange';
                             itemStatusText = '⚡ В РАБОТЕ';
                             headerBgColor = 'linear-gradient(135deg, #3a2a1a, #2a1f0f)';
@@ -2569,6 +2557,9 @@
                         itemHeader.style.borderLeft = `4px solid ${headerBorderColor}`;
                         itemHeader.style.cursor = 'pointer';
 
+                        // Уникальный ID для стрелки
+                        const arrowId = `arrow-${order.id}-${itemIndex}`;
+                        
                         itemHeader.innerHTML = `
                             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                                 <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
@@ -2582,7 +2573,7 @@
                                 <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
                                     📋 Отчёт
                                 </button>
-                                <span id="arrow-${order.id}-${itemIndex}" style="cursor: pointer; color: #a0a0a0; font-size: 14px;">▼</span>
+                                <span id="${arrowId}" style="cursor: pointer; color: #a0a0a0; font-size: 14px;">▼</span>
                             </div>
                         `;
 
@@ -2644,13 +2635,15 @@
                             </div>
                         `;
 
+                        // Обработчик клика по заголовку изделия
                         itemHeader.onclick = (e) => {
+                            // Игнорируем клики по кнопкам
                             if (e.target.tagName === 'BUTTON') return;
                             
                             const isVisible = itemContent.style.display !== 'none';
                             itemContent.style.display = isVisible ? 'none' : 'block';
                             
-                            const arrowSpan = document.getElementById(`arrow-${order.id}-${itemIndex}`);
+                            const arrowSpan = document.getElementById(arrowId);
                             if (arrowSpan) {
                                 arrowSpan.textContent = isVisible ? '▼' : '▲';
                             }
