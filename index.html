@@ -2343,45 +2343,48 @@
                 // ========== ИСПРАВЛЕННОЕ ОПРЕДЕЛЕНИЕ СТАТУСА ==========
                 // Проверяем задачи ТОЛЬКО для этого конкретного изделия
                 let hasAnyTask = false;
-                let allTasksCompleted = true;
-                
-                if (order.tasks) {
-                    for (const [taskId, taskStatus] of Object.entries(order.tasks)) {
-                        const parts = taskId.split('_');
-                        // Формат: orderId_siteKey_itemIndex_opIndex
-                        if (parts.length >= 3 && parseInt(parts[2]) === itemIndex) {
-                            hasAnyTask = true;
-                            if (taskStatus !== 'green' && taskStatus !== 'completed') {
-                                allTasksCompleted = false;
-                            }
-                        }
-                    }
+let allTasksCompleted = true;
+
+if (order.tasks && Object.keys(order.tasks).length > 0) {
+    for (const [taskId, taskStatus] of Object.entries(order.tasks)) {
+        const parts = taskId.split('_');
+        // Формат: orderId_siteKey_itemIndex_opIndex
+        if (parts.length >= 3) {
+            const taskItemIndex = parseInt(parts[2]);
+            if (!isNaN(taskItemIndex) && taskItemIndex === itemIndex) {
+                hasAnyTask = true;
+                if (taskStatus !== 'green' && taskStatus !== 'completed') {
+                    allTasksCompleted = false;
                 }
-                
-                let itemHeaderClass = '';
-                let itemStatusText = '';
-                let headerBgColor = '';
-                let headerBorderColor = '';
-                
-                if (!hasAnyTask) {
-                    // Нет задач — серый статус "ОЖИДАЕТ"
-                    itemHeaderClass = 'item-status-gray';
-                    itemStatusText = '⏳ ОЖИДАЕТ';
-                    headerBgColor = '#232830';
-                    headerBorderColor = '#6c757d';
-                } else if (allTasksCompleted) {
-                    // Есть задачи и все выполнены — зелёный
-                    itemHeaderClass = 'item-status-green';
-                    itemStatusText = '✅ ВЫПОЛНЕНО';
-                    headerBgColor = 'linear-gradient(135deg, #1a3a1a, #0f2a0f)';
-                    headerBorderColor = '#2ecc71';
-                } else {
-                    // Есть незавершённые задачи — оранжевый
-                    itemHeaderClass = 'item-status-orange';
-                    itemStatusText = '⚡ В РАБОТЕ';
-                    headerBgColor = 'linear-gradient(135deg, #3a2a1a, #2a1f0f)';
-                    headerBorderColor = '#ff9800';
-                }
+            }
+        }
+    }
+}
+
+let itemHeaderClass = '';
+let itemStatusText = '';
+let headerBgColor = '';
+let headerBorderColor = '';
+
+if (!hasAnyTask) {
+    // НЕТ ЗАДАЧ — серый статус "ОЖИДАЕТ"
+    itemHeaderClass = 'item-status-gray';
+    itemStatusText = '⏳ ОЖИДАЕТ';
+    headerBgColor = '#232830';
+    headerBorderColor = '#6c757d';
+} else if (allTasksCompleted) {
+    // ЕСТЬ ЗАДАЧИ И ВСЕ ВЫПОЛНЕНЫ — зелёный статус
+    itemHeaderClass = 'item-status-green';
+    itemStatusText = '✅ ВЫПОЛНЕНО';
+    headerBgColor = 'linear-gradient(135deg, #1a3a1a, #0f2a0f)';
+    headerBorderColor = '#2ecc71';
+} else {
+    // ЕСТЬ НЕЗАВЕРШЁННЫЕ ЗАДАЧИ — оранжевый статус
+    itemHeaderClass = 'item-status-orange';
+    itemStatusText = '⚡ В РАБОТЕ';
+    headerBgColor = 'linear-gradient(135deg, #3a2a1a, #2a1f0f)';
+    headerBorderColor = '#ff9800';
+}
                 // ========== КОНЕЦ ИСПРАВЛЕНИЯ ==========
                 
                 const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
