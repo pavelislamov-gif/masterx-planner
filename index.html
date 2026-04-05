@@ -1163,8 +1163,6 @@
                     const itemContent = card.querySelectorAll('.item-content')[itemIndex];
                     if (itemHeader && itemContent) {
                         itemContent.style.display = 'block';
-                        const arrowSpan = itemHeader.querySelector('span:last-child');
-                        if (arrowSpan) arrowSpan.textContent = '▲';
                     }
                 }
             });
@@ -1986,6 +1984,44 @@
                 .replace(/'/g, '&#39;');
         }
 
+        // ============== ОБНОВЛЕНИЕ ПЛАНА В ЗАДАЧАХ ==============
+        function updateTaskQuantitiesFromDetails(orderId) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order || !order.items) return;
+            
+            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+            
+            order.items.forEach((item, itemIndex) => {
+                sites.forEach(siteKey => {
+                    const storageKey = `tasks_${siteKey}`;
+                    const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                    let updated = false;
+                    
+                    tasks.forEach(task => {
+                        if (task.orderId == orderId && task.itemIndex == itemIndex) {
+                            const detailName = task.detail;
+                            if (detailName && item.details) {
+                                const detail = item.details.find(d => d.name === detailName);
+                                if (detail && detail.quantity !== task.totalQuantity) {
+                                    task.totalQuantity = detail.quantity;
+                                    updated = true;
+                                    console.log(`🔄 Обновлён план для ${task.operation}: ${task.totalQuantity} шт`);
+                                }
+                            }
+                        }
+                    });
+                    
+                    if (updated) {
+                        localStorage.setItem(storageKey, JSON.stringify(tasks));
+                    }
+                });
+            });
+            
+            renderOrdersList();
+            updateStatistics();
+        }
+
         // ============== РАБОТА С ФАЙЛАМИ ==============
         function addSiteFile(orderId, siteKey) {
             const orders = loadOrdersFromStorage();
@@ -2128,12 +2164,22 @@
                 let isAdded = false;
                 let plannedQuantity = 1;
                 
+                // ПРИОРИТЕТ: берём количество из деталей изделия (актуальное)
+                if (detailName && item.details) {
+                    const detail = item.details.find(d => d.name === detailName);
+                    if (detail && detail.quantity > 0) {
+                        plannedQuantity = detail.quantity;
+                    }
+                }
+                
                 const existingTask = tasksFromStorage.find(t => t.id === taskId);
                 
-                if (existingTask && existingTask.totalQuantity) {
+                // Если в деталях не нашли, берём из существующей задачи
+                if (existingTask && existingTask.totalQuantity && plannedQuantity === 1) {
                     plannedQuantity = existingTask.totalQuantity;
                 }
                 
+                // Проверяем order.tasks (цвет квадратика)
                 if (order.tasks && order.tasks[taskId]) {
                     const taskStatus = order.tasks[taskId];
                     if (taskStatus === 'green') {
@@ -2511,8 +2557,6 @@
 
                 if (order.items && order.items.length > 0) {
                     order.items.forEach((item, itemIndex) => {
-                        // УДАЛЕН БЛОК ПЕРЕЗАПИСИ
-                        
                         // Формируем отображение RAL и текстуры
                         let ralTextureHtml = '';
                         if (item.ral && item.ral.trim() !== '') {
@@ -2596,23 +2640,21 @@
                         itemHeader.style.borderLeft = `4px solid ${headerBorderColor}`;
                         itemHeader.style.cursor = 'pointer';
 
-                        // Уникальный ID для стрелки
-                        
                         itemHeader.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-        <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
-        <span style="font-size: 11px; color: #4cd964;">${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
-        ${ralTextureHtml}
-    </div>
-    <div style="display: flex; align-items: center; gap: 12px;">
-        <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: ${(!hasAnyTask || !hasAnyExecutor) ? '#6c757d' : (allTasksCompleted ? '#2ecc71' : '#ff9800')}; color: #1a1e24; font-weight: 600;">
-            ${itemStatusText}
-        </span>
-        <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
-            📋 Отчёт
-        </button>
-    </div>
-`;
+                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
+                                <span style="font-size: 11px; color: #4cd964;">${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
+                                ${ralTextureHtml}
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: ${(!hasAnyTask || !hasAnyExecutor) ? '#6c757d' : (allTasksCompleted ? '#2ecc71' : '#ff9800')}; color: #1a1e24; font-weight: 600;">
+                                    ${itemStatusText}
+                                </span>
+                                <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
+                                    📋 Отчёт
+                                </button>
+                            </div>
+                        `;
 
                         const itemContent = document.createElement('div');
                         itemContent.className = 'item-content';
@@ -2672,14 +2714,14 @@
                             </div>
                         `;
 
-                        // Обработчик клика по заголовку изделия
                         itemHeader.onclick = (e) => {
-    if (e.target.tagName === 'BUTTON') return;
-    
-    const isVisible = itemContent.style.display !== 'none';
-    itemContent.style.display = isVisible ? 'none' : 'block';
-    saveMainOpenItemsState();
-};
+                            if (e.target.tagName === 'BUTTON') return;
+                            
+                            const isVisible = itemContent.style.display !== 'none';
+                            itemContent.style.display = isVisible ? 'none' : 'block';
+                            saveMainOpenItemsState();
+                        };
+
                         itemDiv.appendChild(itemHeader);
                         itemDiv.appendChild(itemContent);
                         content.appendChild(itemDiv);
@@ -2701,6 +2743,7 @@
             restoreMainOpenCardsState();
             restoreMainOpenItemsState();
         }
+        
         // ============== ПЕРЕИМЕНОВАНИЕ ГРУППЫ ==============
         function editGroupName(orderId) {
             const orders = loadOrdersFromStorage();
@@ -3315,6 +3358,7 @@
         window.clearAllSiteFiles = clearAllSiteFiles;
         window.showOrderReport = showOrderReport;
         window.printOrderReport = printOrderReport;
+        window.updateTaskQuantitiesFromDetails = updateTaskQuantitiesFromDetails;
 
         document.addEventListener('DOMContentLoaded', initMainPage);
     </script>
