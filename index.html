@@ -2597,24 +2597,22 @@
                         itemHeader.style.cursor = 'pointer';
 
                         // Уникальный ID для стрелки
-                        const arrowId = `arrow-${order.id}-${itemIndex}`;
                         
                         itemHeader.innerHTML = `
-                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                                <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
-                                <span style="font-size: 11px; color: #4cd964;">${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
-                                ${ralTextureHtml}
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: ${(!hasAnyTask || !hasAnyExecutor) ? '#6c757d' : (allTasksCompleted ? '#2ecc71' : '#ff9800')}; color: #1a1e24; font-weight: 600;">
-                                    ${itemStatusText}
-                                </span>
-                                <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
-                                    📋 Отчёт
-                                </button>
-                                <span id="${arrowId}" style="cursor: pointer; color: #a0a0a0; font-size: 14px;">▼</span>
-                            </div>
-                        `;
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <span style="font-weight: 600; color: #ff3b3b;">📦 ${escapeHtml(item.product || 'Изделие')}</span>
+        <span style="font-size: 11px; color: #4cd964;">${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span>
+        ${ralTextureHtml}
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: ${(!hasAnyTask || !hasAnyExecutor) ? '#6c757d' : (allTasksCompleted ? '#2ecc71' : '#ff9800')}; color: #1a1e24; font-weight: 600;">
+            ${itemStatusText}
+        </span>
+        <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); showItemReport(${order.id}, ${itemIndex})" style="font-size: 11px; padding: 2px 8px;">
+            📋 Отчёт
+        </button>
+    </div>
+`;
 
                         const itemContent = document.createElement('div');
                         itemContent.className = 'item-content';
@@ -2676,18 +2674,12 @@
 
                         // Обработчик клика по заголовку изделия
                         itemHeader.onclick = (e) => {
-                            if (e.target.tagName === 'BUTTON') return;
-                            
-                            const isVisible = itemContent.style.display !== 'none';
-                            itemContent.style.display = isVisible ? 'none' : 'block';
-                            
-                            const arrowSpan = document.getElementById(arrowId);
-                            if (arrowSpan) {
-                                arrowSpan.textContent = isVisible ? '▼' : '▲';
-                            }
-                            saveMainOpenItemsState();
-                        };
-
+    if (e.target.tagName === 'BUTTON') return;
+    
+    const isVisible = itemContent.style.display !== 'none';
+    itemContent.style.display = isVisible ? 'none' : 'block';
+    saveMainOpenItemsState();
+};
                         itemDiv.appendChild(itemHeader);
                         itemDiv.appendChild(itemContent);
                         content.appendChild(itemDiv);
