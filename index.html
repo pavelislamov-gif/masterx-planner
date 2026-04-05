@@ -3407,7 +3407,200 @@
         window.showOrderReport = showOrderReport;
         window.printOrderReport = printOrderReport;
         window.updateTaskQuantitiesFromDetails = updateTaskQuantitiesFromDetails;
-
+        
+   // ============== АВТООБНОВЛЕНИЕ СТРАНИЦЫ КАЖДЫЕ 15 МИНУТ ==============
+        
+        // Настройки
+        const AUTO_RELOAD_INTERVAL = 15 * 60 * 1000; // 15 минут
+        const WARNING_BEFORE_RELOAD = 2 * 60 * 1000; // 2 минуты до перезагрузки
+        let reloadTimer = null;
+        let warningTimer = null;
+        let countdownInterval = null;
+        let warningShown = false;
+        let countdownSeconds = 120;
+        
+        // Функция сохранения всех данных перед перезагрузкой
+        function saveAllDataBeforeReload() {
+            console.log('💾 Сохранение данных перед перезагрузкой...');
+            saveMainOpenCardsState();
+            saveMainOpenItemsState();
+            const orders = loadOrdersFromStorage();
+            saveOrdersToStorage(orders);
+            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+            sites.forEach(site => {
+                const storageKey = `tasks_${site}`;
+                const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                if (tasks.length > 0) {
+                    localStorage.setItem(storageKey, JSON.stringify(tasks));
+                }
+            });
+            localStorage.setItem('masterx_last_save', Date.now());
+            console.log('✅ Все данные сохранены');
+        }
+        
+        // Функция перезагрузки страницы
+        function forceReload() {
+            saveAllDataBeforeReload();
+            if (countdownInterval) clearInterval(countdownInterval);
+            if (reloadTimer) clearTimeout(reloadTimer);
+            if (warningTimer) clearTimeout(warningTimer);
+            const notification = document.getElementById('reloadWarning');
+            if (notification) notification.remove();
+            console.log('🔄 Перезагрузка страницы...');
+            setTimeout(() => { location.reload(); }, 100);
+        }
+        
+        // Обновление обратного отсчёта
+        function updateCountdown() {
+            countdownSeconds--;
+            const minutes = Math.floor(countdownSeconds / 60);
+            const seconds = countdownSeconds % 60;
+            const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            const countdownSpan = document.getElementById('reloadCountdown');
+            if (countdownSpan) countdownSpan.textContent = timeString;
+            const progressBar = document.getElementById('reloadProgress');
+            if (progressBar) {
+                const progressPercent = ((120 - countdownSeconds) / 120) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+            }
+            if (countdownSeconds <= 0) {
+                if (countdownInterval) clearInterval(countdownInterval);
+                forceReload();
+            }
+        }
+        
+        // Показ предупреждения
+        function showReloadWarning() {
+            if (warningShown) return;
+            warningShown = true;
+            countdownSeconds = 120;
+            const modal = document.createElement('div');
+            modal.id = 'reloadWarning';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.85);
+                backdrop-filter: blur(8px);
+                z-index: 20000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: fadeIn 0.3s ease;
+            `;
+            modal.innerHTML = `
+                <div style="background: linear-gradient(135deg, #1a1e24, #0f1217); border: 2px solid #ff9800; border-radius: 20px; padding: 35px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+                    <div style="font-size: 56px; margin-bottom: 15px;">⏰</div>
+                    <h3 style="color: #ff9800; margin-bottom: 10px; font-size: 24px;">Автообновление страницы</h3>
+                    <p style="color: #e0e0e0; margin-bottom: 20px; font-size: 16px;">Страница будет автоматически обновлена через</p>
+                    <div style="font-size: 48px; font-weight: 700; color: #ff9800; margin-bottom: 10px;" id="reloadCountdown">2:00</div>
+                    <div style="width: 100%; height: 8px; background: #2a2f38; border-radius: 4px; margin-bottom: 20px; overflow: hidden;">
+                        <div id="reloadProgress" style="width: 0%; height: 100%; background: linear-gradient(90deg, #ff9800, #ff3b3b); border-radius: 4px; transition: width 1s linear;"></div>
+                    </div>
+                    <p style="color: #a0a0a0; font-size: 13px; margin-bottom: 25px;">💾 Все данные будут сохранены автоматически перед обновлением.</p>
+                    <button id="cancelReloadBtn" style="background: #2a2f38; border: 1px solid #3a404b; border-radius: 10px; padding: 12px 30px; color: #e0e0e0; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 10px;">⏰ Отложить на 15 минут</button>
+                    <p style="color: #6c757d; font-size: 11px; margin-top: 20px;">💡 При активности пользователя таймер автоматически сбрасывается</p>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            const style = document.createElement('style');
+            style.textContent = `@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }`;
+            document.head.appendChild(style);
+            countdownInterval = setInterval(updateCountdown, 1000);
+            document.getElementById('cancelReloadBtn').onclick = () => {
+                cancelAutoReload();
+                modal.remove();
+                if (countdownInterval) clearInterval(countdownInterval);
+            };
+        }
+        
+        // Отмена перезагрузки
+        function cancelAutoReload() {
+            if (reloadTimer) clearTimeout(reloadTimer);
+            if (warningTimer) clearTimeout(warningTimer);
+            if (countdownInterval) clearInterval(countdownInterval);
+            warningShown = false;
+            countdownSeconds = 120;
+            startAutoReloadTimer();
+            const notification = document.getElementById('reloadWarning');
+            if (notification) notification.remove();
+            const toast = document.createElement('div');
+            toast.style.cssText = `position: fixed; bottom: 20px; right: 20px; background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; padding: 12px 20px; border-radius: 8px; z-index: 20001; font-size: 14px; animation: fadeIn 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.3);`;
+            toast.innerHTML = '⏰ Автообновление отложено на 15 минут';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+            console.log('⏰ Перезагрузка отложена на 15 минут');
+        }
+        
+        // Запуск таймера
+        function startAutoReloadTimer() {
+            if (reloadTimer) clearTimeout(reloadTimer);
+            if (warningTimer) clearTimeout(warningTimer);
+            if (countdownInterval) clearInterval(countdownInterval);
+            warningShown = false;
+            countdownSeconds = 120;
+            const notification = document.getElementById('reloadWarning');
+            if (notification) notification.remove();
+            warningTimer = setTimeout(() => { showReloadWarning(); }, AUTO_RELOAD_INTERVAL - WARNING_BEFORE_RELOAD);
+            reloadTimer = setTimeout(() => { forceReload(); }, AUTO_RELOAD_INTERVAL);
+            console.log(`⏰ Автообновление запущено (перезагрузка через 15 мин, предупреждение за 2 мин)`);
+        }
+        
+        // Сброс таймера при активности пользователя
+        let userActivityTimer = null;
+        function resetAutoReloadTimer() {
+            if (reloadTimer || warningTimer) {
+                console.log('👆 Активность пользователя, сброс таймера автообновления');
+                startAutoReloadTimer();
+            }
+        }
+        
+        // Отслеживание активности пользователя
+        function trackUserActivity() {
+            const events = ['click', 'mousemove', 'keydown', 'scroll', 'touchstart'];
+            events.forEach(event => {
+                document.addEventListener(event, () => {
+                    if (userActivityTimer) clearTimeout(userActivityTimer);
+                    userActivityTimer = setTimeout(() => { resetAutoReloadTimer(); }, 1000);
+                });
+            });
+        }
+        
+        // Видимость страницы
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                console.log('👁️ Страница стала видимой');
+                const lastReload = localStorage.getItem('masterx_last_reload');
+                const now = Date.now();
+                if (lastReload && (now - parseInt(lastReload)) > AUTO_RELOAD_INTERVAL) {
+                    forceReload();
+                } else {
+                    startAutoReloadTimer();
+                }
+            }
+        });
+        
+        // Сброс при изменении данных
+        function onDataChanged() { resetAutoReloadTimer(); }
+        
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'masterx_orders' || (e.key && e.key.startsWith('tasks_'))) {
+                onDataChanged();
+            }
+        });
+        
+        // Запуск автообновления
+        function initAutoReload() {
+            startAutoReloadTimer();
+            trackUserActivity();
+            console.log('✅ Автообновление настроено (перезагрузка каждые 15 минут)');
+        }
+        
+        // Запускаем автообновление
+        initAutoReload();
+        
         document.addEventListener('DOMContentLoaded', initMainPage);
     </script>
 </body>
