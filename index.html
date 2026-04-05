@@ -2511,8 +2511,7 @@
 
                 if (order.items && order.items.length > 0) {
                     order.items.forEach((item, itemIndex) => {
-                        // ИСПРАВЛЕНО: НЕ ПЕРЕЗАПИСЫВАЕМ item из freshOrder
-                        // Используем оригинальные данные из order.items[itemIndex]
+                        // УДАЛЕН БЛОК ПЕРЕЗАПИСИ
                         
                         // Формируем отображение RAL и текстуры
                         let ralTextureHtml = '';
