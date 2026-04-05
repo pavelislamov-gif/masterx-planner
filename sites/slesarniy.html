@@ -142,9 +142,6 @@
             border-top: 1px solid #2a2f38;
             transition: all 0.2s;
         }
-        .task-content.collapsed {
-            display: none;
-        }
         .operation-info {
             background: #15191f;
             border-radius: 8px;
@@ -611,6 +608,11 @@
             background: #28a745 !important;
             color: white !important;
         }
+        
+        /* Дополнительные стили для анимации */
+        .task-content {
+            transition: display 0.2s ease;
+        }
     </style>
 </head>
 <body>
@@ -714,64 +716,59 @@
         
         // ============== СОХРАНЕНИЕ СОСТОЯНИЯ РАСКРЫТЫХ КАРТОЧЕК ==============
         function saveAllCardsState() {
-    const openTasks = [];
-    document.querySelectorAll('.task-card').forEach(card => {
-        const content = card.querySelector('.task-content');
-        // Проверяем видимость через style или класс
-        const isVisible = content && content.style.display !== 'none';
-        if (isVisible) {
-            openTasks.push(card.dataset.taskId);
+            const openTasks = [];
+            document.querySelectorAll('.task-card').forEach(card => {
+                const content = card.querySelector('.task-content');
+                if (content && content.style.display !== 'none') {
+                    openTasks.push(card.dataset.taskId);
+                }
+            });
+            localStorage.setItem(OPEN_CARDS_KEY, JSON.stringify(openTasks));
+            console.log('💾 Сохранено раскрытых задач:', openTasks.length);
         }
-    });
-    localStorage.setItem(OPEN_CARDS_KEY, JSON.stringify(openTasks));
-    console.log('💾 Сохранено раскрытых задач:', openTasks.length);
-}
-
-function restoreAllCardsState() {
-    const savedOpenTasks = localStorage.getItem(OPEN_CARDS_KEY);
-    if (!savedOpenTasks) return;
-    
-    const openTasksIds = JSON.parse(savedOpenTasks);
-    console.log('🔄 Восстановление задач:', openTasksIds.length);
-    
-    openTasksIds.forEach(taskId => {
-        const card = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
-        if (card) {
-            const content = card.querySelector('.task-content');
-            const header = card.querySelector('.task-header');
-            if (content && header) {
-                // Показываем содержимое
+        
+        function restoreAllCardsState() {
+            const savedOpenTasks = localStorage.getItem(OPEN_CARDS_KEY);
+            if (!savedOpenTasks) return;
+            
+            const openTasksIds = JSON.parse(savedOpenTasks);
+            console.log('🔄 Восстановление задач:', openTasksIds.length);
+            
+            openTasksIds.forEach(taskId => {
+                const card = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+                if (card) {
+                    const content = card.querySelector('.task-content');
+                    const header = card.querySelector('.task-header');
+                    if (content && header) {
+                        content.style.display = 'block';
+                        header.classList.remove('collapsed');
+                        const arrow = header.querySelector('.collapse-icon');
+                        if (arrow) arrow.textContent = '▲';
+                        console.log('✅ Восстановлена задача:', taskId);
+                    }
+                }
+            });
+        }
+        
+        function toggleCardState(header, content, taskId) {
+            const isVisible = content.style.display !== 'none';
+            
+            if (isVisible) {
+                content.style.display = 'none';
+                header.classList.add('collapsed');
+                const arrow = header.querySelector('.collapse-icon');
+                if (arrow) arrow.textContent = '▼';
+                console.log('📁 Свернута задача:', taskId);
+            } else {
                 content.style.display = 'block';
                 header.classList.remove('collapsed');
                 const arrow = header.querySelector('.collapse-icon');
                 if (arrow) arrow.textContent = '▲';
-                console.log('✅ Восстановлена задача:', taskId);
+                console.log('📂 Раскрыта задача:', taskId);
             }
+            
+            saveAllCardsState();
         }
-    });
-}
-
-function toggleCardState(header, content, taskId) {
-    const isVisible = content.style.display !== 'none';
-    
-    if (isVisible) {
-        // Сворачиваем
-        content.style.display = 'none';
-        header.classList.add('collapsed');
-        const arrow = header.querySelector('.collapse-icon');
-        if (arrow) arrow.textContent = '▼';
-        console.log('📁 Свернута задача:', taskId);
-    } else {
-        // Раскрываем
-        content.style.display = 'block';
-        header.classList.remove('collapsed');
-        const arrow = header.querySelector('.collapse-icon');
-        if (arrow) arrow.textContent = '▲';
-        console.log('📂 Раскрыта задача:', taskId);
-    }
-    
-    saveAllCardsState();
-}
         
         // ============== ЗАГРУЗКА ОПЕРАЦИЙ ИЗ JSON ==============
         async function loadTaskOperationsData() {
@@ -967,8 +964,6 @@ function toggleCardState(header, content, taskId) {
             
             const executorList = taskCard.querySelector('.executor-list');
             if (executorList) {
-                const wasCollapsed = taskCard.querySelector('.task-content')?.classList.contains('collapsed');
-                
                 executorList.innerHTML = '';
                 if (task.executors && task.executors.length > 0) {
                     task.executors.forEach(executor => {
@@ -985,15 +980,6 @@ function toggleCardState(header, content, taskId) {
                 if (readyBtn) {
                     readyBtn.disabled = task.status === 'completed';
                 }
-                
-                if (wasCollapsed) {
-                    const content = taskCard.querySelector('.task-content');
-                    const header = taskCard.querySelector('.task-header');
-                    if (content && header) {
-                        content.classList.add('collapsed');
-                        header.classList.add('collapsed');
-                    }
-                }
             }
         }
         
@@ -1003,9 +989,6 @@ function toggleCardState(header, content, taskId) {
             
             const executorList = document.getElementById(`executors-${taskId}`);
             if (!executorList) return;
-            
-            const taskCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
-            const wasCollapsed = taskCard?.querySelector('.task-content')?.classList.contains('collapsed');
             
             executorList.innerHTML = '';
             if (task.executors && task.executors.length > 0) {
@@ -1017,15 +1000,6 @@ function toggleCardState(header, content, taskId) {
                 noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 11px;';
                 noExecutors.textContent = 'Нет исполнителей';
                 executorList.appendChild(noExecutors);
-            }
-            
-            if (wasCollapsed && taskCard) {
-                const content = taskCard.querySelector('.task-content');
-                const header = taskCard.querySelector('.task-header');
-                if (content && header) {
-                    content.classList.add('collapsed');
-                    header.classList.add('collapsed');
-                }
             }
         }
         
@@ -1129,8 +1103,7 @@ function toggleCardState(header, content, taskId) {
             });
         }
         
-        // ============== РАБОТА С ФАЙЛАМИ НА СТРАНИЦЕ УЧАСТКА ==============
-
+        // ============== РАБОТА С ФАЙЛАМИ ==============
         function getCurrentSiteKey() {
             const path = window.location.pathname;
             if (path.includes('tokarniy')) return 'tokarniy';
@@ -1324,7 +1297,7 @@ function toggleCardState(header, content, taskId) {
                 openFileSelectionModal(taskId);
             }
         }
-
+        
         // ============== ФИЛЬТРЫ ==============
         function populateFilters() {
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
@@ -1445,7 +1418,6 @@ function toggleCardState(header, content, taskId) {
             if (isLoadingTasks) return;
             isLoadingTasks = true;
             
-            saveAllCardsState();
             taskManager.loadData();
             
             populateFilters();
@@ -1562,7 +1534,9 @@ function toggleCardState(header, content, taskId) {
                 taskCard.dataset.taskId = task.id;
                 
                 const header = document.createElement('div');
-                header.className = `task-header ${statusClass} ${priorityClass} collapsed`;
+                header.className = `task-header ${statusClass} ${priorityClass}`;
+                header.style.cursor = 'pointer';
+                
                 header.innerHTML = `
                     <div class="task-header-left">
                         <div class="task-customer-name">
@@ -1587,7 +1561,8 @@ function toggleCardState(header, content, taskId) {
                 `;
                 
                 const content = document.createElement('div');
-                content.className = 'task-content collapsed';
+                content.className = 'task-content';
+                content.style.display = 'none';
                 content.innerHTML = `
                     <div class="operation-info">
                         <div class="operation-name">${escapeHtml(displayOperationName)}</div>
@@ -1636,13 +1611,13 @@ function toggleCardState(header, content, taskId) {
                 }
             });
             
-            restoreAllCardsState();
             tasksList.scrollTop = scrollPosition;
             isLoadingTasks = false;
             
             setTimeout(() => {
                 restoreTaskHeaderColors();
-            }, 50);
+                restoreAllCardsState();
+            }, 100);
         }
         
         function showAddExecutorForm(task, container) {
@@ -2007,10 +1982,6 @@ function toggleCardState(header, content, taskId) {
             renderTasks();
             
             window.addEventListener('beforeunload', () => { 
-                saveAllCardsState();
-            });
-            
-            window.addEventListener('pagehide', () => {
                 saveAllCardsState();
             });
         }
