@@ -233,7 +233,7 @@ async function loadProducts() {
         },
         // XRAY 6-T2 BT 200 шторка
         { 
-            name: 'XRAY 6-T2 BT 200 штока', 
+            name: 'XRAY 6-T2 BT 200 шторка', 
             sizes: ['Стандартный']
         },
         // XRAY 6-T2 BT 220
