@@ -1238,6 +1238,86 @@
             }
         }
 
+        // ============== ЕДИНАЯ НОРМАЛИЗАЦИЯ НАЗВАНИЙ ДЕТАЛЕЙ ==============
+        function normalizeDetailName(name) {
+            if (!name) return '';
+            return String(name)
+                .toLowerCase()
+                .replace(/\d+(?:[.,]\d+)?(?:-?\d+)?\s*мм/gi, '')
+                .replace(/aisi/gi, '')
+                .replace(/сталь/gi, '')
+                .replace(/алюминий/gi, '')
+                .replace(/нержавейка/gi, '')
+                .replace(/пвх/gi, '')
+                .replace(/поликарбонат/gi, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+        
+        // ============== ПОЛУЧЕНИЕ КОЛИЧЕСТВА ДЕТАЛИ (ЕДИНАЯ ФУНКЦИЯ) ==========
+        function getDetailQuantity(item, operationDetailName) {
+            if (!operationDetailName || !item?.details) return 0;
+            
+            const normalizedOp = normalizeDetailName(operationDetailName);
+            
+            for (const detail of item.details) {
+                const normalizedDetail = normalizeDetailName(detail.name);
+                if (normalizedDetail === normalizedOp) {
+                    return detail.quantity;
+                }
+            }
+            
+            for (const detail of item.details) {
+                const normalizedDetail = normalizeDetailName(detail.name);
+                if (normalizedOp.includes(normalizedDetail) || normalizedDetail.includes(normalizedOp)) {
+                    return detail.quantity;
+                }
+            }
+            
+            return 0;
+        }
+        
+        // ============== ОБНОВЛЕНИЕ ПЛАНА В ЗАДАЧАХ ==============
+        function updateTaskQuantitiesFromDetails(orderId) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order || !order.items) return false;
+            
+            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+            let anyUpdated = false;
+            
+            order.items.forEach((item, itemIndex) => {
+                sites.forEach(siteKey => {
+                    const storageKey = `tasks_${siteKey}`;
+                    const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                    let siteUpdated = false;
+                    
+                    tasks.forEach(task => {
+                        if (task.orderId == orderId && task.itemIndex == itemIndex && task.detail) {
+                            const newQuantity = getDetailQuantity(item, task.detail);
+                            if (newQuantity > 0 && newQuantity !== task.totalQuantity) {
+                                task.totalQuantity = newQuantity;
+                                siteUpdated = true;
+                                anyUpdated = true;
+                                console.log(`🔄 Обновлён план для ${task.operation}: ${newQuantity} шт`);
+                            }
+                        }
+                    });
+                    
+                    if (siteUpdated) {
+                        localStorage.setItem(storageKey, JSON.stringify(tasks));
+                    }
+                });
+            });
+            
+            if (anyUpdated) {
+                renderOrdersList();
+                updateStatistics();
+            }
+            
+            return anyUpdated;
+        }
+
         // ============== ПОЛУЧЕНИЕ УНИКАЛЬНЫХ ДЕТАЛЕЙ ИЗ ОПЕРАЦИЙ ==============
         function getUniqueDetailsFromOperations(productName) {
             const productOps = taskOperationsData[productName];
@@ -1984,44 +2064,6 @@
                 .replace(/'/g, '&#39;');
         }
 
-        // ============== ОБНОВЛЕНИЕ ПЛАНА В ЗАДАЧАХ ==============
-        function updateTaskQuantitiesFromDetails(orderId) {
-            const orders = loadOrdersFromStorage();
-            const order = orders.find(o => o.id == orderId);
-            if (!order || !order.items) return;
-            
-            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
-            
-            order.items.forEach((item, itemIndex) => {
-                sites.forEach(siteKey => {
-                    const storageKey = `tasks_${siteKey}`;
-                    const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
-                    let updated = false;
-                    
-                    tasks.forEach(task => {
-                        if (task.orderId == orderId && task.itemIndex == itemIndex) {
-                            const detailName = task.detail;
-                            if (detailName && item.details) {
-                                const detail = item.details.find(d => d.name === detailName);
-                                if (detail && detail.quantity !== task.totalQuantity) {
-                                    task.totalQuantity = detail.quantity;
-                                    updated = true;
-                                    console.log(`🔄 Обновлён план для ${task.operation}: ${task.totalQuantity} шт`);
-                                }
-                            }
-                        }
-                    });
-                    
-                    if (updated) {
-                        localStorage.setItem(storageKey, JSON.stringify(tasks));
-                    }
-                });
-            });
-            
-            renderOrdersList();
-            updateStatistics();
-        }
-
         // ============== РАБОТА С ФАЙЛАМИ ==============
         function addSiteFile(orderId, siteKey) {
             const orders = loadOrdersFromStorage();
@@ -2164,11 +2206,11 @@
                 let isAdded = false;
                 let plannedQuantity = 1;
                 
-                // ПРИОРИТЕТ: берём количество из деталей изделия (актуальное)
+                // ПРИОРИТЕТ: берём количество из деталей изделия (гибкое сопоставление)
                 if (detailName && item.details) {
-                    const detail = item.details.find(d => d.name === detailName);
-                    if (detail && detail.quantity > 0) {
-                        plannedQuantity = detail.quantity;
+                    const qty = getDetailQuantity(item, detailName);
+                    if (qty > 0) {
+                        plannedQuantity = qty;
                     }
                 }
                 
@@ -2375,8 +2417,8 @@
                     detailName = opData.detail || '';
                     thickness = opData.thickness || '';
                     if (detailName && item.details) {
-                        const detail = item.details.find(d => d.name === detailName);
-                        if (detail) plannedQuantity = detail.quantity;
+                        const qty = getDetailQuantity(item, detailName);
+                        if (qty > 0) plannedQuantity = qty;
                     }
                 }
             }
@@ -3307,6 +3349,12 @@
             initThemeToggle();
 
             syncAllTasksToOrders();
+            
+            // Синхронизируем планы задач с деталями
+            const orders = loadOrdersFromStorage();
+            orders.forEach(order => {
+                updateTaskQuantitiesFromDetails(order.id);
+            });
 
             renderOrdersList();
             updateStatistics();
