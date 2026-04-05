@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MasterX - Планировщик производства</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='85' font-size='85' text-anchor='middle' fill='%23ff3b3b'>⚙️</text></svg>">
     <link rel="stylesheet" href="css/style.css">
     <style>
         /* Дополнительные стили */
@@ -2402,11 +2403,10 @@
         }
 
         // ============== ОТОБРАЖЕНИЕ СПИСКА ГРУПП ==============
-        
+        function renderOrdersList() {
             const ordersList = document.getElementById('ordersList');
             if (!ordersList) return;
 
-            // Загружаем свежие данные из localStorage
             const freshOrdersData = loadOrdersFromStorage() || [];
             const searchText = document.getElementById('searchInput')?.value?.toLowerCase() || '';
             const statusFilter = document.getElementById('statusFilter')?.value || 'all';
@@ -2470,10 +2470,6 @@
 
                 if (order.items && order.items.length > 0) {
                     order.items.forEach((item, itemIndex) => {
-                        // Используем данные item напрямую, без перезаписи из freshOrder
-                        // Это сохраняет RAL и текстуру
-                        
-                        // Формируем отображение RAL и текстуры
                         let ralTextureHtml = '';
                         if (item.ral && item.ral.trim() !== '') {
                             ralTextureHtml = `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>`;
@@ -2483,7 +2479,6 @@
                             ralTextureHtml = `<span style="font-size: 11px; color: #6c757d;">🎨 не указан</span>`;
                         }
                         
-                        // Определяем статус ТОЛЬКО для этого изделия
                         let hasAnyTask = false;
                         let hasAnyExecutor = false;
                         let allTasksCompleted = true;
@@ -2496,7 +2491,6 @@
                                     if (!isNaN(taskItemIndex) && taskItemIndex === itemIndex) {
                                         hasAnyTask = true;
                                         
-                                        // Проверяем наличие исполнителей
                                         const siteKey = parts[1];
                                         const storageKey = `tasks_${siteKey}`;
                                         const saved = localStorage.getItem(storageKey);
@@ -2557,7 +2551,6 @@
                         itemHeader.style.borderLeft = `4px solid ${headerBorderColor}`;
                         itemHeader.style.cursor = 'pointer';
 
-                        // Уникальный ID для стрелки
                         const arrowId = `arrow-${order.id}-${itemIndex}`;
                         
                         itemHeader.innerHTML = `
@@ -2635,9 +2628,7 @@
                             </div>
                         `;
 
-                        // Обработчик клика по заголовку изделия
                         itemHeader.onclick = (e) => {
-                            // Игнорируем клики по кнопкам
                             if (e.target.tagName === 'BUTTON') return;
                             
                             const isVisible = itemContent.style.display !== 'none';
