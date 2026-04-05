@@ -714,50 +714,64 @@
         
         // ============== СОХРАНЕНИЕ СОСТОЯНИЯ РАСКРЫТЫХ КАРТОЧЕК ==============
         function saveAllCardsState() {
-            const openCards = [];
-            document.querySelectorAll('.task-card').forEach(card => {
-                const content = card.querySelector('.task-content');
-                if (content && !content.classList.contains('collapsed')) {
-                    openCards.push(card.dataset.taskId);
-                }
-            });
-            localStorage.setItem(OPEN_CARDS_KEY, JSON.stringify(openCards));
-            console.log('💾 Сохранено раскрытых задач:', openCards.length);
+    const openTasks = [];
+    document.querySelectorAll('.task-card').forEach(card => {
+        const content = card.querySelector('.task-content');
+        // Проверяем видимость через style или класс
+        const isVisible = content && content.style.display !== 'none';
+        if (isVisible) {
+            openTasks.push(card.dataset.taskId);
         }
-        
-        function restoreAllCardsState() {
-            const savedOpenCards = localStorage.getItem(OPEN_CARDS_KEY);
-            if (!savedOpenCards) return;
-            const openCardsIds = JSON.parse(savedOpenCards);
-            console.log('🔄 Восстановление раскрытых задач:', openCardsIds.length);
-            openCardsIds.forEach(taskId => {
-                const card = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
-                if (card) {
-                    const header = card.querySelector('.task-header');
-                    const content = card.querySelector('.task-content');
-                    if (header && content && content.classList.contains('collapsed')) {
-                        header.classList.remove('collapsed');
-                        content.classList.remove('collapsed');
-                        const arrow = header.querySelector('.collapse-icon');
-                        if (arrow) arrow.textContent = '▲';
-                    }
-                }
-            });
-        }
-        
-        function toggleCardState(header, content, taskId) {
-            const isCollapsing = !header.classList.contains('collapsed');
-            if (isCollapsing) {
-                header.classList.add('collapsed');
-                content.classList.add('collapsed');
-            } else {
+    });
+    localStorage.setItem(OPEN_CARDS_KEY, JSON.stringify(openTasks));
+    console.log('💾 Сохранено раскрытых задач:', openTasks.length);
+}
+
+function restoreAllCardsState() {
+    const savedOpenTasks = localStorage.getItem(OPEN_CARDS_KEY);
+    if (!savedOpenTasks) return;
+    
+    const openTasksIds = JSON.parse(savedOpenTasks);
+    console.log('🔄 Восстановление задач:', openTasksIds.length);
+    
+    openTasksIds.forEach(taskId => {
+        const card = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+        if (card) {
+            const content = card.querySelector('.task-content');
+            const header = card.querySelector('.task-header');
+            if (content && header) {
+                // Показываем содержимое
+                content.style.display = 'block';
                 header.classList.remove('collapsed');
-                content.classList.remove('collapsed');
+                const arrow = header.querySelector('.collapse-icon');
+                if (arrow) arrow.textContent = '▲';
+                console.log('✅ Восстановлена задача:', taskId);
             }
-            const arrow = header.querySelector('.collapse-icon');
-            if (arrow) arrow.textContent = isCollapsing ? '▼' : '▲';
-            saveAllCardsState();
         }
+    });
+}
+
+function toggleCardState(header, content, taskId) {
+    const isVisible = content.style.display !== 'none';
+    
+    if (isVisible) {
+        // Сворачиваем
+        content.style.display = 'none';
+        header.classList.add('collapsed');
+        const arrow = header.querySelector('.collapse-icon');
+        if (arrow) arrow.textContent = '▼';
+        console.log('📁 Свернута задача:', taskId);
+    } else {
+        // Раскрываем
+        content.style.display = 'block';
+        header.classList.remove('collapsed');
+        const arrow = header.querySelector('.collapse-icon');
+        if (arrow) arrow.textContent = '▲';
+        console.log('📂 Раскрыта задача:', taskId);
+    }
+    
+    saveAllCardsState();
+}
         
         // ============== ЗАГРУЗКА ОПЕРАЦИЙ ИЗ JSON ==============
         async function loadTaskOperationsData() {
