@@ -6,66 +6,612 @@
     <title>MasterX - Токарный участок</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        .date-navigation {
-            background: linear-gradient(135deg, #1a1e24, #0f1217);
-            padding: 15px 25px;
+        /* Стили остаются без изменений - такие же как были */
+        .task-card {
+            background: #1a1e24;
             border-radius: 12px;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
             border: 1px solid #2a2f38;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        .task-card.priority {
+            border: 2px solid #ff3b3b;
+            box-shadow: 0 0 15px rgba(255,59,59,0.3);
+        }
+        .task-card:hover {
+            border-color: #ff3b3b;
+        }
+        .task-header {
+            padding: 12px 20px;
+            cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
+            transition: all 0.2s;
         }
-        .nav-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
-        .order-card { background: #1a1e24; border-radius: 12px; margin-bottom: 15px; border: 1px solid #2a2f38; overflow: hidden; }
-        .order-header { padding: 12px 20px; background: #232830; border-bottom: 1px solid #2a2f38; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .order-header h3 { color: #fff; font-size: 16px; font-weight: 500; margin: 0; }
-        .order-header .collapse-icon { color: #a0a0a0; font-size: 14px; transition: transform 0.2s; }
-        .order-header.collapsed .collapse-icon { transform: rotate(-90deg); }
-        .order-content { padding: 15px 20px; transition: all 0.2s; }
-        .order-content.collapsed { display: none; }
-        .product-info { background: #15191f; border-bottom: 1px solid #2a2f38; color: #a0a0a0; font-size: 13px; }
-        .task-card { padding: 12px 15px; border-bottom: 1px solid #2a2f38; transition: all 0.3s; }
-        .task-card:last-child { border-bottom: none; }
-        .task-card.completed { opacity: 0.8; background: #1a2a1a; border-left: 3px solid #2ecc71; }
-        .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .task-title { font-size: 14px; font-weight: 600; color: #fff; }
-        .task-plan { color: #ff9800; font-size: 12px; margin-bottom: 10px; padding: 4px 8px; background: #1e232b; border-radius: 4px; display: inline-block; }
-        .executor-header { display: flex; gap: 10px; padding: 0 10px; margin-bottom: 6px; font-size: 11px; color: #a0a0a0; }
-        .executor-header span:nth-child(1) { width: 140px; }
-        .executor-header span:nth-child(2) { width: 70px; text-align: center; }
-        .executor-header span:nth-child(3) { width: 80px; text-align: center; }
+        .task-header.status-pending {
+            background: linear-gradient(135deg, #232830, #1a1e24);
+            border-left: 4px solid #6c757d;
+        }
+        .task-header.status-in-progress {
+            background: linear-gradient(135deg, #3a2a1a, #2a1f0f);
+            border-left: 4px solid #ff9800;
+        }
+        .task-header.status-completed {
+            background: linear-gradient(135deg, #1a3a1a, #0f2a0f);
+            border-left: 4px solid #2ecc71;
+        }
+        .task-header.priority {
+            background: linear-gradient(135deg, #4a1a1a, #3a0f0f) !important;
+            border-left: 4px solid #ff3b3b !important;
+        }
+        .task-header-left {
+            flex: 1;
+        }
+        .task-customer-name {
+            font-weight: 600;
+            color: #ff3b3b;
+            font-size: 14px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .priority-badge {
+            background: #ff3b3b;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .task-product-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-top: 4px;
+        }
+        .task-product-name {
+            font-size: 13px;
+            color: #ff9800;
+            font-weight: 500;
+        }
+        .task-size {
+            font-size: 11px;
+            color: #4cd964;
+        }
+        .task-quantity {
+            font-size: 11px;
+            color: #a0a0a0;
+        }
+        .task-ral {
+            font-size: 11px;
+            color: #ff9800;
+            background: #1e232b;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .task-texture {
+            font-size: 11px;
+            color: #a0a0a0;
+        }
+        .file-indicator {
+            background: #1e232b;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            color: #4cd964;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .task-status-badge {
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            min-width: 90px;
+            text-align: center;
+        }
+        .task-status-badge.pending {
+            background: #2a2f38;
+            color: #a0a0a0;
+        }
+        .task-status-badge.in-progress {
+            background: #ff9800;
+            color: #1a1e24;
+        }
+        .task-status-badge.completed {
+            background: #4caf50;
+            color: white;
+        }
+        .collapse-icon {
+            color: #a0a0a0;
+            font-size: 14px;
+            transition: transform 0.2s;
+            margin-left: 15px;
+        }
+        .task-header.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+        .task-content {
+            padding: 15px 20px;
+            border-top: 1px solid #2a2f38;
+            transition: all 0.2s;
+        }
+        .task-content.collapsed {
+            display: none;
+        }
+        .operation-info {
+            background: #15191f;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #2a2f38;
+        }
+        .operation-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ff9800;
+            margin-bottom: 6px;
+        }
+        .operation-detail {
+            font-size: 12px;
+            color: #a0a0a0;
+            margin-bottom: 4px;
+        }
+        .operation-detail span {
+            color: #4cd964;
+        }
+        .operation-plan {
+            font-size: 11px;
+            color: #ff9800;
+            margin-top: 6px;
+            padding: 2px 6px;
+            background: #1e232b;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .executor-header {
+            display: flex;
+            gap: 8px;
+            padding: 0 8px;
+            margin-bottom: 4px;
+            font-size: 10px;
+            color: #a0a0a0;
+        }
+        .executor-header span:nth-child(1) { width: 120px; }
+        .executor-header span:nth-child(2) { width: 60px; text-align: center; }
+        .executor-header span:nth-child(3) { width: 70px; text-align: center; }
         .executor-header span:nth-child(4) { width: 30px; }
-        .executor-item { display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: #15191f; border-radius: 6px; margin-bottom: 4px; border: 1px solid #2a2f38; }
-        .executor-name { width: 140px; padding: 4px 8px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; font-size: 12px; }
-        .executor-quantity { width: 70px; padding: 4px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center; font-size: 12px; }
-        .btn-work { background: #ffc107; color: #000; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; width: 70px; font-weight: 600; }
-        .btn-work.active { background: #fd7e14; color: white; }
-        .btn-work:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-add-executor { background: #6c757d; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; margin: 8px 0; width: 140px; }
-        .action-container { margin: 8px 0; }
-        .new-executor-form { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 8px; background: #15191f; border: 1px solid #2a2f38; border-radius: 6px; flex-wrap: wrap; }
-        .new-executor-form input { width: 160px; padding: 5px 8px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; font-size: 12px; }
-        .btn-ready { background: #28a745; color: white; padding: 5px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; margin: 10px 0 0 0; min-width: 100px; }
-        .btn-ready:disabled { opacity: 0.5; cursor: not-allowed; }
-        .extra-task-badge { background: #ff3b3b; color: white; padding: 2px 6px; border-radius: 20px; font-size: 10px; margin-left: 8px; }
-        .task-description { color: #a0a0a0; font-size: 11px; margin: 5px 0 8px 0; padding: 6px; background: #15191f; border-radius: 4px; border-left: 3px solid #ff3b3b; }
-        .no-tasks { text-align: center; padding: 40px; background: #1a1e24; border-radius: 12px; color: #a0a0a0; border: 1px solid #2a2f38; }
-        .filter-section { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
-        .search-box { padding: 6px 12px; background: #1a1e24; border: 1px solid #2a2f38; border-radius: 6px; font-size: 12px; color: #e0e0e0; }
-        .order-stats { display: flex; gap: 15px; margin-bottom: 20px; padding: 12px 15px; background: linear-gradient(135deg, #1a1e24, #0f1217); border-radius: 10px; border: 1px solid #2a2f38; }
-        .stat-item { flex: 1; text-align: center; padding: 8px; background: #15191f; border-radius: 6px; border: 1px solid #2a2f38; }
-        .stat-value { font-size: 22px; font-weight: 700; background: linear-gradient(135deg, #00d4ff, #0077ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2px; }
-        .stat-label { font-size: 11px; color: #a0a0a0; }
-        .loading { text-align: center; padding: 30px; color: #a0a0a0; }
-        .spinner { width: 30px; height: 30px; margin: 0 auto 10px; border: 2px solid #2a2f38; border-top: 2px solid #ff3b3b; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .btn-sm { padding: 3px 6px; font-size: 10px; }
-        .btn-danger { background: #dc3545; color: white; border: none; padding: 3px 6px; font-size: 10px; }
-        .btn-end-shift { background: #ff9800; color: white; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; width: 95px; font-weight: 600; margin-left: 5px; }
-        .btn-end-shift:disabled { background: #4caf50; cursor: not-allowed; opacity: 0.7; }
+        .executor-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 8px;
+            background: #15191f;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            border: 1px solid #2a2f38;
+        }
+        .executor-name {
+            width: 120px;
+            padding: 3px 6px;
+            background: #1e232b;
+            border: 1px solid #2a2f38;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 11px;
+        }
+        .executor-quantity {
+            width: 60px;
+            padding: 3px;
+            background: #1e232b;
+            border: 1px solid #2a2f38;
+            border-radius: 4px;
+            color: #fff;
+            text-align: center;
+            font-size: 11px;
+        }
+        .btn-work {
+            background: #ffc107;
+            color: #000;
+            padding: 3px 6px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            width: 65px;
+            font-weight: 600;
+        }
+        .btn-work.active {
+            background: #fd7e14;
+            color: white;
+        }
+        .btn-work:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-add-executor {
+            background: #6c757d;
+            color: white;
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            margin: 6px 0;
+            width: 120px;
+        }
+        .action-container {
+            margin: 6px 0;
+        }
+        .new-executor-form {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+            padding: 6px;
+            background: #15191f;
+            border: 1px solid #2a2f38;
+            border-radius: 4px;
+            flex-wrap: wrap;
+        }
+        .new-executor-form input {
+            width: 130px;
+            padding: 4px 6px;
+            background: #1e232b;
+            border: 1px solid #2a2f38;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 11px;
+        }
+        .btn-ready {
+            background: #28a745;
+            color: white;
+            padding: 4px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            margin: 8px 0 0 0;
+            min-width: 80px;
+        }
+        .btn-ready:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-end-shift {
+            background: #ff9800;
+            color: white;
+            padding: 3px 6px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            width: 85px;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+        .btn-end-shift:disabled {
+            background: #4caf50;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .btn-report-item {
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-report-item:hover {
+            background: #e68900;
+            transform: scale(1.02);
+        }
+        .btn-copy-path {
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-left: 8px;
+        }
+        .btn-copy-path:hover {
+            background: #218838;
+            transform: scale(1.02);
+        }
+        .btn-sm {
+            padding: 2px 6px;
+            font-size: 9px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+        }
+        .filter-section {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            background: #15191f;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #2a2f38;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 130px;
+        }
+        .filter-group label {
+            font-size: 10px;
+            color: #a0a0a0;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .filter-group select, .filter-group input {
+            padding: 6px 10px;
+            background: #1e232b;
+            border: 1px solid #2a2f38;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 12px;
+            min-width: 140px;
+        }
+        .btn-reset {
+            background: #6c757d;
+            padding: 6px 12px;
+            font-size: 12px;
+            height: 32px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            margin-top: 20px;
+        }
+        .btn-reset:hover {
+            background: #5a6268;
+        }
+        .order-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #1a1e24, #0f1217);
+            border-radius: 10px;
+            border: 1px solid #2a2f38;
+        }
+        .stat-item {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            background: #15191f;
+            border-radius: 6px;
+            border: 1px solid #2a2f38;
+        }
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d4ff, #0077ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2px;
+        }
+        .stat-label {
+            font-size: 11px;
+            color: #a0a0a0;
+        }
+        .no-tasks {
+            text-align: center;
+            padding: 40px;
+            background: #1a1e24;
+            border-radius: 12px;
+            color: #a0a0a0;
+            border: 1px solid #2a2f38;
+        }
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #a0a0a0;
+        }
+        .spinner {
+            width: 30px;
+            height: 30px;
+            margin: 0 auto 10px;
+            border: 2px solid #2a2f38;
+            border-top: 2px solid #ff3b3b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .right-modal {
+            position: fixed;
+            right: -450px;
+            top: 0;
+            width: 450px;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a1e24, #0f1217);
+            border-left: 2px solid #ff3b3b;
+            box-shadow: -5px 0 30px rgba(0,0,0,0.5);
+            transition: right 0.3s ease;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .right-modal.open {
+            right: 0;
+        }
+        .right-modal-header {
+            background: linear-gradient(135deg, #232830, #1a1e24);
+            padding: 15px 20px;
+            border-bottom: 1px solid #2a2f38;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .right-modal-header h3 {
+            margin: 0;
+            color: #ff3b3b;
+            font-size: 18px;
+        }
+        .right-modal-close {
+            background: none;
+            border: none;
+            color: #a0a0a0;
+            font-size: 28px;
+            cursor: pointer;
+        }
+        .right-modal-close:hover {
+            color: #ff3b3b;
+        }
+        .right-modal-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .right-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1999;
+            display: none;
+        }
+        .right-modal-overlay.show {
+            display: block;
+        }
+        .report-row {
+            background: #15191f;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #2a2f38;
+        }
+        .report-input {
+            width: 100%;
+            padding: 6px;
+            background: #1e232b;
+            border: 1px solid #2a2f38;
+            border-radius: 4px;
+            color: #fff;
+        }
+        .report-textarea {
+            width: 100%;
+            padding: 6px;
+            background: #1e232b;
+            border: 1px solid #2a2f38;
+            border-radius: 4px;
+            color: #fff;
+            resize: vertical;
+        }
+        .btn-add-row {
+            width: 100%;
+            padding: 8px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-remove-row {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        .notification {
+            animation: slideInRight 0.3s ease;
+        }
+        body.light-theme .filter-section {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+        body.light-theme .filter-group select,
+        body.light-theme .filter-group input {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #1e293b !important;
+        }
+        body.light-theme .task-card {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+        body.light-theme .task-card.priority {
+            border: 2px solid #ff3b3b !important;
+        }
+        body.light-theme .task-header.status-pending {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
+        }
+        body.light-theme .task-header.status-in-progress {
+            background: linear-gradient(135deg, #fff3e0, #ffe6cc) !important;
+        }
+        body.light-theme .task-header.status-completed {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9) !important;
+        }
+        body.light-theme .task-header.priority {
+            background: linear-gradient(135deg, #fee2e2, #fecaca) !important;
+        }
+        body.light-theme .task-customer-name {
+            color: #dc2626 !important;
+        }
+        body.light-theme .task-product-name {
+            color: #f97316 !important;
+        }
+        body.light-theme .operation-info {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+        body.light-theme .executor-item {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+        body.light-theme .executor-name,
+        body.light-theme .executor-quantity {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #1e293b !important;
+        }
+        body.light-theme .btn-report-item {
+            background: #ff9800 !important;
+            color: white !important;
+        }
+        body.light-theme .btn-copy-path {
+            background: #28a745 !important;
+            color: white !important;
+        }
     </style>
 </head>
 <body>
@@ -75,23 +621,57 @@
                 <img src="../images/logo.png" alt="MasterX Logo" class="logo-img" onerror="this.style.display='none'">
                 <div class="logo-text">Master<span class="x-red">X</span></div>
             </div>
-            <h1 style="margin:0; color: white; font-size:18px;"> Токарный участок</h1>
+            <h1 style="margin:0; color: white; font-size:18px;">🔧 Токарный участок</h1>
         </header>
 
-        <div class="date-navigation">
-            <h2 id="currentDateDisplay" style="font-size: 15px; color: #fff; margin: 0;"></h2>
-            <div class="nav-buttons">
-                <button class="btn btn-info" style="padding: 6px 12px; font-size: 12px;" onclick="exportToExcel()">📊 Excel</button>
-            </div>
-        </div>
-
         <div class="filter-section">
-            <select id="statusFilter" class="search-box" style="width: auto; padding: 6px 10px;" onchange="applyFilters()">
-                <option value="all">Все задачи</option>
-                <option value="pending">Ожидают</option>
-                <option value="in_progress">В работе</option>
-                <option value="completed">Завершённые</option>
-            </select>
+            <div class="filter-group">
+                <label>🏢 ЗАКАЗЧИК</label>
+                <select id="filterCustomer">
+                    <option value="">Все заказчики</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>📦 ИЗДЕЛИЕ</label>
+                <select id="filterProduct">
+                    <option value="">Все изделия</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>🔧 ОПЕРАЦИЯ</label>
+                <select id="filterOperation">
+                    <option value="">Все операции</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>🎨 RAL</label>
+                <select id="filterRal">
+                    <option value="">Все RAL</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>📏 ТОЛЩИНА (мм)</label>
+                <select id="filterThickness">
+                    <option value="">Все толщины</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>📐 РАЗМЕР</label>
+                <select id="filterSize">
+                    <option value="">Все размеры</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>📊 СТАТУС</label>
+                <select id="statusFilter">
+                    <option value="all">Все задачи</option>
+                    <option value="pending">⏳ Ожидают</option>
+                    <option value="in_progress">⚡ В работе</option>
+                    <option value="completed">✅ Завершённые</option>
+                    <option value="priority">🔴 Приоритетные</option>
+                </select>
+            </div>
+            <button class="btn-reset" onclick="resetFilters()">🔄 Сбросить</button>
         </div>
 
         <div class="order-stats">
@@ -103,603 +683,1388 @@
         <div id="tasksList" class="tasks-list"><div class="loading"><div class="spinner"></div><p>Загрузка задач...</p></div></div>
     </div>
 
+    <div id="rightModalOverlay" class="right-modal-overlay" onclick="closeRightModal()"></div>
+    <div id="rightModal" class="right-modal">
+        <div class="right-modal-header">
+            <h3>📝 Отчёт по задаче</h3>
+            <button class="right-modal-close" onclick="closeRightModal()">&times;</button>
+        </div>
+        <div id="rightModalContent" class="right-modal-content"></div>
+    </div>
+
     <script src="../js/storage.js"></script>
     <script src="../js/data-loader.js"></script>
-    <script src="../js/task-operations.js"></script>
+    <script src="../js/materials-report.js"></script>
     <script src="../js/task-manager.js"></script>
 
     <script>
+        // ============== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==============
+        let taskOperationsData = {};
+        let taskManager = null;
+        let isLoadingTasks = false;
+        let currentReportTask = null;
+        let reportRows = [];
+        
+        const OPEN_CARDS_KEY = 'tokarniy_open_tasks';
+        
+        // ============== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==============
         function escapeHtml(str) {
             if (!str) return '';
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
-
-        // ============== ЗАГРУЗКА ОПЕРАЦИЙ ИЗ taskOperations.json ==============
-        let taskOperationsData = {};
         
+        function saveAllCardsState() {
+            const openCards = [];
+            document.querySelectorAll('.task-card').forEach(card => {
+                const content = card.querySelector('.task-content');
+                if (content && content.classList.contains('collapsed')) {
+                    openCards.push(card.dataset.taskId);
+                }
+            });
+            localStorage.setItem(OPEN_CARDS_KEY, JSON.stringify(openCards));
+        }
+        
+        function restoreAllCardsState() {
+            const savedOpenCards = localStorage.getItem(OPEN_CARDS_KEY);
+            if (!savedOpenCards) return;
+            const collapsedCardsIds = JSON.parse(savedOpenCards);
+            collapsedCardsIds.forEach(taskId => {
+                const card = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+                if (card) {
+                    const header = card.querySelector('.task-header');
+                    const content = card.querySelector('.task-content');
+                    if (header && content) {
+                        header.classList.add('collapsed');
+                        content.classList.add('collapsed');
+                        const arrow = header.querySelector('.collapse-icon');
+                        if (arrow) arrow.textContent = '▼';
+                    }
+                }
+            });
+        }
+        
+        function toggleCardState(header, content, taskId) {
+            const isCollapsing = !header.classList.contains('collapsed');
+            if (isCollapsing) {
+                header.classList.add('collapsed');
+                content.classList.add('collapsed');
+            } else {
+                header.classList.remove('collapsed');
+                content.classList.remove('collapsed');
+            }
+            const arrow = header.querySelector('.collapse-icon');
+            if (arrow) arrow.textContent = isCollapsing ? '▼' : '▲';
+            saveAllCardsState();
+        }
+        
+        // ============== ЗАГРУЗКА ОПЕРАЦИЙ ИЗ JSON ==============
         async function loadTaskOperationsData() {
             try {
-                const response = await fetch('../data/taskOperations.json');
+                const response = await fetch('../data/taskOperations.json?_=' + Date.now());
                 if (response.ok) {
                     const data = await response.json();
                     taskOperationsData = data.operations || {};
+                    window.taskOperationsData = taskOperationsData;
                     console.log('✅ Загружены операции из taskOperations.json');
+                    console.log('Загружено изделий:', Object.keys(taskOperationsData).length);
                 } else {
-                    console.warn('taskOperations.json не найден');
+                    console.warn('taskOperations.json не найден, статус:', response.status);
+                    taskOperationsData = {};
                 }
             } catch(e) {
                 console.error('Ошибка загрузки taskOperations.json:', e);
+                taskOperationsData = {};
             }
         }
         
-        // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ (только названия) ==============
-        function getOperationNames(productName, siteKey) {
-            const productOps = taskOperationsData[productName];
-            if (!productOps) return [];
-            
-            const siteMap = {
-                'tokarniy': 'токарно-фрезерный',
-                'frezerniy': 'фрезерный',
-                'slesarniy': 'слесарный',
-                'lazerno': 'лазерно-гибочный',
-                'polimerniy': 'полимерный'
-            };
-            
-            const siteColumn = siteMap[siteKey];
-            if (!siteColumn) return [];
-            
-            const ops = productOps[siteColumn] || [];
-            
-            if (ops.length > 0 && typeof ops[0] === 'object' && ops[0].operation) {
-                return ops.map(op => op.operation);
+        // ============== КЛАСС УПРАВЛЕНИЯ ЗАДАЧАМИ ==============
+        class SimpleTaskManager {
+            constructor(siteKey) {
+                this.siteKey = siteKey;
+                this.tasks = [];
+                this.storageKey = `tasks_${siteKey}`;
             }
             
-            return ops;
-        }
-        
-        function getTaskPlanFromDetails(task, fullOrder) {
-            if (!fullOrder || !fullOrder.items || !fullOrder.items[0]) return 1;
-            
-            const item = fullOrder.items[0];
-            const details = item.details || [];
-            const productName = item.product;
-            
-            const productOps = taskOperationsData[productName];
-            if (!productOps) return item.size?.quantity || 1;
-            
-            let foundDetail = null;
-            for (const siteOps of Object.values(productOps)) {
-                for (const op of siteOps) {
-                    if (op.operation === task.operation) {
-                        foundDetail = op.detail;
-                        break;
-                    }
-                }
-                if (foundDetail) break;
-            }
-            
-            if (!foundDetail) return item.size?.quantity || 1;
-            
-            for (const detail of details) {
-                if (detail.name === foundDetail) {
-                    return detail.quantity;
-                }
-            }
-            
-            if (item.brackets) {
-                for (const b of item.brackets) {
-                    if (`Кронштейн ${b.type}` === foundDetail) {
-                        return b.quantity;
-                    }
-                }
-            }
-            
-            if (item.lyres) {
-                for (const l of item.lyres) {
-                    if (`Лира ${l.type}` === foundDetail) {
-                        return l.quantity;
-                    }
-                }
-            }
-            
-            return item.size?.quantity || 1;
-        }
-
-        // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
-        const TOKARNIY_STORAGE_KEY = 'tokarniy_open_cards';
-        
-        function saveOpenCardsState() {
-            const openCards = [];
-            document.querySelectorAll('.order-card').forEach(card => {
-                const content = card.querySelector('.order-content');
-                if (content && !content.classList.contains('collapsed')) {
-                    openCards.push(card.dataset.orderId);
-                }
-            });
-            localStorage.setItem(TOKARNIY_STORAGE_KEY, JSON.stringify(openCards));
-            console.log('💾 Сохранены открытые карточки:', openCards);
-        }
-
-        function restoreOpenCardsState() {
-            const savedOpenCards = localStorage.getItem(TOKARNIY_STORAGE_KEY);
-            if (!savedOpenCards) return;
-            const openCardsIds = JSON.parse(savedOpenCards);
-            console.log('📂 Восстанавливаем открытые карточки:', openCardsIds);
-            
-            openCardsIds.forEach(orderId => {
-                const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
-                if (card) {
-                    const header = card.querySelector('.order-header');
-                    const content = card.querySelector('.order-content');
-                    if (header && content) {
-                        header.classList.remove('collapsed');
-                        content.classList.remove('collapsed');
-                        console.log('✅ Восстановлена карточка:', orderId);
-                    }
-                }
-            });
-        }
-
-        // ============== ИНИЦИАЛИЗАЦИЯ ==============
-        if (typeof TaskManager === 'undefined') {
-            console.error('❌ TaskManager не загружен!');
-            document.getElementById('tasksList').innerHTML = '<div class="no-tasks"><p>❌ Ошибка загрузки</p></div>';
-        } else {
-            const taskManager = new TaskManager('tokarniy', window.TASK_OPERATIONS.tokarniy || {});
-            let currentFilter = 'all';
-            let currentlyOpenOrderId = null;
-            let isLoadingTasks = false;
-            
-            function saveOpenOrderState() {
-                const allContents = document.querySelectorAll('.order-content');
-                let foundOpenId = null;
-                allContents.forEach(content => {
-                    const card = content.closest('.order-card');
-                    if (card && !content.classList.contains('collapsed')) {
-                        foundOpenId = card.dataset.orderId;
-                    }
-                });
-                currentlyOpenOrderId = foundOpenId;
-            }
-            
-            function restoreOpenOrderState() {
-                if (!currentlyOpenOrderId) return;
-                const openCard = document.querySelector(`.order-card[data-order-id="${currentlyOpenOrderId}"]`);
-                if (openCard) {
-                    const header = openCard.querySelector('.order-header');
-                    const content = openCard.querySelector('.order-content');
-                    if (header && content) {
-                        header.classList.remove('collapsed');
-                        content.classList.remove('collapsed');
-                    }
-                }
-            }
-            
-            window.taskManager = taskManager;
-            
-            document.addEventListener('DOMContentLoaded', async function() {
-                await loadTaskOperationsData();
-                updateDateDisplay();
-                loadTasks();
-                window.addEventListener('beforeunload', function() { saveOpenCardsState(); });
-            });
-            
-            window.changeDate = function(action) {
-                switch(action) {
-                    case 'prev': taskManager.prevDay(); break;
-                    case 'next': taskManager.nextDay(); break;
-                    case 'today': taskManager.today(); break;
-                }
-                currentlyOpenOrderId = null;
-                updateDateDisplay();
-                loadTasks();
-            };
-            
-            function updateDateDisplay() {
-                var options = { year: 'numeric', month: 'long', day: 'numeric' };
-                var dateStr = taskManager.currentDate.toLocaleDateString('ru-RU', options);
-                var isToday = taskManager.formatDate(taskManager.currentDate) === taskManager.formatDate(new Date());
-                document.getElementById('currentDateDisplay').innerHTML = dateStr + (isToday ? '' : '<span class="history-indicator">(история)</span>');
-            }
-            
-            window.applyFilters = function() {
-                currentFilter = document.getElementById('statusFilter').value;
-                loadTasks();
-            };
-            
-            function loadTasks() {
-                if (isLoadingTasks) return;
-                isLoadingTasks = true;
-                
-                var tasksList = document.getElementById('tasksList');
-                taskManager.loadData();
-                var tasks = taskManager.getTasksByStatus(currentFilter);
-                
-                var stats = taskManager.getStats();
-                document.getElementById('totalTasks').textContent = stats.total;
-                document.getElementById('tasksInProgress').textContent = stats.inProgress;
-                document.getElementById('tasksCompleted').textContent = stats.completed;
-                
-                tasksList.innerHTML = '';
-                
-                if (tasks.length === 0) {
-                    tasksList.innerHTML = '<div class="no-tasks"><p>📭 Нет задач на этот день</p></div>';
-                    isLoadingTasks = false;
-                    return;
-                }
-                
-                var byOrder = {};
-                tasks.forEach(function(task) {
-                    if (!byOrder[task.orderId]) {
-                        byOrder[task.orderId] = {
-                            number: task.orderNumber,
-                            orderId: task.orderId,
-                            tasks: []
-                        };
-                    }
-                    byOrder[task.orderId].tasks.push(task);
-                });
-                
-                Object.values(byOrder).forEach(function(order) {
-                    var orderDiv = document.createElement('div');
-                    orderDiv.className = 'order-card';
-                    orderDiv.dataset.orderId = order.orderId;
-                    
-                    var header = document.createElement('div');
-                    header.className = 'order-header collapsed';
-                    header.innerHTML = '<h3>📦 Заказ №' + escapeHtml(order.number) + '</h3><span class="collapse-icon">▼</span>';
-                    
-                    var content = document.createElement('div');
-                    content.className = 'order-content collapsed';
-                    
-                    var fullOrder = null;
-                    try {
-                        var allOrders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
-                        fullOrder = allOrders.find(function(o) { return o.id == order.orderId; });
-                    } catch (e) {}
-
-                    var productQty = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].size?.quantity || 1) : 1;
-                    var productName = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].product || '') : '';
-                    var productSize = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].size?.name || '-') : '-';
-                    var bracket = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].brackets || []) : [];
-                    var lyre = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].lyres || []) : [];
-                    var ral = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].ral || '') : '';
-                    var texture = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].texture || '') : '';
-                    var components = (fullOrder && fullOrder.components) ? fullOrder.components : [];
-                    var details = (fullOrder && fullOrder.items && fullOrder.items[0]) ? (fullOrder.items[0].details || []) : [];
-                    
-                    var allDetails = [];
-                    if (bracket && bracket.length > 0) {
-                        bracket.forEach(function(b) {
-                            if (b.type && b.type !== 'отсутствует' && b.quantity > 0) {
-                                allDetails.push({ name: 'Кронштейн ' + b.type, quantity: b.quantity });
-                            }
-                        });
-                    }
-                    if (lyre && lyre.length > 0) {
-                        lyre.forEach(function(l) {
-                            if (l.type && l.type !== 'отсутствует' && l.quantity > 0) {
-                                allDetails.push({ name: 'Лира ' + l.type, quantity: l.quantity });
-                            }
-                        });
-                    }
-                    if (details && details.length > 0) {
-                        details.forEach(function(d) {
-                            if (d.type !== 'profile' && d.quantity > 0) {
-                                allDetails.push({ name: d.name, quantity: d.quantity });
-                            }
-                        });
-                    }
-                    
-                    var profiles = [];
-                    if (details && details.length > 0) {
-                        details.forEach(function(d) {
-                            if (d.type === 'profile' && d.quantity > 0) {
-                                profiles.push({ name: d.name, lengthMm: d.lengthMm, quantity: d.quantity });
-                            }
-                        });
-                    }
-                    
-                    var productInfoDiv = document.createElement('div');
-                    productInfoDiv.className = 'product-info';
-                    productInfoDiv.style.padding = '8px 12px';
-                    productInfoDiv.style.borderBottom = '1px solid #2a2f38';
-                    
-                    var infoHtml = `
-                        <div style="font-size: 20px; font-weight: 600; color: #ff3b3b; margin: 0 0 8px 0;">📦 ${escapeHtml(productName)}</div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
-                            <div>
-                                <div style="color: #a0a0a0; font-size: 11px;">РАЗМЕР</div>
-                                <div style="font-size: 20px;"><strong>${escapeHtml(productSize)}</strong> <span style="color: #4cd964;">× ${productQty} шт</span></div>
-                                <div style="margin-top: 8px;">
-                                    <div style="color: #a0a0a0; font-size: 11px;">ПОКРЫТИЕ</div>
-                                    <div style="font-size: 18px;"><strong>${escapeHtml(ral || '-')}</strong> / ${escapeHtml(texture || '-')}</div>
-                                </div>
-                            </div>
-                            <div>
-                                <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 8px;">ПРОФИЛИ</div>
-                                ${profiles.map(p => `
-                                    <div style="margin-bottom: 8px;">
-                                        <div style="font-size: 16px;">• ${escapeHtml(p.name)}</div>
-                                        <div style="margin-left: 18px; color: #a0a0a0; font-size: 13px;">
-                                            <span style="color: #ff9800;">${p.lengthMm} мм</span> <span style="color: #4cd964;">× ${p.quantity} шт</span>
-                                        </div>
-                                    </div>
-                                `).join('') || '<div style="color: #6c757d;">— нет —</div>'}
-                            </div>
-                            <div>
-                                <div style="color: #a0a0a0; font-size: 11px; margin-bottom: 8px;">ДЕТАЛИ</div>
-                                ${allDetails.map(d => `
-                                    <div style="margin-bottom: 6px; font-size: 16px;">• ${escapeHtml(d.name)} <span style="color: #4cd964;">${d.quantity} шт</span></div>
-                                `).join('') || '<div style="color: #6c757d;">— нет —</div>'}
-                            </div>
-                        </div>
-                    `;
-                    
-                    if (components && components.length > 0) {
-                        var compsHtml = '';
-                        for (var i = 0; i < components.length; i++) {
-                            compsHtml += '<span style="background: #1e232b; padding: 4px 10px; border-radius: 14px; font-size: 12px; border: 1px solid #2a2f38; margin-right: 6px; display: inline-block;">' + escapeHtml(components[i].name) + ': <strong style="color: #4cd964;">' + components[i].quantityPerProduct + '</strong> шт/изд</span>';
-                        }
-                        infoHtml += '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #2a2f38;"><strong style="color: #ff3b3b;">🔧 КОМПЛЕКТУЮЩИЕ:</strong><div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px;">' + compsHtml + '</div></div>';
-                    }
-                    
-                    productInfoDiv.innerHTML = infoHtml;
-                    content.appendChild(productInfoDiv);
-                    
-                    order.tasks.forEach(function(task) {
-                        content.appendChild(createTaskCard(task, fullOrder));
-                    });
-                    
-                    header.addEventListener('click', function(e) {
-                        if (e.target.tagName === 'BUTTON') return;
-                        content.classList.toggle('collapsed');
-                        header.classList.toggle('collapsed');
-                        saveOpenCardsState();
-                    });
-                    
-                    orderDiv.appendChild(header);
-                    orderDiv.appendChild(content);
-                    tasksList.appendChild(orderDiv);
-                });
-                
-                // Восстанавливаем состояние открытых карточек после отрисовки
-                setTimeout(function() {
-                    restoreOpenCardsState();
-                    isLoadingTasks = false;
-                }, 100);
-            }
-            
-            function createTaskCard(task, fullOrder) {
-                var card = document.createElement('div');
-                card.className = 'task-card ' + (task.status === 'completed' ? 'completed' : '');
-                card.dataset.taskId = task.id;
-                
-                var planQuantity = task.totalQuantity || getTaskPlanFromDetails(task, fullOrder);
-                
-                var operationName = task.operation;
-                if (typeof operationName === 'object' && operationName !== null) {
-                    operationName = operationName.operation || JSON.stringify(operationName);
-                }
-                if (typeof operationName !== 'string') {
-                    operationName = String(operationName);
-                }
-                
-                var header = document.createElement('div');
-                header.className = 'task-header';
-                header.innerHTML = '<span class="task-title">' + escapeHtml(operationName) + (task.isExtra ? '<span class="extra-task-badge">Доп.</span>' : '') + '</span>';
-                card.appendChild(header);
-                
-                var planDiv = document.createElement('div');
-                planDiv.className = 'task-plan';
-                planDiv.innerHTML = '📋 План: ' + planQuantity + ' шт';
-                card.appendChild(planDiv);
-                
-                if (task.isExtra && task.description) {
-                    var desc = document.createElement('div');
-                    desc.className = 'task-description';
-                    desc.textContent = escapeHtml(task.description);
-                    card.appendChild(desc);
-                }
-                
-                var headers = document.createElement('div');
-                headers.className = 'executor-header';
-                headers.innerHTML = '<span>ФИО</span><span>Кол-во</span><span>Статус</span><span></span>';
-                card.appendChild(headers);
-                
-                var executorList = document.createElement('div');
-                executorList.className = 'executor-list';
-                executorList.id = 'executors-' + task.id;
-                
-                if (task.executors && task.executors.length > 0) {
-                    task.executors.forEach(executor => { executorList.appendChild(createExecutorItem(task, executor)); });
+            loadData() {
+                const saved = localStorage.getItem(this.storageKey);
+                if (saved) {
+                    this.tasks = JSON.parse(saved);
                 } else {
-                    var noExecutors = document.createElement('p');
-                    noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 12px;';
+                    this.tasks = [];
+                }
+                return this.tasks;
+            }
+            
+            saveData() {
+                localStorage.setItem(this.storageKey, JSON.stringify(this.tasks));
+            }
+            
+            getTasksByStatus(status) {
+                if (status === 'all') return this.tasks;
+                return this.tasks.filter(t => t.status === status);
+            }
+            
+            getStats() {
+                const total = this.tasks.length;
+                const inProgress = this.tasks.filter(t => t.status === 'in_progress').length;
+                const completed = this.tasks.filter(t => t.status === 'completed').length;
+                return { total, inProgress, completed };
+            }
+            
+            updateExecutorQuantity(taskId, executorId, quantity) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (task && task.executors) {
+                    const executor = task.executors.find(e => e.id === executorId);
+                    if (executor) {
+                        executor.quantity = quantity;
+                        this.saveData();
+                        updateSingleTaskCard(taskId);
+                    }
+                }
+            }
+            
+            updateExecutorStatus(taskId, executorId, status) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (!task || !task.executors) return;
+                
+                const executor = task.executors.find(e => e.id === executorId);
+                if (executor) {
+                    executor.status = status;
+                    
+                    let taskStatus = 'pending';
+                    const hasInProgress = task.executors.some(e => e.status === 'in_progress');
+                    const allShiftEnded = task.executors.length > 0 && task.executors.every(e => e.status === 'shift_ended');
+                    const allCompleted = task.executors.length > 0 && task.executors.every(e => e.status === 'completed');
+                    
+                    if (allCompleted) {
+                        taskStatus = 'completed';
+                    } else if (hasInProgress) {
+                        taskStatus = 'in_progress';
+                    } else if (allShiftEnded) {
+                        taskStatus = 'in_progress';
+                    } else {
+                        taskStatus = 'pending';
+                    }
+                    
+                    task.status = taskStatus;
+                    this.saveData();
+                    
+                    const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+                    const order = orders.find(o => o.id == task.orderId);
+                    if (order) {
+                        if (!order.tasks) order.tasks = {};
+                        const squareColor = taskStatus === 'completed' ? 'green' : (taskStatus === 'in_progress' ? 'orange' : '');
+                        order.tasks[task.id] = squareColor;
+                        localStorage.setItem('masterx_orders', JSON.stringify(orders));
+                    }
+                    
+                    updateSingleTaskCard(taskId);
+                }
+            }
+            
+            addExecutor(taskId, name) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (task) {
+                    if (!task.executors) task.executors = [];
+                    if (task.executors.some(e => e.name === name)) return false;
+                    task.executors.push({
+                        id: Date.now(),
+                        name: name,
+                        quantity: 0,
+                        status: 'pending'
+                    });
+                    this.saveData();
+                    updateExecutorList(taskId);
+                    return true;
+                }
+                return false;
+            }
+            
+            removeExecutor(taskId, executorId) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (task && task.executors) {
+                    task.executors = task.executors.filter(e => e.id !== executorId);
+                    this.saveData();
+                    updateExecutorList(taskId);
+                }
+            }
+            
+            completeTask(taskId) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (task && task.status !== 'completed') {
+                    if (task.executors) {
+                        task.executors.forEach(executor => {
+                            executor.status = 'completed';
+                        });
+                    }
+                    task.status = 'completed';
+                    task.completedAt = new Date().toISOString();
+                    
+                    if (task.isPriority === true) {
+                        task.isPriority = false;
+                    }
+                    
+                    this.saveData();
+                    
+                    const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+                    const order = orders.find(o => o.id == task.orderId);
+                    if (order) {
+                        if (!order.tasks) order.tasks = {};
+                        order.tasks[task.id] = 'green';
+                        localStorage.setItem('masterx_orders', JSON.stringify(orders));
+                    }
+                    
+                    updateSingleTaskCard(taskId);
+                }
+            }
+        }
+        
+        function updateSingleTaskCard(taskId) {
+            const task = taskManager.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            const taskCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+            if (!taskCard) return;
+            
+            const statusBadge = taskCard.querySelector('.task-status-badge');
+            const taskHeader = taskCard.querySelector('.task-header');
+            
+            if (statusBadge) {
+                let statusClass = 'pending';
+                let statusText = '⏳ ОЖИДАЕТ';
+                if (task.status === 'in_progress') {
+                    statusClass = 'in-progress';
+                    statusText = '⚡ В РАБОТЕ';
+                } else if (task.status === 'completed') {
+                    statusClass = 'completed';
+                    statusText = '✅ ГОТОВО';
+                }
+                
+                statusBadge.className = `task-status-badge ${statusClass}`;
+                statusBadge.textContent = statusText;
+                
+                if (taskHeader) {
+                    taskHeader.classList.remove('status-pending', 'status-in-progress', 'status-completed');
+                    taskHeader.classList.add(`status-${statusClass}`);
+                }
+            }
+            
+            const executorList = taskCard.querySelector('.executor-list');
+            if (executorList) {
+                const wasCollapsed = taskCard.querySelector('.task-content')?.classList.contains('collapsed');
+                
+                executorList.innerHTML = '';
+                if (task.executors && task.executors.length > 0) {
+                    task.executors.forEach(executor => {
+                        executorList.appendChild(createExecutorItemElement(task, executor));
+                    });
+                } else {
+                    const noExecutors = document.createElement('p');
+                    noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 11px;';
                     noExecutors.textContent = 'Нет исполнителей';
                     executorList.appendChild(noExecutors);
                 }
-                card.appendChild(executorList);
                 
-                var actionContainer = document.createElement('div');
-                actionContainer.className = 'action-container';
-                if (task.status !== 'completed') {
-                    var addBtn = document.createElement('button');
+                const readyBtn = taskCard.querySelector('.btn-ready');
+                if (readyBtn) {
+                    readyBtn.disabled = task.status === 'completed';
+                }
+                
+                if (wasCollapsed) {
+                    const content = taskCard.querySelector('.task-content');
+                    const header = taskCard.querySelector('.task-header');
+                    if (content && header) {
+                        content.classList.add('collapsed');
+                        header.classList.add('collapsed');
+                    }
+                }
+            }
+        }
+        
+        function updateExecutorList(taskId) {
+            const task = taskManager.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            const executorList = document.getElementById(`executors-${taskId}`);
+            if (!executorList) return;
+            
+            const taskCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+            const wasCollapsed = taskCard?.querySelector('.task-content')?.classList.contains('collapsed');
+            
+            executorList.innerHTML = '';
+            if (task.executors && task.executors.length > 0) {
+                task.executors.forEach(executor => {
+                    executorList.appendChild(createExecutorItemElement(task, executor));
+                });
+            } else {
+                const noExecutors = document.createElement('p');
+                noExecutors.style.cssText = 'color: #a0a0a0; padding: 8px; text-align: center; font-style: italic; font-size: 11px;';
+                noExecutors.textContent = 'Нет исполнителей';
+                executorList.appendChild(noExecutors);
+            }
+            
+            if (wasCollapsed && taskCard) {
+                const content = taskCard.querySelector('.task-content');
+                const header = taskCard.querySelector('.task-header');
+                if (content && header) {
+                    content.classList.add('collapsed');
+                    header.classList.add('collapsed');
+                }
+            }
+        }
+        
+        function createExecutorItemElement(task, executor) {
+            const isShiftEnded = executor.status === 'shift_ended';
+            const isTaskCompleted = task.status === 'completed';
+            const canEdit = !isTaskCompleted && !isShiftEnded;
+            
+            const div = document.createElement('div');
+            div.className = 'executor-item';
+            div.dataset.executorId = executor.id;
+            
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.className = 'executor-name';
+            nameInput.value = executor.name;
+            nameInput.disabled = isTaskCompleted || isShiftEnded;
+            div.appendChild(nameInput);
+            
+            const quantityInput = document.createElement('input');
+            quantityInput.type = 'number';
+            quantityInput.className = 'executor-quantity';
+            quantityInput.value = executor.quantity || 0;
+            quantityInput.min = 0;
+            quantityInput.disabled = !canEdit;
+            quantityInput.onchange = function(e) {
+                e.stopPropagation();
+                if (!canEdit) return;
+                taskManager.updateExecutorQuantity(task.id, executor.id, parseInt(this.value) || 0);
+            };
+            div.appendChild(quantityInput);
+            
+            const workBtn = document.createElement('button');
+            workBtn.className = `btn-work ${executor.status === 'in_progress' ? 'active' : ''}`;
+            workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : (isShiftEnded ? 'СМЕНА ЗАКРЫТА' : 'НАЧАТЬ');
+            workBtn.disabled = !canEdit;
+            workBtn.onclick = function(e) {
+                e.stopPropagation();
+                if (!canEdit) return;
+                const newStatus = workBtn.classList.contains('active') ? 'pending' : 'in_progress';
+                taskManager.updateExecutorStatus(task.id, executor.id, newStatus);
+            };
+            div.appendChild(workBtn);
+            
+            const endShiftBtn = document.createElement('button');
+            endShiftBtn.className = 'btn-end-shift';
+            endShiftBtn.innerHTML = isShiftEnded ? '✅ СМЕНА ЗАКРЫТА' : '🕒 ЗАКРЫТЬ';
+            endShiftBtn.disabled = isTaskCompleted || isShiftEnded;
+            endShiftBtn.onclick = function(e) {
+                e.stopPropagation();
+                if (confirm(`Закрыть смену для ${executor.name}?`)) {
+                    taskManager.updateExecutorStatus(task.id, executor.id, 'shift_ended');
+                }
+            };
+            div.appendChild(endShiftBtn);
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'btn btn-danger btn-sm';
+            removeBtn.innerHTML = '✕';
+            removeBtn.disabled = !canEdit;
+            removeBtn.onclick = function(e) {
+                e.stopPropagation();
+                if (confirm('Удалить этого исполнителя?')) {
+                    taskManager.removeExecutor(task.id, executor.id);
+                }
+            };
+            div.appendChild(removeBtn);
+            
+            return div;
+        }
+        
+        function restoreTaskHeaderColors() {
+            const taskCards = document.querySelectorAll('.task-card');
+            taskCards.forEach(card => {
+                const taskId = card.dataset.taskId;
+                const task = taskManager.tasks.find(t => t.id === taskId);
+                if (task) {
+                    const statusBadge = card.querySelector('.task-status-badge');
+                    const taskHeader = card.querySelector('.task-header');
+                    
+                    if (statusBadge) {
+                        let statusClass = 'pending';
+                        let statusText = '⏳ ОЖИДАЕТ';
+                        if (task.status === 'in_progress') {
+                            statusClass = 'in-progress';
+                            statusText = '⚡ В РАБОТЕ';
+                        } else if (task.status === 'completed') {
+                            statusClass = 'completed';
+                            statusText = '✅ ГОТОВО';
+                        }
+                        
+                        statusBadge.className = `task-status-badge ${statusClass}`;
+                        statusBadge.textContent = statusText;
+                        
+                        if (taskHeader) {
+                            taskHeader.classList.remove('status-pending', 'status-in-progress', 'status-completed');
+                            taskHeader.classList.add(`status-${statusClass}`);
+                        }
+                    }
+                }
+            });
+        }
+        
+        function copySingleFilePath(filePath, fileName) {
+            navigator.clipboard.writeText(filePath);
+            showCopyNotification(fileName, false);
+        }
+        
+        // ============== РАБОТА С ФАЙЛАМИ НА СТРАНИЦЕ УЧАСТКА ==============
+
+// Получить текущий ключ участка
+function getCurrentSiteKey() {
+    const path = window.location.pathname;
+    if (path.includes('tokarniy')) return 'tokarniy';
+    if (path.includes('slesarniy')) return 'slesarniy';
+    if (path.includes('frezerniy')) return 'frezerniy';
+    if (path.includes('lazerno')) return 'lazerno';
+    if (path.includes('polimerniy')) return 'polimerniy';
+    return 'polimerniy';
+}
+
+// Показать всплывающее уведомление
+function showCopyNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 20000;
+        background: linear-gradient(135deg, #1a3a1a, #0f2a0f);
+        color: #4cd964;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        border-left: 4px solid #4cd964;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        animation: slideInRight 0.3s ease;
+    `;
+    if (type === 'warning') {
+        notification.style.background = 'linear-gradient(135deg, #3a2a1a, #2a1f0f)';
+        notification.style.borderLeftColor = '#ff9800';
+        notification.style.color = '#ff9800';
+    } else if (type === 'error') {
+        notification.style.background = 'linear-gradient(135deg, #3a1a1a, #2a0f0f)';
+        notification.style.borderLeftColor = '#ff3b3b';
+        notification.style.color = '#ff6b6b';
+    }
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Открыть модальное окно выбора файла
+function openFileSelectionModal(taskId) {
+    const task = taskManager.tasks.find(t => t.id === taskId);
+    if (!task) {
+        alert('Задача не найдена');
+        return;
+    }
+    
+    const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+    const order = allOrders.find(o => o.id == task.orderId);
+    if (!order) {
+        alert('Заказ не найден');
+        return;
+    }
+    
+    const siteKey = getCurrentSiteKey();
+    const files = order.siteFiles?.[siteKey] || [];
+    
+    if (files.length === 0) {
+        showCopyNotification('📭 Нет прикреплённых файлов', 'warning');
+        return;
+    }
+    
+    // Создаём модальное окно
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.display = 'block';
+    modal.style.zIndex = '10000';
+    
+    let filesListHtml = '';
+    files.forEach((file, index) => {
+        const icon = getFileIcon(file.path);
+        filesListHtml += `
+            <div class="file-select-item" style="
+                background: #1a1e24;
+                border: 1px solid #2a2f38;
+                border-radius: 8px;
+                margin-bottom: 10px;
+                cursor: pointer;
+                transition: all 0.2s;
+            " onclick="selectAndCopyFile('${taskId}', ${file.id})">
+                <div style="padding: 12px; display: flex; align-items: center; gap: 12px;">
+                    <div style="font-size: 24px;">${icon}</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: #ff9800;">${escapeHtml(file.name)}</div>
+                        <div style="font-size: 11px; color: #a0a0a0; word-break: break-all;">${escapeHtml(file.path)}</div>
+                        ${file.comment ? `<div style="font-size: 10px; color: #4cd964; margin-top: 4px;">💬 ${escapeHtml(file.comment)}</div>` : ''}
+                    </div>
+                    <div style="color: #0077ff; font-size: 20px;">📋</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="close" onclick="closeFileModal(this)">&times;</span>
+            <h3 style="color: #ff3b3b; margin-bottom: 15px;">📎 Выберите файл для копирования</h3>
+            <div style="margin-bottom: 15px; padding: 8px 12px; background: #15191f; border-radius: 6px;">
+                <div style="font-size: 12px; color: #a0a0a0;">🏢 ${escapeHtml(order.groupName)}</div>
+                <div style="font-size: 12px;">📦 ${escapeHtml(task.product)} | ${escapeHtml(task.operation)}</div>
+            </div>
+            <div style="max-height: 400px; overflow-y: auto;">
+                ${filesListHtml}
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 15px; padding-top: 15px; border-top: 1px solid #2a2f38;">
+                <button class="btn btn-danger" onclick="closeFileModal(this)">✖️ Отмена</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
+// Выбрать и скопировать файл
+function selectAndCopyFile(taskId, fileId) {
+    const task = taskManager.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+    const order = allOrders.find(o => o.id == task.orderId);
+    if (!order) return;
+    
+    const siteKey = getCurrentSiteKey();
+    const files = order.siteFiles?.[siteKey] || [];
+    const file = files.find(f => f.id === fileId);
+    
+    if (!file) {
+        showCopyNotification('❌ Файл не найден', 'error');
+        return;
+    }
+    
+    navigator.clipboard.writeText(file.path).then(() => {
+        showCopyNotification(`✅ Путь к файлу "${file.name}" скопирован!`, 'success');
+        closeAllModals();
+    }).catch(() => {
+        showCopyNotification('❌ Ошибка при копировании', 'error');
+    });
+}
+
+// Закрыть модальное окно
+function closeFileModal(element) {
+    const modal = element.closest('.modal');
+    if (modal) modal.remove();
+}
+
+// Закрыть все модальные окна
+function closeAllModals() {
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.remove();
+    });
+}
+
+// Получить иконку по расширению
+function getFileIcon(filePath) {
+    const ext = (filePath || '').split('.').pop()?.toLowerCase() || '';
+    const icons = {
+        'pdf': '📄', 'jpg': '🖼️', 'jpeg': '🖼️', 'png': '🖼️', 'gif': '🖼️',
+        'dwg': '📐', 'dxf': '📐', 'cdr': '📐',
+        'mp4': '🎬', 'avi': '🎬',
+        'doc': '📝', 'docx': '📝', 'xls': '📊', 'xlsx': '📊'
+    };
+    return icons[ext] || '📎';
+}
+
+// Основная функция копирования (вызывается по кнопке)
+function copyAllFilePaths(taskId) {
+    const task = taskManager.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+    const order = allOrders.find(o => o.id == task.orderId);
+    if (!order) return;
+    
+    const siteKey = getCurrentSiteKey();
+    const files = order.siteFiles?.[siteKey] || [];
+    
+    if (files.length === 0) {
+        showCopyNotification('📭 Нет прикреплённых файлов', 'warning');
+        return;
+    }
+    
+    if (files.length === 1) {
+        // Если файл один, копируем сразу
+        navigator.clipboard.writeText(files[0].path).then(() => {
+            showCopyNotification(`✅ Путь к файлу "${files[0].name}" скопирован!`, 'success');
+        });
+    } else {
+        // Если файлов несколько, показываем окно выбора
+        openFileSelectionModal(taskId);
+    }
+}
+
+// Добавляем CSS анимации
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+    .file-select-item:hover {
+        background: #232830 !important;
+        border-color: #ff3b3b !important;
+        transform: translateX(5px);
+    }
+`;
+document.head.appendChild(style);
+        
+        function showCopyNotification(fileName, isMultiple = false) {
+            const notification = document.createElement('div');
+            notification.className = 'notification success';
+            if (isMultiple) {
+                notification.innerHTML = `✅ Скопировано ${fileName} путей к файлам!`;
+            } else {
+                notification.innerHTML = `✅ Путь к файлу "${fileName}" скопирован!`;
+            }
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 30px;
+                right: 30px;
+                z-index: 10000;
+                background: linear-gradient(135deg, #1a3a1a, #0f2a0f);
+                color: #4cd964;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-size: 13px;
+                font-weight: 500;
+                border-left: 4px solid #4cd964;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                animation: slideInRight 0.3s ease;
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+        
+        // ============== ФИЛЬТРЫ ==============
+        function populateFilters() {
+            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+            const customers = new Set();
+            const products = new Set();
+            const operations = new Set();
+            const rals = new Set();
+            const thicknesses = new Set();
+            const sizes = new Set();
+            
+            allOrders.forEach(order => {
+                if (order.groupName) customers.add(order.groupName);
+                if (order.items) {
+                    order.items.forEach(item => {
+                        if (item.product) products.add(item.product);
+                        if (item.ral && item.ral.trim()) rals.add(item.ral.trim());
+                        if (item.size?.name) sizes.add(item.size.name);
+                    });
+                }
+            });
+            
+            if (taskManager && taskManager.tasks) {
+                taskManager.tasks.forEach(task => {
+                    if (task.operation) operations.add(task.operation);
+                    if (task.thickness) thicknesses.add(task.thickness);
+                });
+            }
+            
+            const customerSelect = document.getElementById('filterCustomer');
+            if (customerSelect) {
+                const currentCustomer = customerSelect.value;
+                customerSelect.innerHTML = '<option value="">🏢 Все заказчики</option>';
+                Array.from(customers).sort().forEach(c => {
+                    customerSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
+                });
+                if (currentCustomer && customers.has(currentCustomer)) customerSelect.value = currentCustomer;
+            }
+            
+            const productSelect = document.getElementById('filterProduct');
+            if (productSelect) {
+                const currentProduct = productSelect.value;
+                productSelect.innerHTML = '<option value="">📦 Все изделия</option>';
+                Array.from(products).sort().forEach(p => {
+                    productSelect.innerHTML += `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`;
+                });
+                if (currentProduct && products.has(currentProduct)) productSelect.value = currentProduct;
+            }
+            
+            const operationSelect = document.getElementById('filterOperation');
+            if (operationSelect) {
+                const currentOperation = operationSelect.value;
+                operationSelect.innerHTML = '<option value="">🔧 Все операции</option>';
+                Array.from(operations).sort().forEach(op => {
+                    operationSelect.innerHTML += `<option value="${escapeHtml(op)}">${escapeHtml(op)}</option>`;
+                });
+                if (currentOperation && operations.has(currentOperation)) operationSelect.value = currentOperation;
+            }
+            
+            const ralSelect = document.getElementById('filterRal');
+            if (ralSelect) {
+                const currentRal = ralSelect.value;
+                ralSelect.innerHTML = '<option value="">🎨 Все RAL</option>';
+                Array.from(rals).sort().forEach(r => {
+                    ralSelect.innerHTML += `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`;
+                });
+                if (currentRal && rals.has(currentRal)) ralSelect.value = currentRal;
+            }
+            
+            const thicknessSelect = document.getElementById('filterThickness');
+            if (thicknessSelect) {
+                const currentThickness = thicknessSelect.value;
+                thicknessSelect.innerHTML = '<option value="">📏 Все толщины</option>';
+                Array.from(thicknesses).sort().forEach(th => {
+                    thicknessSelect.innerHTML += `<option value="${th}">${th}</option>`;
+                });
+                if (currentThickness && thicknesses.has(currentThickness)) thicknessSelect.value = currentThickness;
+            }
+            
+            const sizeSelect = document.getElementById('filterSize');
+            if (sizeSelect) {
+                const currentSize = sizeSelect.value;
+                sizeSelect.innerHTML = '<option value="">📐 Все размеры</option>';
+                Array.from(sizes).sort((a, b) => {
+                    const aNum = parseInt(a);
+                    const bNum = parseInt(b);
+                    if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+                    return String(a).localeCompare(String(b));
+                }).forEach(s => {
+                    sizeSelect.innerHTML += `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`;
+                });
+                if (currentSize && sizes.has(currentSize)) sizeSelect.value = currentSize;
+            }
+        }
+        
+        function resetFilters() {
+            document.getElementById('filterCustomer').value = '';
+            document.getElementById('filterProduct').value = '';
+            document.getElementById('filterOperation').value = '';
+            document.getElementById('filterRal').value = '';
+            document.getElementById('filterThickness').value = '';
+            document.getElementById('filterSize').value = '';
+            document.getElementById('statusFilter').value = 'all';
+            renderTasks();
+        }
+        
+        function setupFilterListeners() {
+            const inputs = ['filterCustomer', 'filterProduct', 'filterOperation', 'filterRal', 'filterThickness', 'filterSize', 'statusFilter'];
+            inputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('change', () => renderTasks());
+                }
+            });
+        }
+        
+        // ============== ОТОБРАЖЕНИЕ ЗАДАЧ ==============
+        function renderTasks() {
+            if (isLoadingTasks) return;
+            isLoadingTasks = true;
+            
+            saveAllCardsState();
+            taskManager.loadData();
+            
+            populateFilters();
+            
+            const filterCustomer = document.getElementById('filterCustomer').value;
+            const filterProduct = document.getElementById('filterProduct').value;
+            const filterOperation = document.getElementById('filterOperation').value;
+            const filterRal = document.getElementById('filterRal').value;
+            const filterThickness = document.getElementById('filterThickness').value;
+            const filterSize = document.getElementById('filterSize').value;
+            const filterStatus = document.getElementById('statusFilter').value;
+            
+            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+            
+            let tasks = taskManager.tasks;
+            
+            tasks = tasks.filter(task => {
+                const order = allOrders.find(o => o.id == task.orderId);
+                if (!order) return false;
+                
+                if (filterStatus === 'priority') {
+                    return task.isPriority === true;
+                }
+                
+                if (filterStatus === 'completed' && task.status !== 'completed') return false;
+                if (filterStatus === 'in_progress' && task.status !== 'in_progress') return false;
+                if (filterStatus === 'pending' && task.status !== 'pending') return false;
+                
+                if (task.isPriority === true) return true;
+                
+                if (filterCustomer && order.groupName !== filterCustomer) return false;
+                
+                const item = order.items?.[task.itemIndex || 0];
+                if (!item) return false;
+                
+                if (filterProduct && item.product !== filterProduct) return false;
+                if (filterOperation && task.operation !== filterOperation) return false;
+                if (filterRal) {
+                    const itemRal = (item.ral || '').trim();
+                    if (itemRal !== filterRal) return false;
+                }
+                if (filterSize && item.size?.name !== filterSize) return false;
+                if (filterThickness && task.thickness !== filterThickness) return false;
+                
+                return true;
+            });
+            
+            const priorityTasks = tasks.filter(t => t.isPriority === true);
+            const normalTasks = tasks.filter(t => t.isPriority !== true);
+            priorityTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            normalTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            tasks = [...priorityTasks, ...normalTasks];
+            
+            document.getElementById('totalTasks').textContent = tasks.length;
+            document.getElementById('tasksInProgress').textContent = tasks.filter(t => t.status === 'in_progress').length;
+            document.getElementById('tasksCompleted').textContent = tasks.filter(t => t.status === 'completed').length;
+            
+            const tasksList = document.getElementById('tasksList');
+            const scrollPosition = tasksList.scrollTop;
+            tasksList.innerHTML = '';
+            
+            if (tasks.length === 0) {
+                tasksList.innerHTML = '<div class="no-tasks"><p>📭 Нет задач по выбранным фильтрам</p></div>';
+                isLoadingTasks = false;
+                return;
+            }
+            
+            tasks.forEach(task => {
+                const order = allOrders.find(o => o.id == task.orderId);
+                const item = order?.items?.[task.itemIndex || 0];
+                if (!order || !item) return;
+                
+                let statusClass = 'pending';
+                let statusText = '⏳ ОЖИДАЕТ';
+                if (task.status === 'in_progress') {
+                    statusClass = 'in-progress';
+                    statusText = '⚡ В РАБОТЕ';
+                } else if (task.status === 'completed') {
+                    statusClass = 'completed';
+                    statusText = '✅ ГОТОВО';
+                }
+                
+                const isPriority = task.isPriority === true;
+                const priorityClass = isPriority ? 'priority' : '';
+                const priorityBadge = isPriority ? '<span class="priority-badge">🔴 ПРИОРИТЕТ</span>' : '';
+                
+                let displayOperationName = task.operation;
+                if (task.detail) {
+                    let cleanDetailName = task.detail;
+                    if (task.thickness) {
+                        cleanDetailName = task.detail.replace(task.thickness, '').trim();
+                    }
+                    displayOperationName = `${task.operation} (${cleanDetailName})`;
+                    if (task.thickness) {
+                        displayOperationName += ` ${task.thickness}`;
+                    }
+                }
+                
+                let detailDisplay = '';
+                if (task.detail) {
+                    let cleanDetailName = task.detail;
+                    if (task.thickness) {
+                        cleanDetailName = task.detail.replace(task.thickness, '').trim();
+                    }
+                    detailDisplay = `<div class="operation-detail">📦 ${escapeHtml(cleanDetailName)} ${task.thickness ? `<span>${escapeHtml(task.thickness)}</span>` : ''}</div>`;
+                }
+                
+                const siteFiles = order.siteFiles?.['tokarniy'] || [];
+                const hasFiles = siteFiles.length > 0;
+                const filesIndicator = hasFiles ? `<span class="file-indicator">📎 Файлы: ${siteFiles.length}</span>` : '';
+                
+                const taskCard = document.createElement('div');
+                taskCard.className = `task-card ${priorityClass}`;
+                taskCard.dataset.taskId = task.id;
+                
+                const header = document.createElement('div');
+                header.className = `task-header ${statusClass} ${priorityClass} collapsed`;
+                header.innerHTML = `
+                    <div class="task-header-left">
+                        <div class="task-customer-name">
+                            🏢 ${escapeHtml(order.groupName)} | Заказ №${escapeHtml(order.number)}
+                            ${priorityBadge}
+                        </div>
+                        <div class="task-product-info">
+                            <span class="task-product-name">📦 ${escapeHtml(task.product || item.product)}</span>
+                            <span class="task-size">📏 ${escapeHtml(task.size || item.size?.name || '-')}</span>
+                            <span class="task-quantity">× ${task.sizeQuantity || item.size?.quantity || 1} шт</span>
+                            ${task.ral || item.ral ? `<span class="task-ral">🎨 ${escapeHtml(task.ral || item.ral)}</span>` : ''}
+                            ${task.texture || item.texture ? `<span class="task-texture">🧵 ${escapeHtml(task.texture || item.texture)}</span>` : ''}
+                            ${filesIndicator}
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span class="task-status-badge ${statusClass}">${statusText}</span>
+                        <button class="btn-report-item" onclick="event.stopPropagation(); openRightModalForTask('${task.id}')">📝 Отчёт</button>
+                        ${hasFiles ? `<button class="btn-copy-path" onclick="event.stopPropagation(); copyAllFilePaths('${task.id}')">📋 Копировать путь</button>` : ''}
+                        <span class="collapse-icon">▼</span>
+                    </div>
+                `;
+                
+                const content = document.createElement('div');
+                content.className = 'task-content collapsed';
+                content.innerHTML = `
+                    <div class="operation-info">
+                        <div class="operation-name">${escapeHtml(displayOperationName)}</div>
+                        ${detailDisplay}
+                        <div class="operation-plan">📋 План: ${task.totalQuantity || 1} шт</div>
+                    </div>
+                    
+                    <div class="executor-header">
+                        <span>ФИО</span><span>Кол-во</span><span>Статус</span><span></span>
+                    </div>
+                    <div class="executor-list" id="executors-${task.id}"></div>
+                    
+                    <div class="action-container" id="action-${task.id}"></div>
+                    
+                    <button class="btn-ready" id="ready-${task.id}" ${task.status === 'completed' ? 'disabled' : ''} onclick="event.stopPropagation(); completeTask('${task.id}')">✅ ГОТОВО</button>
+                `;
+                
+                header.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'BUTTON') return;
+                    toggleCardState(header, content, task.id);
+                });
+                
+                taskCard.appendChild(header);
+                taskCard.appendChild(content);
+                tasksList.appendChild(taskCard);
+                
+                const executorContainer = document.getElementById(`executors-${task.id}`);
+                if (executorContainer && task.executors) {
+                    executorContainer.innerHTML = '';
+                    task.executors.forEach(executor => {
+                        executorContainer.appendChild(createExecutorItemElement(task, executor));
+                    });
+                }
+                
+                const actionContainer = document.getElementById(`action-${task.id}`);
+                if (actionContainer && task.status !== 'completed') {
+                    actionContainer.innerHTML = '';
+                    const addBtn = document.createElement('button');
                     addBtn.className = 'btn-add-executor';
                     addBtn.textContent = '+ Добавить исполнителя';
-                    addBtn.onclick = function() { showAddExecutorForm(task, actionContainer); };
+                    addBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        showAddExecutorForm(task, actionContainer);
+                    };
                     actionContainer.appendChild(addBtn);
                 }
-                card.appendChild(actionContainer);
-                
-                var readyBtn = document.createElement('button');
-                readyBtn.className = 'btn-ready';
-                readyBtn.textContent = '✅ ГОТОВО';
-                readyBtn.disabled = task.status === 'completed';
-                readyBtn.onclick = function() { completeTask(task.id); };
-                card.appendChild(readyBtn);
-                
-                return card;
-            }
+            });
             
-            function createExecutorItem(task, executor) {
-                var div = document.createElement('div');
-                div.className = 'executor-item';
-                div.dataset.executorId = executor.id;
-                var isShiftEnded = executor.status === 'shift_ended';
-                
-                var nameInput = document.createElement('input');
-                nameInput.type = 'text';
-                nameInput.className = 'executor-name';
-                nameInput.value = escapeHtml(executor.name);
-                nameInput.placeholder = 'ФИО';
-                nameInput.disabled = task.status === 'completed' || isShiftEnded;
-                div.appendChild(nameInput);
-                
-                var quantityInput = document.createElement('input');
-                quantityInput.type = 'number';
-                quantityInput.className = 'executor-quantity';
-                quantityInput.value = executor.quantity || 0;
-                quantityInput.min = 0;
-                quantityInput.disabled = task.status === 'completed' || isShiftEnded;
-                quantityInput.onchange = function(e) {
-                    taskManager.updateExecutorQuantity(task.id, executor.id, parseInt(e.target.value) || 0);
-                };
-                div.appendChild(quantityInput);
-                
-                var workBtn = document.createElement('button');
-                workBtn.className = 'btn-work ' + (executor.status === 'in_progress' ? 'active' : '');
-                workBtn.textContent = executor.status === 'in_progress' ? 'В РАБОТЕ' : (isShiftEnded ? 'СМЕНА ЗАКРЫТА' : 'НАЧАТЬ');
-                workBtn.disabled = task.status === 'completed' || isShiftEnded;
-                workBtn.onclick = function() {
-                    if (isShiftEnded) return;
-                    var newStatus = workBtn.classList.contains('active') ? 'pending' : 'in_progress';
-                    taskManager.updateExecutorStatus(task.id, executor.id, newStatus);
-                    workBtn.classList.toggle('active');
-                    workBtn.textContent = newStatus === 'in_progress' ? 'В РАБОТЕ' : 'НАЧАТЬ';
-                };
-                div.appendChild(workBtn);
-                
-                var endShiftBtn = document.createElement('button');
-                endShiftBtn.className = 'btn-end-shift';
-                endShiftBtn.innerHTML = isShiftEnded ? '✅ СМЕНА ЗАКРЫТА' : '🕒 ЗАКРЫТЬ';
-                endShiftBtn.disabled = task.status === 'completed' || isShiftEnded;
-                endShiftBtn.onclick = function() {
-                    if (confirm('Закрыть смену для ' + executor.name + '?')) {
-                        taskManager.updateExecutorStatus(task.id, executor.id, 'shift_ended');
-                        var executorList = document.getElementById('executors-' + task.id);
-                        if (executorList) {
-                            executorList.innerHTML = '';
-                            var updatedTask = taskManager.tasks.find(t => t.id === task.id);
-                            if (updatedTask && updatedTask.executors) {
-                                updatedTask.executors.forEach(exec => { executorList.appendChild(createExecutorItem(updatedTask, exec)); });
-                            }
-                        }
-                    }
-                };
-                div.appendChild(endShiftBtn);
-                
-                var removeBtn = document.createElement('button');
-                removeBtn.className = 'btn btn-danger btn-sm';
-                removeBtn.innerHTML = '✕';
-                removeBtn.disabled = task.status === 'completed' || isShiftEnded;
-                removeBtn.onclick = function() {
-                    if (confirm('Удалить этого исполнителя?')) taskManager.removeExecutor(task.id, executor.id);
-                };
-                div.appendChild(removeBtn);
-                
-                return div;
-            }
+            restoreAllCardsState();
+            tasksList.scrollTop = scrollPosition;
+            isLoadingTasks = false;
             
-            function showAddExecutorForm(task, actionContainer) {
-                var oldForm = actionContainer.querySelector('.new-executor-form');
-                if (oldForm) oldForm.remove();
-                
-                var formDiv = document.createElement('div');
-                formDiv.className = 'new-executor-form';
-                var input = document.createElement('input');
-                input.type = 'text';
-                input.placeholder = 'ФИО исполнителя';
-                var addBtn = document.createElement('button');
-                addBtn.className = 'btn btn-success';
-                addBtn.textContent = 'Добавить';
-                addBtn.onclick = function() {
-                    var name = input.value.trim();
-                    if (!name) { alert('Введите ФИО'); return; }
-                    if (taskManager.addExecutor(task.id, name)) {
-                        formDiv.remove();
-                        var executorList = document.getElementById('executors-' + task.id);
-                        if (executorList) {
-                            executorList.innerHTML = '';
-                            var updatedTask = taskManager.tasks.find(t => t.id === task.id);
-                            if (updatedTask && updatedTask.executors) {
-                                updatedTask.executors.forEach(exec => { executorList.appendChild(createExecutorItem(updatedTask, exec)); });
-                            }
-                        }
-                    } else { alert('Исполнитель уже существует'); }
-                };
-                var cancelBtn = document.createElement('button');
-                cancelBtn.className = 'btn btn-danger';
-                cancelBtn.textContent = 'Отмена';
-                cancelBtn.onclick = function() { formDiv.remove(); };
-                formDiv.appendChild(input);
-                formDiv.appendChild(addBtn);
-                formDiv.appendChild(cancelBtn);
-                actionContainer.appendChild(formDiv);
-            }
+            setTimeout(() => {
+                restoreTaskHeaderColors();
+            }, 50);
+        }
+        
+        function showAddExecutorForm(task, container) {
+            const oldForm = container.querySelector('.new-executor-form');
+            if (oldForm) oldForm.remove();
             
-            window.completeTask = function(taskId) {
-                var task = taskManager.tasks.find(t => t.id === taskId);
-                if (!task) return;
-                var totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
-                
-                var operationName = task.operation;
-                if (typeof operationName === 'object' && operationName !== null) {
-                    operationName = operationName.operation || JSON.stringify(operationName);
-                }
-                
-                if (confirm('Завершить задачу?\nОперация: ' + operationName + '\nВыполнено: ' + totalAssigned + ' шт')) {
-                    taskManager.completeTask(taskId);
-                    var taskCard = document.querySelector('.task-card[data-task-id="' + taskId + '"]');
-                    if (taskCard) {
-                        var updatedTask = taskManager.tasks.find(t => t.id === taskId);
-                        if (updatedTask) taskCard.parentNode.replaceChild(createTaskCard(updatedTask), taskCard);
-                    }
+            const formDiv = document.createElement('div');
+            formDiv.className = 'new-executor-form';
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = 'ФИО исполнителя';
+            const addBtn = document.createElement('button');
+            addBtn.className = 'btn btn-success';
+            addBtn.textContent = 'Добавить';
+            addBtn.onclick = function(e) {
+                e.stopPropagation();
+                const name = input.value.trim();
+                if (!name) { alert('Введите ФИО'); return; }
+                if (taskManager.addExecutor(task.id, name)) {
+                    formDiv.remove();
+                } else { 
+                    alert('Исполнитель уже существует'); 
                 }
             };
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'btn btn-danger';
+            cancelBtn.textContent = 'Отмена';
+            cancelBtn.onclick = function(e) {
+                e.stopPropagation();
+                formDiv.remove();
+            };
+            formDiv.appendChild(input);
+            formDiv.appendChild(addBtn);
+            formDiv.appendChild(cancelBtn);
+            container.appendChild(formDiv);
+        }
+        
+        function completeTask(taskId) {
+            const task = taskManager.tasks.find(t => t.id === taskId);
+            if (!task) return;
             
-            window.exportToExcel = function() {
-                const tasks = taskManager.tasks;
-                const dateStr = taskManager.formatDate(taskManager.currentDate);
-                let csv = "Заказ,Изделие,Операция,Исполнитель,Количество,Статус,План\n";
-                tasks.forEach(task => {
-                    let fullOrder = null;
-                    try {
-                        const allOrders = JSON.parse(localStorage.getItem('masterx_orders')) || [];
-                        fullOrder = allOrders.find(o => o.id == task.orderId);
-                    } catch(e) {}
-                    const planQuantity = task.totalQuantity || getTaskPlanFromDetails(task, fullOrder);
-                    
-                    var operationName = task.operation;
-                    if (typeof operationName === 'object' && operationName !== null) {
-                        operationName = operationName.operation || JSON.stringify(operationName);
-                    }
-                    
-                    if (task.executors && task.executors.length > 0) {
-                        task.executors.forEach(exec => {
-                            csv += `"${task.orderNumber}","${task.product}","${operationName}","${exec.name}",${exec.quantity || 0},"${exec.status}",${planQuantity}\n`;
-                        });
-                    } else {
-                        csv += `"${task.orderNumber}","${task.product}","${operationName}","Нет",0,"${task.status}",${planQuantity}\n`;
-                    }
-                });
-                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `tokarniy_${dateStr}.csv`;
-                link.click();
+            const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
+            const planQuantity = task.totalQuantity || 1;
+            let operationName = task.operation;
+            if (task.detail) {
+                operationName += ` (${task.detail})`;
+            }
+            
+            if (totalAssigned < planQuantity) {
+                if (!confirm(`⚠️ Выполнено только ${totalAssigned} из ${planQuantity} шт.\n\nВсё равно завершить задачу?`)) {
+                    return;
+                }
+            } else {
+                if (!confirm(`✅ Завершить задачу?\nОперация: ${operationName}\nВыполнено: ${totalAssigned} из ${planQuantity} шт`)) {
+                    return;
+                }
+            }
+            
+            taskManager.completeTask(taskId);
+        }
+        
+        // ============== ОТЧЁТЫ ==============
+        function openRightModalForTask(taskId) {
+            const task = taskManager.tasks.find(t => t.id === taskId);
+            if (!task) {
+                alert('Задача не найдена');
+                return;
+            }
+            
+            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+            const order = allOrders.find(o => o.id == task.orderId);
+            const item = order?.items?.[task.itemIndex || 0];
+            
+            if (!order || !item) {
+                alert('Данные заказа не найдены');
+                return;
+            }
+            
+            currentReportTask = {
+                taskId: task.id,
+                orderId: order.id,
+                orderNumber: order.number,
+                customerName: order.groupName,
+                product: task.product || item.product,
+                size: task.size || item.size?.name,
+                quantity: task.sizeQuantity || item.size?.quantity,
+                ral: task.ral || item.ral,
+                texture: task.texture || item.texture,
+                operation: task.operation,
+                detail: task.detail,
+                thickness: task.thickness,
+                isPriority: task.isPriority || false,
+                siteKey: 'tokarniy'
+            };
+            
+            const modal = document.getElementById('rightModal');
+            const overlay = document.getElementById('rightModalOverlay');
+            const contentDiv = document.getElementById('rightModalContent');
+            
+            const savedData = getSavedReportDataForTask(task.id);
+            if (savedData && savedData.rows) {
+                reportRows = [...savedData.rows];
+            } else {
+                reportRows = [{ расход: 0, единица: 'гр', количество: 0, комментарий: '' }];
+            }
+            
+            renderReportForm(contentDiv);
+            modal.classList.add('open');
+            overlay.classList.add('show');
+        }
+        
+        function getSavedReportDataForTask(taskId) {
+            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+            const taskReports = allReports.filter(r => r.taskId === taskId && r.siteKey === 'tokarniy');
+            if (taskReports.length === 0) return null;
+            const allRows = [];
+            taskReports.forEach(report => {
+                if (report.rows) {
+                    allRows.push(...report.rows);
+                }
+            });
+            return { 
+                rows: allRows.map(row => ({
+                    расход: row.расход || 0,
+                    единица: row.единица || 'гр',
+                    количество: row.количество || 0,
+                    комментарий: row.комментарий || ''
+                })),
+                savedAt: taskReports[taskReports.length - 1]?.savedAt 
             };
         }
+        
+        function renderReportForm(container) {
+            let totalQuantity = 0;
+            if (currentReportTask && currentReportTask.taskId) {
+                const task = taskManager.tasks.find(t => t.id === currentReportTask.taskId);
+                if (task && task.executors) {
+                    totalQuantity = task.executors.reduce((sum, exec) => sum + (exec.quantity || 0), 0);
+                }
+            }
+            
+            let rowsHtml = '';
+            reportRows.forEach((row, index) => {
+                rowsHtml += `
+                    <div class="report-row" data-row-index="${index}">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="font-size: 12px; color: #ff9800;">📝 Запись ${index + 1}</span>
+                            <button type="button" class="btn-remove-row" onclick="removeReportRowItem(${index})">✖️</button>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 0.5fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <div>
+                                <label style="font-size: 11px; color: #a0a0a0;">📊 Расход:</label>
+                                <input type="number" class="report-input report-expense" data-row="${index}" value="${row.расход || 0}" step="0.01" placeholder="0">
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; color: #a0a0a0;">📏 Ед. изм.:</label>
+                                <select class="report-input report-unit" data-row="${index}">
+                                    <option value="гр" ${row.единица === 'гр' ? 'selected' : ''}>гр</option>
+                                    <option value="кг" ${row.единица === 'кг' ? 'selected' : ''}>кг</option>
+                                    <option value="мм" ${row.единица === 'мм' ? 'selected' : ''}>мм</option>
+                                    <option value="м2" ${row.единица === 'м2' ? 'selected' : ''}>м²</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; color: #a0a0a0;">📦 Количество (шт):</label>
+                                <input type="number" class="report-input report-quantity" data-row="${index}" value="${row.количество || totalQuantity || 0}" step="1" placeholder="0">
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size: 11px; color: #a0a0a0;">💬 Комментарий:</label>
+                            <textarea class="report-textarea report-comment" data-row="${index}" rows="2" placeholder="Дополнительная информация...">${escapeHtml(row.комментарий || '')}</textarea>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            const operationDisplay = currentReportTask.operation + (currentReportTask.detail ? ` (${currentReportTask.detail})` : '');
+            const priorityBadge = currentReportTask.isPriority ? '<span style="background: #ff3b3b; color: white; padding: 2px 8px; border-radius: 20px; font-size: 10px; margin-left: 8px;">🔴 ПРИОРИТЕТ</span>' : '';
+            
+            container.innerHTML = `
+                <div style="padding: 20px 0;">
+                    <div style="margin-bottom: 20px; padding: 12px; background: #15191f; border-radius: 8px; border-left: 3px solid #ff9800;">
+                        <div style="font-size: 12px; color: #a0a0a0;">Заказ: ${escapeHtml(currentReportTask.orderNumber)}</div>
+                        <div style="font-size: 14px; font-weight: bold; color: #ff9800; margin: 5px 0;">${escapeHtml(currentReportTask.product)}${priorityBadge}</div>
+                        <div style="font-size: 12px;">🏢 ${escapeHtml(currentReportTask.customerName)}</div>
+                        <div style="font-size: 12px;">📏 Размер: ${escapeHtml(currentReportTask.size || '-')} × ${currentReportTask.quantity || 0} шт</div>
+                        <div style="font-size: 12px;">🎨 Покрытие: ${escapeHtml(currentReportTask.ral || '-')} / ${escapeHtml(currentReportTask.texture || '-')}</div>
+                        <div style="font-size: 12px; margin-top: 8px;">🔧 Операция: ${escapeHtml(operationDisplay)}</div>
+                        <div style="font-size: 12px; margin-top: 8px; color: #4cd964;">📦 Выполнено: ${totalQuantity} шт</div>
+                    </div>
+                    <div id="reportRowsContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
+                        ${rowsHtml}
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <button type="button" class="btn-add-row" onclick="addReportRowItem()">➕ Добавить строку</button>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="button" class="btn btn-success" onclick="saveReportDataForTask()" style="flex: 1;">💾 Сохранить</button>
+                        <button type="button" class="btn btn-danger" onclick="closeRightModal()" style="flex: 1;">✖️ Закрыть</button>
+                    </div>
+                </div>
+            `;
+            
+            document.querySelectorAll('.report-expense').forEach(input => {
+                input.addEventListener('change', function() {
+                    const rowIndex = parseInt(this.dataset.row);
+                    if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                        reportRows[rowIndex].расход = parseFloat(this.value) || 0;
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.report-unit').forEach(select => {
+                select.addEventListener('change', function() {
+                    const rowIndex = parseInt(this.dataset.row);
+                    if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                        reportRows[rowIndex].единица = this.value;
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.report-quantity').forEach(input => {
+                input.addEventListener('change', function() {
+                    const rowIndex = parseInt(this.dataset.row);
+                    if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                        reportRows[rowIndex].количество = parseFloat(this.value) || 0;
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.report-comment').forEach(textarea => {
+                textarea.addEventListener('change', function() {
+                    const rowIndex = parseInt(this.dataset.row);
+                    if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                        reportRows[rowIndex].комментарий = this.value;
+                    }
+                });
+            });
+        }
+        
+        function addReportRowItem() {
+            reportRows.push({ расход: 0, единица: 'гр', количество: 0, комментарий: '' });
+            const container = document.getElementById('rightModalContent');
+            renderReportForm(container);
+        }
+        
+        function removeReportRowItem(rowIndex) {
+            if (reportRows.length <= 1) {
+                if (!confirm('Удалить последнюю строку? Будет создана пустая строка.')) return;
+                reportRows = [{ расход: 0, единица: 'гр', количество: 0, комментарий: '' }];
+            } else {
+                reportRows.splice(rowIndex, 1);
+            }
+            const container = document.getElementById('rightModalContent');
+            renderReportForm(container);
+        }
+        
+        function saveReportDataForTask() {
+            if (!currentReportTask) return;
+            
+            document.querySelectorAll('.report-expense').forEach(input => {
+                const rowIndex = parseInt(input.dataset.row);
+                if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                    reportRows[rowIndex].расход = parseFloat(input.value) || 0;
+                }
+            });
+            
+            document.querySelectorAll('.report-unit').forEach(select => {
+                const rowIndex = parseInt(select.dataset.row);
+                if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                    reportRows[rowIndex].единица = select.value;
+                }
+            });
+            
+            document.querySelectorAll('.report-quantity').forEach(input => {
+                const rowIndex = parseInt(input.dataset.row);
+                if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                    reportRows[rowIndex].количество = parseFloat(input.value) || 0;
+                }
+            });
+            
+            document.querySelectorAll('.report-comment').forEach(textarea => {
+                const rowIndex = parseInt(textarea.dataset.row);
+                if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                    reportRows[rowIndex].комментарий = textarea.value;
+                }
+            });
+            
+            const reportData = {
+                id: Date.now(),
+                taskId: currentReportTask.taskId,
+                orderId: currentReportTask.orderId,
+                orderNumber: currentReportTask.orderNumber,
+                customerName: currentReportTask.customerName,
+                product: currentReportTask.product,
+                size: currentReportTask.size,
+                quantity: currentReportTask.quantity,
+                ral: currentReportTask.ral,
+                texture: currentReportTask.texture,
+                operation: currentReportTask.operation,
+                detail: currentReportTask.detail,
+                thickness: currentReportTask.thickness,
+                isPriority: currentReportTask.isPriority,
+                siteKey: currentReportTask.siteKey,
+                rows: reportRows.map(row => ({
+                    расход: row.расход || 0,
+                    единица: row.единица || 'гр',
+                    количество: row.количество || 0,
+                    комментарий: row.комментарий || ''
+                })),
+                savedAt: new Date().toISOString(),
+                isTaskReport: true
+            };
+            
+            let allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+            allReports = allReports.filter(r => !(r.taskId === currentReportTask.taskId && r.siteKey === currentReportTask.siteKey));
+            allReports.push(reportData);
+            localStorage.setItem('material_reports', JSON.stringify(allReports));
+            
+            alert('✅ Отчёт сохранён!');
+            closeRightModal();
+        }
+        
+        function closeRightModal() {
+            const modal = document.getElementById('rightModal');
+            const overlay = document.getElementById('rightModalOverlay');
+            modal.classList.remove('open');
+            overlay.classList.remove('show');
+            currentReportTask = null;
+            reportRows = [];
+        }
+        
+        window.exportToExcel = function() {
+            const tasks = taskManager.tasks;
+            const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+            let csv = "Заказ,Заказчик,Изделие,Размер,Количество,RAL,Текстура,Операция,Деталь,Толщина,Приоритет,Исполнитель,Количество,Статус,План\n";
+            tasks.forEach(task => {
+                const order = allOrders.find(o => o.id == task.orderId);
+                const item = order?.items?.[task.itemIndex || 0];
+                const isPriority = task.isPriority ? 'ДА' : 'НЕТ';
+                if (task.executors && task.executors.length > 0) {
+                    task.executors.forEach(exec => {
+                        csv += `"${task.orderNumber}","${order?.groupName || ''}","${task.product || item?.product || ''}","${task.size || item?.size?.name || ''}",${task.sizeQuantity || item?.size?.quantity || 0},"${task.ral || item?.ral || ''}","${task.texture || item?.texture || ''}","${task.operation}","${task.detail || ''}","${task.thickness || ''}","${isPriority}","${exec.name}",${exec.quantity || 0},"${exec.status}",${task.totalQuantity || 1}\n`;
+                    });
+                } else {
+                    csv += `"${task.orderNumber}","${order?.groupName || ''}","${task.product || item?.product || ''}","${task.size || item?.size?.name || ''}",${task.sizeQuantity || item?.size?.quantity || 0},"${task.ral || item?.ral || ''}","${task.texture || item?.texture || ''}","${task.operation}","${task.detail || ''}","${task.thickness || ''}","${isPriority}","Нет",0,"${task.status}",${task.totalQuantity || 1}\n`;
+                }
+            });
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `tokarniy_tasks.csv`;
+            link.click();
+        };
+        
+        // ============== ИНИЦИАЛИЗАЦИЯ ==============
+        async function init() {
+            await loadTaskOperationsData();
+            taskManager = new SimpleTaskManager('tokarniy');
+            window.taskManager = taskManager;
+            setupFilterListeners();
+            renderTasks();
+            window.addEventListener('beforeunload', () => { saveAllCardsState(); });
+        }
+        
+        window.resetFilters = resetFilters;
+        window.openRightModalForTask = openRightModalForTask;
+        window.closeRightModal = closeRightModal;
+        window.addReportRowItem = addReportRowItem;
+        window.removeReportRowItem = removeReportRowItem;
+        window.saveReportDataForTask = saveReportDataForTask;
+        
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
