@@ -1101,7 +1101,6 @@
         let productsList = [];
         let bracketsList = [];
         let lyresList = [];
-        let productDetailsData = {};
         let tempBrackets = [];
         let tempLyres = [];
         let tempProfiles = [];
@@ -1230,6 +1229,7 @@
                     taskOperationsData = data.operations || {};
                     window.taskOperationsData = taskOperationsData;
                     console.log('✅ Загружены операции из taskOperations.json');
+                    console.log('📦 Доступные продукты:', Object.keys(taskOperationsData).length);
                 } else {
                     console.warn('taskOperations.json не найден');
                     taskOperationsData = {};
@@ -1240,21 +1240,45 @@
             }
         }
 
-        async function loadProductDetails() {
-            try {
-                const response = await fetch('data/productDetails.json');
-                if (response.ok) {
-                    const data = await response.json();
-                    productDetailsData = data.products || {};
-                    console.log('✅ Загружены данные о деталях');
-                } else {
-                    console.warn('productDetails.json не найден');
-                    productDetailsData = {};
-                }
-            } catch(e) {
-                console.error('Ошибка загрузки productDetails.json:', e);
-                productDetailsData = {};
+        // ============== ПОЛУЧЕНИЕ УНИКАЛЬНЫХ ДЕТАЛЕЙ ИЗ ОПЕРАЦИЙ ==============
+        function getUniqueDetailsFromOperations(productName) {
+            const productOps = taskOperationsData[productName];
+            if (!productOps) {
+                console.warn(`⚠️ Нет операций для ${productName} в taskOperations.json`);
+                return [];
             }
+            
+            const detailsMap = new Map();
+            
+            const sites = ['токарно-фрезерный', 'фрезерный', 'слесарный', 'лазерно-гибочный', 'полимерный'];
+            
+            for (const site of sites) {
+                const operations = productOps[site] || [];
+                for (const op of operations) {
+                    const detailName = op.detail;
+                    if (detailName && detailName.trim() !== '') {
+                        if (!detailsMap.has(detailName)) {
+                            let material = 'алюминий';
+                            const nameLower = detailName.toLowerCase();
+                            if (nameLower.includes('пвх')) material = 'ПВХ';
+                            else if (nameLower.includes('поликарбонат')) material = 'поликарбонат';
+                            else if (nameLower.includes('aisi') || nameLower.includes('нержавейка')) material = 'нержавейка';
+                            else if (nameLower.includes('сталь')) material = 'сталь';
+                            else if (nameLower.includes('оргстекло') || nameLower.includes('plexiglas')) material = 'оргстекло';
+                            
+                            detailsMap.set(detailName, {
+                                name: detailName,
+                                material: material,
+                                quantity: 0
+                            });
+                        }
+                    }
+                }
+            }
+            
+            const result = Array.from(detailsMap.values());
+            console.log(`📦 Уникальные детали для ${productName}:`, result);
+            return result;
         }
 
         // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ==============
@@ -1384,7 +1408,6 @@
 
             profilesList.innerHTML = profilesHtml;
 
-            // Обработчики для длины профиля
             document.querySelectorAll('#profilesList .profile-length, #profilesList .profile-length-custom').forEach(input => {
                 const profileIdx = parseInt(input.dataset.profileIndex);
                 input.addEventListener('change', function() {
@@ -1394,7 +1417,6 @@
                 });
             });
 
-            // Обработчики для количества профилей
             document.querySelectorAll('#profilesList .profile-qty, #profilesList .profile-qty-custom').forEach(input => {
                 const profileIdx = parseInt(input.dataset.profileIndex);
                 input.addEventListener('change', function() {
@@ -1404,7 +1426,6 @@
                 });
             });
 
-            // Обработчики для названия кастомного профиля
             document.querySelectorAll('#profilesList .profile-name-custom').forEach(input => {
                 const profileIdx = parseInt(input.dataset.profileIndex);
                 input.addEventListener('change', function() {
@@ -1416,13 +1437,12 @@
         }
 
         // ============== ОБНОВЛЕНИЕ ПРИ ВЫБОРЕ ИЗДЕЛИЯ ==============
-         function onNewItemProductChange() {
+        function onNewItemProductChange() {
             const productName = document.getElementById('newItemProduct').value;
             const sizeSelect = document.getElementById('newItemSize');
             const detailsContainer = document.getElementById('detailsContainer');
             const detailsList = document.getElementById('detailsList');
             const profilesContainer = document.getElementById('profilesContainer');
-            const profilesList = document.getElementById('profilesList');
 
             if (!productName) {
                 sizeSelect.innerHTML = '<option value="">Сначала выберите изделие</option>';
@@ -1445,13 +1465,10 @@
                 sizeSelect.innerHTML = '<option value="Стандартный">Стандартный</option>';
             }
 
-            // Загружаем детали из productDetailsData
-            const productDetails = productDetailsData[productName]?.details || [];
+            // ========== ПОЛУЧАЕМ ДЕТАЛИ ИЗ taskOperations.json ==========
+            const allDetails = getUniqueDetailsFromOperations(productName);
             
-            console.log(`📦 Загружены детали для ${productName}:`, productDetails);
-            
-            if (!productDetails || productDetails.length === 0) {
-                console.warn(`⚠️ Нет деталей для ${productName} в productDetails.json`);
+            if (allDetails.length === 0) {
                 detailsContainer.style.display = 'none';
                 profilesContainer.style.display = 'none';
                 return;
@@ -1461,9 +1478,8 @@
             const regularDetails = [];
             const profilesFromDetails = [];
             
-            for (const detail of productDetails) {
+            for (const detail of allDetails) {
                 const name = detail.name || '';
-                // Профили — это детали с ключевыми словами
                 if (name.includes('Профиль') || name.includes('профиль') || 
                     name.includes('НПС') || name.includes('МП') || 
                     name.includes('КП') || name.includes('Труба')) {
@@ -1473,19 +1489,19 @@
                 }
             }
             
-            // Отображаем обычные детали с quantity = 0 (СТАРТ С НУЛЯ)
+            // Отображаем обычные детали с quantity = 0
             if (regularDetails.length > 0) {
                 detailsContainer.style.display = 'block';
                 let detailsHtml = '';
-                regularDetails.forEach((detail, idx) => {
+                regularDetails.forEach((detail) => {
                     detailsHtml += `
-                        <div class="detail-item" data-detail-index="${idx}" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 6px; background: #15191f; border-radius: 6px;">
+                        <div class="detail-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 6px; background: #15191f; border-radius: 6px;">
                             <span style="font-size: 14px;">${escapeHtml(detail.name)}</span>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <input type="number" 
                                        class="detail-qty" 
                                        data-detail-name="${escapeHtml(detail.name)}"
-                                       data-detail-material="${detail.material || 'aluminum'}"
+                                       data-detail-material="${detail.material}"
                                        value="0" 
                                        min="0" 
                                        step="1"
@@ -1500,13 +1516,13 @@
                 detailsContainer.style.display = 'none';
             }
             
-            // Отображаем профили с length = 0 и quantity = 0 (СТАРТ С НУЛЯ)
+            // Отображаем профили
             tempProfiles = [];
             if (profilesFromDetails.length > 0) {
                 profilesFromDetails.forEach(profile => {
                     tempProfiles.push({
                         name: profile.name,
-                        material: profile.material || 'алюминий',
+                        material: profile.material,
                         lengthMm: 0,
                         quantity: 0,
                         isCustom: false
@@ -1523,10 +1539,9 @@
         function collectDetailsFromForm() {
             const details = [];
 
-            // Собираем обычные детали
             document.querySelectorAll('#detailsList .detail-qty').forEach(input => {
                 const qty = parseInt(input.value) || 0;
-                if (qty > 0) {  // Только если количество > 0
+                if (qty > 0) {
                     details.push({
                         name: input.dataset.detailName,
                         material: input.dataset.detailMaterial,
@@ -1536,7 +1551,6 @@
                 }
             });
 
-            // Собираем профили
             tempProfiles.forEach(profile => {
                 if (profile.name && profile.quantity > 0) {
                     details.push({
@@ -1879,10 +1893,6 @@
             orders.push(newOrder);
             saveOrdersToStorage(orders);
             
-            if (typeof createTasksForOrder === 'function') {
-                createTasksForOrder(newOrder);
-            }
-            
             closeGroupModal();
             renderOrdersList();
             updateStatistics();
@@ -1974,85 +1984,6 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
-        }
-
-        function normalizeDetailName(str) {
-            if (!str) return '';
-            return String(str)
-                .toLowerCase()
-                .replace(/,/g, '.')
-                .replace(/\s+/g, ' ')
-                .replace(/(\d+(?:\.\d+)?)\s*мм/gi, '')
-                .trim();
-        }
-
-        function detailsMatch(a, b) {
-            const na = normalizeDetailName(a);
-            const nb = normalizeDetailName(b);
-            if (!na || !nb) return false;
-            return na === nb;
-        }
-
-        function getPlannedQuantityFromItemDetails(item, detailName) {
-            if (!detailName) return 1;
-
-            const details = item.details || [];
-
-            // 1. Точное совпадение
-            for (const detail of details) {
-                if ((detail.name || '') === detailName) {
-                    return parseInt(detail.quantity) || 1;
-                }
-            }
-
-            // 2. Совпадение без толщины и материала
-            const cleanOpDetail = detailName
-                .toLowerCase()
-                .replace(/\d+(?:,\d+)?мм/g, '')
-                .replace(/aisi/gi, '')
-                .replace(/сталь/gi, '')
-                .replace(/алюминий/gi, '')
-                .replace(/\s+/g, ' ')
-                .trim();
-
-            for (const detail of details) {
-                let cleanItemDetail = (detail.name || '')
-                    .toLowerCase()
-                    .replace(/\d+(?:,\d+)?мм/g, '')
-                    .replace(/aisi/gi, '')
-                    .replace(/сталь/gi, '')
-                    .replace(/алюминий/gi, '')
-                    .replace(/\s+/g, ' ')
-                    .trim();
-                
-                if (cleanItemDetail === cleanOpDetail) {
-                    return parseInt(detail.quantity) || 1;
-                }
-                
-                // 3. Частичное совпадение (одно название содержит другое)
-                if (cleanOpDetail.includes(cleanItemDetail) || cleanItemDetail.includes(cleanOpDetail)) {
-                    return parseInt(detail.quantity) || 1;
-                }
-            }
-
-            // 4. Специальные случаи
-            if (detailName.toLowerCase().includes('лира') && cleanOpDetail.includes('лира')) {
-                for (const detail of details) {
-                    if ((detail.name || '').toLowerCase().includes('лира')) {
-                        return parseInt(detail.quantity) || 1;
-                    }
-                }
-            }
-            
-            if (detailName.toLowerCase().includes('кронштейн') && cleanOpDetail.includes('кронштейн')) {
-                for (const detail of details) {
-                    if ((detail.name || '').toLowerCase().includes('кронштейн')) {
-                        return parseInt(detail.quantity) || 1;
-                    }
-                }
-            }
-
-            return 1;
         }
 
         // ============== РАБОТА С ФАЙЛАМИ ==============
@@ -2166,7 +2097,6 @@
             let operationsHtml = '';
             let completedCount = 0;
 
-            // Получаем актуальные задачи из localStorage
             let tasksFromStorage = [];
             const storageKey = `tasks_${siteKey}`;
             try {
@@ -2182,7 +2112,6 @@
                 const detailName = opData.detail || '';
                 const thickness = opData.thickness || '';
                 
-                // Отображаем имя операции с деталью
                 let displayOperationName = operationName;
                 if (detailName) {
                     let cleanDetailName = detailName;
@@ -2195,22 +2124,16 @@
                     }
                 }
                 
-                // Определяем статус и количество
                 let squareClass = '';
                 let isAdded = false;
                 let plannedQuantity = 1;
                 
-                // Проверяем существующую задачу в localStorage (ОДИН РАЗ!)
                 const existingTask = tasksFromStorage.find(t => t.id === taskId);
                 
                 if (existingTask && existingTask.totalQuantity) {
                     plannedQuantity = existingTask.totalQuantity;
-                } else if (detailName && item.details) {
-                    // Если задачи нет, получаем из деталей
-                    plannedQuantity = getPlannedQuantityFromItemDetails(item, detailName);
                 }
                 
-                // Проверяем order.tasks (цвет квадратика)
                 if (order.tasks && order.tasks[taskId]) {
                     const taskStatus = order.tasks[taskId];
                     if (taskStatus === 'green') {
@@ -2225,7 +2148,6 @@
                     }
                 }
                 
-                // Если задача есть в localStorage, но нет в order.tasks
                 if (existingTask && !isAdded) {
                     isAdded = true;
                     if (existingTask.status === 'completed') {
@@ -2236,7 +2158,6 @@
                     }
                 }
                 
-                // Кнопка добавления/удаления
                 const buttonIcon = isAdded ? '✓' : '+';
                 const buttonClass = isAdded ? 'added' : '';
                 
@@ -2266,7 +2187,6 @@
                 `;
             }
 
-            // Файлы, прикреплённые к участку
             const files = order.siteFiles?.[siteKey] || [];
             const hasFiles = files.length > 0;
             
@@ -2330,7 +2250,6 @@
                 order.tasks[taskId] = newColor;
                 saveOrdersToStorage(orders);
                 
-                // Также обновляем статус в localStorage задачи
                 const storageKey = `tasks_${siteKey}`;
                 const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
                 const taskIndex = tasks.findIndex(t => t.id === taskId);
@@ -2361,7 +2280,6 @@
 
             const taskExists = existingTasks.some(t => t.id === taskId);
 
-            // ========== ЕСЛИ ЗАДАЧА УЖЕ СУЩЕСТВУЕТ - УДАЛЯЕМ ==========
             if (taskExists) {
                 if (confirm(`❓ Удалить операцию "${operationName}" с участка?`)) {
                     const filteredTasks = existingTasks.filter(t => t.id !== taskId);
@@ -2386,7 +2304,6 @@
                 return;
             }
 
-            // ========== СОЗДАНИЕ НОВОЙ ЗАДАЧИ ==========
             const item = order.items[itemIndex];
 
             let plannedQuantity = 1;
@@ -2411,7 +2328,10 @@
                 if (opData) {
                     detailName = opData.detail || '';
                     thickness = opData.thickness || '';
-                    plannedQuantity = getPlannedQuantityFromItemDetails(item, detailName);
+                    if (detailName && item.details) {
+                        const detail = item.details.find(d => d.name === detailName);
+                        if (detail) plannedQuantity = detail.quantity;
+                    }
                 }
             }
 
@@ -3341,7 +3261,6 @@
             productsList = await loadProducts() || [];
             bracketsList = await loadBrackets() || [];
             lyresList = await loadLyres() || [];
-            await loadProductDetails();
             await loadTaskOperations();
 
             populateNewItemSelects();
