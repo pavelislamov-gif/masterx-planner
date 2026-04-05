@@ -1838,7 +1838,7 @@
                 id: Date.now(),
                 groupName: groupName,
                 date: new Date().toISOString().split('T')[0],
-                number: generateOrderNumber(orders.length + 1),
+                number: generateOrderNumber(),
                 items: JSON.parse(JSON.stringify(tempItemsList)),
                 status: 'active',
                 tasks: {},
@@ -1928,7 +1928,13 @@
             updateStatistics();
         }
 
-        function generateOrderNumber(index) {
+        function generateOrderNumber() {
+            const date = new Date();
+            const year = date.getFullYear().toString().slice(-2);
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${day}.${month}.${year}`;
+        }
 
         function escapeHtml(str) {
             if (!str) return '';
@@ -2088,14 +2094,23 @@
             let operationsHtml = '';
             let completedCount = 0;
 
+            // Получаем актуальные задачи из localStorage
+            let tasksFromStorage = [];
+            const storageKey = `tasks_${siteKey}`;
+            try {
+                const saved = localStorage.getItem(storageKey);
+                if (saved) tasksFromStorage = JSON.parse(saved);
+            } catch(e) { console.error(e); }
+
             for (let i = 0; i < operationsWithDetails.length; i++) {
                 const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
                 const opData = operationsWithDetails[i];
-
+                
                 const operationName = opData.operation || opData;
                 const detailName = opData.detail || '';
                 const thickness = opData.thickness || '';
-
+                
+                // Отображаем имя операции с деталью
                 let displayOperationName = operationName;
                 if (detailName) {
                     let cleanDetailName = detailName;
@@ -2107,43 +2122,49 @@
                         displayOperationName += ` ${thickness}`;
                     }
                 }
-
+                
+                // Определяем статус и количество
                 let squareClass = '';
                 let isAdded = false;
-
+                let plannedQuantity = 1;
+                
+                // Проверяем order.tasks (цвет квадратика)
                 if (order.tasks && order.tasks[taskId]) {
-                    isAdded = true;
                     const taskStatus = order.tasks[taskId];
-                    if (taskStatus === 'green' || taskStatus === 'completed') {
+                    if (taskStatus === 'green') {
                         squareClass = 'green';
+                        isAdded = true;
                         completedCount++;
-                    } else if (taskStatus === 'orange' || taskStatus === 'in_progress') {
+                    } else if (taskStatus === 'orange') {
                         squareClass = 'orange';
+                        isAdded = true;
+                    } else if (taskStatus === 'pending' || taskStatus === '') {
+                        isAdded = true;
                     }
                 }
-
-                try {
-                    const storageKey = `tasks_${siteKey}`;
-                    const saved = localStorage.getItem(storageKey);
-                    if (saved) {
-                        const existingTasks = JSON.parse(saved);
-                        const existingTask = existingTasks.find(t => t.id === taskId);
-                        if (existingTask) {
-                            isAdded = true;
-                            if (existingTask.status === 'completed') {
-                                squareClass = 'green';
-                                completedCount++;
-                            } else if (existingTask.status === 'in_progress') {
-                                squareClass = 'orange';
-                            }
+                
+                // Проверяем localStorage для получения plannedQuantity
+                const existingTask = tasksFromStorage.find(t => t.id === taskId);
+                if (existingTask) {
+                    plannedQuantity = existingTask.totalQuantity || 1;
+                    if (!isAdded) {
+                        isAdded = true;
+                        if (existingTask.status === 'completed') {
+                            squareClass = 'green';
+                            completedCount++;
+                        } else if (existingTask.status === 'in_progress') {
+                            squareClass = 'orange';
                         }
                     }
-                } catch (e) {
-                    console.error(e);
+                } else if (detailName && item.details) {
+                    // Если задачи нет, получаем plannedQuantity из деталей
+                    plannedQuantity = getPlannedQuantityFromItemDetails(item, detailName);
                 }
-
-                const plannedQuantity = getPlannedQuantityFromItemDetails(item, detailName);
-
+                
+                // Кнопка добавления/удаления
+                const buttonIcon = isAdded ? '✓' : '+';
+                const buttonClass = isAdded ? 'added' : '';
+                
                 operationsHtml += `
                     <div class="operation-item">
                         <div class="operation-info">
@@ -2151,11 +2172,14 @@
                             <div class="operation-plan">📋 План: ${plannedQuantity} шт</div>
                         </div>
                         <div class="operation-controls">
-                            <div class="square-status ${squareClass}" data-task-id="${taskId}"></div>
+                            <div class="square-status ${squareClass}" 
+                                 data-task-id="${taskId}"
+                                 onclick="event.stopPropagation(); toggleSquareStatus('${taskId}')">
+                            </div>
                             <div class="action-buttons">
-                                <button class="action-btn btn-add ${isAdded ? 'added' : ''}" 
+                                <button class="action-btn btn-add ${buttonClass}" 
                                         onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', false)">
-                                    ${isAdded ? '✓' : '+'}
+                                    ${buttonIcon}
                                 </button>
                                 <button class="action-btn btn-priority" 
                                         onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', true)">
@@ -2167,9 +2191,10 @@
                 `;
             }
 
+            // Файлы, прикреплённые к участку
             const files = order.siteFiles?.[siteKey] || [];
             const hasFiles = files.length > 0;
-
+            
             let filesIndicatorHtml = '';
             if (hasFiles) {
                 filesIndicatorHtml = `
@@ -2199,15 +2224,56 @@
                 </div>
             `;
         }
+        
+        // ============== ПЕРЕКЛЮЧЕНИЕ СТАТУСА КВАДРАТИКА ==============
+        function toggleSquareStatus(taskId) {
+            const square = document.querySelector(`.square-status[data-task-id="${taskId}"]`);
+            if (!square) return;
+            
+            let newStatus = '';
+            let newColor = '';
+            
+            if (square.classList.contains('orange')) {
+                newStatus = 'completed';
+                newColor = 'green';
+            } else if (square.classList.contains('green')) {
+                newStatus = 'pending';
+                newColor = '';
+            } else {
+                newStatus = 'in_progress';
+                newColor = 'orange';
+            }
+            
+            const parts = taskId.split('_');
+            const orderId = parseInt(parts[0]);
+            const siteKey = parts[1];
+            
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                if (!order.tasks) order.tasks = {};
+                order.tasks[taskId] = newColor;
+                saveOrdersToStorage(orders);
+                
+                // Также обновляем статус в localStorage задачи
+                const storageKey = `tasks_${siteKey}`;
+                const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                const taskIndex = tasks.findIndex(t => t.id === taskId);
+                if (taskIndex !== -1) {
+                    tasks[taskIndex].status = newStatus;
+                    localStorage.setItem(storageKey, JSON.stringify(tasks));
+                }
+                
+                renderOrdersList();
+                updateStatistics();
+            }
+        }
 
-        // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ ==============
+        // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ (ДОБАВЛЕНИЕ/УДАЛЕНИЕ) ==============
         function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName, isPriority = false) {
             const orders = loadOrdersFromStorage();
             const order = orders.find(o => o.id == orderId);
-            if (!order) {
-                alert('Заказ не найден');
-                return;
-            }
+            if (!order) { alert('Заказ не найден'); return; }
 
             const storageKey = `tasks_${siteKey}`;
             const taskId = `${order.id}_${siteKey}_${itemIndex}_${opIndex}`;
@@ -2216,12 +2282,11 @@
             try {
                 const saved = localStorage.getItem(storageKey);
                 if (saved) existingTasks = JSON.parse(saved);
-            } catch (e) {
-                console.error(e);
-            }
+            } catch(e) { console.error(e); }
 
             const taskExists = existingTasks.some(t => t.id === taskId);
 
+            // ========== ЕСЛИ ЗАДАЧА УЖЕ СУЩЕСТВУЕТ - УДАЛЯЕМ ==========
             if (taskExists) {
                 if (confirm(`❓ Удалить операцию "${operationName}" с участка?`)) {
                     const filteredTasks = existingTasks.filter(t => t.id !== taskId);
@@ -2230,10 +2295,10 @@
                     if (order.tasks && order.tasks[taskId]) {
                         delete order.tasks[taskId];
                     }
-
+                    
                     const newStatus = getGroupStatus(order);
                     order.status = newStatus === 'green' ? 'completed' : (newStatus === 'orange' ? 'active' : 'pending');
-
+                    
                     const orderIndex = orders.findIndex(o => o.id == orderId);
                     orders[orderIndex] = order;
                     saveOrdersToStorage(orders);
@@ -2246,6 +2311,7 @@
                 return;
             }
 
+            // ========== СОЗДАНИЕ НОВОЙ ЗАДАЧИ ==========
             const item = order.items[itemIndex];
 
             let plannedQuantity = 1;
@@ -3129,7 +3195,7 @@
                         </div>
                     `;
                 }
-            });
+            }
             
             let html = `
                 <div style="padding: 20px;">
@@ -3247,6 +3313,7 @@
         window.addExtraTask = addExtraTask;
         window.deleteOrder = deleteOrder;
         window.toggleSiteOperation = toggleSiteOperation;
+        window.toggleSquareStatus = toggleSquareStatus;
         window.addCustomProfile = addCustomProfile;
         window.removeCustomProfile = removeCustomProfile;
         window.onNewItemProductChange = onNewItemProductChange;
