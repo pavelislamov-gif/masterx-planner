@@ -1348,6 +1348,7 @@
                                        data-profile-index="${idx}"
                                        value="${profile.quantity}" 
                                        min="0" 
+                                       step="1"
                                        style="width: 60px; padding: 6px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
                                 <span style="color: #a0a0a0;">шт</span>
                                 <button class="remove-profile-btn" onclick="removeCustomProfile(${idx})" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer;">✕</button>
@@ -1372,6 +1373,7 @@
                                        data-profile-index="${idx}"
                                        value="${profile.quantity}" 
                                        min="0" 
+                                       step="1"
                                        style="width: 60px; padding: 6px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
                                 <span style="color: #a0a0a0;">шт</span>
                             </div>
@@ -1382,6 +1384,7 @@
 
             profilesList.innerHTML = profilesHtml;
 
+            // Обработчики для длины профиля
             document.querySelectorAll('#profilesList .profile-length, #profilesList .profile-length-custom').forEach(input => {
                 const profileIdx = parseInt(input.dataset.profileIndex);
                 input.addEventListener('change', function() {
@@ -1391,6 +1394,7 @@
                 });
             });
 
+            // Обработчики для количества профилей
             document.querySelectorAll('#profilesList .profile-qty, #profilesList .profile-qty-custom').forEach(input => {
                 const profileIdx = parseInt(input.dataset.profileIndex);
                 input.addEventListener('change', function() {
@@ -1400,6 +1404,7 @@
                 });
             });
 
+            // Обработчики для названия кастомного профиля
             document.querySelectorAll('#profilesList .profile-name-custom').forEach(input => {
                 const profileIdx = parseInt(input.dataset.profileIndex);
                 input.addEventListener('change', function() {
@@ -1411,15 +1416,24 @@
         }
 
         // ============== ОБНОВЛЕНИЕ ПРИ ВЫБОРЕ ИЗДЕЛИЯ ==============
-        function onNewItemProductChange() {
+         function onNewItemProductChange() {
             const productName = document.getElementById('newItemProduct').value;
             const sizeSelect = document.getElementById('newItemSize');
             const detailsContainer = document.getElementById('detailsContainer');
             const detailsList = document.getElementById('detailsList');
             const profilesContainer = document.getElementById('profilesContainer');
+            const profilesList = document.getElementById('profilesList');
 
+            if (!productName) {
+                sizeSelect.innerHTML = '<option value="">Сначала выберите изделие</option>';
+                detailsContainer.style.display = 'none';
+                profilesContainer.style.display = 'none';
+                return;
+            }
+
+            // Загружаем размеры
             const product = productsList.find(p => p.name === productName);
-            if (product && product.sizes) {
+            if (product && product.sizes && product.sizes.length > 0) {
                 sizeSelect.innerHTML = '<option value="">Выберите размер</option>';
                 product.sizes.forEach(size => {
                     const option = document.createElement('option');
@@ -1428,42 +1442,54 @@
                     sizeSelect.appendChild(option);
                 });
             } else {
-                sizeSelect.innerHTML = '<option value="">Нет доступных размеров</option>';
+                sizeSelect.innerHTML = '<option value="Стандартный">Стандартный</option>';
             }
 
+            // Загружаем детали из productDetailsData
             const productDetails = productDetailsData[productName]?.details || [];
-
-            const regularDetails = productDetails.filter(d => 
-                !d.name.includes('Профиль') && 
-                !d.name.includes('профиль') &&
-                !d.name.includes('НПС') &&
-                !d.name.includes('МП') &&
-                !d.name.includes('КП')
-            );
-
-            const profilesFromDetails = productDetails.filter(d => 
-                d.name.includes('Профиль') || 
-                d.name.includes('профиль') ||
-                d.name.includes('НПС') ||
-                d.name.includes('МП') ||
-                d.name.includes('КП')
-            );
-
+            
+            console.log(`📦 Загружены детали для ${productName}:`, productDetails);
+            
+            if (!productDetails || productDetails.length === 0) {
+                console.warn(`⚠️ Нет деталей для ${productName} в productDetails.json`);
+                detailsContainer.style.display = 'none';
+                profilesContainer.style.display = 'none';
+                return;
+            }
+            
+            // Разделяем на обычные детали и профили
+            const regularDetails = [];
+            const profilesFromDetails = [];
+            
+            for (const detail of productDetails) {
+                const name = detail.name || '';
+                // Профили — это детали с ключевыми словами
+                if (name.includes('Профиль') || name.includes('профиль') || 
+                    name.includes('НПС') || name.includes('МП') || 
+                    name.includes('КП') || name.includes('Труба')) {
+                    profilesFromDetails.push(detail);
+                } else {
+                    regularDetails.push(detail);
+                }
+            }
+            
+            // Отображаем обычные детали с quantity = 0 (СТАРТ С НУЛЯ)
             if (regularDetails.length > 0) {
                 detailsContainer.style.display = 'block';
                 let detailsHtml = '';
-                regularDetails.forEach((detail) => {
+                regularDetails.forEach((detail, idx) => {
                     detailsHtml += `
-                        <div class="detail-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 6px; background: #15191f; border-radius: 6px;">
+                        <div class="detail-item" data-detail-index="${idx}" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 6px; background: #15191f; border-radius: 6px;">
                             <span style="font-size: 14px;">${escapeHtml(detail.name)}</span>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <input type="number" 
                                        class="detail-qty" 
-                                       data-detail-name="${detail.name}"
-                                       data-detail-material="${detail.material}"
-                                       value="${detail.quantity}" 
+                                       data-detail-name="${escapeHtml(detail.name)}"
+                                       data-detail-material="${detail.material || 'aluminum'}"
+                                       value="0" 
                                        min="0" 
-                                       style="width: 70px; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                                       step="1"
+                                       style="width: 80px; padding: 6px; background: #1e232b; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
                                 <span style="color: #a0a0a0;">шт</span>
                             </div>
                         </div>
@@ -1473,19 +1499,21 @@
             } else {
                 detailsContainer.style.display = 'none';
             }
-
+            
+            // Отображаем профили с length = 0 и quantity = 0 (СТАРТ С НУЛЯ)
             tempProfiles = [];
             if (profilesFromDetails.length > 0) {
                 profilesFromDetails.forEach(profile => {
                     tempProfiles.push({
                         name: profile.name,
-                        material: profile.material,
+                        material: profile.material || 'алюминий',
                         lengthMm: 0,
-                        quantity: profile.quantity,
+                        quantity: 0,
                         isCustom: false
                     });
                 });
                 renderProfilesList();
+                profilesContainer.style.display = 'block';
             } else {
                 profilesContainer.style.display = 'none';
             }
@@ -1495,9 +1523,10 @@
         function collectDetailsFromForm() {
             const details = [];
 
+            // Собираем обычные детали
             document.querySelectorAll('#detailsList .detail-qty').forEach(input => {
                 const qty = parseInt(input.value) || 0;
-                if (qty > 0) {
+                if (qty > 0) {  // Только если количество > 0
                     details.push({
                         name: input.dataset.detailName,
                         material: input.dataset.detailMaterial,
@@ -1507,12 +1536,13 @@
                 }
             });
 
+            // Собираем профили
             tempProfiles.forEach(profile => {
                 if (profile.name && profile.quantity > 0) {
                     details.push({
                         name: profile.name,
                         material: profile.material,
-                        lengthMm: profile.lengthMm,
+                        lengthMm: profile.lengthMm || 0,
                         quantity: profile.quantity,
                         type: 'profile'
                     });
