@@ -170,38 +170,6 @@
             color: #ff3b3b;
         }
 
-        .position-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-            background: #1e232b;
-            padding: 6px 10px;
-            border-radius: 4px;
-        }
-
-        .position-item select {
-            flex: 2;
-            padding: 4px;
-            font-size: 12px;
-        }
-
-        .position-item input {
-            width: 70px;
-            padding: 4px;
-            text-align: center;
-        }
-
-        .position-item .remove-position {
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
-            cursor: pointer;
-            font-size: 10px;
-        }
-
         .empty-items {
             text-align: center;
             padding: 40px;
@@ -215,7 +183,6 @@
             justify-content: flex-end;
         }
 
-        /* СТАТУСЫ ГРУППЫ */
         .order-header.status-green {
             background: linear-gradient(135deg, #1a3a1a, #0f2a0f);
             border-left: 4px solid #2ecc71;
@@ -231,7 +198,6 @@
             border-left: 4px solid #6c757d;
         }
 
-        /* СТАТИСТИКА */
         .order-stats {
             display: flex;
             gap: 20px;
@@ -279,7 +245,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* ФИЛЬТРЫ */
         .filter-section {
             display: flex;
             gap: 15px;
@@ -298,7 +263,6 @@
             color: #e0e0e0;
         }
 
-        /* НАВИГАЦИЯ ПО УЧАСТКАМ */
         .sites-navigation {
             background: linear-gradient(135deg, #1a1e24, #0f1217);
             padding: 15px 25px;
@@ -335,7 +299,6 @@
             border-color: #ff3b3b;
         }
 
-        /* ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ */
         .theme-switch-wrapper {
             display: flex;
             align-items: center;
@@ -386,7 +349,6 @@
             background-color: #fff;
         }
 
-        /* СТАТУСЫ ИЗДЕЛИЙ */
         .item-header {
             transition: all 0.2s;
             cursor: pointer;
@@ -404,7 +366,6 @@
             border-left: 4px solid #6c757d !important;
         }
 
-        /* МОДАЛЬНЫЕ ОКНА - УВЕЛИЧЕННЫЕ */
         .modal-content {
             background: linear-gradient(135deg, #1a1e24, #0f1217);
             margin: 2% auto;
@@ -415,7 +376,6 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
 
-        /* Модальное окно создания группы - ШИРОКОЕ */
         #groupModal .modal-content {
             max-width: 1600px;
             width: 98%;
@@ -423,7 +383,6 @@
             overflow-y: auto;
         }
 
-        /* Модальное окно отчёта по заказу/изделию - ШИРОКОЕ */
         #orderReportModal .modal-content {
             max-width: 1600px;
             width: 98%;
@@ -431,7 +390,6 @@
             overflow-y: auto;
         }
 
-        /* Модальное окно материалов */
         #materialsModal .modal-content {
             max-width: 1000px;
             width: 90%;
@@ -439,7 +397,6 @@
             overflow-y: auto;
         }
 
-        /* КАРТОЧКИ УЧАСТКОВ НА ГЛАВНОЙ СТРАНИЦЕ */
         .sites-section {
             padding: 15px;
             background: #15191f;
@@ -526,32 +483,6 @@
             white-space: normal;
             word-break: break-word;
             line-height: 1.3;
-        }
-
-        .operation-detail {
-            font-size: 10px;
-            color: #b0b0b0;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-
-        .operation-detail .material {
-            color: #ffffff;
-            font-weight: 500;
-            white-space: normal;
-            word-break: break-word;
-        }
-
-        .operation-detail .thickness {
-            color: #4cd964;
-            background: #1e232b;
-            padding: 1px 4px;
-            border-radius: 3px;
-            font-size: 9px;
-            white-space: nowrap;
-            flex-shrink: 0;
         }
 
         .operation-controls {
@@ -686,7 +617,6 @@
             color: #4cd964;
         }
 
-        /* Адаптация для узких экранов */
         @media (max-width: 1300px) {
             .sites-grid {
                 min-width: 1000px;
@@ -872,14 +802,6 @@
             color: #f97316 !important;
         }
 
-        body.light-theme .operation-detail {
-            color: #64748b !important;
-        }
-
-        body.light-theme .operation-detail .material {
-            color: #1e293b !important;
-        }
-
         body.light-theme .square-status {
             background: #f1f5f9 !important;
             border-color: #e2e8f0 !important;
@@ -910,11 +832,21 @@
         body.light-theme .detail-chip .detail-name {
             color: #f97316 !important;
         }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #ff9800, #e68900);
+            color: white;
+            border: none;
+        }
+        
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #e68900, #cc7a00);
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- ШАПКА -->
         <header>
             <div class="logo-container">
                 <img src="images/logo.png" alt="MasterX Logo" class="logo-img" onerror="this.style.display='none'">
@@ -937,7 +869,6 @@
             </div>
         </header>
 
-        <!-- НАВИГАЦИЯ ПО УЧАСТКАМ -->
         <div class="sites-navigation">
             <h3>🏭 Производственные участки:</h3>
             <div class="sites-links">
@@ -949,7 +880,6 @@
             </div>
         </div>
 
-        <!-- СТАТИСТИКА -->
         <div class="order-stats">
             <div class="stat-item">
                 <div class="stat-value" id="totalOrders">0</div>
@@ -969,7 +899,6 @@
             </div>
         </div>
 
-        <!-- ФИЛЬТРЫ И ПОИСК -->
         <div class="filter-section">
             <input type="text" class="search-box" placeholder="🔍 Поиск по названию группы или изделию..." id="searchInput">
             <select id="statusFilter" class="search-box" style="width: auto;">
@@ -979,9 +908,9 @@
             </select>
             <button class="btn btn-primary" onclick="exportOrders()">📥 Экспорт заказов</button>
             <button class="btn btn-success" onclick="importOrders()">📤 Импорт заказов</button>
+            <button class="btn btn-warning" onclick="archiveCompletedGroups()">🗄️ Архив завершённых групп</button>
         </div>
 
-        <!-- МОДАЛЬНОЕ ОКНО СОЗДАНИЯ/РЕДАКТИРОВАНИЯ ГРУППЫ -->
         <div id="groupModal" class="modal">
             <div class="modal-content group-modal-content">
                 <span class="close" onclick="closeGroupModal()">&times;</span>
@@ -1014,14 +943,12 @@
                             </div>
                         </div>
 
-                        <!-- ПРОФИЛИ -->
                         <div id="profilesContainer" style="display: none;">
                             <div class="components-title" style="color: #ff3b3b; font-size: 14px; margin-bottom: 10px;">📐 ПРОФИЛИ:</div>
                             <div id="profilesList"></div>
                             <button type="button" class="btn-outline" onclick="addCustomProfile()" style="margin-top: 5px; width: 100%;">+ Добавить профиль</button>
                         </div>
 
-                        <!-- ДЕТАЛИ -->
                         <div id="detailsContainer" style="display: none;">
                             <div class="components-title" style="color: #ff3b3b; font-size: 14px; margin-bottom: 10px;">🔧 ДЕТАЛИ:</div>
                             <div id="detailsList"></div>
@@ -1070,7 +997,6 @@
             </div>
         </div>
 
-        <!-- МОДАЛЬНОЕ ОКНО МАТЕРИАЛОВ -->
         <div id="materialsModal" class="modal">
             <div class="modal-content" style="max-width: 1000px;">
                 <span class="close" onclick="closeMaterialsModal()">&times;</span>
@@ -1078,7 +1004,6 @@
             </div>
         </div>
 
-        <!-- МОДАЛЬНОЕ ОКНО ДЛЯ ОТЧЁТА ПО ЗАКАЗУ/ИЗДЕЛИЮ -->
         <div id="orderReportModal" class="modal">
             <div class="modal-content">
                 <span class="close" onclick="closeOrderReportModal()">&times;</span>
@@ -1086,7 +1011,6 @@
             </div>
         </div>
 
-        <!-- СПИСОК ГРУПП -->
         <div id="ordersList" class="orders-list"></div>
     </div>
 
@@ -1108,7 +1032,6 @@
         let editingOrderId = null;
         let editingItemIndex = null;
 
-        // КЛЮЧИ ДЛЯ СОХРАНЕНИЯ СОСТОЯНИЯ
         const MAIN_STORAGE_KEY = 'main_open_cards';
         const MAIN_ITEMS_STORAGE_KEY = 'main_open_items';
 
@@ -1227,7 +1150,6 @@
                     taskOperationsData = data.operations || {};
                     window.taskOperationsData = taskOperationsData;
                     console.log('✅ Загружены операции из taskOperations.json');
-                    console.log('📦 Доступные продукты:', Object.keys(taskOperationsData).length);
                 } else {
                     console.warn('taskOperations.json не найден');
                     taskOperationsData = {};
@@ -1238,7 +1160,7 @@
             }
         }
 
-        // ============== ЕДИНАЯ НОРМАЛИЗАЦИЯ НАЗВАНИЙ ДЕТАЛЕЙ ==============
+        // ============== НОРМАЛИЗАЦИЯ ==============
         function normalizeDetailName(name) {
             if (!name) return '';
             return String(name)
@@ -1254,7 +1176,6 @@
                 .trim();
         }
         
-        // ============== ПОЛУЧЕНИЕ КОЛИЧЕСТВА ДЕТАЛИ (ЕДИНАЯ ФУНКЦИЯ) ==========
         function getDetailQuantity(item, operationDetailName) {
             if (!operationDetailName || !item?.details) return 0;
             
@@ -1277,7 +1198,6 @@
             return 0;
         }
         
-        // ============== ОБНОВЛЕНИЕ ПЛАНА В ЗАДАЧАХ ==============
         function updateTaskQuantitiesFromDetails(orderId) {
             const orders = loadOrdersFromStorage();
             const order = orders.find(o => o.id == orderId);
@@ -1299,7 +1219,6 @@
                                 task.totalQuantity = newQuantity;
                                 siteUpdated = true;
                                 anyUpdated = true;
-                                console.log(`🔄 Обновлён план для ${task.operation}: ${newQuantity} шт`);
                             }
                         }
                     });
@@ -1318,16 +1237,13 @@
             return anyUpdated;
         }
 
-        // ============== ПОЛУЧЕНИЕ УНИКАЛЬНЫХ ДЕТАЛЕЙ ИЗ ОПЕРАЦИЙ ==============
         function getUniqueDetailsFromOperations(productName) {
             const productOps = taskOperationsData[productName];
             if (!productOps) {
-                console.warn(`⚠️ Нет операций для ${productName} в taskOperations.json`);
                 return [];
             }
             
             const detailsMap = new Map();
-            
             const sites = ['токарно-фрезерный', 'фрезерный', 'слесарный', 'лазерно-гибочный', 'полимерный'];
             
             for (const site of sites) {
@@ -1354,20 +1270,7 @@
                 }
             }
             
-            const result = Array.from(detailsMap.values());
-            console.log(`📦 Уникальные детали для ${productName}:`, result);
-            return result;
-        }
-
-        // ============== ПОЛУЧЕНИЕ ОПЕРАЦИЙ ==============
-        function getOperationNames(productName, siteKey) {
-            const ops = getOperationNamesWithDetails(productName, siteKey);
-            if (ops.length === 0) return [];
-
-            if (typeof ops[0] === 'object' && ops[0].operation) {
-                return ops.map(op => op.operation);
-            }
-            return ops;
+            return Array.from(detailsMap.values());
         }
 
         function getOperationNamesWithDetails(productName, siteKey) {
@@ -1395,7 +1298,7 @@
             return [];
         }
 
-        // ============== ФУНКЦИИ ДЛЯ ПРОФИЛЕЙ ==============
+        // ============== ПРОФИЛИ ==============
         function addCustomProfile() {
             tempProfiles.push({
                 name: '',
@@ -1529,7 +1432,6 @@
                 return;
             }
 
-            // Загружаем размеры
             const product = productsList.find(p => p.name === productName);
             if (product && product.sizes && product.sizes.length > 0) {
                 sizeSelect.innerHTML = '<option value="">Выберите размер</option>';
@@ -1543,7 +1445,6 @@
                 sizeSelect.innerHTML = '<option value="Стандартный">Стандартный</option>';
             }
 
-            // ========== ПОЛУЧАЕМ ДЕТАЛИ ИЗ taskOperations.json ==========
             const allDetails = getUniqueDetailsFromOperations(productName);
             
             if (allDetails.length === 0) {
@@ -1552,7 +1453,6 @@
                 return;
             }
             
-            // Разделяем на обычные детали и профили
             const regularDetails = [];
             const profilesFromDetails = [];
             
@@ -1567,7 +1467,6 @@
                 }
             }
             
-            // Отображаем обычные детали с quantity = 0
             if (regularDetails.length > 0) {
                 detailsContainer.style.display = 'block';
                 let detailsHtml = '';
@@ -1594,7 +1493,6 @@
                 detailsContainer.style.display = 'none';
             }
             
-            // Отображаем профили
             tempProfiles = [];
             if (profilesFromDetails.length > 0) {
                 profilesFromDetails.forEach(profile => {
@@ -1613,7 +1511,6 @@
             }
         }
 
-        // ============== СБОР ДЕТАЛЕЙ ==============
         function collectDetailsFromForm() {
             const details = [];
 
@@ -2206,7 +2103,6 @@
                 let isAdded = false;
                 let plannedQuantity = 1;
                 
-                // ПРИОРИТЕТ: берём количество из деталей изделия (гибкое сопоставление)
                 if (detailName && item.details) {
                     const qty = getDetailQuantity(item, detailName);
                     if (qty > 0) {
@@ -2216,12 +2112,10 @@
                 
                 const existingTask = tasksFromStorage.find(t => t.id === taskId);
                 
-                // Если в деталях не нашли, берём из существующей задачи
                 if (existingTask && existingTask.totalQuantity && plannedQuantity === 1) {
                     plannedQuantity = existingTask.totalQuantity;
                 }
                 
-                // Проверяем order.tasks (цвет квадратика)
                 if (order.tasks && order.tasks[taskId]) {
                     const taskStatus = order.tasks[taskId];
                     if (taskStatus === 'green') {
@@ -2351,7 +2245,7 @@
             }
         }
 
-        // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ (ДОБАВЛЕНИЕ/УДАЛЕНИЕ) ==============
+        // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ ==============
         function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName, isPriority = false) {
             const orders = loadOrdersFromStorage();
             const order = orders.find(o => o.id == orderId);
@@ -2466,7 +2360,7 @@
             updateStatistics();
         }
 
-        // ============== СИНХРОНИЗАЦИЯ ВСЕХ ЗАДАЧ ПРИ ЗАГРУЗКЕ ==============
+        // ============== СИНХРОНИЗАЦИЯ ЗАДАЧ ==============
         function syncAllTasksToOrders() {
             const orders = loadOrdersFromStorage();
             const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
@@ -2496,7 +2390,6 @@
                         if (uniqueTasks.length !== tasks.length) {
                             tasks = uniqueTasks;
                             localStorage.setItem(storageKey, JSON.stringify(tasks));
-                            console.log(`Удалено дубликатов в ${site}`);
                         }
                         
                         tasks.forEach(task => {
@@ -2521,7 +2414,6 @@
                     if (!activeTaskIds.has(taskId)) {
                         delete order.tasks[taskId];
                         updated = true;
-                        console.log(`Удалена устаревшая задача: ${taskId}`);
                     }
                 }
             });
@@ -2599,7 +2491,6 @@
 
                 if (order.items && order.items.length > 0) {
                     order.items.forEach((item, itemIndex) => {
-                        // Формируем отображение RAL и текстуры
                         let ralTextureHtml = '';
                         if (item.ral && item.ral.trim() !== '') {
                             ralTextureHtml = `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>`;
@@ -2609,7 +2500,6 @@
                             ralTextureHtml = `<span style="font-size: 11px; color: #6c757d;">🎨 не указан</span>`;
                         }
                         
-                        // Определяем статус изделия
                         let hasAnyTask = false;
                         let hasAnyExecutor = false;
                         let allTasksCompleted = true;
@@ -3026,11 +2916,11 @@
             });
             
             const siteNames = {
-                'polimerniy': '📍 ПОЛИМЕРНЫЙ УЧАСТОК',
-                'slesarniy': '📍 СЛЕСАРНЫЙ УЧАСТОК',
-                'frezerniy': '📍 ФРЕЗЕРНЫЙ УЧАСТОК',
-                'tokarniy': '📍 ТОКАРНЫЙ УЧАСТОК',
-                'lazerno': '📍 ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
+                'polimerniy': '🎨 ПОЛИМЕРНЫЙ УЧАСТОК',
+                'slesarniy': '🔩 СЛЕСАРНЫЙ УЧАСТОК',
+                'frezerniy': '⚙️ ФРЕЗЕРНЫЙ УЧАСТОК',
+                'tokarniy': '🔧 ТОКАРНЫЙ УЧАСТОК',
+                'lazerno': '✨ ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК'
             };
             
             const reportsBySite = {};
@@ -3338,6 +3228,92 @@
             printWindow.close();
         }
 
+        // ============== АРХИВАЦИЯ ЗАВЕРШЁННЫХ ГРУПП ==============
+
+        // Название периода (янв-июн / июл-дек)
+        function getPeriodName() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            
+            if (month <= 6) {
+                return `${year}_01-06`;
+            } else {
+                return `${year}_07-12`;
+            }
+        }
+
+        // Архивация и удаление только завершённых групп (статус green)
+        function archiveCompletedGroups() {
+            const orders = loadOrdersFromStorage();
+            
+            if (orders.length === 0) {
+                alert('📭 Нет данных для архивации');
+                return;
+            }
+            
+            // Разделяем на активные (незавершённые) и завершённые
+            const activeOrders = [];      // orange + gray
+            const completedOrders = [];   // green
+            
+            orders.forEach(order => {
+                const status = getGroupStatus(order);
+                if (status === 'green') {
+                    completedOrders.push(order);
+                } else {
+                    activeOrders.push(order);
+                }
+            });
+            
+            if (completedOrders.length === 0) {
+                alert('📭 Нет завершённых групп для архивации');
+                return;
+            }
+            
+            if (!confirm(`⚠️ АРХИВАЦИЯ ЗАВЕРШЁННЫХ ГРУПП\n\n✅ Завершённых групп (удаляем): ${completedOrders.length}\n🟠 Активных групп (оставляем): ${activeOrders.length}\n\n💾 Создать архив и удалить завершённые группы?`)) {
+                return;
+            }
+            
+            // 1. Создаём архив
+            const archiveData = {
+                archivedAt: new Date().toISOString(),
+                period: getPeriodName(),
+                completedGroups: completedOrders,
+                stats: {
+                    totalArchived: completedOrders.length,
+                    totalItems: completedOrders.reduce((sum, o) => sum + (o.items?.length || 0), 0),
+                    remainingActive: activeOrders.length
+                }
+            };
+            
+            // 2. Скачиваем архив
+            const fileName = `masterx_archive_completed_${getPeriodName()}.json`;
+            const blob = new Blob([JSON.stringify(archiveData, null, 2)], {type: 'application/json'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+            
+            // 3. Сохраняем ТОЛЬКО активные группы
+            saveOrdersToStorage(activeOrders);
+            
+            // 4. Удаляем задачи завершённых групп со всех участков
+            const completedIds = new Set(completedOrders.map(o => o.id));
+            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+            
+            sites.forEach(site => {
+                const storageKey = `tasks_${site}`;
+                const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                const filteredTasks = tasks.filter(task => !completedIds.has(task.orderId));
+                localStorage.setItem(storageKey, JSON.stringify(filteredTasks));
+            });
+            
+            // 5. Перезагружаем страницу
+            alert(`✅ Архив создан!\n📁 Файл: ${fileName}\n📦 Завершённых групп в архиве: ${completedOrders.length}\n🔵 Активных групп осталось: ${activeOrders.length}\n\nСтраница будет перезагружена.`);
+            
+            location.reload();
+        }
+
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         async function initMainPage() {
             productsList = await loadProducts() || [];
@@ -3350,7 +3326,6 @@
 
             syncAllTasksToOrders();
             
-            // Синхронизируем планы задач с деталями
             const orders = loadOrdersFromStorage();
             orders.forEach(order => {
                 updateTaskQuantitiesFromDetails(order.id);
@@ -3381,6 +3356,7 @@
             });
         }
 
+        // ============== ГЛОБАЛЬНЫЕ ЭКСПОРТЫ ==============
         window.openGroupModal = openGroupModal;
         window.closeGroupModal = closeGroupModal;
         window.addItemToGroup = addItemToGroup;
@@ -3407,21 +3383,19 @@
         window.showOrderReport = showOrderReport;
         window.printOrderReport = printOrderReport;
         window.updateTaskQuantitiesFromDetails = updateTaskQuantitiesFromDetails;
+        window.archiveCompletedGroups = archiveCompletedGroups;
+        window.getPeriodName = getPeriodName;
         
-   // ============== АВТООБНОВЛЕНИЕ СТРАНИЦЫ КАЖДЫЕ 15 МИНУТ ==============
-        
-        // Настройки
-        const AUTO_RELOAD_INTERVAL = 15 * 60 * 1000; // 15 минут
-        const WARNING_BEFORE_RELOAD = 2 * 60 * 1000; // 2 минуты до перезагрузки
+        // ============== АВТООБНОВЛЕНИЕ СТРАНИЦЫ ==============
+        const AUTO_RELOAD_INTERVAL = 15 * 60 * 1000;
+        const WARNING_BEFORE_RELOAD = 2 * 60 * 1000;
         let reloadTimer = null;
         let warningTimer = null;
         let countdownInterval = null;
         let warningShown = false;
         let countdownSeconds = 120;
         
-        // Функция сохранения всех данных перед перезагрузкой
         function saveAllDataBeforeReload() {
-            console.log('💾 Сохранение данных перед перезагрузкой...');
             saveMainOpenCardsState();
             saveMainOpenItemsState();
             const orders = loadOrdersFromStorage();
@@ -3435,10 +3409,8 @@
                 }
             });
             localStorage.setItem('masterx_last_save', Date.now());
-            console.log('✅ Все данные сохранены');
         }
         
-        // Функция перезагрузки страницы
         function forceReload() {
             saveAllDataBeforeReload();
             if (countdownInterval) clearInterval(countdownInterval);
@@ -3446,11 +3418,9 @@
             if (warningTimer) clearTimeout(warningTimer);
             const notification = document.getElementById('reloadWarning');
             if (notification) notification.remove();
-            console.log('🔄 Перезагрузка страницы...');
             setTimeout(() => { location.reload(); }, 100);
         }
         
-        // Обновление обратного отсчёта
         function updateCountdown() {
             countdownSeconds--;
             const minutes = Math.floor(countdownSeconds / 60);
@@ -3469,7 +3439,6 @@
             }
         }
         
-        // Показ предупреждения
         function showReloadWarning() {
             if (warningShown) return;
             warningShown = true;
@@ -3516,7 +3485,6 @@
             };
         }
         
-        // Отмена перезагрузки
         function cancelAutoReload() {
             if (reloadTimer) clearTimeout(reloadTimer);
             if (warningTimer) clearTimeout(warningTimer);
@@ -3531,10 +3499,8 @@
             toast.innerHTML = '⏰ Автообновление отложено на 15 минут';
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
-            console.log('⏰ Перезагрузка отложена на 15 минут');
         }
         
-        // Запуск таймера
         function startAutoReloadTimer() {
             if (reloadTimer) clearTimeout(reloadTimer);
             if (warningTimer) clearTimeout(warningTimer);
@@ -3545,19 +3511,15 @@
             if (notification) notification.remove();
             warningTimer = setTimeout(() => { showReloadWarning(); }, AUTO_RELOAD_INTERVAL - WARNING_BEFORE_RELOAD);
             reloadTimer = setTimeout(() => { forceReload(); }, AUTO_RELOAD_INTERVAL);
-            console.log(`⏰ Автообновление запущено (перезагрузка через 15 мин, предупреждение за 2 мин)`);
         }
         
-        // Сброс таймера при активности пользователя
         let userActivityTimer = null;
         function resetAutoReloadTimer() {
             if (reloadTimer || warningTimer) {
-                console.log('👆 Активность пользователя, сброс таймера автообновления');
                 startAutoReloadTimer();
             }
         }
         
-        // Отслеживание активности пользователя
         function trackUserActivity() {
             const events = ['click', 'mousemove', 'keydown', 'scroll', 'touchstart'];
             events.forEach(event => {
@@ -3568,10 +3530,8 @@
             });
         }
         
-        // Видимость страницы
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden) {
-                console.log('👁️ Страница стала видимой');
                 const lastReload = localStorage.getItem('masterx_last_reload');
                 const now = Date.now();
                 if (lastReload && (now - parseInt(lastReload)) > AUTO_RELOAD_INTERVAL) {
@@ -3582,7 +3542,6 @@
             }
         });
         
-        // Сброс при изменении данных
         function onDataChanged() { resetAutoReloadTimer(); }
         
         window.addEventListener('storage', function(e) {
@@ -3591,14 +3550,11 @@
             }
         });
         
-        // Запуск автообновления
         function initAutoReload() {
             startAutoReloadTimer();
             trackUserActivity();
-            console.log('✅ Автообновление настроено (перезагрузка каждые 15 минут)');
         }
         
-        // Запускаем автообновление
         initAutoReload();
         
         document.addEventListener('DOMContentLoaded', initMainPage);
