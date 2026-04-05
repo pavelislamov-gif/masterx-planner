@@ -2511,6 +2511,10 @@
 
                 if (order.items && order.items.length > 0) {
                     order.items.forEach((item, itemIndex) => {
+                        // ИСПРАВЛЕНО: НЕ ПЕРЕЗАПИСЫВАЕМ item из freshOrder
+                        // Используем оригинальные данные из order.items[itemIndex]
+                        
+                        // Формируем отображение RAL и текстуры
                         let ralTextureHtml = '';
                         if (item.ral && item.ral.trim() !== '') {
                             ralTextureHtml = `<span style="font-size: 11px; color: #ff9800;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture || '-')}</span>`;
@@ -2520,6 +2524,7 @@
                             ralTextureHtml = `<span style="font-size: 11px; color: #6c757d;">🎨 не указан</span>`;
                         }
                         
+                        // Определяем статус изделия
                         let hasAnyTask = false;
                         let hasAnyExecutor = false;
                         let allTasksCompleted = true;
@@ -2592,6 +2597,7 @@
                         itemHeader.style.borderLeft = `4px solid ${headerBorderColor}`;
                         itemHeader.style.cursor = 'pointer';
 
+                        // Уникальный ID для стрелки
                         const arrowId = `arrow-${order.id}-${itemIndex}`;
                         
                         itemHeader.innerHTML = `
@@ -2669,6 +2675,7 @@
                             </div>
                         `;
 
+                        // Обработчик клика по заголовку изделия
                         itemHeader.onclick = (e) => {
                             if (e.target.tagName === 'BUTTON') return;
                             
@@ -2703,7 +2710,6 @@
             restoreMainOpenCardsState();
             restoreMainOpenItemsState();
         }
-
         // ============== ПЕРЕИМЕНОВАНИЕ ГРУППЫ ==============
         function editGroupName(orderId) {
             const orders = loadOrdersFromStorage();
