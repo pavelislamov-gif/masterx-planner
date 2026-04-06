@@ -1721,7 +1721,7 @@
             if (savedData && savedData.rows) {
                 reportRows = [...savedData.rows];
             } else {
-                reportRows = [{ расход: 0, единица: 'гр', количество: 0, комментарий: '' }];
+                reportRows = [{ материал: '', расход: 0, единица: 'гр', количество: 0, комментарий: '' }];
             }
             
             renderReportForm(contentDiv);
@@ -1740,14 +1740,15 @@
                 }
             });
             return { 
-                rows: allRows.map(row => ({
-                    расход: row.расход || 0,
-                    единица: row.единица || 'гр',
-                    количество: row.количество || 0,
-                    комментарий: row.комментарий || ''
-                })),
-                savedAt: taskReports[taskReports.length - 1]?.savedAt 
-            };
+    rows: allRows.map(row => ({
+        материал: row.материал || row.material || '',
+        расход: row.расход || 0,
+        единица: row.единица || 'гр',
+        количество: row.количество || 0,
+        комментарий: row.комментарий || ''
+    })),
+    savedAt: taskReports[taskReports.length - 1]?.savedAt 
+};
         }
         
         function renderReportForm(container) {
@@ -1867,7 +1868,7 @@
         function removeReportRowItem(rowIndex) {
             if (reportRows.length <= 1) {
                 if (!confirm('Удалить последнюю строку? Будет создана пустая строка.')) return;
-                reportRows = [{ расход: 0, единица: 'гр', количество: 0, комментарий: '' }];
+                reportRows = [{ материал: '', расход: 0, единица: 'гр', количество: 0, комментарий: '' }];
             } else {
                 reportRows.splice(rowIndex, 1);
             }
