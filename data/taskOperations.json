@@ -3,100 +3,104 @@
   "operations": {
     "XRAY 1": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 50мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 50мм Д16Т корпус", "thickness": null }
       ],
       "фрезерный": [
         { "operation": "Фрезеровка", "detail": "Поликарбонат Прозрачный 6мм", "thickness": "6мм" }
       ],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null }
+        { "operation": "Нарезка резьбы", "detail": "Пруток 50мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 50мм Д16Т корпус", "thickness": null }
       ],
       "лазерно-гибочный": [
         { "operation": "Раскрой", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Покраска", "detail": "Пруток 50мм Д16Т корпус", "thickness": null },
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 3": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 58мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 58мм Д16Т корпус", "thickness": null }
       ],
       "фрезерный": [
         { "operation": "Фрезеровка", "detail": "Поликарбонат Прозрачный 6мм", "thickness": "6мм" }
       ],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "РТИ", "detail": "Корпус", "thickness": null }
+        { "operation": "Нарезка резьбы", "detail": "Пруток 58мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 58мм Д16Т корпус", "thickness": null },
+        { "operation": "РТИ", "detail": "Пруток 58мм Д16Т корпус", "thickness": null }
       ],
       "лазерно-гибочный": [
         { "operation": "Раскрой", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Покраска", "detail": "Пруток 58мм Д16Т корпус", "thickness": null },
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 3-2": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 58мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 58мм Д16Т корпус", "thickness": null }
       ],
       "фрезерный": [
         { "operation": "Фрезеровка", "detail": "Поликарбонат Прозрачный 6мм", "thickness": "6мм" }
       ],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "РТИ", "detail": "Корпус", "thickness": null }
+        { "operation": "Нарезка резьбы", "detail": "Пруток 58мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 58мм Д16Т корпус", "thickness": null },
+        { "operation": "РТИ", "detail": "Пруток 58мм Д16Т корпус", "thickness": null }
       ],
       "лазерно-гибочный": [
         { "operation": "Раскрой", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Покраска", "detail": "Пруток 58мм Д16Т корпус", "thickness": null },
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 3-GRP": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null },
-        { "operation": "Точение", "detail": "Основание платы", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Основание платы", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 48мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 48мм Д16Т корпус", "thickness": null },
+        { "operation": "Точение", "detail": "Пруток 40мм Д16Т основание платы", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 40мм Д16Т основание платы", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null }
+        { "operation": "Нарезка резьбы", "detail": "Пруток 48мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 48мм Д16Т корпус", "thickness": null }
       ],
       "лазерно-гибочный": [
         { "operation": "Раскрой", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Покраска", "detail": "Пруток 48мм Д16Т корпус", "thickness": null },
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 6": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 75мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 75мм Д16Т корпус", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "РТИ", "detail": "Корпус", "thickness": null }
+        { "operation": "Нарезка резьбы", "detail": "Пруток 75мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 75мм Д16Т корпус", "thickness": null },
+        { "operation": "РТИ", "detail": "Пруток 75мм Д16Т корпус", "thickness": null }
       ],
       "лазерно-гибочный": [
         { "operation": "Раскрой", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
@@ -104,21 +108,22 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Пруток 75мм Д16Т корпус", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 6 RGBW": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 75мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 75мм Д16Т корпус", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "РТИ", "detail": "Корпус", "thickness": null }
+        { "operation": "Нарезка резьбы", "detail": "Пруток 75мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 75мм Д16Т корпус", "thickness": null },
+        { "operation": "РТИ", "detail": "Пруток 75мм Д16Т корпус", "thickness": null }
       ],
       "лазерно-гибочный": [
         { "operation": "Раскрой", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
@@ -126,66 +131,69 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Пруток 75мм Д16Т корпус", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 6-2 проходной": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 75мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 75мм Д16Т корпус", "thickness": null }
       ],
       "фрезерный": [
         { "operation": "Фрезеровка", "detail": "Поликарбонат Прозрачный 6мм", "thickness": "6мм" }
       ],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "РТИ", "detail": "Корпус", "thickness": null }
+        { "operation": "Нарезка резьбы", "detail": "Пруток 75мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 75мм Д16Т корпус", "thickness": null },
+        { "operation": "РТИ", "detail": "Пруток 75мм Д16Т корпус", "thickness": null }
       ],
       "лазерно-гибочный": [
         { "operation": "Раскрой", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Покраска", "detail": "Пруток 75мм Д16Т корпус", "thickness": null },
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 6-2 оконечный": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 75мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 75мм Д16Т корпус", "thickness": null }
       ],
       "фрезерный": [
         { "operation": "Фрезеровка", "detail": "Поликарбонат Прозрачный 6мм", "thickness": "6мм" }
       ],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "РТИ", "detail": "Корпус", "thickness": null }
+        { "operation": "Нарезка резьбы", "detail": "Пруток 75мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 75мм Д16Т корпус", "thickness": null },
+        { "operation": "РТИ", "detail": "Пруток 75мм Д16Т корпус", "thickness": null }
       ],
       "лазерно-гибочный": [
         { "operation": "Раскрой", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Покраска", "detail": "Пруток 75мм Д16Т корпус", "thickness": null },
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 6-T2 BT 180": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Установка заклепок", "detail": "Корпус", "thickness": null },
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Установка заклепок", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" }
       ],
@@ -196,23 +204,24 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 6-T2 BT 200 шторка": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Установка заклепок", "detail": "Корпус", "thickness": null },
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "Торцовка", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Установка заклепок", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Торцовка", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" }
       ],
@@ -223,22 +232,23 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 6-T2 BT 220": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Установка заклепок", "detail": "Корпус", "thickness": null },
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Установка заклепок", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" }
       ],
@@ -249,23 +259,24 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 6-T2 BT 220 Шторка х2": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Установка заклепок", "detail": "Корпус", "thickness": null },
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "Торцовка", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Установка заклепок", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Торцовка", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" }
       ],
@@ -276,23 +287,24 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 6-T2 BT 240 Шторка": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка корпуса", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка корпуса", "detail": "Профиль СЧ4435", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Установка заклепок", "detail": "Корпус", "thickness": null },
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "Торцовка", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Установка заклепок", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Торцовка", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" }
       ],
@@ -303,23 +315,24 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 6-T2 BT 240 Шторка х2": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Установка заклепок", "detail": "Корпус", "thickness": null },
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "Торцовка", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Установка заклепок", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Торцовка", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" }
       ],
@@ -330,22 +343,23 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 6-T2 BZ 180": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Установка заклепок", "detail": "Корпус", "thickness": null },
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Установка заклепок", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Раскрой", "detail": "Профиль Труба 80*40 Алюминий", "thickness": null },
@@ -359,24 +373,25 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
         { "operation": "Покраска", "detail": "Профиль Труба 80*40 Алюминий", "thickness": null },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 6-T2 BZ 200 Шторка": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Установка заклепок", "detail": "Корпус", "thickness": null },
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "Торцовка", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Установка заклепок", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Торцовка", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Раскрой", "detail": "Профиль Труба 80*40 Алюминий", "thickness": null },
@@ -390,23 +405,24 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
         { "operation": "Покраска", "detail": "Профиль Труба 80*40 Алюминий", "thickness": null },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 6-T2 BZ 220": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Установка заклепок", "detail": "Корпус", "thickness": null },
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Установка заклепок", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Раскрой", "detail": "Профиль Труба 80*40 Алюминий", "thickness": null },
@@ -420,24 +436,25 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
         { "operation": "Покраска", "detail": "Профиль Труба 80*40 Алюминий", "thickness": null },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 6-T2 BZ 220 Шторка х2": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Установка заклепок", "detail": "Корпус", "thickness": null },
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "Торцовка", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Установка заклепок", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Торцовка", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Раскрой", "detail": "Профиль Труба 80*40 Алюминий", "thickness": null },
@@ -451,24 +468,25 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
         { "operation": "Покраска", "detail": "Профиль Труба 80*40 Алюминий", "thickness": null },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 6-T2 BZ 240 Шторка": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Установка заклепок", "detail": "Корпус", "thickness": null },
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "Торцовка", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Установка заклепок", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Торцовка", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Раскрой", "detail": "Профиль Труба 80*40 Алюминий", "thickness": null },
@@ -482,24 +500,25 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
         { "operation": "Покраска", "detail": "Профиль Труба 80*40 Алюминий", "thickness": null },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 6-T2 BZ 240 Шторка х2": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Установка заклепок", "detail": "Корпус", "thickness": null },
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "Торцовка", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Установка заклепок", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Торцовка", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Раскрой", "detail": "Профиль Труба 80*40 Алюминий", "thickness": null },
@@ -513,23 +532,24 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
         { "operation": "Покраска", "detail": "Профиль Труба 80*40 Алюминий", "thickness": null },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 6T Накладной": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null },
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Точение", "detail": "Крепление", "thickness": null },
         { "operation": "Фрезеровка", "detail": "Крепление", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Нарезка резьбы", "detail": "Крепление", "thickness": null },
         { "operation": "Обработка", "detail": "Крышка Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Крышка Алюминий 3мм", "thickness": "3мм" },
@@ -542,7 +562,7 @@
         { "operation": "Раскрой", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Крепление", "thickness": null },
         { "operation": "Покраска", "detail": "Крышка Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" }
@@ -550,15 +570,15 @@
     },
     "XRAY 6T BT 120": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Установка заклепок", "detail": "Корпус", "thickness": null },
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Установка заклепок", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Обработка", "detail": "Крышка Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" }
@@ -571,7 +591,7 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Крышка Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
         { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
@@ -580,16 +600,16 @@
     },
     "XRAY 6T BT 140 Шторка": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Установка заклепок", "detail": "Корпус", "thickness": null },
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "Торцовка", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Установка заклепок", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Торцовка", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Обработка", "detail": "Крышка Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" }
@@ -602,7 +622,7 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Крышка Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
         { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
@@ -611,15 +631,15 @@
     },
     "XRAY 6T BZ 120": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Установка заклепок", "detail": "Корпус", "thickness": null },
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Установка заклепок", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Обработка", "detail": "Крышка Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
@@ -635,7 +655,7 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Крышка Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
         { "operation": "Покраска", "detail": "Профиль Труба 80*40 Алюминий", "thickness": null },
@@ -645,16 +665,16 @@
     },
     "XRAY 6T BZ 140 Шторка": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Установка заклепок", "detail": "Корпус", "thickness": null },
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "Торцовка", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Установка заклепок", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Торцовка", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Обработка", "detail": "Крышка Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
@@ -670,7 +690,7 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Крышка Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
         { "operation": "Покраска", "detail": "Профиль Труба 80*40 Алюминий", "thickness": null },
@@ -680,15 +700,15 @@
     },
     "XRAY 6T RGBW BT 150": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Установка заклепок", "detail": "Корпус", "thickness": null },
-        { "operation": "Обработка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Установка заклепок", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Обработка", "detail": "Крышка Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" }
@@ -701,7 +721,7 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Покраска", "detail": "Крышка Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
         { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
@@ -710,16 +730,16 @@
     },
     "XRAY 9": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 120мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 120мм Д16Т корпус", "thickness": null }
       ],
       "фрезерный": [
         { "operation": "Фрезеровка", "detail": "Поликарбонат Прозрачный 6мм", "thickness": "6мм" }
       ],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Зенковка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null }
+        { "operation": "Нарезка резьбы", "detail": "Пруток 120мм Д16Т корпус", "thickness": null },
+        { "operation": "Зенковка", "detail": "Пруток 120мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 120мм Д16Т корпус", "thickness": null }
       ],
       "лазерно-гибочный": [
         { "operation": "Раскрой", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
@@ -727,20 +747,21 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Пруток 120мм Д16Т корпус", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 9S": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 120мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 120мм Д16Т корпус", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Пруток 120мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 120мм Д16Т корпус", "thickness": null },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" }
       ],
@@ -751,20 +772,21 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Пруток 120мм Д16Т корпус", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 12S": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 130мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 130мм Д16Т корпус", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Пруток 130мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 130мм Д16Т корпус", "thickness": null },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 4мм", "thickness": "4мм" },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 4мм", "thickness": "4мм" }
       ],
@@ -775,23 +797,24 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Пруток 130мм Д16Т корпус", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 18": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 150мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 150мм Д16Т корпус", "thickness": null }
       ],
       "фрезерный": [
         { "operation": "Фрезеровка", "detail": "Поликарбонат Прозрачный 6мм", "thickness": "6мм" }
       ],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "Зенковка", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null }
+        { "operation": "Нарезка резьбы", "detail": "Пруток 150мм Д16Т корпус", "thickness": null },
+        { "operation": "Зенковка", "detail": "Пруток 150мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 150мм Д16Т корпус", "thickness": null }
       ],
       "лазерно-гибочный": [
         { "operation": "Раскрой", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
@@ -799,18 +822,19 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2-3мм", "thickness": "2-3мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Пруток 150мм Д16Т корпус", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2-3мм", "thickness": "2-3мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2-3мм", "thickness": "2-3мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2-3мм", "thickness": "2-3мм" }
       ]
     },
     "XRAY 18S": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 150мм Д16Т корпус", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 150мм Д16Т корпус", "thickness": null },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 4мм", "thickness": "4мм" },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 4мм", "thickness": "4мм" }
       ],
@@ -821,9 +845,10 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2-3мм", "thickness": "2-3мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Пруток 150мм Д16Т корпус", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2-3мм", "thickness": "2-3мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2-3мм", "thickness": "2-3мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2-3мм", "thickness": "2-3мм" }
       ]
     },
     "XRAY 36": {
@@ -847,7 +872,8 @@
       "полимерный": [
         { "operation": "Покраска", "detail": "Корпус", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XRAY 36S": {
@@ -871,21 +897,22 @@
       "полимерный": [
         { "operation": "Покраска", "detail": "Корпус", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
-        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
+        { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
+        { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "XSLOPE": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null },
-        { "operation": "Точение", "detail": "Модуль", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Модуль", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 60мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 60мм Д16Т корпус", "thickness": null },
+        { "operation": "Точение", "detail": "Пруток 55мм Д16Т модуль", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 55мм Д16Т модуль", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "Нарезка резьбы", "detail": "Модуль", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Пруток 60мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 60мм Д16Т корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Пруток 55мм Д16Т модуль", "thickness": null },
         { "operation": "Зенковка", "detail": "Пластина AISI 1мм", "thickness": "1мм" }
       ],
       "лазерно-гибочный": [
@@ -895,77 +922,79 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 1,5мм", "thickness": "1,5мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
-        { "operation": "Покраска", "detail": "Модуль", "thickness": null },
+        { "operation": "Покраска", "detail": "Пруток 60мм Д16Т корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Пруток 55мм Д16Т модуль", "thickness": null },
         { "operation": "Покраска", "detail": "Кронштейн AISI 1,5мм", "thickness": "1,5мм" }
       ]
     },
     "XPIXEL BIN v.1": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 90мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 90мм Д16Т корпус", "thickness": null },
+        { "operation": "Точение", "detail": "Пруток 110мм Д16Т Кольцо", "thickness": null }
       ],
       "фрезерный": [
-        { "operation": "Кабельный ввод", "detail": "Корпус", "thickness": null },
+        { "operation": "Кабельный ввод", "detail": "Пруток 90мм Д16Т корпус", "thickness": null },
         { "operation": "Фрезеровка", "detail": "Plexiglas 2мм опал 30%", "thickness": "2мм" }
       ],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null }
+        { "operation": "Нарезка резьбы", "detail": "Пруток 90мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 90мм Д16Т корпус", "thickness": null }
       ],
       "лазерно-гибочный": [],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null }
+        { "operation": "Покраска", "detail": "Пруток 90мм Д16Т корпус", "thickness": null }
       ]
     },
     "XPIXEL BIN v.2": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 90мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 90мм Д16Т корпус", "thickness": null },
+        { "operation": "Точение", "detail": "Пруток 110мм Д16Т кольцо", "thickness": null }
       ],
       "фрезерный": [
         { "operation": "Фрезеровка", "detail": "Plexiglas 2мм опал 30%", "thickness": "2мм" }
       ],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null }
+        { "operation": "Нарезка резьбы", "detail": "Пруток 90мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 90мм Д16Т корпус", "thickness": null }
       ],
       "лазерно-гибочный": [],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null }
+        { "operation": "Покраска", "detail": "Пруток 90мм Д16Т корпус", "thickness": null }
       ]
     },
     "XPIXEL BIN v.3": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 90мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 90мм Д16Т корпус", "thickness": null }
       ],
       "фрезерный": [
-        { "operation": "Кабельный ввод", "detail": "Корпус", "thickness": null },
+        { "operation": "Кабельный ввод", "detail": "Пруток 90мм Д16Т корпус", "thickness": null },
         { "operation": "Фрезеровка", "detail": "Plexiglas 2мм опал 30%", "thickness": "2мм" }
       ],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null }
+        { "operation": "Нарезка резьбы", "detail": "Пруток 90мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 90мм Д16Т корпус", "thickness": null }
       ],
       "лазерно-гибочный": [
         { "operation": "Раскрой", "detail": "Кронштейн AISI 1,5мм", "thickness": "1,5мм" },
         { "operation": "Гибка", "detail": "Кронштейн AISI 1,5мм", "thickness": "1,5мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Пруток 90мм Д16Т корпус", "thickness": null },
         { "operation": "Покраска", "detail": "Кронштейн AISI 1,5мм", "thickness": "1,5мм" }
       ]
     },
     "XPIXEL OVHD": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 50мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 90мм Д16Т корпус", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Пруток 50мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 90мм Д16Т корпус", "thickness": null },
         { "operation": "Штамповка", "detail": "Чаша Алюминий 1,2мм", "thickness": "1,2мм" },
         { "operation": "Сверление", "detail": "Чаша Алюминий 1,2мм", "thickness": "1,2мм" }
       ],
@@ -973,36 +1002,31 @@
         { "operation": "Раскрой", "detail": "Чаша Алюминий 1,2мм", "thickness": "1,2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Пруток 50мм Д16Т корпус", "thickness": null },
         { "operation": "Покраска", "detail": "Чаша Алюминий 1,2мм", "thickness": "1,2мм" }
       ]
     },
     "XDISK": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null },
-        { "operation": "Точение", "detail": "Крышка", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Крышка", "thickness": null },
-        { "operation": "Точение", "detail": "Стойка", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Стойка", "thickness": null },
-        { "operation": "Точение", "detail": "Кронштейн", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Кронштейн", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток  90мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток  90мм Д16Т корпус", "thickness": null },
+        { "operation": "Точение", "detail": "Пруток Шестигранник Ал 25мм стойка", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток Шестигранник Ал 25мм стойка", "thickness": null },
+        { "operation": "Точение", "detail": "Пруток 75мм Д16Т крышка", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 75мм Д16Т крышка", "thickness": null }
       ],
       "фрезерный": [
         { "operation": "Фрезеровка", "detail": "Держатель кабеля ПВХ 10мм", "thickness": "10мм" }
       ],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
-        { "operation": "Нарезка резьбы", "detail": "Крышка", "thickness": null },
-        { "operation": "УВ крышки", "detail": "Крышка", "thickness": null },
-        { "operation": "Нарезка резьбы", "detail": "Стойка", "thickness": null }
+        { "operation": "Нарезка резьбы", "detail": "Пруток  90мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток  90мм Д16Т корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Пруток Шестигранник Ал 25мм стойка", "thickness": null }
       ],
       "лазерно-гибочный": [],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
-        { "operation": "Покраска", "detail": "Крышка", "thickness": null },
-        { "operation": "Покраска", "detail": "Кронштейн", "thickness": null }
+        { "operation": "Покраска", "detail": "Пруток  90мм Д16Т корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Пруток 75мм Д16Т крышка", "thickness": null }
       ]
     },
     "XPOINT OVHD": {
@@ -1020,37 +1044,38 @@
     },
     "XSPOT": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null },
-        { "operation": "Точение", "detail": "Основание платы", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Основание платы", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток 55мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 55мм Д16Т корпус", "thickness": null },
+        { "operation": "Точение", "detail": "Пруток 40мм Д16Т основание платы", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток 40мм Д16Т основание платы", "thickness": null }
       ],
       "фрезерный": [
         { "operation": "Фрезеровка", "detail": "Фоновая заглушка GEBAU 2мм черный", "thickness": "2мм" }
       ],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null }
+        { "operation": "Нарезка резьбы", "detail": "Пруток 55мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток 55мм Д16Т корпус", "thickness": null }
       ],
       "лазерно-гибочный": [
         { "operation": "Раскрой", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Пруток 55мм Д16Т корпус", "thickness": null },
         { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
         { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
     "ACENTO 3T": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Точение", "detail": "Пруток 75мм Д16Т втулка", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Профиль СЧ4435", "thickness": null },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 3мм", "thickness": "3мм" }
       ],
@@ -1061,7 +1086,8 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль СЧ4435", "thickness": null },
+        { "operation": "Покраска", "detail": "Пруток 75мм Д16Т втулка", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
         { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
         { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
@@ -1069,13 +1095,13 @@
     },
     "ACENTO 4": {
       "токарно-фрезерный": [
-        { "operation": "Точение", "detail": "Корпус", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Корпус", "thickness": null }
+        { "operation": "Точение", "detail": "Пруток  100мм Д16Т корпус", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Пруток  100мм Д16Т корпус", "thickness": null }
       ],
       "фрезерный": [],
       "слесарный": [
-        { "operation": "Нарезка резьбы", "detail": "Корпус", "thickness": null },
-        { "operation": "УВ корпуса", "detail": "Корпус", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Пруток  100мм Д16Т корпус", "thickness": null },
+        { "operation": "УВ корпуса", "detail": "Пруток  100мм Д16Т корпус", "thickness": null },
         { "operation": "Нарезка резьбы", "detail": "Основание платы Алюминий 4мм", "thickness": "4мм" },
         { "operation": "Обработка", "detail": "Основание платы Алюминий 4мм", "thickness": "4мм" }
       ],
@@ -1086,7 +1112,7 @@
         { "operation": "Гибка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ],
       "полимерный": [
-        { "operation": "Покраска", "detail": "Корпус", "thickness": null },
+        { "operation": "Покраска", "detail": "Пруток  100мм Д16Т корпус", "thickness": null },
         { "operation": "Покраска", "detail": "Фоновая заглушка Сталь 0,5мм", "thickness": "0,5мм" },
         { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
         { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
@@ -1435,9 +1461,9 @@
         { "operation": "Раскрой", "detail": "Профиль НПС 2997", "thickness": null },
         { "operation": "Сверловка", "detail": "Профиль НПС 2997", "thickness": null },
         { "operation": "Обработка", "detail": "Профиль НПС 2997", "thickness": null },
-        { "operation": "Раскрой", "detail": "Профиль НПС 2994", "thickness": null },
-        { "operation": "Сверловка", "detail": "Профиль НПС 2994", "thickness": null },
-        { "operation": "Обработка", "detail": "Профиль НПС 2994", "thickness": null },
+        { "operation": "Раскрой", "detail": "Профиль планка НПС 2994", "thickness": null },
+        { "operation": "Сверловка", "detail": "Профиль планка НПС 2994", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль планка НПС 2994", "thickness": null },
         { "operation": "Зенковка", "detail": "Заглушка левая Алюминий 8мм", "thickness": "8мм" },
         { "operation": "Обработка", "detail": "Заглушка левая Алюминий 8мм", "thickness": "8мм" },
         { "operation": "Зенковка", "detail": "Заглушка правая Алюминий 8мм", "thickness": "8мм" },
@@ -1449,7 +1475,7 @@
       ],
       "полимерный": [
         { "operation": "Покраска", "detail": "Профиль НПС 2997", "thickness": null },
-        { "operation": "Покраска", "detail": "Профиль НПС 2994", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль планка НПС 2994", "thickness": null },
         { "operation": "Покраска", "detail": "Заглушка левая Алюминий 8мм", "thickness": "8мм" },
         { "operation": "Покраска", "detail": "Заглушка правая Алюминий 8мм", "thickness": "8мм" },
         { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
@@ -1463,9 +1489,9 @@
         { "operation": "Раскрой", "detail": "Профиль НПС 2993", "thickness": null },
         { "operation": "Сверловка", "detail": "Профиль НПС 2993", "thickness": null },
         { "operation": "Обработка", "detail": "Профиль НПС 2993", "thickness": null },
-        { "operation": "Раскрой", "detail": "Профиль НПС 2994", "thickness": null },
-        { "operation": "Сверловка", "detail": "Профиль НПС 2994", "thickness": null },
-        { "operation": "Обработка", "detail": "Профиль НПС 2994", "thickness": null }
+        { "operation": "Раскрой", "detail": "Профиль планка НПС 2994", "thickness": null },
+        { "operation": "Сверловка", "detail": "Профиль планка НПС 2994", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль планка НПС 2994", "thickness": null }
       ],
       "лазерно-гибочный": [
         { "operation": "Раскрой", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
@@ -1473,7 +1499,7 @@
       ],
       "полимерный": [
         { "operation": "Покраска", "detail": "Профиль НПС 2993", "thickness": null },
-        { "operation": "Покраска", "detail": "Профиль НПС 2994", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль планка НПС 2994", "thickness": null },
         { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
         { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
@@ -1482,52 +1508,52 @@
       "токарно-фрезерный": [],
       "фрезерный": [
         { "operation": "Фрезеровка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
-        { "operation": "Фрезеровка", "detail": "Заглушка правая Алюминий 3мм", "thickness": "3мм" }
+        { "operation": "Фрезеровка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" }
       ],
       "слесарный": [
         { "operation": "Раскрой", "detail": "Профиль МП 1928 XGRAY", "thickness": null },
         { "operation": "Обработка", "detail": "Профиль МП 1928 XGRAY", "thickness": null },
-        { "operation": "Раскрой", "detail": "Профиль НПС 2999 (XGRAY/XYELLOW)", "thickness": null },
-        { "operation": "Обработка", "detail": "Профиль НПС 2999 (XGRAY/XYELLOW)", "thickness": null },
-        { "operation": "Раскрой", "detail": "Профиль СЧ 4446 Планка", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Профиль СЧ 4446 Планка", "thickness": null },
-        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ 4446 Планка", "thickness": null },
-        { "operation": "Обработка", "detail": "Профиль СЧ 4446 Планка", "thickness": null },
+        { "operation": "Раскрой", "detail": "Профиль модуль НПС 2999 (XGRAY/XYELLOW)", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль модуль НПС 2999 (XGRAY/XYELLOW)", "thickness": null },
+        { "operation": "Раскрой", "detail": "Профиль планка СЧ 4446", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль планка СЧ 4447", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль планка СЧ 4448", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль планка СЧ 4449", "thickness": null },
         { "operation": "Зенковка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Обработка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
-        { "operation": "Зенковка", "detail": "Заглушка правая Алюминий 3мм", "thickness": "3мм" },
-        { "operation": "Обработка", "detail": "Заглушка правая Алюминий 3мм", "thickness": "3мм" },
-        { "operation": "Зенковка", "detail": "Заглушка модуля AISI 1мм", "thickness": "1мм" }
+        { "operation": "Зенковка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
+        { "operation": "Обработка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
+        { "operation": "Зенковка", "detail": "Заглушка молуля AISI 1мм", "thickness": "1мм" }
       ],
       "лазерно-гибочный": [
-        { "operation": "Раскрой", "detail": "Заглушка модуля AISI 1мм", "thickness": "1мм" }
+        { "operation": "Раскрой", "detail": "Заглушка молуля AISI 1мм", "thickness": "1мм" }
       ],
       "полимерный": [
         { "operation": "Покраска", "detail": "Профиль МП 1928 XGRAY", "thickness": null },
-        { "operation": "Покраска", "detail": "Профиль СЧ 4446 Планка", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль планка СЧ 4446", "thickness": null },
         { "operation": "Покраска", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
-        { "operation": "Покраска", "detail": "Заглушка правая Алюминий 3мм", "thickness": "3мм" }
+        { "operation": "Покраска", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" }
       ]
     },
     "XGRAY v.2": {
       "токарно-фрезерный": [],
       "фрезерный": [
         { "operation": "Фрезеровка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
-        { "operation": "Фрезеровка", "detail": "Заглушка правая Алюминий 3мм", "thickness": "3мм" }
+        { "operation": "Фрезеровка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" }
       ],
       "слесарный": [
         { "operation": "Раскрой", "detail": "Профиль МП 1928 XGRAY", "thickness": null },
         { "operation": "Обработка", "detail": "Профиль МП 1928 XGRAY", "thickness": null },
-        { "operation": "Раскрой", "detail": "Профиль НПС 2999 (XGRAY/XYELLOW)", "thickness": null },
-        { "operation": "Обработка", "detail": "Профиль НПС 2999 (XGRAY/XYELLOW)", "thickness": null },
+        { "operation": "Раскрой", "detail": "Профиль модуль НПС 2999 (XGRAY/XYELLOW)", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль модуль НПС 2999 (XGRAY/XYELLOW)", "thickness": null },
         { "operation": "Зенковка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Обработка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
-        { "operation": "Зенковка", "detail": "Заглушка правая Алюминий 3мм", "thickness": "3мм" },
-        { "operation": "Обработка", "detail": "Заглушка правая Алюминий 3мм", "thickness": "3мм" },
-        { "operation": "Зенковка", "detail": "Заглушка модуля AISI 1мм", "thickness": "1мм" }
+        { "operation": "Обработка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
+        { "operation": "Зенковка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
+        { "operation": "Зенковка", "detail": "Заглушка молуля AISI 1мм", "thickness": "1мм" }
       ],
       "лазерно-гибочный": [
-        { "operation": "Раскрой", "detail": "Заглушка модуля AISI 1мм", "thickness": "1мм" },
+        { "operation": "Раскрой", "detail": "Заглушка молуля AISI 1мм", "thickness": "1мм" },
         { "operation": "Раскрой", "detail": "Лира AISI 1,5мм", "thickness": "1,5мм" },
         { "operation": "Гибка", "detail": "Лира AISI 1,5мм", "thickness": "1,5мм" },
         { "operation": "Раскрой", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
@@ -1536,7 +1562,7 @@
       "полимерный": [
         { "operation": "Покраска", "detail": "Профиль МП 1928 XGRAY", "thickness": null },
         { "operation": "Покраска", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
-        { "operation": "Покраска", "detail": "Заглушка правая Алюминий 3мм", "thickness": "3мм" },
+        { "operation": "Покраска", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Голтовка", "detail": "Лира AISI 1,5мм", "thickness": "1,5мм" },
         { "operation": "Покраска", "detail": "Лира AISI 1,5мм", "thickness": "1,5мм" },
         { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
@@ -1548,7 +1574,7 @@
       "фрезерный": [
         { "operation": "Кабельный ввод", "detail": "Профиль НПС 2966", "thickness": null },
         { "operation": "Фрезеровка", "detail": "Заглушка Алюминий 3мм", "thickness": "3мм" },
-        { "operation": "Фрезеровка", "detail": "Вставка ПВХ 3мм", "thickness": "3мм" }
+        { "operation": "Фрезеровка", "detail": "Вствка ПВХ 3мм", "thickness": "3мм" }
       ],
       "слесарный": [
         { "operation": "Оклейка", "detail": "Профиль НПС 2966", "thickness": null },
@@ -1578,16 +1604,16 @@
       "токарно-фрезерный": [],
       "фрезерный": [
         { "operation": "Фрезеровка", "detail": "Заглушка Алюминий 3мм", "thickness": "3мм" },
-        { "operation": "Фрезеровка", "detail": "Вставка ПВХ 3мм", "thickness": "3мм" }
+        { "operation": "Фрезеровка", "detail": "Вствка ПВХ 3мм", "thickness": "3мм" }
       ],
       "слесарный": [
         { "operation": "Оклейка", "detail": "Профиль КП 453785", "thickness": null },
         { "operation": "Раскрой", "detail": "Профиль КП 453785", "thickness": null },
         { "operation": "Фрезеровка", "detail": "Профиль КП 453785", "thickness": null },
         { "operation": "Обработка", "detail": "Профиль КП 453785", "thickness": null },
-        { "operation": "Раскрой", "detail": "Профиль КП 453784", "thickness": null },
-        { "operation": "Сверловка", "detail": "Профиль КП 453784", "thickness": null },
-        { "operation": "Обработка", "detail": "Профиль КП 453784", "thickness": null },
+        { "operation": "Раскрой", "detail": "Профиль модуль КП 453784", "thickness": null },
+        { "operation": "Сверловка", "detail": "Профиль модуль КП 453784", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль модуль КП 453784", "thickness": null },
         { "operation": "Зенковка", "detail": "Заглушка Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Обработка", "detail": "Заглушка Алюминий 3мм", "thickness": "3мм" }
       ],
@@ -1610,7 +1636,7 @@
       "токарно-фрезерный": [],
       "фрезерный": [
         { "operation": "Фрезеровка", "detail": "Заглушка Алюминий 3мм", "thickness": "3мм" },
-        { "operation": "Фрезеровка", "detail": "Вставка ПВХ 3мм", "thickness": "3мм" }
+        { "operation": "Фрезеровка", "detail": "Вствка ПВХ 3мм", "thickness": "3мм" }
       ],
       "слесарный": [
         { "operation": "Оклейка", "detail": "Профиль НП 455015", "thickness": null },
@@ -1641,7 +1667,7 @@
     "XSTRONG": {
       "токарно-фрезерный": [],
       "фрезерный": [
-        { "operation": "Фрезеровка", "detail": "Вставка ПВХ 3мм", "thickness": "3мм" }
+        { "operation": "Фрезеровка", "detail": "Вствка ПВХ 3мм", "thickness": "3мм" }
       ],
       "слесарный": [
         { "operation": "Оклейка", "detail": "Профиль ТПК 004S", "thickness": null },
@@ -1880,7 +1906,7 @@
     "XFOCUS": {
       "токарно-фрезерный": [],
       "фрезерный": [
-        { "operation": "Фрезеровка", "detail": "Вставка ПВХ 3мм", "thickness": "3мм" }
+        { "operation": "Фрезеровка", "detail": "Вствка ПВХ 3мм", "thickness": "3мм" }
       ],
       "слесарный": [
         { "operation": "Оклейка", "detail": "Профиль ТПК 004S", "thickness": null },
@@ -1888,10 +1914,10 @@
         { "operation": "Фрезеровка", "detail": "Профиль ТПК 004S", "thickness": null },
         { "operation": "Сверловка", "detail": "Профиль ТПК 004S", "thickness": null },
         { "operation": "Обработка", "detail": "Профиль ТПК 004S", "thickness": null },
-        { "operation": "Обработка", "detail": "Вставка Алюминий 3мм", "thickness": "3мм" }
+        { "operation": "Обработка", "detail": "Вставка Алюминий3мм", "thickness": "3мм" }
       ],
       "лазерно-гибочный": [
-        { "operation": "Раскрой", "detail": "Вставка Алюминий 3мм", "thickness": "3мм" },
+        { "operation": "Раскрой", "detail": "Вставка Алюминий3мм", "thickness": "3мм" },
         { "operation": "Раскрой", "detail": "Лира AISI 1,5мм", "thickness": "1,5мм" },
         { "operation": "Гибка", "detail": "Лира AISI 1,5мм", "thickness": "1,5мм" },
         { "operation": "Раскрой", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
@@ -1913,21 +1939,21 @@
       "слесарный": [
         { "operation": "Раскрой", "detail": "Профиль МП 1928 XGRAY", "thickness": null },
         { "operation": "Обработка", "detail": "Профиль МП 1928 XGRAY", "thickness": null },
-        { "operation": "Раскрой", "detail": "Профиль НПС 2999 (XGRAY/XYELLOW)", "thickness": null },
-        { "operation": "Обработка", "detail": "Профиль НПС 2999 (XGRAY/XYELLOW)", "thickness": null },
-        { "operation": "Раскрой", "detail": "Профиль СЧ 4446 Планка", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Профиль СЧ 4446 Планка", "thickness": null },
-        { "operation": "Нарезка резьбы", "detail": "Профиль СЧ 4446 Планка", "thickness": null },
-        { "operation": "Обработка", "detail": "Профиль СЧ 4446 Планка", "thickness": null },
+        { "operation": "Раскрой", "detail": "Профиль модуль НПС 2999 (XGRAY/XYELLOW)", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль модуль НПС 2999 (XGRAY/XYELLOW)", "thickness": null },
+        { "operation": "Раскрой", "detail": "Профиль планка СЧ 4446", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль планка СЧ 4446", "thickness": null },
+        { "operation": "Нарезка резьбы", "detail": "Профиль планка СЧ 4446", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль планка СЧ 4446", "thickness": null },
         { "operation": "Зенковка", "detail": "Заглушка Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Обработка", "detail": "Заглушка Алюминий 3мм", "thickness": "3мм" }
       ],
       "лазерно-гибочный": [
-        { "operation": "Раскрой", "detail": "Заглушка модуля AISI 1мм", "thickness": "1мм" }
+        { "operation": "Раскрой", "detail": "Заглушка молуля AISI 1мм", "thickness": "1мм" }
       ],
       "полимерный": [
         { "operation": "Покраска", "detail": "Профиль МП 1928 XGRAY", "thickness": null },
-        { "operation": "Покраска", "detail": "Профиль СЧ 4446 Планка", "thickness": null },
+        { "operation": "Покраска", "detail": "Профиль планка СЧ 4446", "thickness": null },
         { "operation": "Покраска", "detail": "Заглушка Алюминий 3мм", "thickness": "3мм" }
       ]
     },
@@ -1940,9 +1966,11 @@
         { "operation": "Раскрой", "detail": "Профиль КП 453434", "thickness": null },
         { "operation": "Обработка", "detail": "Профиль КП 453434", "thickness": null },
         { "operation": "Раскрой", "detail": "Профиль рассеиватель XLINE", "thickness": null },
-        { "operation": "Раскрой", "detail": "Профиль КП 453436", "thickness": null },
-        { "operation": "Фрезеровка", "detail": "Профиль КП 453436", "thickness": null },
-        { "operation": "Обработка", "detail": "Профиль КП 453436", "thickness": null },
+        { "operation": "Раскрой", "detail": "Профиль планка AYPC.F50.0601F", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль планка AYPC.F50.0601F", "thickness": null },
+        { "operation": "Раскрой", "detail": "Профиль модуль КП 453436", "thickness": null },
+        { "operation": "Фрезеровка", "detail": "Профиль модуль КП 453436", "thickness": null },
+        { "operation": "Обработка", "detail": "Профиль модуль КП 453436", "thickness": null },
         { "operation": "Зенковка", "detail": "Заглушка Алюминий 4мм", "thickness": "4мм" },
         { "operation": "Обработка", "detail": "Заглушка Алюминий 4мм", "thickness": "4мм" }
       ],
