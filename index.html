@@ -3251,18 +3251,105 @@ body.light-theme header .btn-primary {
 
         // ============== СТАТИСТИКА ПО ГРУППЕ (материалы) ==============
         
-        function getSiteNameShort(siteKey) {
-    const names = {
-        'tokarniy': '🔧 Токарный',
-        'slesarniy': '🔨 Слесарный',
-        'frezerniy': '⚙️ Фрезерный',
-        'lazerno': '✨ Лазерно-гибочный',
-        'polimerniy': '🎨 Полимерный'
-    };
-    return names[siteKey] || siteKey;
+        function getAllGroupTasks(orderId) {
+    const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+    const allTasks = [];
+    
+    sites.forEach(site => {
+        const storageKey = `tasks_${site}`;
+        const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        const groupTasks = tasks.filter(t => t.orderId == orderId);
+        groupTasks.forEach(task => {
+            allTasks.push({ ...task, site });
+        });
+    });
+    
+    return allTasks;
 }
 
-function showTimeStats(orderId) {
+function collectWorkStats(allTasks) {
+    const workStats = {};
+    
+    allTasks.forEach(task => {
+        const opKey = `${task.site}_${task.operation}_${task.detail || ''}`;
+        if (!workStats[opKey]) {
+            workStats[opKey] = {
+                operation: task.operation,
+                detail: task.detail || '-',
+                site: task.site,
+                siteName: siteNamesFull[task.site] || task.site,
+                totalTime: 0,
+                count: 0,
+                avgTime: 0,
+                minTime: Infinity,
+                maxTime: 0,
+                completedCount: 0,
+                totalQuantity: task.totalQuantity || 1,
+                completedQuantity: task.completedQuantity || 0
+            };
+        }
+        
+        if (task.status === 'completed') {
+            workStats[opKey].completedCount++;
+        }
+        
+        if (task.executors && task.executors.length > 0) {
+            task.executors.forEach(exec => {
+                if (exec.workTime && exec.workTime > 0) {
+                    workStats[opKey].totalTime += exec.workTime;
+                    workStats[opKey].count++;
+                    workStats[opKey].minTime = Math.min(workStats[opKey].minTime, exec.workTime);
+                    workStats[opKey].maxTime = Math.max(workStats[opKey].maxTime, exec.workTime);
+                }
+            });
+        }
+    });
+    
+    Object.values(workStats).forEach(stat => {
+        if (stat.count > 0) {
+            stat.avgTime = Math.round(stat.totalTime / stat.count);
+        } else {
+            stat.avgTime = 0;
+            stat.minTime = 0;
+            stat.maxTime = 0;
+        }
+    });
+    
+    return workStats;
+}
+
+function collectSiteStats(allTasks, workStats) {
+    const siteStats = {};
+    
+    allTasks.forEach(task => {
+        if (!siteStats[task.site]) {
+            siteStats[task.site] = {
+                siteKey: task.site,
+                siteName: siteNamesFull[task.site] || task.site,
+                totalTasks: 0,
+                completedTasks: 0,
+                totalTime: 0,
+                operations: []
+            };
+        }
+        
+        siteStats[task.site].totalTasks++;
+        if (task.status === 'completed') {
+            siteStats[task.site].completedTasks++;
+        }
+    });
+    
+    Object.values(workStats).forEach(stat => {
+        if (siteStats[stat.site]) {
+            siteStats[stat.site].totalTime += stat.totalTime;
+            siteStats[stat.site].operations.push(stat);
+        }
+    });
+    
+    return siteStats;
+}
+
+function showGroupStats(orderId) {
     const orders = loadOrdersFromStorage();
     const order = orders.find(o => o.id == orderId);
     if (!order) {
@@ -3270,277 +3357,165 @@ function showTimeStats(orderId) {
         return;
     }
     
-    const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+    const allTasks = getAllGroupTasks(orderId);
+    const workStats = collectWorkStats(allTasks);
+    const siteStats = collectSiteStats(allTasks, workStats);
     
-    // Структура для хранения данных по каждому изделию
-    const itemsData = {};
+    const totalOperations = allTasks.length;
+    const completedOperations = allTasks.filter(t => t.status === 'completed').length;
+    const totalWorkTime = Object.values(workStats).reduce((sum, s) => sum + s.totalTime, 0);
+    const totalWorkHours = Math.round(totalWorkTime / 60 * 10) / 10;
     
-    // Проходим по каждому изделию в заказе
-    order.items.forEach((item, itemIndex) => {
-        const itemKey = `${item.product}_${item.size?.name || 'Стандартный'}`;
-        
-        if (!itemsData[itemKey]) {
-            itemsData[itemKey] = {
-                product: item.product,
-                size: item.size?.name || 'Стандартный',
-                quantity: item.size?.quantity || 1,
-                ral: item.ral || '-',
-                texture: item.texture || '-',
-                details: item.details || [],
-                sitesData: {}
-            };
-        }
-        
-        // Инициализируем участки для этого изделия
-        sites.forEach(site => {
-            if (!itemsData[itemKey].sitesData[site]) {
-                itemsData[itemKey].sitesData[site] = {
-                    siteName: getSiteNameShort(site),
-                    operations: {}
-                };
-            }
-        });
-        
-        // Собираем задачи для этого изделия
-        sites.forEach(site => {
-            const storageKey = `tasks_${site}`;
-            const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            const itemTasks = tasks.filter(t => t.orderId == orderId && t.itemIndex == itemIndex);
+    let statsHtml = `
+        <div style="padding: 20px;">
+            <div style="margin-bottom: 20px; border-bottom: 2px solid #ff3b3b; padding-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h2 style="color: #ff3b3b; margin: 0;">📊 СТАТИСТИКА ПО ГРУППЕ</h2>
+                        <h3 style="margin: 5px 0 0 0;">${escapeHtml(order.groupName)}</h3>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 14px; color: #a0a0a0;">Заказ №${order.number || '---'}</div>
+                        <div style="font-size: 12px; color: #a0a0a0;">Дата: ${order.date}</div>
+                    </div>
+                </div>
+            </div>
             
-            itemTasks.forEach(task => {
-                const opKey = `${task.operation}_${task.detail || ''}`;
-                
-                if (!itemsData[itemKey].sitesData[site].operations[opKey]) {
-                    itemsData[itemKey].sitesData[site].operations[opKey] = {
-                        operation: task.operation,
-                        detail: task.detail || '-',
-                        records: []
-                    };
-                }
-                
-                // Добавляем записи о времени от исполнителей
-                if (task.executors && task.executors.length > 0) {
-                    task.executors.forEach(executor => {
-                        if (executor.startTime && executor.endTime && executor.workTime > 0) {
-                            const start = new Date(executor.startTime);
-                            const end = new Date(executor.endTime);
-                            const workSeconds = Math.round((end - start) / 1000);
-                            
-                            itemsData[itemKey].sitesData[site].operations[opKey].records.push({
-                                executor: executor.name,
-                                quantity: executor.quantity || 1,
-                                startTime: start,
-                                endTime: end,
-                                workSeconds: workSeconds
-                            });
-                        }
-                    });
-                }
-            });
-        });
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;">
+                <div style="background: #15191f; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid #2a2f38;">
+                    <div style="font-size: 28px; font-weight: 700; color: #ff9800;">${totalOperations}</div>
+                    <div style="font-size: 11px; color: #a0a0a0;">Всего операций</div>
+                </div>
+                <div style="background: #15191f; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid #2a2f38;">
+                    <div style="font-size: 28px; font-weight: 700; color: #4caf50;">${completedOperations}</div>
+                    <div style="font-size: 11px; color: #a0a0a0;">Выполнено</div>
+                </div>
+                <div style="background: #15191f; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid #2a2f38;">
+                    <div style="font-size: 28px; font-weight: 700; color: #00d4ff;">${totalWorkTime}</div>
+                    <div style="font-size: 11px; color: #a0a0a0;">Общее время (мин)</div>
+                </div>
+                <div style="background: #15191f; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid #2a2f38;">
+                    <div style="font-size: 28px; font-weight: 700; color: #9b59b6;">${totalWorkHours}</div>
+                    <div style="font-size: 11px; color: #a0a0a0;">Общее время (часы)</div>
+                </div>
+            </div>
+            
+            <div style="overflow-x: auto; margin-bottom: 25px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #232830; border-bottom: 2px solid #2a2f38;">
+                            <th style="padding: 10px; text-align: left;">Участок</th>
+                            <th style="padding: 10px; text-align: center;">Операций</th>
+                            <th style="padding: 10px; text-align: center;">Выполнено</th>
+                            <th style="padding: 10px; text-align: center;">Прогресс</th>
+                            <th style="padding: 10px; text-align: center;">Время (мин)</th>
+                            <th style="padding: 10px; text-align: center;">Время (часы)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+    
+    const sortedSites = Object.values(siteStats).sort((a, b) => b.totalTime - a.totalTime);
+    
+    sortedSites.forEach(site => {
+        const progress = site.totalTasks > 0 ? Math.round((site.completedTasks / site.totalTasks) * 100) : 0;
+        const siteHours = Math.round(site.totalTime / 60 * 10) / 10;
+        
+        statsHtml += `
+            <tr style="border-bottom: 1px solid #2a2f38;">
+                <td style="padding: 8px;"><strong>${site.siteName}</strong></td>
+                <td style="padding: 8px; text-align: center;">${site.totalTasks}</td>
+                <td style="padding: 8px; text-align: center; color: #4caf50;">${site.completedTasks}</td>
+                <td style="padding: 8px; text-align: center;">
+                    <div style="background: #2a2f38; border-radius: 10px; height: 20px; width: 100px; display: inline-block; overflow: hidden;">
+                        <div style="background: #4caf50; width: ${progress}%; height: 100%; border-radius: 10px;"></div>
+                    </div>
+                    <span style="margin-left: 8px; font-size: 11px;">${progress}%</span>
+                </td>
+                <td style="padding: 8px; text-align: center; color: #00d4ff;">${site.totalTime}</td>
+                <td style="padding: 8px; text-align: center;">${siteHours}</td>
+            </tr>
+        `;
     });
     
-    // Проверяем, есть ли данные
-    let hasData = false;
-    for (const itemKey in itemsData) {
-        for (const site in itemsData[itemKey].sitesData) {
-            if (Object.keys(itemsData[itemKey].sitesData[site].operations).length > 0) {
-                hasData = true;
-                break;
-            }
-        }
-    }
-    
-    if (!hasData) {
-        alert('📭 Нет данных о времени выполнения операций');
-        return;
-    }
-    
-    // Формируем HTML
-    let html = `
-        <div style="padding: 20px;">
-            <div style="margin-bottom: 20px; border-bottom: 2px solid #00bcd4; padding-bottom: 15px;">
-                <h2 style="color: #00bcd4; margin: 0;">⏱️ ОТЧЁТ ПО ВРЕМЕНИ ВЫПОЛНЕНИЯ</h2>
-                <h3 style="margin: 5px 0 0 0;">${escapeHtml(order.groupName)}</h3>
-                <div style="font-size: 12px; color: #a0a0a0; margin-top: 5px;">Заказ №${order.number || '---'} | Дата: ${order.date}</div>
+    statsHtml += `
+                    </tbody>
+                </table>
             </div>
-    `;
-    
-    // Выводим данные по каждому изделию
-    for (const itemKey in itemsData) {
-        const item = itemsData[itemKey];
-        
-        // Профили и детали
-        const profiles = item.details.filter(d => d.type === 'profile');
-        const details = item.details.filter(d => d.type !== 'profile');
-        
-        let profilesHtml = '';
-        let detailsHtml = '';
-        
-        if (profiles.length > 0) {
-            profilesHtml = `<div style="margin-top: 8px;"><strong>📐 Профили:</strong> ${profiles.map(p => `${escapeHtml(p.name)} ${p.lengthMm || 0}мм × ${p.quantity} шт`).join(', ')}</div>`;
-        }
-        
-        if (details.length > 0) {
-            detailsHtml = `<div style="margin-top: 5px;"><strong>🔩 Детали:</strong> ${details.map(d => `${escapeHtml(d.name)} × ${d.quantity} шт`).join(', ')}</div>`;
-        }
-        
-        html += `
-            <div style="margin-bottom: 25px; border: 1px solid #2a2f38; border-radius: 10px; overflow: hidden;">
-                <div style="background: linear-gradient(135deg, #232830, #1a1e24); padding: 12px 15px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                        <div>
-                            <span style="font-weight: 600; color: #ff3b3b; font-size: 16px;">📦 ${escapeHtml(item.product)}</span>
-                            <span style="font-size: 12px; color: #4cd964; margin-left: 10px;">${escapeHtml(item.size)} × ${item.quantity} шт</span>
-                            <span style="font-size: 12px; color: #ff9800; margin-left: 10px;">🎨 ${escapeHtml(item.ral)} / ${escapeHtml(item.texture)}</span>
-                        </div>
-                    </div>
-                    ${profilesHtml}
-                    ${detailsHtml}
-                </div>
-                <div style="padding: 15px;">
-        `;
-        
-        // Выводим операции по участкам
-        for (const site in item.sitesData) {
-            const siteData = item.sitesData[site];
-            const hasOperations = Object.keys(siteData.operations).length > 0;
             
-            if (!hasOperations) continue;
-            
-            html += `
-                <div style="margin-bottom: 20px; border: 1px solid #2a2f38; border-radius: 8px; overflow: hidden;">
-                    <div style="background: #15191f; padding: 8px 12px; border-bottom: 1px solid #2a2f38;">
-                        <h4 style="margin: 0; color: #ff3b3b;">${siteData.siteName}</h4>
-                    </div>
-                    <div style="padding: 10px;">
-            `;
-            
-            for (const opKey in siteData.operations) {
-                const op = siteData.operations[opKey];
-                
-                html += `
-                    <div style="margin-bottom: 15px; border-left: 3px solid #ff9800; padding-left: 12px;">
-                        <div style="font-weight: 600; color: #ff9800; margin-bottom: 8px;">
-                            🔧 ${escapeHtml(op.operation)} ${op.detail !== '-' ? `(${escapeHtml(op.detail)})` : ''}
-                        </div>
-                `;
-                
-                for (const record of op.records) {
-                    const startTimeStr = record.startTime.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                    const endTimeStr = record.endTime.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                    
-                    html += `
-                        <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 6px; padding: 4px 0; border-bottom: 1px solid #2a2f38;">
-                            <span style="min-width: 120px;">👤 ${escapeHtml(record.executor)}</span>
-                            <span>📦 ${record.quantity} шт</span>
-                            <span>🕐 ${startTimeStr}</span>
-                            <span>✅ ${endTimeStr}</span>
-                            <span style="color: #ff9800; font-weight: 600;">⏱️ ${record.workSeconds} сек</span>
-                        </div>
-                    `;
-                }
-                
-                html += `</div>`;
-            }
-            
-            html += `
-                    </div>
-                </div>
-            `;
-        }
-        
-        html += `
-                </div>
-            </div>
-        `;
-    }
-    
-    html += `
             <div style="display: flex; justify-content: center; gap: 12px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #2a2f38;">
-                <button class="btn btn-success" onclick="exportTimeStatsToExcel()">📊 Экспорт в Excel</button>
-                <button class="btn btn-primary" onclick="printTimeStatsReport()">🖨️ Распечатать</button>
-                <button class="btn btn-danger" onclick="closeTimeStatsModal()">✖️ Закрыть</button>
+                <button class="btn btn-success" onclick="exportStatsToExcel()">📊 Экспорт в Excel</button>
+                <button class="btn btn-primary" onclick="printStatsReport()">🖨️ Распечатать</button>
+                <button class="btn btn-danger" onclick="closeStatsModal()">✖️ Закрыть</button>
             </div>
         </div>
     `;
     
-    window.currentTimeStatsHtml = html;
-    window.currentTimeStatsData = itemsData;
+    window.currentStatsHtml = statsHtml;
+    window.currentStatsData = { orderName: order.groupName, orderNumber: order.number, orderDate: order.date, totalOperations, completedOperations, totalWorkTime, totalWorkHours, siteStats: Object.values(siteStats), workStats: Object.values(workStats) };
     
     const modal = document.createElement('div');
-    modal.id = 'timeStatsModal';
+    modal.id = 'statsModal';
     modal.className = 'modal';
     modal.style.display = 'block';
     modal.style.zIndex = '10001';
-    modal.innerHTML = `<div class="modal-content" style="max-width: 1200px; max-height: 85vh; overflow-y: auto;"><span class="close" onclick="closeTimeStatsModal()">&times;</span>${html}</div>`;
+    modal.innerHTML = `<div class="modal-content" style="max-width: 1000px; max-height: 85vh; overflow-y: auto;"><span class="close" onclick="closeStatsModal()">&times;</span>${statsHtml}</div>`;
     document.body.appendChild(modal);
 }
 
-function closeTimeStatsModal() {
-    const modal = document.getElementById('timeStatsModal');
+function closeStatsModal() {
+    const modal = document.getElementById('statsModal');
     if (modal) modal.remove();
 }
 
-function printTimeStatsReport() {
+function printStatsReport() {
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
         <html>
             <head>
-                <title>Отчёт по времени</title>
+                <title>Статистика по группе</title>
                 <style>
                     body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: white; color: black; }
-                    .btn { display: none; }
-                    table { border-collapse: collapse; width: 100%; }
-                    td, th { border: 1px solid #ddd; padding: 8px; }
+                    table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
                     th { background: #f0f0f0; }
+                    .btn { display: none; }
                 </style>
             </head>
-            <body>${window.currentTimeStatsHtml.replace(/<button[^>]*>.*?<\/button>/gs, '')}</body>
+            <body>${window.currentStatsHtml.replace(/<button[^>]*>.*?<\/button>/gs, '')}</body>
         </html>
     `);
     printWindow.print();
     printWindow.close();
 }
 
-function exportTimeStatsToExcel() {
-    const itemsData = window.currentTimeStatsData;
-    if (!itemsData) {
-        alert('Нет данных для экспорта');
-        return;
-    }
-    
+function exportStatsToExcel() {
+    const data = window.currentStatsData;
+    if (!data) { alert('Нет данных для экспорта'); return; }
     let csv = [];
-    csv.push(`"Отчёт по времени выполнения"`);
+    csv.push(`"Статистика по группе: ${data.orderName}"`);
+    csv.push(`"Заказ №: ${data.orderNumber}", "Дата: ${data.orderDate}"`);
     csv.push([]);
-    csv.push(`"Изделие","Размер","Кол-во","RAL","Текстура","Участок","Операция","Деталь","Исполнитель","Кол-во","Время начала","Время окончания","Время (сек)"`);
-    
-    for (const itemKey in itemsData) {
-        const item = itemsData[itemKey];
-        
-        for (const site in item.sitesData) {
-            const siteData = item.sitesData[site];
-            
-            for (const opKey in siteData.operations) {
-                const op = siteData.operations[opKey];
-                
-                for (const record of op.records) {
-                    const startTimeStr = record.startTime.toLocaleTimeString('ru-RU');
-                    const endTimeStr = record.endTime.toLocaleTimeString('ru-RU');
-                    csv.push(`"${item.product}","${item.size}","${item.quantity}","${item.ral}","${item.texture}","${siteData.siteName}","${op.operation}","${op.detail}","${record.executor}","${record.quantity}","${startTimeStr}","${endTimeStr}","${record.workSeconds}"`);
-                }
-            }
-        }
-    }
-    
+    csv.push(`"ОБЩАЯ СТАТИСТИКА"`);
+    csv.push(`"Всего операций","${data.totalOperations}"`);
+    csv.push(`"Выполнено операций","${data.completedOperations}"`);
+    csv.push(`"Общее время (минуты)","${data.totalWorkTime}"`);
+    csv.push(`"Общее время (часы)","${data.totalWorkHours}"`);
+    csv.push([]);
+    csv.push(`"СТАТИСТИКА ПО УЧАСТКАМ"`);
+    csv.push(`"Участок","Операций","Выполнено","Прогресс %","Время (мин)","Время (часы)"`);
+    data.siteStats.forEach(site => {
+        const progress = site.totalTasks > 0 ? Math.round((site.completedTasks / site.totalTasks) * 100) : 0;
+        const hours = Math.round(site.totalTime / 60 * 10) / 10;
+        csv.push(`"${site.siteName}","${site.totalTasks}","${site.completedTasks}","${progress}","${site.totalTime}","${hours}"`);
+    });
     const csvContent = csv.join('\n');
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `time_stats.csv`;
+    link.download = `statistics_${data.orderName}_${data.orderNumber}.csv`;
     link.click();
-    
-    alert(`✅ Статистика времени экспортирована в файл: time_stats.csv`);
+    alert(`✅ Статистика экспортирована в файл: statistics_${data.orderName}_${data.orderNumber}.csv`);
 }
 
         // ============== ОТЧЁТ ПО ВРЕМЕНИ ВЫПОЛНЕНИЯ ОПЕРАЦИЙ ==============
