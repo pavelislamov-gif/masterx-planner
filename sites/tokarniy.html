@@ -845,27 +845,31 @@
         if (status === 'in_progress' && executor.status !== 'in_progress') {
             executor.startTime = now;
             executor.endTime = null;
-            console.log(`⏱️ Начало работы: ${executor.name} - ${task.operation} в ${new Date(now).toLocaleTimeString()}`);
+            console.log(`⏱️ НАЧАЛО: ${executor.name} - ${task.operation} в ${new Date(now).toLocaleTimeString()}`);
         }
         
         // Фиксируем время завершения (кнопка "ЗАКРЫТЬ")
         if (status === 'shift_ended' && executor.status === 'in_progress') {
             executor.endTime = now;
-            // Вычисляем время выполнения в минутах
-            const start = new Date(executor.startTime);
-            const end = new Date(now);
-            const minutes = Math.round((end - start) / 60000);
-            executor.workTime = minutes;
-            
-            // Обновляем общее время задачи
-            if (!task.totalWorkTime) task.totalWorkTime = 0;
-            task.totalWorkTime += minutes;
-            
-            console.log(`⏱️ Завершение работы: ${executor.name} - ${task.operation}, время: ${minutes} мин`);
+            if (executor.startTime) {
+                const start = new Date(executor.startTime);
+                const end = new Date(now);
+                const minutes = Math.round((end - start) / 60000);
+                executor.workTime = minutes;
+                
+                if (!task.totalWorkTime) task.totalWorkTime = 0;
+                task.totalWorkTime += minutes;
+                
+                console.log(`⏱️ ЗАКРЫТИЕ СМЕНЫ: ${executor.name} - ${task.operation}, время: ${minutes} мин (${start.toLocaleTimeString()} - ${end.toLocaleTimeString()})`);
+            }
+            executor.status = 'shift_ended';
         }
         // =====================================
         
-        executor.status = status;
+        // Обновляем статус исполнителя (но не перезаписываем shift_ended)
+        if (status !== 'shift_ended') {
+            executor.status = status;
+        }
         
         let taskStatus = 'pending';
         const hasInProgress = task.executors.some(e => e.status === 'in_progress');
@@ -926,32 +930,69 @@
             }
             
             completeTask(taskId) {
-                const task = this.tasks.find(t => t.id === taskId);
-                if (task && task.status !== 'completed') {
-                    if (task.executors) {
-                        task.executors.forEach(executor => {
-                            executor.status = 'completed';
-                        });
-                    }
-                    task.status = 'completed';
-                    task.completedAt = new Date().toISOString();
+    const task = this.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    // ========== ФИКСИРУЕМ ВРЕМЯ ДЛЯ ВСЕХ АКТИВНЫХ ИСПОЛНИТЕЛЕЙ ==========
+    const now = new Date().toISOString();
+    if (task.executors && task.executors.length > 0) {
+        task.executors.forEach(executor => {
+            // Если исполнитель в статусе "in_progress" или "shift_ended" и ещё не завершён
+            if ((executor.status === 'in_progress' || executor.status === 'shift_ended') && !executor.endTime) {
+                executor.endTime = now;
+                if (executor.startTime) {
+                    const start = new Date(executor.startTime);
+                    const end = new Date(now);
+                    const minutes = Math.round((end - start) / 60000);
+                    executor.workTime = minutes;
                     
-                    if (task.isPriority === true) {
-                        task.isPriority = false;
-                    }
+                    if (!task.totalWorkTime) task.totalWorkTime = 0;
+                    task.totalWorkTime += minutes;
                     
-                    this.saveData();
-                    
-                    const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-                    const order = orders.find(o => o.id == task.orderId);
-                    if (order) {
-                        if (!order.tasks) order.tasks = {};
-                        order.tasks[task.id] = 'green';
-                        localStorage.setItem('masterx_orders', JSON.stringify(orders));
-                    }
-                    
-                    updateSingleTaskCard(taskId);
+                    console.log(`⏱️ ГОТОВО: ${executor.name} - ${task.operation}, время: ${minutes} мин (${start.toLocaleTimeString()} - ${end.toLocaleTimeString()})`);
                 }
+                executor.status = 'completed';
+            }
+        });
+    }
+    // ================================================================
+    
+    const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
+    const planQuantity = task.totalQuantity || 1;
+    let operationName = task.operation;
+    if (task.detail) {
+        operationName += ` (${task.detail})`;
+    }
+    
+    if (totalAssigned < planQuantity) {
+        if (!confirm(`⚠️ Выполнено только ${totalAssigned} из ${planQuantity} шт.\n\nВсё равно завершить задачу?`)) {
+            return;
+        }
+    } else {
+        if (!confirm(`✅ Завершить задачу?\nОперация: ${operationName}\nВыполнено: ${totalAssigned} из ${planQuantity} шт`)) {
+            return;
+        }
+    }
+    
+    task.status = 'completed';
+    task.completedAt = new Date().toISOString();
+    
+    if (task.isPriority === true) {
+        task.isPriority = false;
+    }
+    
+    this.saveData();
+    
+    const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+    const order = orders.find(o => o.id == task.orderId);
+    if (order) {
+        if (!order.tasks) order.tasks = {};
+        order.tasks[task.id] = 'green';
+        localStorage.setItem('masterx_orders', JSON.stringify(orders));
+    }
+    
+    updateSingleTaskCard(taskId);
+}
             }
         }
         
