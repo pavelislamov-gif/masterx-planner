@@ -1730,25 +1730,26 @@
         }
         
         function getSavedReportDataForTask(taskId) {
-            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-            const taskReports = allReports.filter(r => r.taskId === taskId && r.siteKey === 'slesarniy');
-            if (taskReports.length === 0) return null;
-            const allRows = [];
-            taskReports.forEach(report => {
-                if (report.rows) {
-                    allRows.push(...report.rows);
-                }
-            });
-           return { 
-    rows: allRows.map(row => ({
-        материал: row.материал || row.material || '',
-        расход: row.расход || 0,
-        единица: row.единица || 'гр',
-        количество: row.количество || 0,
-        комментарий: row.комментарий || ''
-    })),
-    savedAt: taskReports[taskReports.length - 1]?.savedAt 
-};
+    const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+    const taskReports = allReports.filter(r => r.taskId === taskId && r.siteKey === 'slesarniy');
+    if (taskReports.length === 0) return null;
+    const allRows = [];
+    taskReports.forEach(report => {
+        if (report.rows) {
+            allRows.push(...report.rows);
+        }
+    });
+    return { 
+        rows: allRows.map(row => ({
+            материал: row.материал || row.material || '',
+            расход: row.расход || 0,
+            единица: row.единица || 'гр',
+            количество: row.количество || 0,
+            комментарий: row.комментарий || ''
+        })),
+        savedAt: taskReports[taskReports.length - 1]?.savedAt 
+    };
+}
         
         function renderReportForm(container) {
             let totalQuantity = 0;
