@@ -686,7 +686,7 @@
     <div id="rightModalOverlay" class="right-modal-overlay" onclick="closeRightModal()"></div>
     <div id="rightModal" class="right-modal">
         <div class="right-modal-header">
-            <h3>📝 Отчёт по задаче</h3>
+            <h3 id="modalTitle">📝 Отчёт по задаче</h3>
             <button class="right-modal-close" onclick="closeRightModal()">&times;</button>
         </div>
         <div id="rightModalContent" class="right-modal-content"></div>
@@ -706,6 +706,22 @@
         let reportRows = [];
         
         const OPEN_CARDS_KEY = 'tokarniy_open_tasks';
+        
+        // ============== ФУНКЦИЯ ДЛЯ ФОРМИРОВАНИЯ ЗАГОЛОВКА ОПЕРАЦИИ ==============
+        function getOperationDisplayName(operation, detail, thickness) {
+            let displayName = operation || 'Операция';
+            if (detail && detail.trim() !== '') {
+                let cleanDetail = detail;
+                if (thickness && thickness.trim() !== '') {
+                    cleanDetail = detail.replace(thickness, '').trim();
+                }
+                displayName = `${operation} (${cleanDetail})`;
+                if (thickness && thickness.trim() !== '') {
+                    displayName += ` ${thickness}`;
+                }
+            }
+            return displayName;
+        }
         
         // ============== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==============
         function escapeHtml(str) {
@@ -840,14 +856,12 @@
                 if (executor) {
                     const now = new Date().toISOString();
                     
-                    // НАЧАЛО работы (кнопка "НАЧАТЬ")
                     if (status === 'in_progress' && executor.status !== 'in_progress') {
                         executor.startTime = now;
                         executor.endTime = null;
                         console.log(`⏱️ НАЧАЛО: ${executor.name} - ${task.operation}`);
                     }
                     
-                    // ЗАКРЫТИЕ смены (кнопка "ЗАКРЫТЬ")
                     if (status === 'shift_ended' && executor.status === 'in_progress') {
                         executor.endTime = now;
                         if (executor.startTime) {
@@ -862,7 +876,6 @@
                         executor.status = 'shift_ended';
                     }
                     
-                    // Обновляем статус (но не перезаписываем shift_ended)
                     if (status !== 'shift_ended') {
                         executor.status = status;
                     }
@@ -936,7 +949,6 @@
                 
                 if (task.executors && task.executors.length > 0) {
                     task.executors.forEach(executor => {
-                        // Для исполнителей в статусе "in_progress" (активно работают)
                         if (executor.status === 'in_progress') {
                             executor.endTime = now;
                             if (executor.startTime) {
@@ -950,7 +962,6 @@
                             }
                             executor.status = 'completed';
                         }
-                        // Для исполнителей в статусе "shift_ended" (смена закрыта, но задача не завершена)
                         else if (executor.status === 'shift_ended') {
                             if (!executor.workTime && executor.startTime && executor.endTime) {
                                 const start = new Date(executor.startTime);
@@ -1004,7 +1015,6 @@
             }
         }
         
-        // Глобальная функция для кнопки ГОТОВО
         function completeTask(taskId) {
             if (taskManager) {
                 taskManager.completeTask(taskId);
@@ -1187,12 +1197,6 @@
         
         // ============== РАБОТА С ФАЙЛАМИ ==============
         function getCurrentSiteKey() {
-            const path = window.location.pathname;
-            if (path.includes('tokarniy')) return 'tokarniy';
-            if (path.includes('slesarniy')) return 'slesarniy';
-            if (path.includes('frezerniy')) return 'frezerniy';
-            if (path.includes('lazerno')) return 'lazerno';
-            if (path.includes('polimerniy')) return 'polimerniy';
             return 'tokarniy';
         }
 
@@ -1542,15 +1546,7 @@
                 const priorityClass = isPriority ? 'priority' : '';
                 const priorityBadge = isPriority ? '<span class="priority-badge">🔴 ПРИОРИТЕТ</span>' : '';
                 
-                let displayOperationName = task.operation;
-                if (task.detail) {
-                    let cleanDetailName = task.detail;
-                    if (task.thickness) {
-                        cleanDetailName = task.detail.replace(task.thickness, '').trim();
-                    }
-                    displayOperationName = `${task.operation} (${cleanDetailName})`;
-                    if (task.thickness) displayOperationName += ` ${task.thickness}`;
-                }
+                let displayOperationName = getOperationDisplayName(task.operation, task.detail, task.thickness);
                 
                 let detailDisplay = '';
                 if (task.detail) {
@@ -1709,13 +1705,29 @@
             if (!order || !item) { alert('Данные заказа не найдены'); return; }
             
             currentReportTask = {
-                taskId: task.id, orderId: order.id, orderNumber: order.number, customerName: order.groupName,
-                product: task.product || item.product, size: task.size || item.size?.name,
-                quantity: task.sizeQuantity || item.size?.quantity, ral: task.ral || item.ral,
-                texture: task.texture || item.texture, operation: task.operation, detail: task.detail,
-                material: task.detail || '', thickness: task.thickness, isPriority: task.isPriority || false,
+                taskId: task.id,
+                orderId: order.id,
+                orderNumber: order.number,
+                customerName: order.groupName,
+                product: task.product || item.product,
+                size: task.size || item.size?.name,
+                quantity: task.sizeQuantity || item.size?.quantity,
+                ral: task.ral || item.ral,
+                texture: task.texture || item.texture,
+                operation: task.operation,
+                operationDisplay: getOperationDisplayName(task.operation, task.detail, task.thickness),
+                detail: task.detail,
+                material: task.detail || '',
+                thickness: task.thickness,
+                isPriority: task.isPriority || false,
                 siteKey: 'tokarniy'
             };
+            
+            // Устанавливаем заголовок модального окна
+            const modalTitle = document.getElementById('modalTitle');
+            if (modalTitle) {
+                modalTitle.textContent = currentReportTask.operationDisplay;
+            }
             
             const modal = document.getElementById('rightModal');
             const overlay = document.getElementById('rightModalOverlay');
@@ -1761,7 +1773,7 @@
                 `;
             });
             
-            const operationDisplay = currentReportTask.operation + (currentReportTask.detail ? ` (${currentReportTask.detail})` : '');
+            const operationDisplay = currentReportTask.operationDisplay || getOperationDisplayName(currentReportTask.operation, currentReportTask.detail, currentReportTask.thickness);
             const priorityBadge = currentReportTask.isPriority ? '<span style="background: #ff3b3b; color: white; padding: 2px 8px; border-radius: 20px; font-size: 10px; margin-left: 8px;">🔴 ПРИОРИТЕТ</span>' : '';
             const materialDisplay = currentReportTask.material ? `<div style="font-size: 12px;">📦 Материал/деталь: <strong style="color: #4cd964;">${escapeHtml(currentReportTask.material)}</strong></div>` : '';
             
@@ -1925,6 +1937,8 @@
         window.removeReportRowItem = removeReportRowItem;
         window.saveReportDataForTask = saveReportDataForTask;
         window.completeTask = completeTask;
+        window.copyAllFilePaths = copyAllFilePaths;
+        window.selectAndCopyFile = selectAndCopyFile;
         
         document.addEventListener('DOMContentLoaded', init);
     </script>
