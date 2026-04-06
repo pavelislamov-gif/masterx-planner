@@ -844,97 +844,15 @@
             transform: translateY(-2px);
         }
         
-        .btn-stats {
-            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        .btn-time-stats {
+            background: linear-gradient(135deg, #00bcd4, #0097a7);
             color: white;
             border: none;
         }
         
-        .btn-stats:hover {
-            background: linear-gradient(135deg, #8e44ad, #7d3c98);
+        .btn-time-stats:hover {
+            background: linear-gradient(135deg, #0097a7, #00838f);
             transform: translateY(-2px);
-        }
-        
-        /* Стили для статистики */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        
-        .stat-card {
-            background: #15191f;
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            border: 1px solid #2a2f38;
-        }
-        
-        .stat-card-value {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        
-        .stat-card-label {
-            font-size: 11px;
-            color: #a0a0a0;
-        }
-        
-        .progress-bar-container {
-            background: #2a2f38;
-            border-radius: 10px;
-            height: 20px;
-            width: 100px;
-            display: inline-block;
-            overflow: hidden;
-        }
-        
-        .progress-bar-fill {
-            background: #4caf50;
-            height: 100%;
-            border-radius: 10px;
-        }
-        
-        .stats-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .stats-table th,
-        .stats-table td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #2a2f38;
-        }
-        
-        .stats-table th {
-            background: #232830;
-            font-weight: 600;
-        }
-        
-        .site-stats-block {
-            margin-top: 20px;
-            border: 1px solid #2a2f38;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .site-stats-header {
-            background: linear-gradient(135deg, #232830, #1a1e24);
-            padding: 10px 15px;
-        }
-        
-        .site-stats-header h5 {
-            margin: 0;
-            color: #ff3b3b;
-        }
-        
-        .file-select-item:hover {
-            background: #232830 !important;
-            border-color: #ff3b3b !important;
-            transform: translateX(5px);
         }
     </style>
 </head>
@@ -2581,7 +2499,8 @@
                         </div>
                         <div style="display: flex; gap: 8px;">
                             <button class="btn btn-primary" onclick="event.stopPropagation(); showOrderReport(${order.id})" style="background: #0077ff;">📋 Отчёт по заказу</button>
-                            <button class="btn btn-stats" onclick="event.stopPropagation(); showGroupStats(${order.id})">📊 Статистика</button>
+                            <button class="btn btn-stats" onclick="event.stopPropagation(); showGroupStats(${order.id})" style="background: #9b59b6;">📊 Статистика</button>
+                            <button class="btn btn-time-stats" onclick="event.stopPropagation(); showTimeStats(${order.id})">⏱️ Статистика времени</button>
                             <button class="btn btn-info" onclick="event.stopPropagation(); editGroup(${order.id})">✏️ Редактировать состав</button>
                             <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
                         </div>
@@ -3331,9 +3250,19 @@
             printWindow.close();
         }
 
-        // ============== СТАТИСТИКА ПО ГРУППЕ ==============
+        // ============== СТАТИСТИКА ПО ГРУППЕ (материалы) ==============
         
-        // Получить все задачи группы со всех участков
+        function getSiteNameShort(siteKey) {
+            const names = {
+                'tokarniy': '🔧 Токарный',
+                'slesarniy': '🔨 Слесарный',
+                'frezerniy': '⚙️ Фрезерный',
+                'lazerno': '✨ Лазерно-гибочный',
+                'polimerniy': '🎨 Полимерный'
+            };
+            return names[siteKey] || siteKey;
+        }
+
         function getAllGroupTasks(orderId) {
             const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
             const allTasks = [];
@@ -3350,7 +3279,6 @@
             return allTasks;
         }
 
-        // Собрать статистику по операциям
         function collectWorkStats(allTasks) {
             const workStats = {};
             
@@ -3389,7 +3317,6 @@
                 }
             });
             
-            // Вычисляем среднее время
             Object.values(workStats).forEach(stat => {
                 if (stat.count > 0) {
                     stat.avgTime = Math.round(stat.totalTime / stat.count);
@@ -3403,7 +3330,6 @@
             return workStats;
         }
 
-        // Собрать статистику по участкам
         function collectSiteStats(allTasks, workStats) {
             const siteStats = {};
             
@@ -3425,7 +3351,6 @@
                 }
             });
             
-            // Добавляем время из статистики операций
             Object.values(workStats).forEach(stat => {
                 if (siteStats[stat.site]) {
                     siteStats[stat.site].totalTime += stat.totalTime;
@@ -3436,7 +3361,6 @@
             return siteStats;
         }
 
-        // Показать статистику по группе
         function showGroupStats(orderId) {
             const orders = loadOrdersFromStorage();
             const order = orders.find(o => o.id == orderId);
@@ -3449,13 +3373,11 @@
             const workStats = collectWorkStats(allTasks);
             const siteStats = collectSiteStats(allTasks, workStats);
             
-            // Общая статистика
             const totalOperations = allTasks.length;
             const completedOperations = allTasks.filter(t => t.status === 'completed').length;
             const totalWorkTime = Object.values(workStats).reduce((sum, s) => sum + s.totalTime, 0);
             const totalWorkHours = Math.round(totalWorkTime / 60 * 10) / 10;
             
-            // Формируем HTML
             let statsHtml = `
                 <div style="padding: 20px;">
                     <div style="margin-bottom: 20px; border-bottom: 2px solid #ff3b3b; padding-bottom: 15px;">
@@ -3471,45 +3393,18 @@
                         </div>
                     </div>
                     
-                    <!-- Общая статистика -->
                     <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-card-value" style="color: #ff9800;">${totalOperations}</div>
-                            <div class="stat-card-label">Всего операций</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-card-value" style="color: #4caf50;">${completedOperations}</div>
-                            <div class="stat-card-label">Выполнено</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-card-value" style="color: #00d4ff;">${totalWorkTime}</div>
-                            <div class="stat-card-label">Общее время (мин)</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-card-value" style="color: #9b59b6;">${totalWorkHours}</div>
-                            <div class="stat-card-label">Общее время (часы)</div>
-                        </div>
+                        <div class="stat-card"><div class="stat-card-value" style="color: #ff9800;">${totalOperations}</div><div class="stat-card-label">Всего операций</div></div>
+                        <div class="stat-card"><div class="stat-card-value" style="color: #4caf50;">${completedOperations}</div><div class="stat-card-label">Выполнено</div></div>
+                        <div class="stat-card"><div class="stat-card-value" style="color: #00d4ff;">${totalWorkTime}</div><div class="stat-card-label">Общее время (мин)</div></div>
+                        <div class="stat-card"><div class="stat-card-value" style="color: #9b59b6;">${totalWorkHours}</div><div class="stat-card-label">Общее время (часы)</div></div>
                     </div>
             `;
             
-            // Статистика по участкам
             if (Object.keys(siteStats).length > 0) {
-                statsHtml += `
-                    <h4 style="color: #ff9800; margin-bottom: 15px;">🏭 СТАТИСТИКА ПО УЧАСТКАМ</h4>
+                statsHtml += `<h4 style="color: #ff9800; margin-bottom: 15px;">🏭 СТАТИСТИКА ПО УЧАСТКАМ</h4>
                     <div style="overflow-x: auto; margin-bottom: 25px;">
-                        <table class="stats-table">
-                            <thead>
-                                <tr>
-                                    <th>Участок</th>
-                                    <th style="text-align: center;">Операций</th>
-                                    <th style="text-align: center;">Выполнено</th>
-                                    <th style="text-align: center;">Прогресс</th>
-                                    <th style="text-align: center;">Время (мин)</th>
-                                    <th style="text-align: center;">Время (часы)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                `;
+                        <table class="stats-table"><thead><tr><th>Участок</th><th style="text-align: center;">Операций</th><th style="text-align: center;">Выполнено</th><th style="text-align: center;">Прогресс</th><th style="text-align: center;">Время (мин)</th><th style="text-align: center;">Время (часы)</th></tr></thead><tbody>`;
                 
                 const sortedSites = Object.values(siteStats).sort((a, b) => b.totalTime - a.totalTime);
                 
@@ -3517,134 +3412,52 @@
                     const progress = site.totalTasks > 0 ? Math.round((site.completedTasks / site.totalTasks) * 100) : 0;
                     const siteHours = Math.round(site.totalTime / 60 * 10) / 10;
                     
-                    statsHtml += `
-                        <tr>
-                            <td><strong>${site.siteName}</strong></td>
-                            <td style="text-align: center;">${site.totalTasks}</td>
-                            <td style="text-align: center; color: #4caf50;">${site.completedTasks}</td>
-                            <td style="text-align: center;">
-                                <div class="progress-bar-container">
-                                    <div class="progress-bar-fill" style="width: ${progress}%;"></div>
-                                </div>
-                                <span style="margin-left: 8px; font-size: 11px;">${progress}%</span>
-                            </td>
-                            <td style="text-align: center; color: #00d4ff;">${site.totalTime}</td>
-                            <td style="text-align: center;">${siteHours}</td>
-                        </tr>
-                    `;
+                    statsHtml += `<tr><td><strong>${site.siteName}</strong></td><td style="text-align: center;">${site.totalTasks}</td><td style="text-align: center; color: #4caf50;">${site.completedTasks}</td>
+                        <td style="text-align: center;"><div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${progress}%;"></div></div><span style="margin-left: 8px; font-size: 11px;">${progress}%</span></td>
+                        <td style="text-align: center; color: #00d4ff;">${site.totalTime}</td><td style="text-align: center;">${siteHours}</td></tr>`;
                 });
                 
-                statsHtml += `
-                            </tbody>
-                        </table>
-                    </div>
-                `;
+                statsHtml += `</tbody></table></div><h4 style="color: #ff9800; margin-bottom: 15px;">⏱️ ДЕТАЛЬНАЯ СТАТИСТИКА ПО ОПЕРАЦИЯМ</h4>`;
                 
-                // Статистика по операциям (с группировкой по участкам)
-                statsHtml += `<h4 style="color: #ff9800; margin-bottom: 15px;">⏱️ ДЕТАЛЬНАЯ СТАТИСТИКА ПО ОПЕРАЦИЯМ</h4>`;
-                
-                // Группируем операции по участкам
                 const operationsBySite = {};
                 Object.values(workStats).forEach(stat => {
-                    if (!operationsBySite[stat.site]) {
-                        operationsBySite[stat.site] = [];
-                    }
+                    if (!operationsBySite[stat.site]) operationsBySite[stat.site] = [];
                     operationsBySite[stat.site].push(stat);
                 });
                 
                 for (const [siteKey, operations] of Object.entries(operationsBySite)) {
                     const siteName = siteNamesFull[siteKey] || siteKey;
-                    statsHtml += `
-                        <div class="site-stats-block">
-                            <div class="site-stats-header">
-                                <h5>${siteName}</h5>
-                            </div>
-                            <div style="overflow-x: auto;">
-                                <table class="stats-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Операция</th>
-                                            <th>Деталь</th>
-                                            <th style="text-align: center;">Выполнений</th>
-                                            <th style="text-align: center;">Ср. время (мин)</th>
-                                            <th style="text-align: center;">Мин (мин)</th>
-                                            <th style="text-align: center;">Макс (мин)</th>
-                                            <th style="text-align: center;">Всего (мин)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                    `;
+                    statsHtml += `<div class="site-stats-block"><div class="site-stats-header"><h5>${siteName}</h5></div><div style="overflow-x: auto;"><table class="stats-table"><thead><tr><th>Операция</th><th>Деталь</th><th style="text-align: center;">Выполнений</th><th style="text-align: center;">Ср. время (мин)</th><th style="text-align: center;">Мин (мин)</th><th style="text-align: center;">Макс (мин)</th><th style="text-align: center;">Всего (мин)</th></tr></thead><tbody>`;
                     
                     const sortedOps = operations.sort((a, b) => b.totalTime - a.totalTime);
-                    
                     sortedOps.forEach(op => {
-                        statsHtml += `
-                            <tr>
-                                <td><strong>${escapeHtml(op.operation)}</strong></td>
-                                <td style="color: #4cd964; font-size: 11px;">${escapeHtml(op.detail)}</td>
-                                <td style="text-align: center;">${op.count}</td>
-                                <td style="text-align: center; color: #ff9800; font-weight: 600;">${op.avgTime}</td>
-                                <td style="text-align: center;">${op.minTime === Infinity ? '-' : op.minTime}</td>
-                                <td style="text-align: center;">${op.maxTime || '-'}</td>
-                                <td style="text-align: center; color: #00d4ff;">${op.totalTime}</td>
-                            </tr>
-                        `;
+                        statsHtml += `<tr><td><strong>${escapeHtml(op.operation)}</strong></td><td style="color: #4cd964; font-size: 11px;">${escapeHtml(op.detail)}</td>
+                            <td style="text-align: center;">${op.count}</td><td style="text-align: center; color: #ff9800; font-weight: 600;">${op.avgTime}</td>
+                            <td style="text-align: center;">${op.minTime === Infinity ? '-' : op.minTime}</td><td style="text-align: center;">${op.maxTime || '-'}</td>
+                            <td style="text-align: center; color: #00d4ff;">${op.totalTime}</td></tr>`;
                     });
-                    
-                    statsHtml += `
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    `;
+                    statsHtml += `</tbody></table></div></div>`;
                 }
             } else {
-                statsHtml += `
-                    <div style="text-align: center; padding: 40px; background: #15191f; border-radius: 8px;">
-                        <div style="font-size: 48px; margin-bottom: 10px;">📭</div>
-                        <p>Нет данных по выполненным операциям</p>
-                        <p style="font-size: 11px; color: #6c757d;">Статистика появится после завершения операций на участках</p>
-                    </div>
-                `;
+                statsHtml += `<div style="text-align: center; padding: 40px; background: #15191f; border-radius: 8px;"><div style="font-size: 48px; margin-bottom: 10px;">📭</div><p>Нет данных по выполненным операциям</p><p style="font-size: 11px; color: #6c757d;">Статистика появится после завершения операций на участках</p></div>`;
             }
             
-            statsHtml += `
-                    <div style="display: flex; justify-content: center; gap: 12px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #2a2f38;">
-                        <button class="btn btn-success" onclick="exportStatsToExcel()">📊 Экспорт в Excel</button>
-                        <button class="btn btn-primary" onclick="printStatsReport()">🖨️ Распечатать</button>
-                        <button class="btn btn-danger" onclick="closeStatsModal()">✖️ Закрыть</button>
-                    </div>
-                </div>
-            `;
+            statsHtml += `<div style="display: flex; justify-content: center; gap: 12px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #2a2f38;">
+                <button class="btn btn-success" onclick="exportStatsToExcel()">📊 Экспорт в Excel</button>
+                <button class="btn btn-primary" onclick="printStatsReport()">🖨️ Распечатать</button>
+                <button class="btn btn-danger" onclick="closeStatsModal()">✖️ Закрыть</button>
+            </div></div>`;
             
-            // Сохраняем данные для экспорта
-            window.currentStatsData = {
-                orderName: order.groupName,
-                orderNumber: order.number,
-                orderDate: order.date,
-                totalOperations,
-                completedOperations,
-                totalWorkTime,
-                totalWorkHours,
-                siteStats: Object.values(siteStats),
-                workStats: Object.values(workStats)
-            };
+            window.currentStatsData = { orderName: order.groupName, orderNumber: order.number, orderDate: order.date, totalOperations, completedOperations, totalWorkTime, totalWorkHours, siteStats: Object.values(siteStats), workStats: Object.values(workStats) };
+            window.currentStatsHtml = statsHtml;
             
-            // Создаём модальное окно
             const modal = document.createElement('div');
             modal.id = 'statsModal';
             modal.className = 'modal';
             modal.style.display = 'block';
             modal.style.zIndex = '10001';
-            modal.innerHTML = `
-                <div class="modal-content" style="max-width: 1400px; max-height: 85vh; overflow-y: auto;">
-                    <span class="close" onclick="closeStatsModal()">&times;</span>
-                    ${statsHtml}
-                </div>
-            `;
+            modal.innerHTML = `<div class="modal-content" style="max-width: 1400px; max-height: 85vh; overflow-y: auto;"><span class="close" onclick="closeStatsModal()">&times;</span>${statsHtml}</div>`;
             document.body.appendChild(modal);
-            
-            window.currentStatsHtml = statsHtml;
         }
 
         function closeStatsModal() {
@@ -3654,59 +3467,24 @@
 
         function printStatsReport() {
             const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                    <head>
-                        <title>Статистика по группе</title>
-                        <style>
-                            body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: white; color: black; }
-                            table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
-                            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                            th { background: #f0f0f0; }
-                            .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
-                            .stat-card { border: 1px solid #ddd; border-radius: 10px; padding: 15px; text-align: center; }
-                            .stat-card-value { font-size: 28px; font-weight: bold; }
-                            .stat-card-label { font-size: 12px; color: #666; }
-                            .progress-bar-container { background: #ddd; border-radius: 10px; height: 20px; width: 100px; display: inline-block; overflow: hidden; }
-                            .progress-bar-fill { background: #4caf50; height: 100%; border-radius: 10px; }
-                            .site-stats-block { margin-top: 20px; border: 1px solid #ddd; border-radius: 10px; overflow: hidden; }
-                            .site-stats-header { background: #f0f0f0; padding: 10px 15px; }
-                            .btn { display: none; }
-                            @media print {
-                                .btn { display: none; }
-                            }
-                        </style>
-                    </head>
-                    <body>${window.currentStatsHtml.replace(/<button[^>]*>.*?<\/button>/gs, '')}</body>
-                </html>
-            `);
+            printWindow.document.write(`<html><head><title>Статистика по группе</title><style>body{font-family:'Segoe UI',sans-serif;padding:20px;background:white;color:black;}table{border-collapse:collapse;width:100%;margin-bottom:20px;}th,td{border:1px solid #ddd;padding:8px;text-align:left;}th{background:#f0f0f0;}.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:25px;}.stat-card{border:1px solid #ddd;border-radius:10px;padding:15px;text-align:center;}.stat-card-value{font-size:28px;font-weight:bold;}.progress-bar-container{background:#ddd;border-radius:10px;height:20px;width:100px;display:inline-block;overflow:hidden;}.progress-bar-fill{background:#4caf50;height:100%;border-radius:10px;}.btn{display:none;}</style></head><body>${window.currentStatsHtml.replace(/<button[^>]*>.*?<\/button>/gs, '')}</body></html>`);
             printWindow.print();
             printWindow.close();
         }
 
         function exportStatsToExcel() {
             const data = window.currentStatsData;
-            if (!data) {
-                alert('Нет данных для экспорта');
-                return;
-            }
-            
+            if (!data) { alert('Нет данных для экспорта'); return; }
             let csv = [];
-            
-            // Заголовок
             csv.push(`"Статистика по группе: ${data.orderName}"`);
             csv.push(`"Заказ №: ${data.orderNumber}", "Дата: ${data.orderDate}"`);
             csv.push([]);
-            
-            // Общая статистика
             csv.push(`"ОБЩАЯ СТАТИСТИКА"`);
             csv.push(`"Всего операций","${data.totalOperations}"`);
             csv.push(`"Выполнено операций","${data.completedOperations}"`);
             csv.push(`"Общее время (минуты)","${data.totalWorkTime}"`);
             csv.push(`"Общее время (часы)","${data.totalWorkHours}"`);
             csv.push([]);
-            
-            // Статистика по участкам
             csv.push(`"СТАТИСТИКА ПО УЧАСТКАМ"`);
             csv.push(`"Участок","Операций","Выполнено","Прогресс %","Время (мин)","Время (часы)"`);
             data.siteStats.forEach(site => {
@@ -3715,54 +3493,255 @@
                 csv.push(`"${site.siteName}","${site.totalTasks}","${site.completedTasks}","${progress}","${site.totalTime}","${hours}"`);
             });
             csv.push([]);
-            
-            // Детальная статистика по операциям
             csv.push(`"ДЕТАЛЬНАЯ СТАТИСТИКА ПО ОПЕРАЦИЯМ"`);
             csv.push(`"Участок","Операция","Деталь","Выполнений","Ср. время (мин)","Мин (мин)","Макс (мин)","Всего (мин)"`);
             data.workStats.forEach(op => {
                 const siteName = siteNamesFull[op.site] || op.site;
                 csv.push(`"${siteName}","${op.operation}","${op.detail}","${op.count}","${op.avgTime}","${op.minTime === Infinity ? '-' : op.minTime}","${op.maxTime || '-'}","${op.totalTime}"`);
             });
-            
-            // Создаём и скачиваем файл
-            const csvContent = csv.map(row => Array.isArray(row) ? row.join(',') : row).join('\n');
+            const csvContent = csv.join('\n');
             const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
-            const fileName = `statistics_${data.orderName}_${data.orderNumber}.csv`;
             link.href = URL.createObjectURL(blob);
-            link.download = fileName;
+            link.download = `statistics_${data.orderName}_${data.orderNumber}.csv`;
             link.click();
+            alert(`✅ Статистика экспортирована в файл: statistics_${data.orderName}_${data.orderNumber}.csv`);
+        }
+
+        // ============== ОТЧЁТ ПО ВРЕМЕНИ ВЫПОЛНЕНИЯ ОПЕРАЦИЙ ==============
+
+        function showTimeStats(orderId) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) {
+                alert('Группа не найдена');
+                return;
+            }
             
-            alert(`✅ Статистика экспортирована в файл: ${fileName}`);
+            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+            const allTimeRecords = [];
+            
+            sites.forEach(site => {
+                const storageKey = `tasks_${site}`;
+                const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                const groupTasks = tasks.filter(t => t.orderId == orderId);
+                
+                groupTasks.forEach(task => {
+                    if (task.executors && task.executors.length > 0) {
+                        task.executors.forEach(executor => {
+                            if (executor.startTime && executor.endTime && executor.workTime > 0) {
+                                const start = new Date(executor.startTime);
+                                const end = new Date(executor.endTime);
+                                const workSeconds = Math.round((end - start) / 1000);
+                                
+                                allTimeRecords.push({
+                                    site: site,
+                                    siteName: getSiteNameShort(site),
+                                    product: task.product,
+                                    operation: task.operation,
+                                    detail: task.detail || '-',
+                                    executor: executor.name,
+                                    quantity: executor.quantity || 1,
+                                    startTime: start,
+                                    endTime: end,
+                                    workSeconds: workSeconds,
+                                    date: start.toLocaleDateString('ru-RU')
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+            
+            if (allTimeRecords.length === 0) {
+                alert('📭 Нет данных о времени выполнения операций');
+                return;
+            }
+            
+            const statsByOperation = {};
+            allTimeRecords.forEach(record => {
+                const key = `${record.site}_${record.operation}_${record.detail}`;
+                if (!statsByOperation[key]) {
+                    statsByOperation[key] = {
+                        site: record.site,
+                        siteName: record.siteName,
+                        product: record.product,
+                        operation: record.operation,
+                        detail: record.detail,
+                        totalSeconds: 0,
+                        count: 0,
+                        avgSeconds: 0,
+                        records: []
+                    };
+                }
+                statsByOperation[key].totalSeconds += record.workSeconds;
+                statsByOperation[key].count++;
+                statsByOperation[key].records.push(record);
+            });
+            
+            Object.values(statsByOperation).forEach(stat => {
+                stat.avgSeconds = Math.round(stat.totalSeconds / stat.count);
+            });
+            
+            let html = `
+                <div style="padding: 20px;">
+                    <div style="margin-bottom: 20px; border-bottom: 2px solid #00bcd4; padding-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                                <h2 style="color: #00bcd4; margin: 0;">⏱️ ОТЧЁТ ПО ВРЕМЕНИ ВЫПОЛНЕНИЯ</h2>
+                                <h3 style="margin: 5px 0 0 0;">${escapeHtml(order.groupName)}</h3>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 14px; color: #a0a0a0;">Заказ №${order.number || '---'}</div>
+                                <div style="font-size: 12px; color: #a0a0a0;">Дата: ${order.date}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #232830; border-bottom: 2px solid #00bcd4;">
+                                    <th style="padding: 10px; text-align: left;">Участок</th>
+                                    <th style="padding: 10px; text-align: left;">Изделие</th>
+                                    <th style="padding: 10px; text-align: left;">Операция</th>
+                                    <th style="padding: 10px; text-align: left;">Деталь</th>
+                                    <th style="padding: 10px; text-align: center;">Кол-во</th>
+                                    <th style="padding: 10px; text-align: center;">Время начала</th>
+                                    <th style="padding: 10px; text-align: center;">Время окончания</th>
+                                    <th style="padding: 10px; text-align: center;">Время (сек)</th>
+                                    <th style="padding: 10px; text-align: center;">Среднее (сек)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            const sortedStats = Object.values(statsByOperation).sort((a, b) => b.totalSeconds - a.totalSeconds);
+            
+            for (const stat of sortedStats) {
+                html += `<tr style="background: #1a1e24; border-bottom: 1px solid #2a2f38;">
+                    <td style="padding: 8px;"><strong>${stat.siteName}</strong></td>
+                    <td style="padding: 8px;">${escapeHtml(stat.product)}</td>
+                    <td style="padding: 8px;">${escapeHtml(stat.operation)}</td>
+                    <td style="padding: 8px; color: #4cd964;">${escapeHtml(stat.detail)}</td>
+                    <td style="padding: 8px; text-align: center;">${stat.count}</td>
+                    <td style="padding: 8px; text-align: center;" colspan="2">—</td>
+                    <td style="padding: 8px; text-align: center; color: #ff9800; font-weight: 600;">${stat.totalSeconds}</td>
+                    <td style="padding: 8px; text-align: center; color: #00bcd4; font-weight: 600;">${stat.avgSeconds}</td>
+                </tr>`;
+                
+                for (const record of stat.records) {
+                    const startTimeStr = record.startTime.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    const endTimeStr = record.endTime.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    
+                    html += `<tr style="border-bottom: 1px solid #2a2f38; background: #15191f;">
+                        <td style="padding: 6px 8px;"></td>
+                        <td style="padding: 6px 8px;"></td>
+                        <td style="padding: 6px 8px; color: #a0a0a0; font-size: 12px;">↳ ${escapeHtml(record.executor)}</td>
+                        <td style="padding: 6px 8px;"></td>
+                        <td style="padding: 6px 8px; text-align: center; font-size: 12px;">${record.quantity}</td>
+                        <td style="padding: 6px 8px; text-align: center; font-size: 12px;">${startTimeStr}</td>
+                        <td style="padding: 6px 8px; text-align: center; font-size: 12px;">${endTimeStr}</td>
+                        <td style="padding: 6px 8px; text-align: center; font-size: 12px;">${record.workSeconds}</td>
+                        <td style="padding: 6px 8px; text-align: center;"></td>
+                    </tr>`;
+                }
+            }
+            
+            const totalSeconds = allTimeRecords.reduce((sum, r) => sum + r.workSeconds, 0);
+            const totalMinutes = Math.floor(totalSeconds / 60);
+            const remainingSeconds = totalSeconds % 60;
+            
+            html += `
+                            </tbody>
+                            <tfoot>
+                                <tr style="background: #232830; border-top: 2px solid #00bcd4;">
+                                    <td colspan="7" style="padding: 10px; text-align: right; font-weight: 600;">ИТОГО:</td>
+                                    <td style="padding: 10px; text-align: center; color: #ff9800; font-weight: 600;">${totalSeconds} сек</td>
+                                    <td style="padding: 10px; text-align: center; color: #ff9800;">(${totalMinutes} мин ${remainingSeconds} сек)</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: center; gap: 12px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #2a2f38;">
+                        <button class="btn btn-success" onclick="exportTimeStatsToExcel()">📊 Экспорт в Excel</button>
+                        <button class="btn btn-primary" onclick="printTimeStatsReport()">🖨️ Распечатать</button>
+                        <button class="btn btn-danger" onclick="closeTimeStatsModal()">✖️ Закрыть</button>
+                    </div>
+                </div>
+            `;
+            
+            window.currentTimeStatsData = {
+                orderName: order.groupName,
+                orderNumber: order.number,
+                orderDate: order.date,
+                records: allTimeRecords,
+                stats: Object.values(statsByOperation),
+                totalSeconds: totalSeconds
+            };
+            window.currentTimeStatsHtml = html;
+            
+            const modal = document.createElement('div');
+            modal.id = 'timeStatsModal';
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.style.zIndex = '10001';
+            modal.innerHTML = `<div class="modal-content" style="max-width: 1400px; max-height: 85vh; overflow-y: auto;"><span class="close" onclick="closeTimeStatsModal()">&times;</span>${html}</div>`;
+            document.body.appendChild(modal);
+        }
+
+        function closeTimeStatsModal() {
+            const modal = document.getElementById('timeStatsModal');
+            if (modal) modal.remove();
+        }
+
+        function printTimeStatsReport() {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`<html><head><title>Отчёт по времени</title><style>body{font-family:'Segoe UI',sans-serif;padding:20px;background:white;color:black;}table{border-collapse:collapse;width:100%;margin-bottom:20px;}th,td{border:1px solid #ddd;padding:8px;text-align:left;}th{background:#f0f0f0;}.btn{display:none;}</style></head><body>${window.currentTimeStatsHtml.replace(/<button[^>]*>.*?<\/button>/gs, '')}</body></html>`);
+            printWindow.print();
+            printWindow.close();
+        }
+
+        function exportTimeStatsToExcel() {
+            const data = window.currentTimeStatsData;
+            if (!data) { alert('Нет данных для экспорта'); return; }
+            let csv = [];
+            csv.push(`"Отчёт по времени выполнения: ${data.orderName}"`);
+            csv.push(`"Заказ №: ${data.orderNumber}", "Дата: ${data.orderDate}"`);
+            csv.push([]);
+            csv.push(`"Участок","Изделие","Операция","Деталь","Исполнитель","Кол-во","Время начала","Время окончания","Время (сек)"`);
+            data.records.forEach(record => {
+                const startTimeStr = record.startTime.toLocaleTimeString('ru-RU');
+                const endTimeStr = record.endTime.toLocaleTimeString('ru-RU');
+                csv.push(`"${record.siteName}","${record.product}","${record.operation}","${record.detail}","${record.executor}","${record.quantity}","${startTimeStr}","${endTimeStr}","${record.workSeconds}"`);
+            });
+            csv.push([]);
+            csv.push(`"ИТОГО: ${data.totalSeconds} секунд (${Math.floor(data.totalSeconds / 60)} мин ${data.totalSeconds % 60} сек)"`);
+            const csvContent = csv.join('\n');
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `time_stats_${data.orderName}_${data.orderNumber}.csv`;
+            link.click();
+            alert(`✅ Статистика времени экспортирована в файл: time_stats_${data.orderName}_${data.orderNumber}.csv`);
         }
 
         // ============== АРХИВАЦИЯ ЗАВЕРШЁННЫХ ГРУПП ==============
 
-        // Название периода (янв-июн / июл-дек)
         function getPeriodName() {
             const now = new Date();
             const year = now.getFullYear();
             const month = now.getMonth() + 1;
-            
-            if (month <= 6) {
-                return `${year}_01-06`;
-            } else {
-                return `${year}_07-12`;
-            }
+            return month <= 6 ? `${year}_01-06` : `${year}_07-12`;
         }
 
-        // Архивация и удаление только завершённых групп (статус green)
         function archiveCompletedGroups() {
             const orders = loadOrdersFromStorage();
+            if (orders.length === 0) { alert('📭 Нет данных для архивации'); return; }
             
-            if (orders.length === 0) {
-                alert('📭 Нет данных для архивации');
-                return;
-            }
-            
-            // Разделяем на активные (незавершённые) и завершённые
-            const activeOrders = [];      // orange + gray
-            const completedOrders = [];   // green
+            const activeOrders = [];
+            const completedOrders = [];
             
             orders.forEach(order => {
                 const status = getGroupStatus(order);
@@ -3773,42 +3752,20 @@
                 }
             });
             
-            if (completedOrders.length === 0) {
-                alert('📭 Нет завершённых групп для архивации');
-                return;
-            }
+            if (completedOrders.length === 0) { alert('📭 Нет завершённых групп для архивации'); return; }
+            if (!confirm(`⚠️ АРХИВАЦИЯ ЗАВЕРШЁННЫХ ГРУПП\n\n✅ Завершённых групп (удаляем): ${completedOrders.length}\n🟠 Активных групп (оставляем): ${activeOrders.length}\n\n💾 Создать архив и удалить завершённые группы?`)) return;
             
-            if (!confirm(`⚠️ АРХИВАЦИЯ ЗАВЕРШЁННЫХ ГРУПП\n\n✅ Завершённых групп (удаляем): ${completedOrders.length}\n🟠 Активных групп (оставляем): ${activeOrders.length}\n\n💾 Создать архив и удалить завершённые группы?`)) {
-                return;
-            }
-            
-            // 1. Создаём архив
-            const archiveData = {
-                archivedAt: new Date().toISOString(),
-                period: getPeriodName(),
-                completedGroups: completedOrders,
-                stats: {
-                    totalArchived: completedOrders.length,
-                    totalItems: completedOrders.reduce((sum, o) => sum + (o.items?.length || 0), 0),
-                    remainingActive: activeOrders.length
-                }
-            };
-            
-            // 2. Скачиваем архив
+            const archiveData = { archivedAt: new Date().toISOString(), period: getPeriodName(), completedGroups: completedOrders, stats: { totalArchived: completedOrders.length, totalItems: completedOrders.reduce((sum, o) => sum + (o.items?.length || 0), 0), remainingActive: activeOrders.length } };
             const fileName = `masterx_archive_completed_${getPeriodName()}.json`;
-            const blob = new Blob([JSON.stringify(archiveData, null, 2)], {type: 'application/json'});
+            const blob = new Blob([JSON.stringify(archiveData, null, 2)], { type: 'application/json' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = fileName;
             link.click();
             
-            // 3. Сохраняем ТОЛЬКО активные группы
             saveOrdersToStorage(activeOrders);
-            
-            // 4. Удаляем задачи завершённых групп со всех участков
             const completedIds = new Set(completedOrders.map(o => o.id));
             const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
-            
             sites.forEach(site => {
                 const storageKey = `tasks_${site}`;
                 const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
@@ -3816,9 +3773,7 @@
                 localStorage.setItem(storageKey, JSON.stringify(filteredTasks));
             });
             
-            // 5. Перезагружаем страницу
             alert(`✅ Архив создан!\n📁 Файл: ${fileName}\n📦 Завершённых групп в архиве: ${completedOrders.length}\n🔵 Активных групп осталось: ${activeOrders.length}\n\nСтраница будет перезагружена.`);
-            
             location.reload();
         }
 
@@ -3897,6 +3852,10 @@
         window.closeStatsModal = closeStatsModal;
         window.printStatsReport = printStatsReport;
         window.exportStatsToExcel = exportStatsToExcel;
+        window.showTimeStats = showTimeStats;
+        window.closeTimeStatsModal = closeTimeStatsModal;
+        window.printTimeStatsReport = printTimeStatsReport;
+        window.exportTimeStatsToExcel = exportTimeStatsToExcel;
         
         // ============== АВТООБНОВЛЕНИЕ СТРАНИЦЫ ==============
         const AUTO_RELOAD_INTERVAL = 15 * 60 * 1000;
