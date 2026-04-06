@@ -2958,33 +2958,30 @@
                     </div>
                 `;
             } else {
-                for (const [siteKey, rows] of Object.entries(reportsBySite)) {
-                    html += `
-                        <div style="margin-bottom: 10px; border: 1px solid #2a2f38; border-radius: 6px; overflow: hidden;">
-                            <div style="background: linear-gradient(135deg, #232830, #1a1e24); padding: 5px 10px;">
-                                <h4 style="margin: 0; color: #ff3b3b; font-size: 12px;">${siteNames[siteKey] || siteKey}</h4>
-                            </div>
-                            <div style="padding: 5px 8px;">
-                    `;
-                    
-                    rows.forEach(row => {
-                        const расход = row.расход || 0;
-                        const единица = row.единица || 'гр';
-                        const количество = row.количество || 0;
-                        const комментарий = row.комментарий || '';
-                        
-                        let text = `Расход: ${расход} ${единица}, Количество: ${количество} шт`;
-                        if (комментарий) text += `, ${комментарий}`;
-                        
-                        html += `
-                            <div style="margin-bottom: 3px; padding: 3px 5px; background: #15191f; border-radius: 3px; font-size: 11px;">
-                                ${escapeHtml(text)}
-                            </div>
-                        `;
-                    });
-                    
-                    html += `</div></div>`;
-                }
+                for (const [siteKey, rows] of Object.entries(item.reportsBySite)) {
+    let rowsHtml = '';
+    rows.forEach(row => {
+        const расход = row.расход || 0;
+        const единица = row.единица || 'гр';
+        const количество = row.количество || 0;
+        const комментарий = row.комментарий || '';
+        const материал = row.материал || row.material || 'Материал';
+        
+        let text = `📦 ${escapeHtml(материал)}: 📊 Расход ${расход} ${единица}, 📦 Кол-во ${количество} шт`;
+        if (комментарий) text += `, 💬 ${комментарий}`;
+        
+        rowsHtml += `<div style="padding: 4px 0; font-size: 12px; border-bottom: 1px solid #2a2f38;">${escapeHtml(text)}</div>`;
+    });
+    
+    sitesHtml += `
+        <div style="margin-top: 15px; border: 1px solid #2a2f38; border-radius: 6px; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #1a1e24, #15191f); padding: 6px 10px;">
+                <h4 style="margin: 0; color: #ff3b3b; font-size: 13px;">${siteNames[siteKey] || siteKey}</h4>
+            </div>
+            <div style="padding: 8px;">${rowsHtml}</div>
+        </div>
+    `;
+}
             }
             
             html += `
