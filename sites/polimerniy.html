@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MasterX - Слесарный участок</title>
+    <title>MasterX - Полимерный участок</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
         .task-card {
@@ -622,7 +622,7 @@
                 <img src="../images/logo.png" alt="MasterX Logo" class="logo-img" onerror="this.style.display='none'">
                 <div class="logo-text">Master<span class="x-red">X</span></div>
             </div>
-            <h1 style="margin:0; color: white; font-size:18px;">🔨 Слесарный участок</h1>
+            <h1 style="margin:0; color: white; font-size:18px;">🔨 Полимерный участок</h1>
         </header>
 
         <div class="filter-section">
@@ -706,7 +706,7 @@
         let currentReportTask = null;
         let reportRows = [];
         
-        const OPEN_CARDS_KEY = 'slesarniy_open_tasks';
+        const OPEN_CARDS_KEY = 'polimerniy_open_tasks';
         
         // ============== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==============
         function escapeHtml(str) {
@@ -1525,7 +1525,7 @@
                     detailDisplay = `<div class="operation-detail">📦 ${escapeHtml(cleanDetailName)} ${task.thickness ? `<span>${escapeHtml(task.thickness)}</span>` : ''}</div>`;
                 }
                 
-                const siteFiles = order.siteFiles?.['slesarniy'] || [];
+                const siteFiles = order.siteFiles?.['polimerniy'] || [];
                 const hasFiles = siteFiles.length > 0;
                 const filesIndicator = hasFiles ? `<span class="file-indicator">📎 Файлы: ${siteFiles.length}</span>` : '';
                 
@@ -1710,7 +1710,7 @@
                 detail: task.detail,
                 thickness: task.thickness,
                 isPriority: task.isPriority || false,
-                siteKey: 'slesarniy'
+                siteKey: 'polimerniy'
             };
             
             const modal = document.getElementById('rightModal');
@@ -1731,7 +1731,7 @@
         
         function getSavedReportDataForTask(taskId) {
             const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-            const taskReports = allReports.filter(r => r.taskId === taskId && r.siteKey === 'slesarniy');
+            const taskReports = allReports.filter(r => r.taskId === taskId && r.siteKey === 'polimerniy');
             if (taskReports.length === 0) return null;
             const allRows = [];
             taskReports.forEach(report => {
@@ -1969,14 +1969,14 @@
             const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `slesarniy_tasks.csv`;
+            link.download = `polimerniy_tasks.csv`;
             link.click();
         };
         
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         async function init() {
             await loadTaskOperationsData();
-            taskManager = new SimpleTaskManager('slesarniy');
+            taskManager = new SimpleTaskManager('polimerniy');
             window.taskManager = taskManager;
             setupFilterListeners();
             renderTasks();
