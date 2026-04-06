@@ -833,43 +833,70 @@
             }
             
             updateExecutorStatus(taskId, executorId, status) {
-                const task = this.tasks.find(t => t.id === taskId);
-                if (!task || !task.executors) return;
-                
-                const executor = task.executors.find(e => e.id === executorId);
-                if (executor) {
-                    executor.status = status;
-                    
-                    let taskStatus = 'pending';
-                    const hasInProgress = task.executors.some(e => e.status === 'in_progress');
-                    const allShiftEnded = task.executors.length > 0 && task.executors.every(e => e.status === 'shift_ended');
-                    const allCompleted = task.executors.length > 0 && task.executors.every(e => e.status === 'completed');
-                    
-                    if (allCompleted) {
-                        taskStatus = 'completed';
-                    } else if (hasInProgress) {
-                        taskStatus = 'in_progress';
-                    } else if (allShiftEnded) {
-                        taskStatus = 'in_progress';
-                    } else {
-                        taskStatus = 'pending';
-                    }
-                    
-                    task.status = taskStatus;
-                    this.saveData();
-                    
-                    const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-                    const order = orders.find(o => o.id == task.orderId);
-                    if (order) {
-                        if (!order.tasks) order.tasks = {};
-                        const squareColor = taskStatus === 'completed' ? 'green' : (taskStatus === 'in_progress' ? 'orange' : '');
-                        order.tasks[task.id] = squareColor;
-                        localStorage.setItem('masterx_orders', JSON.stringify(orders));
-                    }
-                    
-                    updateSingleTaskCard(taskId);
-                }
-            }
+    const task = this.tasks.find(t => t.id === taskId);
+    if (!task || !task.executors) return;
+    
+    const executor = task.executors.find(e => e.id === executorId);
+    if (executor) {
+        const now = new Date().toISOString();
+        
+        // ========== ФИКСАЦИЯ ВРЕМЕНИ ==========
+        // Фиксируем время начала работы (кнопка "НАЧАТЬ")
+        if (status === 'in_progress' && executor.status !== 'in_progress') {
+            executor.startTime = now;
+            executor.endTime = null;
+            console.log(`⏱️ Начало работы: ${executor.name} - ${task.operation} в ${new Date(now).toLocaleTimeString()}`);
+        }
+        
+        // Фиксируем время завершения (кнопка "ЗАКРЫТЬ")
+        if (status === 'shift_ended' && executor.status === 'in_progress') {
+            executor.endTime = now;
+            // Вычисляем время выполнения в минутах
+            const start = new Date(executor.startTime);
+            const end = new Date(now);
+            const minutes = Math.round((end - start) / 60000);
+            executor.workTime = minutes;
+            
+            // Обновляем общее время задачи
+            if (!task.totalWorkTime) task.totalWorkTime = 0;
+            task.totalWorkTime += minutes;
+            
+            console.log(`⏱️ Завершение работы: ${executor.name} - ${task.operation}, время: ${minutes} мин`);
+        }
+        // =====================================
+        
+        executor.status = status;
+        
+        let taskStatus = 'pending';
+        const hasInProgress = task.executors.some(e => e.status === 'in_progress');
+        const allShiftEnded = task.executors.length > 0 && task.executors.every(e => e.status === 'shift_ended');
+        const allCompleted = task.executors.length > 0 && task.executors.every(e => e.status === 'completed');
+        
+        if (allCompleted) {
+            taskStatus = 'completed';
+        } else if (hasInProgress) {
+            taskStatus = 'in_progress';
+        } else if (allShiftEnded) {
+            taskStatus = 'in_progress';
+        } else {
+            taskStatus = 'pending';
+        }
+        
+        task.status = taskStatus;
+        this.saveData();
+        
+        const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+        const order = orders.find(o => o.id == task.orderId);
+        if (order) {
+            if (!order.tasks) order.tasks = {};
+            const squareColor = taskStatus === 'completed' ? 'green' : (taskStatus === 'in_progress' ? 'orange' : '');
+            order.tasks[task.id] = squareColor;
+            localStorage.setItem('masterx_orders', JSON.stringify(orders));
+        }
+        
+        updateSingleTaskCard(taskId);
+    }
+}
             
             addExecutor(taskId, name) {
                 const task = this.tasks.find(t => t.id === taskId);
