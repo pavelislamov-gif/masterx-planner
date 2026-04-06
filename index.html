@@ -843,6 +843,99 @@
             background: linear-gradient(135deg, #e68900, #cc7a00);
             transform: translateY(-2px);
         }
+        
+        .btn-stats {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            border: none;
+        }
+        
+        .btn-stats:hover {
+            background: linear-gradient(135deg, #8e44ad, #7d3c98);
+            transform: translateY(-2px);
+        }
+        
+        /* Стили для статистики */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-card {
+            background: #15191f;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #2a2f38;
+        }
+        
+        .stat-card-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card-label {
+            font-size: 11px;
+            color: #a0a0a0;
+        }
+        
+        .progress-bar-container {
+            background: #2a2f38;
+            border-radius: 10px;
+            height: 20px;
+            width: 100px;
+            display: inline-block;
+            overflow: hidden;
+        }
+        
+        .progress-bar-fill {
+            background: #4caf50;
+            height: 100%;
+            border-radius: 10px;
+        }
+        
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .stats-table th,
+        .stats-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #2a2f38;
+        }
+        
+        .stats-table th {
+            background: #232830;
+            font-weight: 600;
+        }
+        
+        .site-stats-block {
+            margin-top: 20px;
+            border: 1px solid #2a2f38;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .site-stats-header {
+            background: linear-gradient(135deg, #232830, #1a1e24);
+            padding: 10px 15px;
+        }
+        
+        .site-stats-header h5 {
+            margin: 0;
+            color: #ff3b3b;
+        }
+        
+        .file-select-item:hover {
+            background: #232830 !important;
+            border-color: #ff3b3b !important;
+            transform: translateX(5px);
+        }
     </style>
 </head>
 <body>
@@ -1034,6 +1127,15 @@
 
         const MAIN_STORAGE_KEY = 'main_open_cards';
         const MAIN_ITEMS_STORAGE_KEY = 'main_open_items';
+        
+        // Названия участков для статистики
+        const siteNamesFull = {
+            'tokarniy': '🔧 Токарный участок',
+            'slesarniy': '🔨 Слесарный участок',
+            'frezerniy': '⚙️ Фрезерный участок',
+            'lazerno': '✨ Лазерно-гибочный участок',
+            'polimerniy': '🎨 Полимерный участок'
+        };
 
         // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
         function saveMainOpenCardsState() {
@@ -2479,6 +2581,7 @@
                         </div>
                         <div style="display: flex; gap: 8px;">
                             <button class="btn btn-primary" onclick="event.stopPropagation(); showOrderReport(${order.id})" style="background: #0077ff;">📋 Отчёт по заказу</button>
+                            <button class="btn btn-stats" onclick="event.stopPropagation(); showGroupStats(${order.id})">📊 Статистика</button>
                             <button class="btn btn-info" onclick="event.stopPropagation(); editGroup(${order.id})">✏️ Редактировать состав</button>
                             <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
                         </div>
@@ -2958,29 +3061,32 @@
                     </div>
                 `;
             } else {
-                for (const [siteKey, rows] of Object.entries(item.reportsBySite)) {
-    rows.forEach(row => {
-    const расход = row.расход || 0;
-    const единица = row.единица || 'гр';
-    const количество = row.количество || 0;
-    const комментарий = row.комментарий || '';
-    const материал = row.материал || row.material || 'Материал';
-    
-    let text = `📦 ${escapeHtml(материал)}: 📊 Расход ${расход} ${единица}, 📦 Кол-во ${количество} шт`;
-    if (комментарий) text += `, 💬 ${комментарий}`;
-    
-    rowsHtml += `<div style="padding: 6px 0; font-size: 12px; border-bottom: 1px solid #2a2f38;">${escapeHtml(text)}</div>`;
-});
-    
-    sitesHtml += `
-        <div style="margin-top: 15px; border: 1px solid #2a2f38; border-radius: 6px; overflow: hidden;">
-            <div style="background: linear-gradient(135deg, #1a1e24, #15191f); padding: 6px 10px;">
-                <h4 style="margin: 0; color: #ff3b3b; font-size: 13px;">${siteNames[siteKey] || siteKey}</h4>
-            </div>
-            <div style="padding: 8px;">${rowsHtml}</div>
-        </div>
-    `;
-}
+                for (const [siteKey, rows] of Object.entries(reportsBySite)) {
+                    let rowsHtml = '';
+                    rows.forEach(row => {
+                        const расход = row.расход || 0;
+                        const единица = row.единица || 'гр';
+                        const количество = row.количество || 0;
+                        const комментарий = row.комментарий || '';
+                        const материал = row.материал || row.material || 'Материал';
+                        
+                        let text = `📦 ${escapeHtml(материал)}: 📊 Расход ${расход} ${единица}, 📦 Кол-во ${количество} шт`;
+                        if (комментарий) text += `, 💬 ${комментарий}`;
+                        
+                        rowsHtml += `<div style="padding: 4px 0; font-size: 12px; border-bottom: 1px solid #2a2f38;">${escapeHtml(text)}</div>`;
+                    });
+                    
+                    html += `
+                        <div style="margin-bottom: 10px; border: 1px solid #2a2f38; border-radius: 6px; overflow: hidden;">
+                            <div style="background: linear-gradient(135deg, #232830, #1a1e24); padding: 5px 10px;">
+                                <h4 style="margin: 0; color: #ff3b3b; font-size: 12px;">${siteNames[siteKey] || siteKey}</h4>
+                            </div>
+                            <div style="padding: 5px 8px;">
+                                ${rowsHtml}
+                            </div>
+                        </div>
+                    `;
+                }
             }
             
             html += `
@@ -3114,29 +3220,29 @@
                     
                     let sitesHtml = '';
                     for (const [siteKey, rows] of Object.entries(item.reportsBySite)) {
-    let rowsHtml = '';
-    rows.forEach(row => {
-        const расход = row.расход || 0;
-        const единица = row.единица || 'гр';
-        const количество = row.количество || 0;
-        const комментарий = row.комментарий || '';
-        const материал = row.материал || row.material || 'Материал';
-        
-        let text = `📦 ${escapeHtml(материал)}: 📊 Расход ${расход} ${единица}, 📦 Кол-во ${количество} шт`;
-        if (комментарий) text += `, 💬 ${комментарий}`;
-        
-        rowsHtml += `<div style="padding: 4px 0; font-size: 12px; border-bottom: 1px solid #2a2f38;">${escapeHtml(text)}</div>`;
-    });
-    
-    sitesHtml += `
-        <div style="margin-top: 15px; border: 1px solid #2a2f38; border-radius: 6px; overflow: hidden;">
-            <div style="background: linear-gradient(135deg, #1a1e24, #15191f); padding: 6px 10px;">
-                <h4 style="margin: 0; color: #ff3b3b; font-size: 13px;">${siteNames[siteKey] || siteKey}</h4>
-            </div>
-            <div style="padding: 8px;">${rowsHtml}</div>
-        </div>
-    `;
-}
+                        let rowsHtml = '';
+                        rows.forEach(row => {
+                            const расход = row.расход || 0;
+                            const единица = row.единица || 'гр';
+                            const количество = row.количество || 0;
+                            const комментарий = row.комментарий || '';
+                            const материал = row.материал || row.material || 'Материал';
+                            
+                            let text = `📦 ${escapeHtml(материал)}: 📊 Расход ${расход} ${единица}, 📦 Кол-во ${количество} шт`;
+                            if (комментарий) text += `, 💬 ${комментарий}`;
+                            
+                            rowsHtml += `<div style="padding: 4px 0; font-size: 12px; border-bottom: 1px solid #2a2f38;">${escapeHtml(text)}</div>`;
+                        });
+                        
+                        sitesHtml += `
+                            <div style="margin-top: 15px; border: 1px solid #2a2f38; border-radius: 6px; overflow: hidden;">
+                                <div style="background: linear-gradient(135deg, #1a1e24, #15191f); padding: 6px 10px;">
+                                    <h4 style="margin: 0; color: #ff3b3b; font-size: 13px;">${siteNames[siteKey] || siteKey}</h4>
+                                </div>
+                                <div style="padding: 8px;">${rowsHtml}</div>
+                            </div>
+                        `;
+                    }
                     
                     itemsHtml += `
                         <div style="margin-bottom: 25px; border: 1px solid #2a2f38; border-radius: 8px; overflow: hidden;">
@@ -3223,6 +3329,411 @@
             `);
             printWindow.print();
             printWindow.close();
+        }
+
+        // ============== СТАТИСТИКА ПО ГРУППЕ ==============
+        
+        // Получить все задачи группы со всех участков
+        function getAllGroupTasks(orderId) {
+            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+            const allTasks = [];
+            
+            sites.forEach(site => {
+                const storageKey = `tasks_${site}`;
+                const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                const groupTasks = tasks.filter(t => t.orderId == orderId);
+                groupTasks.forEach(task => {
+                    allTasks.push({ ...task, site });
+                });
+            });
+            
+            return allTasks;
+        }
+
+        // Собрать статистику по операциям
+        function collectWorkStats(allTasks) {
+            const workStats = {};
+            
+            allTasks.forEach(task => {
+                const opKey = `${task.site}_${task.operation}_${task.detail || ''}`;
+                if (!workStats[opKey]) {
+                    workStats[opKey] = {
+                        operation: task.operation,
+                        detail: task.detail || '-',
+                        site: task.site,
+                        siteName: siteNamesFull[task.site] || task.site,
+                        totalTime: 0,
+                        count: 0,
+                        avgTime: 0,
+                        minTime: Infinity,
+                        maxTime: 0,
+                        completedCount: 0,
+                        totalQuantity: task.totalQuantity || 1,
+                        completedQuantity: task.completedQuantity || 0
+                    };
+                }
+                
+                if (task.status === 'completed') {
+                    workStats[opKey].completedCount++;
+                }
+                
+                if (task.executors && task.executors.length > 0) {
+                    task.executors.forEach(exec => {
+                        if (exec.workTime && exec.workTime > 0) {
+                            workStats[opKey].totalTime += exec.workTime;
+                            workStats[opKey].count++;
+                            workStats[opKey].minTime = Math.min(workStats[opKey].minTime, exec.workTime);
+                            workStats[opKey].maxTime = Math.max(workStats[opKey].maxTime, exec.workTime);
+                        }
+                    });
+                }
+            });
+            
+            // Вычисляем среднее время
+            Object.values(workStats).forEach(stat => {
+                if (stat.count > 0) {
+                    stat.avgTime = Math.round(stat.totalTime / stat.count);
+                } else {
+                    stat.avgTime = 0;
+                    stat.minTime = 0;
+                    stat.maxTime = 0;
+                }
+            });
+            
+            return workStats;
+        }
+
+        // Собрать статистику по участкам
+        function collectSiteStats(allTasks, workStats) {
+            const siteStats = {};
+            
+            allTasks.forEach(task => {
+                if (!siteStats[task.site]) {
+                    siteStats[task.site] = {
+                        siteKey: task.site,
+                        siteName: siteNamesFull[task.site] || task.site,
+                        totalTasks: 0,
+                        completedTasks: 0,
+                        totalTime: 0,
+                        operations: []
+                    };
+                }
+                
+                siteStats[task.site].totalTasks++;
+                if (task.status === 'completed') {
+                    siteStats[task.site].completedTasks++;
+                }
+            });
+            
+            // Добавляем время из статистики операций
+            Object.values(workStats).forEach(stat => {
+                if (siteStats[stat.site]) {
+                    siteStats[stat.site].totalTime += stat.totalTime;
+                    siteStats[stat.site].operations.push(stat);
+                }
+            });
+            
+            return siteStats;
+        }
+
+        // Показать статистику по группе
+        function showGroupStats(orderId) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) {
+                alert('Группа не найдена');
+                return;
+            }
+            
+            const allTasks = getAllGroupTasks(orderId);
+            const workStats = collectWorkStats(allTasks);
+            const siteStats = collectSiteStats(allTasks, workStats);
+            
+            // Общая статистика
+            const totalOperations = allTasks.length;
+            const completedOperations = allTasks.filter(t => t.status === 'completed').length;
+            const totalWorkTime = Object.values(workStats).reduce((sum, s) => sum + s.totalTime, 0);
+            const totalWorkHours = Math.round(totalWorkTime / 60 * 10) / 10;
+            
+            // Формируем HTML
+            let statsHtml = `
+                <div style="padding: 20px;">
+                    <div style="margin-bottom: 20px; border-bottom: 2px solid #ff3b3b; padding-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                                <h2 style="color: #ff3b3b; margin: 0;">📊 СТАТИСТИКА ПО ГРУППЕ</h2>
+                                <h3 style="margin: 5px 0 0 0;">${escapeHtml(order.groupName)}</h3>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 14px; color: #a0a0a0;">Заказ №${order.number || '---'}</div>
+                                <div style="font-size: 12px; color: #a0a0a0;">Дата: ${order.date}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Общая статистика -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-card-value" style="color: #ff9800;">${totalOperations}</div>
+                            <div class="stat-card-label">Всего операций</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-value" style="color: #4caf50;">${completedOperations}</div>
+                            <div class="stat-card-label">Выполнено</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-value" style="color: #00d4ff;">${totalWorkTime}</div>
+                            <div class="stat-card-label">Общее время (мин)</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-value" style="color: #9b59b6;">${totalWorkHours}</div>
+                            <div class="stat-card-label">Общее время (часы)</div>
+                        </div>
+                    </div>
+            `;
+            
+            // Статистика по участкам
+            if (Object.keys(siteStats).length > 0) {
+                statsHtml += `
+                    <h4 style="color: #ff9800; margin-bottom: 15px;">🏭 СТАТИСТИКА ПО УЧАСТКАМ</h4>
+                    <div style="overflow-x: auto; margin-bottom: 25px;">
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Участок</th>
+                                    <th style="text-align: center;">Операций</th>
+                                    <th style="text-align: center;">Выполнено</th>
+                                    <th style="text-align: center;">Прогресс</th>
+                                    <th style="text-align: center;">Время (мин)</th>
+                                    <th style="text-align: center;">Время (часы)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                const sortedSites = Object.values(siteStats).sort((a, b) => b.totalTime - a.totalTime);
+                
+                sortedSites.forEach(site => {
+                    const progress = site.totalTasks > 0 ? Math.round((site.completedTasks / site.totalTasks) * 100) : 0;
+                    const siteHours = Math.round(site.totalTime / 60 * 10) / 10;
+                    
+                    statsHtml += `
+                        <tr>
+                            <td><strong>${site.siteName}</strong></td>
+                            <td style="text-align: center;">${site.totalTasks}</td>
+                            <td style="text-align: center; color: #4caf50;">${site.completedTasks}</td>
+                            <td style="text-align: center;">
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" style="width: ${progress}%;"></div>
+                                </div>
+                                <span style="margin-left: 8px; font-size: 11px;">${progress}%</span>
+                            </td>
+                            <td style="text-align: center; color: #00d4ff;">${site.totalTime}</td>
+                            <td style="text-align: center;">${siteHours}</td>
+                        </tr>
+                    `;
+                });
+                
+                statsHtml += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                
+                // Статистика по операциям (с группировкой по участкам)
+                statsHtml += `<h4 style="color: #ff9800; margin-bottom: 15px;">⏱️ ДЕТАЛЬНАЯ СТАТИСТИКА ПО ОПЕРАЦИЯМ</h4>`;
+                
+                // Группируем операции по участкам
+                const operationsBySite = {};
+                Object.values(workStats).forEach(stat => {
+                    if (!operationsBySite[stat.site]) {
+                        operationsBySite[stat.site] = [];
+                    }
+                    operationsBySite[stat.site].push(stat);
+                });
+                
+                for (const [siteKey, operations] of Object.entries(operationsBySite)) {
+                    const siteName = siteNamesFull[siteKey] || siteKey;
+                    statsHtml += `
+                        <div class="site-stats-block">
+                            <div class="site-stats-header">
+                                <h5>${siteName}</h5>
+                            </div>
+                            <div style="overflow-x: auto;">
+                                <table class="stats-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Операция</th>
+                                            <th>Деталь</th>
+                                            <th style="text-align: center;">Выполнений</th>
+                                            <th style="text-align: center;">Ср. время (мин)</th>
+                                            <th style="text-align: center;">Мин (мин)</th>
+                                            <th style="text-align: center;">Макс (мин)</th>
+                                            <th style="text-align: center;">Всего (мин)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                    `;
+                    
+                    const sortedOps = operations.sort((a, b) => b.totalTime - a.totalTime);
+                    
+                    sortedOps.forEach(op => {
+                        statsHtml += `
+                            <tr>
+                                <td><strong>${escapeHtml(op.operation)}</strong></td>
+                                <td style="color: #4cd964; font-size: 11px;">${escapeHtml(op.detail)}</td>
+                                <td style="text-align: center;">${op.count}</td>
+                                <td style="text-align: center; color: #ff9800; font-weight: 600;">${op.avgTime}</td>
+                                <td style="text-align: center;">${op.minTime === Infinity ? '-' : op.minTime}</td>
+                                <td style="text-align: center;">${op.maxTime || '-'}</td>
+                                <td style="text-align: center; color: #00d4ff;">${op.totalTime}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    statsHtml += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else {
+                statsHtml += `
+                    <div style="text-align: center; padding: 40px; background: #15191f; border-radius: 8px;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📭</div>
+                        <p>Нет данных по выполненным операциям</p>
+                        <p style="font-size: 11px; color: #6c757d;">Статистика появится после завершения операций на участках</p>
+                    </div>
+                `;
+            }
+            
+            statsHtml += `
+                    <div style="display: flex; justify-content: center; gap: 12px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #2a2f38;">
+                        <button class="btn btn-success" onclick="exportStatsToExcel()">📊 Экспорт в Excel</button>
+                        <button class="btn btn-primary" onclick="printStatsReport()">🖨️ Распечатать</button>
+                        <button class="btn btn-danger" onclick="closeStatsModal()">✖️ Закрыть</button>
+                    </div>
+                </div>
+            `;
+            
+            // Сохраняем данные для экспорта
+            window.currentStatsData = {
+                orderName: order.groupName,
+                orderNumber: order.number,
+                orderDate: order.date,
+                totalOperations,
+                completedOperations,
+                totalWorkTime,
+                totalWorkHours,
+                siteStats: Object.values(siteStats),
+                workStats: Object.values(workStats)
+            };
+            
+            // Создаём модальное окно
+            const modal = document.createElement('div');
+            modal.id = 'statsModal';
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.style.zIndex = '10001';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 1400px; max-height: 85vh; overflow-y: auto;">
+                    <span class="close" onclick="closeStatsModal()">&times;</span>
+                    ${statsHtml}
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            window.currentStatsHtml = statsHtml;
+        }
+
+        function closeStatsModal() {
+            const modal = document.getElementById('statsModal');
+            if (modal) modal.remove();
+        }
+
+        function printStatsReport() {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Статистика по группе</title>
+                        <style>
+                            body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: white; color: black; }
+                            table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+                            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                            th { background: #f0f0f0; }
+                            .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+                            .stat-card { border: 1px solid #ddd; border-radius: 10px; padding: 15px; text-align: center; }
+                            .stat-card-value { font-size: 28px; font-weight: bold; }
+                            .stat-card-label { font-size: 12px; color: #666; }
+                            .progress-bar-container { background: #ddd; border-radius: 10px; height: 20px; width: 100px; display: inline-block; overflow: hidden; }
+                            .progress-bar-fill { background: #4caf50; height: 100%; border-radius: 10px; }
+                            .site-stats-block { margin-top: 20px; border: 1px solid #ddd; border-radius: 10px; overflow: hidden; }
+                            .site-stats-header { background: #f0f0f0; padding: 10px 15px; }
+                            .btn { display: none; }
+                            @media print {
+                                .btn { display: none; }
+                            }
+                        </style>
+                    </head>
+                    <body>${window.currentStatsHtml.replace(/<button[^>]*>.*?<\/button>/gs, '')}</body>
+                </html>
+            `);
+            printWindow.print();
+            printWindow.close();
+        }
+
+        function exportStatsToExcel() {
+            const data = window.currentStatsData;
+            if (!data) {
+                alert('Нет данных для экспорта');
+                return;
+            }
+            
+            let csv = [];
+            
+            // Заголовок
+            csv.push(`"Статистика по группе: ${data.orderName}"`);
+            csv.push(`"Заказ №: ${data.orderNumber}", "Дата: ${data.orderDate}"`);
+            csv.push([]);
+            
+            // Общая статистика
+            csv.push(`"ОБЩАЯ СТАТИСТИКА"`);
+            csv.push(`"Всего операций","${data.totalOperations}"`);
+            csv.push(`"Выполнено операций","${data.completedOperations}"`);
+            csv.push(`"Общее время (минуты)","${data.totalWorkTime}"`);
+            csv.push(`"Общее время (часы)","${data.totalWorkHours}"`);
+            csv.push([]);
+            
+            // Статистика по участкам
+            csv.push(`"СТАТИСТИКА ПО УЧАСТКАМ"`);
+            csv.push(`"Участок","Операций","Выполнено","Прогресс %","Время (мин)","Время (часы)"`);
+            data.siteStats.forEach(site => {
+                const progress = site.totalTasks > 0 ? Math.round((site.completedTasks / site.totalTasks) * 100) : 0;
+                const hours = Math.round(site.totalTime / 60 * 10) / 10;
+                csv.push(`"${site.siteName}","${site.totalTasks}","${site.completedTasks}","${progress}","${site.totalTime}","${hours}"`);
+            });
+            csv.push([]);
+            
+            // Детальная статистика по операциям
+            csv.push(`"ДЕТАЛЬНАЯ СТАТИСТИКА ПО ОПЕРАЦИЯМ"`);
+            csv.push(`"Участок","Операция","Деталь","Выполнений","Ср. время (мин)","Мин (мин)","Макс (мин)","Всего (мин)"`);
+            data.workStats.forEach(op => {
+                const siteName = siteNamesFull[op.site] || op.site;
+                csv.push(`"${siteName}","${op.operation}","${op.detail}","${op.count}","${op.avgTime}","${op.minTime === Infinity ? '-' : op.minTime}","${op.maxTime || '-'}","${op.totalTime}"`);
+            });
+            
+            // Создаём и скачиваем файл
+            const csvContent = csv.map(row => Array.isArray(row) ? row.join(',') : row).join('\n');
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const fileName = `statistics_${data.orderName}_${data.orderNumber}.csv`;
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+            
+            alert(`✅ Статистика экспортирована в файл: ${fileName}`);
         }
 
         // ============== АРХИВАЦИЯ ЗАВЕРШЁННЫХ ГРУПП ==============
@@ -3382,6 +3893,10 @@
         window.updateTaskQuantitiesFromDetails = updateTaskQuantitiesFromDetails;
         window.archiveCompletedGroups = archiveCompletedGroups;
         window.getPeriodName = getPeriodName;
+        window.showGroupStats = showGroupStats;
+        window.closeStatsModal = closeStatsModal;
+        window.printStatsReport = printStatsReport;
+        window.exportStatsToExcel = exportStatsToExcel;
         
         // ============== АВТООБНОВЛЕНИЕ СТРАНИЦЫ ==============
         const AUTO_RELOAD_INTERVAL = 15 * 60 * 1000;
