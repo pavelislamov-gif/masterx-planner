@@ -697,7 +697,7 @@
     <script src="../js/materials-report.js"></script>
     <script src="../js/task-manager.js"></script>
 
-    <script>
+        <script>
         // ============== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==============
         let taskOperationsData = {};
         let taskManager = null;
@@ -788,211 +788,112 @@
         
         // ============== КЛАСС УПРАВЛЕНИЯ ЗАДАЧАМИ ==============
         class SimpleTaskManager {
-    constructor(siteKey) {
-        this.siteKey = siteKey;
-        this.tasks = [];
-        this.storageKey = `tasks_${siteKey}`;
-    }
-    
-    loadData() {
-        const saved = localStorage.getItem(this.storageKey);
-        if (saved) {
-            this.tasks = JSON.parse(saved);
-        } else {
-            this.tasks = [];
-        }
-        return this.tasks;
-    }
-    
-    saveData() {
-        localStorage.setItem(this.storageKey, JSON.stringify(this.tasks));
-    }
-    
-    getTasksByStatus(status) {
-        if (status === 'all') return this.tasks;
-        return this.tasks.filter(t => t.status === status);
-    }
-    
-    getStats() {
-        const total = this.tasks.length;
-        const inProgress = this.tasks.filter(t => t.status === 'in_progress').length;
-        const completed = this.tasks.filter(t => t.status === 'completed').length;
-        return { total, inProgress, completed };
-    }
-    
-    updateExecutorQuantity(taskId, executorId, quantity) {
-        const task = this.tasks.find(t => t.id === taskId);
-        if (task && task.executors) {
-            const executor = task.executors.find(e => e.id === executorId);
-            if (executor) {
-                executor.quantity = quantity;
-                this.saveData();
-                updateSingleTaskCard(taskId);
-            }
-        }
-    }
-    
-    updateExecutorStatus(taskId, executorId, status) {
-        const task = this.tasks.find(t => t.id === taskId);
-        if (!task || !task.executors) return;
-        
-        const executor = task.executors.find(e => e.id === executorId);
-        if (executor) {
-            const now = new Date().toISOString();
-            
-            // Фиксируем время начала работы (кнопка "НАЧАТЬ")
-            if (status === 'in_progress' && executor.status !== 'in_progress') {
-                executor.startTime = now;
-                executor.endTime = null;
-                console.log(`⏱️ НАЧАЛО: ${executor.name} - ${task.operation} в ${new Date(now).toLocaleTimeString()}`);
+            constructor(siteKey) {
+                this.siteKey = siteKey;
+                this.tasks = [];
+                this.storageKey = `tasks_${siteKey}`;
             }
             
-            // Фиксируем время завершения (кнопка "ЗАКРЫТЬ")
-            if (status === 'shift_ended' && executor.status === 'in_progress') {
-                executor.endTime = now;
-                if (executor.startTime) {
-                    const start = new Date(executor.startTime);
-                    const end = new Date(now);
-                    const minutes = Math.round((end - start) / 60000);
-                    executor.workTime = minutes;
-                    
-                    if (!task.totalWorkTime) task.totalWorkTime = 0;
-                    task.totalWorkTime += minutes;
-                    
-                    console.log(`⏱️ ЗАКРЫТИЕ СМЕНЫ: ${executor.name} - ${task.operation}, время: ${minutes} мин`);
+            loadData() {
+                const saved = localStorage.getItem(this.storageKey);
+                if (saved) {
+                    this.tasks = JSON.parse(saved);
+                } else {
+                    this.tasks = [];
                 }
-                executor.status = 'shift_ended';
+                return this.tasks;
             }
             
-            // Обновляем статус исполнителя (но не перезаписываем shift_ended)
-            if (status !== 'shift_ended') {
-                executor.status = status;
+            saveData() {
+                localStorage.setItem(this.storageKey, JSON.stringify(this.tasks));
             }
             
-            let taskStatus = 'pending';
-            const hasInProgress = task.executors.some(e => e.status === 'in_progress');
-            const allShiftEnded = task.executors.length > 0 && task.executors.every(e => e.status === 'shift_ended');
-            const allCompleted = task.executors.length > 0 && task.executors.every(e => e.status === 'completed');
-            
-            if (allCompleted) {
-                taskStatus = 'completed';
-            } else if (hasInProgress) {
-                taskStatus = 'in_progress';
-            } else if (allShiftEnded) {
-                taskStatus = 'in_progress';
-            } else {
-                taskStatus = 'pending';
+            getTasksByStatus(status) {
+                if (status === 'all') return this.tasks;
+                return this.tasks.filter(t => t.status === status);
             }
             
-            task.status = taskStatus;
-            this.saveData();
-            
-            const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-            const order = orders.find(o => o.id == task.orderId);
-            if (order) {
-                if (!order.tasks) order.tasks = {};
-                const squareColor = taskStatus === 'completed' ? 'green' : (taskStatus === 'in_progress' ? 'orange' : '');
-                order.tasks[task.id] = squareColor;
-                localStorage.setItem('masterx_orders', JSON.stringify(orders));
+            getStats() {
+                const total = this.tasks.length;
+                const inProgress = this.tasks.filter(t => t.status === 'in_progress').length;
+                const completed = this.tasks.filter(t => t.status === 'completed').length;
+                return { total, inProgress, completed };
             }
             
-            updateSingleTaskCard(taskId);
-        }
-    }
-    
-    addExecutor(taskId, name) {
-        const task = this.tasks.find(t => t.id === taskId);
-        if (task) {
-            if (!task.executors) task.executors = [];
-            if (task.executors.some(e => e.name === name)) return false;
-            task.executors.push({
-                id: Date.now(),
-                name: name,
-                quantity: 0,
-                status: 'pending',
-                startTime: null,
-                endTime: null,
-                workTime: 0
-            });
-            this.saveData();
-            updateExecutorList(taskId);
-            return true;
-        }
-        return false;
-    }
-    
-    removeExecutor(taskId, executorId) {
-        const task = this.tasks.find(t => t.id === taskId);
-        if (task && task.executors) {
-            task.executors = task.executors.filter(e => e.id !== executorId);
-            this.saveData();
-            updateExecutorList(taskId);
-        }
-    }
-    
-    completeTask(taskId) {
-        const task = this.tasks.find(t => t.id === taskId);
-        if (!task) return;
-        
-        // Фиксируем время для всех активных исполнителей
-        const now = new Date().toISOString();
-        if (task.executors && task.executors.length > 0) {
-            task.executors.forEach(executor => {
-                if ((executor.status === 'in_progress' || executor.status === 'shift_ended') && !executor.endTime) {
-                    executor.endTime = now;
-                    if (executor.startTime) {
-                        const start = new Date(executor.startTime);
-                        const end = new Date(now);
-                        const minutes = Math.round((end - start) / 60000);
-                        executor.workTime = minutes;
-                        
-                        if (!task.totalWorkTime) task.totalWorkTime = 0;
-                        task.totalWorkTime += minutes;
-                        
-                        console.log(`⏱️ ГОТОВО: ${executor.name} - ${task.operation}, время: ${minutes} мин`);
+            updateExecutorQuantity(taskId, executorId, quantity) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (task && task.executors) {
+                    const executor = task.executors.find(e => e.id === executorId);
+                    if (executor) {
+                        executor.quantity = quantity;
+                        this.saveData();
+                        updateSingleTaskCard(taskId);
                     }
-                    executor.status = 'completed';
                 }
-            });
-        }
-        
-        const totalAssigned = task.executors.reduce((sum, e) => sum + (e.quantity || 0), 0);
-        const planQuantity = task.totalQuantity || 1;
-        let operationName = task.operation;
-        if (task.detail) {
-            operationName += ` (${task.detail})`;
-        }
-        
-        if (totalAssigned < planQuantity) {
-            if (!confirm(`⚠️ Выполнено только ${totalAssigned} из ${planQuantity} шт.\n\nВсё равно завершить задачу?`)) {
-                return;
             }
-        } else {
-            if (!confirm(`✅ Завершить задачу?\nОперация: ${operationName}\nВыполнено: ${totalAssigned} из ${planQuantity} шт`)) {
-                return;
+            
+            updateExecutorStatus(taskId, executorId, status) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (!task || !task.executors) return;
+                
+                const executor = task.executors.find(e => e.id === executorId);
+                if (executor) {
+                    const now = new Date().toISOString();
+                    
+                    if (status === 'in_progress' && executor.status !== 'in_progress') {
+                        executor.startTime = now;
+                        executor.endTime = null;
+                        console.log(`⏱️ НАЧАЛО: ${executor.name} - ${task.operation}`);
+                    }
+                    
+                    if (status === 'shift_ended' && executor.status === 'in_progress') {
+                        executor.endTime = now;
+                        if (executor.startTime) {
+                            const start = new Date(executor.startTime);
+                            const end = new Date(now);
+                            const minutes = Math.round((end - start) / 60000);
+                            executor.workTime = minutes;
+                            if (!task.totalWorkTime) task.totalWorkTime = 0;
+                            task.totalWorkTime += minutes;
+                            console.log(`⏱️ ЗАКРЫТИЕ СМЕНЫ: ${executor.name} - ${task.operation}, время: ${minutes} мин`);
+                        }
+                        executor.status = 'shift_ended';
+                    }
+                    
+                    if (status !== 'shift_ended') {
+                        executor.status = status;
+                    }
+                    
+                    let taskStatus = 'pending';
+                    const hasInProgress = task.executors.some(e => e.status === 'in_progress');
+                    const allShiftEnded = task.executors.length > 0 && task.executors.every(e => e.status === 'shift_ended');
+                    const allCompleted = task.executors.length > 0 && task.executors.every(e => e.status === 'completed');
+                    
+                    if (allCompleted) {
+                        taskStatus = 'completed';
+                    } else if (hasInProgress) {
+                        taskStatus = 'in_progress';
+                    } else if (allShiftEnded) {
+                        taskStatus = 'in_progress';
+                    } else {
+                        taskStatus = 'pending';
+                    }
+                    
+                    task.status = taskStatus;
+                    this.saveData();
+                    
+                    const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
+                    const order = orders.find(o => o.id == task.orderId);
+                    if (order) {
+                        if (!order.tasks) order.tasks = {};
+                        const squareColor = taskStatus === 'completed' ? 'green' : (taskStatus === 'in_progress' ? 'orange' : '');
+                        order.tasks[task.id] = squareColor;
+                        localStorage.setItem('masterx_orders', JSON.stringify(orders));
+                    }
+                    
+                    updateSingleTaskCard(taskId);
+                }
             }
-        }
-        
-        task.status = 'completed';
-        task.completedAt = new Date().toISOString();
-        
-        if (task.isPriority === true) {
-            task.isPriority = false;
-        }
-        
-        this.saveData();
-        
-        const orders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
-        const order = orders.find(o => o.id == task.orderId);
-        if (order) {
-            if (!order.tasks) order.tasks = {};
-            order.tasks[task.id] = 'green';
-            localStorage.setItem('masterx_orders', JSON.stringify(orders));
-        }
-        
-        updateSingleTaskCard(taskId);
-    }
-}
             
             addExecutor(taskId, name) {
                 const task = this.tasks.find(t => t.id === taskId);
@@ -1003,7 +904,10 @@
                         id: Date.now(),
                         name: name,
                         quantity: 0,
-                        status: 'pending'
+                        status: 'pending',
+                        startTime: null,
+                        endTime: null,
+                        workTime: 0
                     });
                     this.saveData();
                     updateExecutorList(taskId);
@@ -1025,7 +929,6 @@
                 const task = this.tasks.find(t => t.id === taskId);
                 if (!task) return;
                 
-                // Фиксируем время для всех активных исполнителей
                 const now = new Date().toISOString();
                 if (task.executors && task.executors.length > 0) {
                     task.executors.forEach(executor => {
@@ -1036,10 +939,8 @@
                                 const end = new Date(now);
                                 const minutes = Math.round((end - start) / 60000);
                                 executor.workTime = minutes;
-                                
                                 if (!task.totalWorkTime) task.totalWorkTime = 0;
                                 task.totalWorkTime += minutes;
-                                
                                 console.log(`⏱️ ГОТОВО: ${executor.name} - ${task.operation}, время: ${minutes} мин`);
                             }
                             executor.status = 'completed';
@@ -1303,17 +1204,11 @@
 
         function openFileSelectionModal(taskId) {
             const task = taskManager.tasks.find(t => t.id === taskId);
-            if (!task) {
-                alert('Задача не найдена');
-                return;
-            }
+            if (!task) return;
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             const order = allOrders.find(o => o.id == task.orderId);
-            if (!order) {
-                alert('Заказ не найден');
-                return;
-            }
+            if (!order) return;
             
             const siteKey = getCurrentSiteKey();
             const files = order.siteFiles?.[siteKey] || [];
@@ -1329,54 +1224,38 @@
             modal.style.zIndex = '10000';
             
             let filesListHtml = '';
-            files.forEach((file, index) => {
+            files.forEach((file) => {
                 const icon = getFileIcon(file.path);
                 filesListHtml += `
-                    <div class="file-select-item" style="
-                        background: #1a1e24;
-                        border: 1px solid #2a2f38;
-                        border-radius: 8px;
-                        margin-bottom: 10px;
-                        cursor: pointer;
-                        transition: all 0.2s;
-                    " onclick="selectAndCopyFile('${taskId}', ${file.id})">
-                        <div style="padding: 12px; display: flex; align-items: center; gap: 12px;">
-                            <div style="font-size: 24px;">${icon}</div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 600; color: #ff9800;">${escapeHtml(file.name)}</div>
-                                <div style="font-size: 11px; color: #a0a0a0; word-break: break-all;">${escapeHtml(file.path)}</div>
-                                ${file.comment ? `<div style="font-size: 10px; color: #4cd964; margin-top: 4px;">💬 ${escapeHtml(file.comment)}</div>` : ''}
+                    <div class="file-select-item" style="background:#1a1e24; border:1px solid #2a2f38; border-radius:8px; margin-bottom:10px; cursor:pointer; transition:all 0.2s;" onclick="selectAndCopyFile('${taskId}', ${file.id})">
+                        <div style="padding:12px; display:flex; align-items:center; gap:12px;">
+                            <div style="font-size:24px;">${icon}</div>
+                            <div style="flex:1;">
+                                <div style="font-weight:600; color:#ff9800;">${escapeHtml(file.name)}</div>
+                                <div style="font-size:11px; color:#a0a0a0; word-break:break-all;">${escapeHtml(file.path)}</div>
+                                ${file.comment ? `<div style="font-size:10px; color:#4cd964; margin-top:4px;">💬 ${escapeHtml(file.comment)}</div>` : ''}
                             </div>
-                            <div style="color: #0077ff; font-size: 20px;">📋</div>
+                            <div style="color:#0077ff; font-size:20px;">📋</div>
                         </div>
                     </div>
                 `;
             });
             
             modal.innerHTML = `
-                <div class="modal-content" style="max-width: 600px;">
-                    <span class="close" onclick="closeFileModal(this)">&times;</span>
-                    <h3 style="color: #ff3b3b; margin-bottom: 15px;">📎 Выберите файл для копирования</h3>
-                    <div style="margin-bottom: 15px; padding: 8px 12px; background: #15191f; border-radius: 6px;">
-                        <div style="font-size: 12px; color: #a0a0a0;">🏢 ${escapeHtml(order.groupName)}</div>
-                        <div style="font-size: 12px;">📦 ${escapeHtml(task.product)} | ${escapeHtml(task.operation)}</div>
+                <div class="modal-content" style="max-width:600px;">
+                    <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                    <h3 style="color:#ff3b3b; margin-bottom:15px;">📎 Выберите файл для копирования</h3>
+                    <div style="margin-bottom:15px; padding:8px 12px; background:#15191f; border-radius:6px;">
+                        <div style="font-size:12px; color:#a0a0a0;">🏢 ${escapeHtml(order.groupName)}</div>
+                        <div style="font-size:12px;">📦 ${escapeHtml(task.product)} | ${escapeHtml(task.operation)}</div>
                     </div>
-                    <div style="max-height: 400px; overflow-y: auto;">
-                        ${filesListHtml}
-                    </div>
-                    <div style="display: flex; justify-content: flex-end; margin-top: 15px; padding-top: 15px; border-top: 1px solid #2a2f38;">
-                        <button class="btn btn-danger" onclick="closeFileModal(this)">✖️ Отмена</button>
+                    <div style="max-height:400px; overflow-y:auto;">${filesListHtml}</div>
+                    <div style="display:flex; justify-content:flex-end; margin-top:15px; padding-top:15px; border-top:1px solid #2a2f38;">
+                        <button class="btn btn-danger" onclick="this.closest('.modal').remove()">✖️ Отмена</button>
                     </div>
                 </div>
             `;
-            
             document.body.appendChild(modal);
-            
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.remove();
-                }
-            });
         }
 
         function selectAndCopyFile(taskId, fileId) {
@@ -1398,20 +1277,9 @@
             
             navigator.clipboard.writeText(file.path).then(() => {
                 showCopyNotification(`✅ Путь к файлу "${file.name}" скопирован!`, 'success');
-                closeAllModals();
+                document.querySelectorAll('.modal').forEach(modal => modal.remove());
             }).catch(() => {
                 showCopyNotification('❌ Ошибка при копировании', 'error');
-            });
-        }
-
-        function closeFileModal(element) {
-            const modal = element.closest('.modal');
-            if (modal) modal.remove();
-        }
-
-        function closeAllModals() {
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.remove();
             });
         }
 
@@ -1572,7 +1440,6 @@
             isLoadingTasks = true;
             
             taskManager.loadData();
-            
             populateFilters();
             
             const filterCustomer = document.getElementById('filterCustomer').value;
@@ -1585,22 +1452,15 @@
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             
-            let tasks = taskManager.tasks;
-            
-            tasks = tasks.filter(task => {
+            let tasks = taskManager.tasks.filter(task => {
                 const order = allOrders.find(o => o.id == task.orderId);
                 if (!order) return false;
                 
-                if (filterStatus === 'priority') {
-                    return task.isPriority === true;
-                }
-                
+                if (filterStatus === 'priority') return task.isPriority === true;
                 if (filterStatus === 'completed' && task.status !== 'completed') return false;
                 if (filterStatus === 'in_progress' && task.status !== 'in_progress') return false;
                 if (filterStatus === 'pending' && task.status !== 'pending') return false;
-                
                 if (task.isPriority === true) return true;
-                
                 if (filterCustomer && order.groupName !== filterCustomer) return false;
                 
                 const item = order.items?.[task.itemIndex || 0];
@@ -1608,10 +1468,7 @@
                 
                 if (filterProduct && item.product !== filterProduct) return false;
                 if (filterOperation && task.operation !== filterOperation) return false;
-                if (filterRal) {
-                    const itemRal = (item.ral || '').trim();
-                    if (itemRal !== filterRal) return false;
-                }
+                if (filterRal && (item.ral || '').trim() !== filterRal) return false;
                 if (filterSize && item.size?.name !== filterSize) return false;
                 if (filterThickness && task.thickness !== filterThickness) return false;
                 
@@ -1664,17 +1521,13 @@
                         cleanDetailName = task.detail.replace(task.thickness, '').trim();
                     }
                     displayOperationName = `${task.operation} (${cleanDetailName})`;
-                    if (task.thickness) {
-                        displayOperationName += ` ${task.thickness}`;
-                    }
+                    if (task.thickness) displayOperationName += ` ${task.thickness}`;
                 }
                 
                 let detailDisplay = '';
                 if (task.detail) {
                     let cleanDetailName = task.detail;
-                    if (task.thickness) {
-                        cleanDetailName = task.detail.replace(task.thickness, '').trim();
-                    }
+                    if (task.thickness) cleanDetailName = task.detail.replace(task.thickness, '').trim();
                     detailDisplay = `<div class="operation-detail">📦 ${escapeHtml(cleanDetailName)} ${task.thickness ? `<span>${escapeHtml(task.thickness)}</span>` : ''}</div>`;
                 }
                 
@@ -1689,13 +1542,9 @@
                 const header = document.createElement('div');
                 header.className = `task-header ${statusClass} ${priorityClass}`;
                 header.style.cursor = 'pointer';
-                
                 header.innerHTML = `
                     <div class="task-header-left">
-                        <div class="task-customer-name">
-                            🏢 ${escapeHtml(order.groupName)} | Заказ №${escapeHtml(order.number)}
-                            ${priorityBadge}
-                        </div>
+                        <div class="task-customer-name">🏢 ${escapeHtml(order.groupName)} | Заказ №${escapeHtml(order.number)} ${priorityBadge}</div>
                         <div class="task-product-info">
                             <span class="task-product-name">📦 ${escapeHtml(task.product || item.product)}</span>
                             <span class="task-size">📏 ${escapeHtml(task.size || item.size?.name || '-')}</span>
@@ -1722,14 +1571,9 @@
                         ${detailDisplay}
                         <div class="operation-plan">📋 План: ${task.totalQuantity || 1} шт</div>
                     </div>
-                    
-                    <div class="executor-header">
-                        <span>ФИО</span><span>Кол-во</span><span>Статус</span><span></span>
-                    </div>
+                    <div class="executor-header"><span>ФИО</span><span>Кол-во</span><span>Статус</span><span></span></div>
                     <div class="executor-list" id="executors-${task.id}"></div>
-                    
                     <div class="action-container" id="action-${task.id}"></div>
-                    
                     <button class="btn-ready" id="ready-${task.id}" ${task.status === 'completed' ? 'disabled' : ''} onclick="event.stopPropagation(); completeTask('${task.id}')">✅ ГОТОВО</button>
                 `;
                 
@@ -1756,7 +1600,7 @@
                     const addBtn = document.createElement('button');
                     addBtn.className = 'btn-add-executor';
                     addBtn.textContent = '+ Добавить исполнителя';
-                    addBtn.onclick = function(e) {
+                    addBtn.onclick = (e) => {
                         e.stopPropagation();
                         showAddExecutorForm(task, actionContainer);
                     };
@@ -1785,20 +1629,18 @@
             const addBtn = document.createElement('button');
             addBtn.className = 'btn btn-success';
             addBtn.textContent = 'Добавить';
-            addBtn.onclick = function(e) {
+            addBtn.onclick = (e) => {
                 e.stopPropagation();
                 const name = input.value.trim();
                 if (!name) { alert('Введите ФИО'); return; }
                 if (taskManager.addExecutor(task.id, name)) {
                     formDiv.remove();
-                } else { 
-                    alert('Исполнитель уже существует'); 
-                }
+                } else { alert('Исполнитель уже существует'); }
             };
             const cancelBtn = document.createElement('button');
             cancelBtn.className = 'btn btn-danger';
             cancelBtn.textContent = 'Отмена';
-            cancelBtn.onclick = function(e) {
+            cancelBtn.onclick = (e) => {
                 e.stopPropagation();
                 formDiv.remove();
             };
@@ -1815,9 +1657,7 @@
             if (taskReports.length === 0) return null;
             const allRows = [];
             taskReports.forEach(report => {
-                if (report.rows) {
-                    allRows.push(...report.rows);
-                }
+                if (report.rows) allRows.push(...report.rows);
             });
             return { 
                 rows: allRows.map(row => ({
@@ -1833,35 +1673,19 @@
         
         function openRightModalForTask(taskId) {
             const task = taskManager.tasks.find(t => t.id === taskId);
-            if (!task) {
-                alert('Задача не найдена');
-                return;
-            }
+            if (!task) { alert('Задача не найдена'); return; }
             
             const allOrders = JSON.parse(localStorage.getItem('masterx_orders') || '[]');
             const order = allOrders.find(o => o.id == task.orderId);
             const item = order?.items?.[task.itemIndex || 0];
-            
-            if (!order || !item) {
-                alert('Данные заказа не найдены');
-                return;
-            }
+            if (!order || !item) { alert('Данные заказа не найдены'); return; }
             
             currentReportTask = {
-                taskId: task.id,
-                orderId: order.id,
-                orderNumber: order.number,
-                customerName: order.groupName,
-                product: task.product || item.product,
-                size: task.size || item.size?.name,
-                quantity: task.sizeQuantity || item.size?.quantity,
-                ral: task.ral || item.ral,
-                texture: task.texture || item.texture,
-                operation: task.operation,
-                detail: task.detail,
-                material: task.detail || '',
-                thickness: task.thickness,
-                isPriority: task.isPriority || false,
+                taskId: task.id, orderId: order.id, orderNumber: order.number, customerName: order.groupName,
+                product: task.product || item.product, size: task.size || item.size?.name,
+                quantity: task.sizeQuantity || item.size?.quantity, ral: task.ral || item.ral,
+                texture: task.texture || item.texture, operation: task.operation, detail: task.detail,
+                material: task.detail || '', thickness: task.thickness, isPriority: task.isPriority || false,
                 siteKey: 'tokarniy'
             };
             
@@ -1899,33 +1723,12 @@
                             <button type="button" class="btn-remove-row" onclick="removeReportRowItem(${index})">✖️</button>
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 0.5fr 0.5fr 1fr; gap: 10px; margin-bottom: 10px;">
-                            <div>
-                                <label style="font-size: 11px; color: #a0a0a0;">📦 Материал/деталь:</label>
-                                <input type="text" class="report-input report-material" data-row="${index}" value="${escapeHtml(row.материал || currentReportTask.material || '')}" placeholder="Например: Алюминий 2мм">
-                            </div>
-                            <div>
-                                <label style="font-size: 11px; color: #a0a0a0;">📊 Расход:</label>
-                                <input type="number" class="report-input report-expense" data-row="${index}" value="${row.расход || 0}" step="0.01" placeholder="0">
-                            </div>
-                            <div>
-                                <label style="font-size: 11px; color: #a0a0a0;">📏 Ед. изм.:</label>
-                                <select class="report-input report-unit" data-row="${index}">
-                                    <option value="гр" ${row.единица === 'гр' ? 'selected' : ''}>гр</option>
-                                    <option value="кг" ${row.единица === 'кг' ? 'selected' : ''}>кг</option>
-                                    <option value="мм" ${row.единица === 'мм' ? 'selected' : ''}>мм</option>
-                                    <option value="м2" ${row.единица === 'м2' ? 'selected' : ''}>м²</option>
-                                    <option value="шт" ${row.единица === 'шт' ? 'selected' : ''}>шт</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="font-size: 11px; color: #a0a0a0;">📦 Количество (шт):</label>
-                                <input type="number" class="report-input report-quantity" data-row="${index}" value="${row.количество || totalQuantity || 0}" step="1" placeholder="0">
-                            </div>
+                            <div><label style="font-size: 11px; color: #a0a0a0;">📦 Материал/деталь:</label><input type="text" class="report-input report-material" data-row="${index}" value="${escapeHtml(row.материал || currentReportTask.material || '')}" placeholder="Например: Алюминий 2мм"></div>
+                            <div><label style="font-size: 11px; color: #a0a0a0;">📊 Расход:</label><input type="number" class="report-input report-expense" data-row="${index}" value="${row.расход || 0}" step="0.01" placeholder="0"></div>
+                            <div><label style="font-size: 11px; color: #a0a0a0;">📏 Ед. изм.:</label><select class="report-input report-unit" data-row="${index}"><option value="гр" ${row.единица === 'гр' ? 'selected' : ''}>гр</option><option value="кг" ${row.единица === 'кг' ? 'selected' : ''}>кг</option><option value="мм" ${row.единица === 'мм' ? 'selected' : ''}>мм</option><option value="м2" ${row.единица === 'м2' ? 'selected' : ''}>м²</option><option value="шт" ${row.единица === 'шт' ? 'selected' : ''}>шт</option></select></div>
+                            <div><label style="font-size: 11px; color: #a0a0a0;">📦 Количество (шт):</label><input type="number" class="report-input report-quantity" data-row="${index}" value="${row.количество || totalQuantity || 0}" step="1" placeholder="0"></div>
                         </div>
-                        <div>
-                            <label style="font-size: 11px; color: #a0a0a0;">💬 Комментарий:</label>
-                            <textarea class="report-textarea report-comment" data-row="${index}" rows="2" placeholder="Дополнительная информация...">${escapeHtml(row.комментарий || '')}</textarea>
-                        </div>
+                        <div><label style="font-size: 11px; color: #a0a0a0;">💬 Комментарий:</label><textarea class="report-textarea report-comment" data-row="${index}" rows="2" placeholder="Дополнительная информация...">${escapeHtml(row.комментарий || '')}</textarea></div>
                     </div>
                 `;
             });
@@ -1946,62 +1749,40 @@
                         ${materialDisplay}
                         <div style="font-size: 12px; margin-top: 8px; color: #4cd964;">📦 Выполнено: ${totalQuantity} шт</div>
                     </div>
-                    <div id="reportRowsContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
-                        ${rowsHtml}
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <button type="button" class="btn-add-row" onclick="addReportRowItem()">➕ Добавить строку</button>
-                    </div>
-                    <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button type="button" class="btn btn-success" onclick="saveReportDataForTask()" style="flex: 1;">💾 Сохранить</button>
-                        <button type="button" class="btn btn-danger" onclick="closeRightModal()" style="flex: 1;">✖️ Закрыть</button>
-                    </div>
+                    <div id="reportRowsContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;">${rowsHtml}</div>
+                    <div style="margin-bottom: 15px;"><button type="button" class="btn-add-row" onclick="addReportRowItem()">➕ Добавить строку</button></div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;"><button type="button" class="btn btn-success" onclick="saveReportDataForTask()" style="flex: 1;">💾 Сохранить</button><button type="button" class="btn btn-danger" onclick="closeRightModal()" style="flex: 1;">✖️ Закрыть</button></div>
                 </div>
             `;
             
-            // Обработчики событий
             document.querySelectorAll('.report-material').forEach(input => {
                 input.addEventListener('change', function() {
                     const rowIndex = parseInt(this.dataset.row);
-                    if (!isNaN(rowIndex) && reportRows[rowIndex]) {
-                        reportRows[rowIndex].материал = this.value;
-                    }
+                    if (!isNaN(rowIndex) && reportRows[rowIndex]) reportRows[rowIndex].материал = this.value;
                 });
             });
-            
             document.querySelectorAll('.report-expense').forEach(input => {
                 input.addEventListener('change', function() {
                     const rowIndex = parseInt(this.dataset.row);
-                    if (!isNaN(rowIndex) && reportRows[rowIndex]) {
-                        reportRows[rowIndex].расход = parseFloat(this.value) || 0;
-                    }
+                    if (!isNaN(rowIndex) && reportRows[rowIndex]) reportRows[rowIndex].расход = parseFloat(this.value) || 0;
                 });
             });
-            
             document.querySelectorAll('.report-unit').forEach(select => {
                 select.addEventListener('change', function() {
                     const rowIndex = parseInt(this.dataset.row);
-                    if (!isNaN(rowIndex) && reportRows[rowIndex]) {
-                        reportRows[rowIndex].единица = this.value;
-                    }
+                    if (!isNaN(rowIndex) && reportRows[rowIndex]) reportRows[rowIndex].единица = this.value;
                 });
             });
-            
             document.querySelectorAll('.report-quantity').forEach(input => {
                 input.addEventListener('change', function() {
                     const rowIndex = parseInt(this.dataset.row);
-                    if (!isNaN(rowIndex) && reportRows[rowIndex]) {
-                        reportRows[rowIndex].количество = parseFloat(this.value) || 0;
-                    }
+                    if (!isNaN(rowIndex) && reportRows[rowIndex]) reportRows[rowIndex].количество = parseFloat(this.value) || 0;
                 });
             });
-            
             document.querySelectorAll('.report-comment').forEach(textarea => {
                 textarea.addEventListener('change', function() {
                     const rowIndex = parseInt(this.dataset.row);
-                    if (!isNaN(rowIndex) && reportRows[rowIndex]) {
-                        reportRows[rowIndex].комментарий = this.value;
-                    }
+                    if (!isNaN(rowIndex) && reportRows[rowIndex]) reportRows[rowIndex].комментарий = this.value;
                 });
             });
         }
@@ -2026,67 +1807,36 @@
         function saveReportDataForTask() {
             if (!currentReportTask) return;
             
-            // Собираем данные из формы
             document.querySelectorAll('.report-material').forEach(input => {
                 const rowIndex = parseInt(input.dataset.row);
-                if (!isNaN(rowIndex) && reportRows[rowIndex]) {
-                    reportRows[rowIndex].материал = input.value;
-                }
+                if (!isNaN(rowIndex) && reportRows[rowIndex]) reportRows[rowIndex].материал = input.value;
             });
-            
             document.querySelectorAll('.report-expense').forEach(input => {
                 const rowIndex = parseInt(input.dataset.row);
-                if (!isNaN(rowIndex) && reportRows[rowIndex]) {
-                    reportRows[rowIndex].расход = parseFloat(input.value) || 0;
-                }
+                if (!isNaN(rowIndex) && reportRows[rowIndex]) reportRows[rowIndex].расход = parseFloat(input.value) || 0;
             });
-            
             document.querySelectorAll('.report-unit').forEach(select => {
                 const rowIndex = parseInt(select.dataset.row);
-                if (!isNaN(rowIndex) && reportRows[rowIndex]) {
-                    reportRows[rowIndex].единица = select.value;
-                }
+                if (!isNaN(rowIndex) && reportRows[rowIndex]) reportRows[rowIndex].единица = select.value;
             });
-            
             document.querySelectorAll('.report-quantity').forEach(input => {
                 const rowIndex = parseInt(input.dataset.row);
-                if (!isNaN(rowIndex) && reportRows[rowIndex]) {
-                    reportRows[rowIndex].количество = parseFloat(input.value) || 0;
-                }
+                if (!isNaN(rowIndex) && reportRows[rowIndex]) reportRows[rowIndex].количество = parseFloat(input.value) || 0;
             });
-            
             document.querySelectorAll('.report-comment').forEach(textarea => {
                 const rowIndex = parseInt(textarea.dataset.row);
-                if (!isNaN(rowIndex) && reportRows[rowIndex]) {
-                    reportRows[rowIndex].комментарий = textarea.value;
-                }
+                if (!isNaN(rowIndex) && reportRows[rowIndex]) reportRows[rowIndex].комментарий = textarea.value;
             });
             
             const reportData = {
-                id: Date.now(),
-                taskId: currentReportTask.taskId,
-                orderId: currentReportTask.orderId,
-                orderNumber: currentReportTask.orderNumber,
-                customerName: currentReportTask.customerName,
-                product: currentReportTask.product,
-                size: currentReportTask.size,
-                quantity: currentReportTask.quantity,
-                ral: currentReportTask.ral,
-                texture: currentReportTask.texture,
-                operation: currentReportTask.operation,
-                detail: currentReportTask.detail,
-                thickness: currentReportTask.thickness,
-                isPriority: currentReportTask.isPriority,
+                id: Date.now(), taskId: currentReportTask.taskId, orderId: currentReportTask.orderId,
+                orderNumber: currentReportTask.orderNumber, customerName: currentReportTask.customerName,
+                product: currentReportTask.product, size: currentReportTask.size, quantity: currentReportTask.quantity,
+                ral: currentReportTask.ral, texture: currentReportTask.texture, operation: currentReportTask.operation,
+                detail: currentReportTask.detail, thickness: currentReportTask.thickness, isPriority: currentReportTask.isPriority,
                 siteKey: currentReportTask.siteKey,
-                rows: reportRows.map(row => ({
-                    материал: row.материал || '',
-                    расход: row.расход || 0,
-                    единица: row.единица || 'гр',
-                    количество: row.количество || 0,
-                    комментарий: row.комментарий || ''
-                })),
-                savedAt: new Date().toISOString(),
-                isTaskReport: true
+                rows: reportRows.map(row => ({ материал: row.материал || '', расход: row.расход || 0, единица: row.единица || 'гр', количество: row.количество || 0, комментарий: row.комментарий || '' })),
+                savedAt: new Date().toISOString(), isTaskReport: true
             };
             
             let allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
@@ -2137,10 +1887,7 @@
             window.taskManager = taskManager;
             setupFilterListeners();
             renderTasks();
-            
-            window.addEventListener('beforeunload', () => { 
-                saveAllCardsState();
-            });
+            window.addEventListener('beforeunload', () => saveAllCardsState());
         }
         
         window.resetFilters = resetFilters;
