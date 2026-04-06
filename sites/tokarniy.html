@@ -1004,6 +1004,16 @@
             }
         }
         
+        // Глобальная функция для кнопки ГОТОВО
+        function completeTask(taskId) {
+            if (taskManager) {
+                taskManager.completeTask(taskId);
+            } else {
+                console.error('taskManager не инициализирован');
+                alert('Ошибка: менеджер задач не инициализирован');
+            }
+        }
+        
         function updateSingleTaskCard(taskId) {
             const task = taskManager.tasks.find(t => t.id === taskId);
             if (!task) return;
@@ -1914,6 +1924,7 @@
         window.addReportRowItem = addReportRowItem;
         window.removeReportRowItem = removeReportRowItem;
         window.saveReportDataForTask = saveReportDataForTask;
+        window.completeTask = completeTask;
         
         document.addEventListener('DOMContentLoaded', init);
     </script>
