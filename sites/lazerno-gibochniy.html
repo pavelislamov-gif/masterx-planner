@@ -609,7 +609,6 @@
             color: white !important;
         }
         
-        /* Дополнительные стили для анимации */
         .task-content {
             transition: display 0.2s ease;
         }
@@ -706,7 +705,7 @@
         let currentReportTask = null;
         let reportRows = [];
         
-        const OPEN_CARDS_KEY = 'lazerno_open_tasks';
+        const OPEN_CARDS_KEY = 'lazerno-gibochniy_open_tasks';
         
         // ============== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==============
         function escapeHtml(str) {
@@ -744,7 +743,6 @@
                         header.classList.remove('collapsed');
                         const arrow = header.querySelector('.collapse-icon');
                         if (arrow) arrow.textContent = '▲';
-                        console.log('✅ Восстановлена задача:', taskId);
                     }
                 }
             });
@@ -758,13 +756,11 @@
                 header.classList.add('collapsed');
                 const arrow = header.querySelector('.collapse-icon');
                 if (arrow) arrow.textContent = '▼';
-                console.log('📁 Свернута задача:', taskId);
             } else {
                 content.style.display = 'block';
                 header.classList.remove('collapsed');
                 const arrow = header.querySelector('.collapse-icon');
                 if (arrow) arrow.textContent = '▲';
-                console.log('📂 Раскрыта задача:', taskId);
             }
             
             saveAllCardsState();
@@ -1525,7 +1521,7 @@
                     detailDisplay = `<div class="operation-detail">📦 ${escapeHtml(cleanDetailName)} ${task.thickness ? `<span>${escapeHtml(task.thickness)}</span>` : ''}</div>`;
                 }
                 
-                const siteFiles = order.siteFiles?.['lazerno'] || [];
+                const siteFiles = order.siteFiles?.['lazerno-gibochniy'] || [];
                 const hasFiles = siteFiles.length > 0;
                 const filesIndicator = hasFiles ? `<span class="file-indicator">📎 Файлы: ${siteFiles.length}</span>` : '';
                 
@@ -1680,6 +1676,28 @@
         }
         
         // ============== ОТЧЁТЫ ==============
+        function getSavedReportDataForTask(taskId) {
+            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
+            const taskReports = allReports.filter(r => r.taskId === taskId && r.siteKey === 'lazerno-gibochniy');
+            if (taskReports.length === 0) return null;
+            const allRows = [];
+            taskReports.forEach(report => {
+                if (report.rows) {
+                    allRows.push(...report.rows);
+                }
+            });
+            return { 
+                rows: allRows.map(row => ({
+                    материал: row.материал || row.material || '',
+                    расход: row.расход || 0,
+                    единица: row.единица || 'гр',
+                    количество: row.количество || 0,
+                    комментарий: row.комментарий || ''
+                })),
+                savedAt: taskReports[taskReports.length - 1]?.savedAt 
+            };
+        }
+        
         function openRightModalForTask(taskId) {
             const task = taskManager.tasks.find(t => t.id === taskId);
             if (!task) {
@@ -1708,9 +1726,10 @@
                 texture: task.texture || item.texture,
                 operation: task.operation,
                 detail: task.detail,
+                material: task.detail || '',
                 thickness: task.thickness,
                 isPriority: task.isPriority || false,
-                siteKey: 'lazerno'
+                siteKey: 'lazerno-gibochniy'
             };
             
             const modal = document.getElementById('rightModal');
@@ -1721,34 +1740,12 @@
             if (savedData && savedData.rows) {
                 reportRows = [...savedData.rows];
             } else {
-                reportRows = [{ материал: '', расход: 0, единица: 'гр', количество: 0, комментарий: '' }];
+                reportRows = [{ материал: currentReportTask.material || '', расход: 0, единица: 'гр', количество: 0, комментарий: '' }];
             }
             
             renderReportForm(contentDiv);
             modal.classList.add('open');
             overlay.classList.add('show');
-        }
-        
-        function getSavedReportDataForTask(taskId) {
-            const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-            const taskReports = allReports.filter(r => r.taskId === taskId && r.siteKey === 'lazerno');
-            if (taskReports.length === 0) return null;
-            const allRows = [];
-            taskReports.forEach(report => {
-                if (report.rows) {
-                    allRows.push(...report.rows);
-                }
-            });
-            return { 
-    rows: allRows.map(row => ({
-        материал: row.материал || row.material || '',
-        расход: row.расход || 0,
-        единица: row.единица || 'гр',
-        количество: row.количество || 0,
-        комментарий: row.комментарий || ''
-    })),
-    savedAt: taskReports[taskReports.length - 1]?.savedAt 
-};
         }
         
         function renderReportForm(container) {
@@ -1768,7 +1765,11 @@
                             <span style="font-size: 12px; color: #ff9800;">📝 Запись ${index + 1}</span>
                             <button type="button" class="btn-remove-row" onclick="removeReportRowItem(${index})">✖️</button>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 0.5fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div style="display: grid; grid-template-columns: 1fr 0.5fr 0.5fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <div>
+                                <label style="font-size: 11px; color: #a0a0a0;">📦 Материал/деталь:</label>
+                                <input type="text" class="report-input report-material" data-row="${index}" value="${escapeHtml(row.материал || currentReportTask.material || '')}" placeholder="Например: Алюминий 2мм">
+                            </div>
                             <div>
                                 <label style="font-size: 11px; color: #a0a0a0;">📊 Расход:</label>
                                 <input type="number" class="report-input report-expense" data-row="${index}" value="${row.расход || 0}" step="0.01" placeholder="0">
@@ -1780,6 +1781,7 @@
                                     <option value="кг" ${row.единица === 'кг' ? 'selected' : ''}>кг</option>
                                     <option value="мм" ${row.единица === 'мм' ? 'selected' : ''}>мм</option>
                                     <option value="м2" ${row.единица === 'м2' ? 'selected' : ''}>м²</option>
+                                    <option value="шт" ${row.единица === 'шт' ? 'selected' : ''}>шт</option>
                                 </select>
                             </div>
                             <div>
@@ -1797,6 +1799,7 @@
             
             const operationDisplay = currentReportTask.operation + (currentReportTask.detail ? ` (${currentReportTask.detail})` : '');
             const priorityBadge = currentReportTask.isPriority ? '<span style="background: #ff3b3b; color: white; padding: 2px 8px; border-radius: 20px; font-size: 10px; margin-left: 8px;">🔴 ПРИОРИТЕТ</span>' : '';
+            const materialDisplay = currentReportTask.material ? `<div style="font-size: 12px;">📦 Материал/деталь: <strong style="color: #4cd964;">${escapeHtml(currentReportTask.material)}</strong></div>` : '';
             
             container.innerHTML = `
                 <div style="padding: 20px 0;">
@@ -1807,6 +1810,7 @@
                         <div style="font-size: 12px;">📏 Размер: ${escapeHtml(currentReportTask.size || '-')} × ${currentReportTask.quantity || 0} шт</div>
                         <div style="font-size: 12px;">🎨 Покрытие: ${escapeHtml(currentReportTask.ral || '-')} / ${escapeHtml(currentReportTask.texture || '-')}</div>
                         <div style="font-size: 12px; margin-top: 8px;">🔧 Операция: ${escapeHtml(operationDisplay)}</div>
+                        ${materialDisplay}
                         <div style="font-size: 12px; margin-top: 8px; color: #4cd964;">📦 Выполнено: ${totalQuantity} шт</div>
                     </div>
                     <div id="reportRowsContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
@@ -1821,6 +1825,16 @@
                     </div>
                 </div>
             `;
+            
+            // Обработчики событий
+            document.querySelectorAll('.report-material').forEach(input => {
+                input.addEventListener('change', function() {
+                    const rowIndex = parseInt(this.dataset.row);
+                    if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                        reportRows[rowIndex].материал = this.value;
+                    }
+                });
+            });
             
             document.querySelectorAll('.report-expense').forEach(input => {
                 input.addEventListener('change', function() {
@@ -1860,7 +1874,7 @@
         }
         
         function addReportRowItem() {
-            reportRows.push({ расход: 0, единица: 'гр', количество: 0, комментарий: '' });
+            reportRows.push({ материал: currentReportTask?.material || '', расход: 0, единица: 'гр', количество: 0, комментарий: '' });
             const container = document.getElementById('rightModalContent');
             renderReportForm(container);
         }
@@ -1868,7 +1882,7 @@
         function removeReportRowItem(rowIndex) {
             if (reportRows.length <= 1) {
                 if (!confirm('Удалить последнюю строку? Будет создана пустая строка.')) return;
-                reportRows = [{ материал: '', расход: 0, единица: 'гр', количество: 0, комментарий: '' }];
+                reportRows = [{ материал: currentReportTask?.material || '', расход: 0, единица: 'гр', количество: 0, комментарий: '' }];
             } else {
                 reportRows.splice(rowIndex, 1);
             }
@@ -1878,6 +1892,14 @@
         
         function saveReportDataForTask() {
             if (!currentReportTask) return;
+            
+            // Собираем данные из формы
+            document.querySelectorAll('.report-material').forEach(input => {
+                const rowIndex = parseInt(input.dataset.row);
+                if (!isNaN(rowIndex) && reportRows[rowIndex]) {
+                    reportRows[rowIndex].материал = input.value;
+                }
+            });
             
             document.querySelectorAll('.report-expense').forEach(input => {
                 const rowIndex = parseInt(input.dataset.row);
@@ -1924,6 +1946,7 @@
                 isPriority: currentReportTask.isPriority,
                 siteKey: currentReportTask.siteKey,
                 rows: reportRows.map(row => ({
+                    материал: row.материал || '',
                     расход: row.расход || 0,
                     единица: row.единица || 'гр',
                     количество: row.количество || 0,
@@ -1970,14 +1993,14 @@
             const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `lazerno_tasks.csv`;
+            link.download = `lazerno-gibochniy_tasks.csv`;
             link.click();
         };
         
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         async function init() {
             await loadTaskOperationsData();
-            taskManager = new SimpleTaskManager('lazerno');
+            taskManager = new SimpleTaskManager('lazerno-gibochniy');
             window.taskManager = taskManager;
             setupFilterListeners();
             renderTasks();
