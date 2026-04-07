@@ -1078,8 +1078,6 @@
         // ============== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==============
         let tempItemsList = [];
         let productsList = [];
-        let bracketsList = [];
-        let lyresList = [];
         let tempBrackets = [];
         let tempLyres = [];
         let tempProfiles = [];
@@ -4156,10 +4154,8 @@
 
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         async function initMainPage() {
-            productsList = await loadProducts() || [];
-            bracketsList = await loadBrackets() || [];
-            lyresList = await loadLyres() || [];
-            await loadTaskOperations();
+    productsList = await loadProducts() || [];
+    await loadTaskOperations();
 
             populateNewItemSelects();
             initThemeToggle();
