@@ -705,7 +705,7 @@
         let currentReportTask = null;
         let reportRows = [];
         
-        const OPEN_CARDS_KEY = 'lazerno-gibochniy_open_tasks';
+        const OPEN_CARDS_KEY = 'lazerno_open_tasks';
         
         // ============== ФУНКЦИЯ ДЛЯ ФОРМИРОВАНИЯ ЗАГОЛОВКА ОПЕРАЦИИ ==============
         function getOperationDisplayName(operation, detail, thickness) {
@@ -1197,7 +1197,7 @@
         
         // ============== РАБОТА С ФАЙЛАМИ ==============
         function getCurrentSiteKey() {
-            return 'lazerno-gibochniy';
+            return 'lazerno';
         }
 
         function showCopyNotification(message, type = 'success') {
@@ -1555,7 +1555,7 @@
                     detailDisplay = `<div class="operation-detail">📦 ${escapeHtml(cleanDetailName)} ${task.thickness ? `<span>${escapeHtml(task.thickness)}</span>` : ''}</div>`;
                 }
                 
-                const siteFiles = order.siteFiles?.['lazerno-gibochniy'] || [];
+                const siteFiles = order.siteFiles?.['lazerno'] || [];
                 const hasFiles = siteFiles.length > 0;
                 const filesIndicator = hasFiles ? `<span class="file-indicator">📎 Файлы: ${siteFiles.length}</span>` : '';
                 
@@ -1680,7 +1680,7 @@
         // ============== ОТЧЁТЫ ==============
         function getSavedReportDataForTask(taskId) {
             const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]');
-            const taskReports = allReports.filter(r => r.taskId === taskId && r.siteKey === 'lazerno-gibochniy');
+            const taskReports = allReports.filter(r => r.taskId === taskId && r.siteKey === 'lazerno');
             if (taskReports.length === 0) return null;
             const allRows = [];
             taskReports.forEach(report => {
@@ -1723,7 +1723,7 @@
                 material: task.detail || '',
                 thickness: task.thickness,
                 isPriority: task.isPriority || false,
-                siteKey: 'lazerno-gibochniy'
+                siteKey: 'lazerno'
             };
             
             // Устанавливаем заголовок модального окна
@@ -1919,14 +1919,14 @@
             const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `lazerno-gibochniy_tasks.csv`;
+            link.download = `lazerno_tasks.csv`;
             link.click();
         };
         
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         async function init() {
             await loadTaskOperationsData();
-            taskManager = new SimpleTaskManager('lazerno-gibochniy');
+            taskManager = new SimpleTaskManager('lazerno');
             window.taskManager = taskManager;
             setupFilterListeners();
             renderTasks();
