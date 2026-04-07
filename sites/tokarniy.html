@@ -1575,6 +1575,7 @@
                             <span class="task-quantity">× ${task.sizeQuantity || item.size?.quantity || 1} шт</span>
                             ${task.ral || item.ral ? `<span class="task-ral">🎨 ${escapeHtml(task.ral || item.ral)}</span>` : ''}
                             ${task.texture || item.texture ? `<span class="task-texture">🧵 ${escapeHtml(task.texture || item.texture)}</span>` : ''}
+                            
                             ${filesIndicator}
                         </div>
                     </div>
@@ -1584,6 +1585,7 @@
                         ${hasFiles ? `<button class="btn-copy-path" onclick="event.stopPropagation(); copyAllFilePaths('${task.id}')">📋 Копировать путь</button>` : ''}
                         <span class="collapse-icon">▼</span>
                     </div>
+                    <div style="margin-top: 6px; font-size: 13px; font-weight: 600; color: #ff9800;">🔧 ${escapeHtml(task.operation)}${task.detail ? ' (' + escapeHtml(task.detail) + ')' : ''}</div>
                 `;
                 
                 const content = document.createElement('div');
