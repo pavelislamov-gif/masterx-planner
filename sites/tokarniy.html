@@ -1588,13 +1588,6 @@
         <span class="collapse-icon">▼</span>
     </div>
 `;
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span class="task-status-badge ${statusClass}">${statusText}</span>
-                        <button class="btn-report-item" onclick="event.stopPropagation(); openRightModalForTask('${task.id}')">📝 Отчёт</button>
-                        ${hasFiles ? `<button class="btn-copy-path" onclick="event.stopPropagation(); copyAllFilePaths('${task.id}')">📋 Копировать путь</button>` : ''}
-                        <span class="collapse-icon">▼</span>
-                    </div>
-                `;
                 
                 const content = document.createElement('div');
                 content.className = 'task-content';
