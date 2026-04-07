@@ -2350,24 +2350,20 @@
     } catch(e) { console.error(e); }
 
     for (let i = 0; i < operationsWithDetails.length; i++) {
-        const opData = operationsWithDetails[i];
-        const detailName = opData.detail || '';
-        
-        // ===== КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ =====
-        // Показываем операцию ТОЛЬКО если:
-        // 1. У операции нет детали (detail пустой) ИЛИ
-        // 2. Деталь есть в заказе
-        if (detailName) {
-            const hasDetail = item.details && item.details.some(d => d.name === detailName);
-            if (!hasDetail) {
-                continue; // пропускаем операцию — такой детали нет в заказе
-            }
-        }
-        // ================================
-        
-        const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
-        const operationName = opData.operation || opData;
-        const thickness = opData.thickness || '';
+    const opData = operationsWithDetails[i];
+    const detailName = opData.detail || '';
+    
+    // Временно отключаем проверку наличия детали
+    // if (detailName && item.details) {
+    //     const hasDetail = item.details.some(d => d.name === detailName);
+    //     if (!hasDetail) {
+    //         continue;
+    //     }
+    // }
+    
+    const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
+    const operationName = opData.operation || opData;
+    const thickness = opData.thickness || '';
         
         let displayOperationName = operationName;
         if (detailName) {
