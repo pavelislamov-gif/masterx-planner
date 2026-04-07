@@ -2355,13 +2355,17 @@
         const opData = operationsWithDetails[i];
         const detailName = opData.detail || '';
         
-        // Пропускаем операции для деталей, которых нет в заказе
-        if (detailName && item.details) {
-            const hasDetail = item.details.some(d => d.name === detailName);
+        // ===== КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ =====
+        // Показываем операцию ТОЛЬКО если:
+        // 1. У операции нет детали (detail пустой) ИЛИ
+        // 2. Деталь есть в заказе
+        if (detailName) {
+            const hasDetail = item.details && item.details.some(d => d.name === detailName);
             if (!hasDetail) {
-                continue;
+                continue; // пропускаем операцию — такой детали нет в заказе
             }
         }
+        // ================================
         
         const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
         const operationName = opData.operation || opData;
@@ -2383,10 +2387,11 @@
         let isAdded = false;
         let plannedQuantity = 1;
         
+        // Берём количество из заказа
         if (detailName && item.details) {
-            const qty = getDetailQuantity(item, detailName);
-            if (qty > 0) {
-                plannedQuantity = qty;
+            const foundDetail = item.details.find(d => d.name === detailName);
+            if (foundDetail && foundDetail.quantity > 0) {
+                plannedQuantity = foundDetail.quantity;
             }
         }
         
