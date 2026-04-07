@@ -1270,40 +1270,54 @@
         }
 
         function getUniqueDetailsFromOperations(productName) {
-            const productOps = taskOperationsData[productName];
-            if (!productOps) {
-                return [];
-            }
-            
-            const detailsMap = new Map();
-            const sites = ['токарно-фрезерный', 'фрезерный', 'слесарный', 'лазерно-гибочный', 'полимерный'];
-            
-            for (const site of sites) {
-                const operations = productOps[site] || [];
-                for (const op of operations) {
-                    const detailName = op.detail;
-                    if (detailName && detailName.trim() !== '') {
-                        if (!detailsMap.has(detailName)) {
-                            let material = 'алюминий';
-                            const nameLower = detailName.toLowerCase();
-                            if (nameLower.includes('пвх')) material = 'ПВХ';
-                            else if (nameLower.includes('поликарбонат')) material = 'поликарбонат';
-                            else if (nameLower.includes('aisi') || nameLower.includes('нержавейка')) material = 'нержавейка';
-                            else if (nameLower.includes('сталь')) material = 'сталь';
-                            else if (nameLower.includes('оргстекло') || nameLower.includes('plexiglas')) material = 'оргстекло';
-                            
-                            detailsMap.set(detailName, {
-                                name: detailName,
-                                material: material,
-                                quantity: 0
-                            });
+    const productOps = taskOperationsData[productName];
+    if (!productOps) {
+        return [];
+    }
+    
+    const detailsMap = new Map();
+    const sites = ['токарно-фрезерный', 'фрезерный', 'слесарный', 'лазерно-гибочный', 'полимерный'];
+    
+    // Ключевые слова для определения профиля
+    const profileKeywords = ['Профиль', 'НПС', 'МП', 'КП', 'Труба', 'НП', 'ABA', 'ТПК', 'Н2248', 'XROLL', 'НПС 2997', 'НПС 2966', 'НПС 2967', 'НПС 3362', 'НП 455015'];
+    
+    for (const site of sites) {
+        const operations = productOps[site] || [];
+        for (const op of operations) {
+            const detailName = op.detail;
+            if (detailName && detailName.trim() !== '') {
+                if (!detailsMap.has(detailName)) {
+                    let material = 'алюминий';
+                    const nameLower = detailName.toLowerCase();
+                    if (nameLower.includes('пвх')) material = 'ПВХ';
+                    else if (nameLower.includes('поликарбонат')) material = 'поликарбонат';
+                    else if (nameLower.includes('aisi') || nameLower.includes('нержавейка')) material = 'нержавейка';
+                    else if (nameLower.includes('сталь')) material = 'сталь';
+                    else if (nameLower.includes('оргстекло') || nameLower.includes('plexiglas')) material = 'оргстекло';
+                    
+                    // Определяем тип: профиль или обычная деталь
+                    let type = 'detail';
+                    for (const keyword of profileKeywords) {
+                        if (detailName.includes(keyword)) {
+                            type = 'profile';
+                            break;
                         }
                     }
+                    
+                    detailsMap.set(detailName, {
+                        name: detailName,
+                        material: material,
+                        quantity: 0,
+                        type: type,
+                        lengthMm: 0  // для профилей
+                    });
                 }
             }
-            
-            return Array.from(detailsMap.values());
         }
+    }
+    
+    return Array.from(detailsMap.values());
+}
 
         function getOperationNamesWithDetails(productName, siteKey) {
             const siteColumnMap = {
@@ -1544,35 +1558,36 @@
         }
 
         function collectDetailsFromForm() {
-            const details = [];
+    const details = [];
 
-            document.querySelectorAll('#detailsList .detail-qty').forEach(input => {
-                const qty = parseInt(input.value) || 0;
-                if (qty > 0) {
-                    details.push({
-                        name: input.dataset.detailName,
-                        material: input.dataset.detailMaterial,
-                        quantity: qty,
-                        type: 'detail'
-                    });
-                }
+    // Собираем обычные детали
+    document.querySelectorAll('#detailsList .detail-qty').forEach(input => {
+        const qty = parseInt(input.value) || 0;
+        if (qty > 0) {
+            details.push({
+                name: input.dataset.detailName,
+                material: input.dataset.detailMaterial,
+                quantity: qty,
+                type: 'detail'
             });
-
-            tempProfiles.forEach(profile => {
-                if (profile.name && profile.quantity > 0) {
-                    details.push({
-                        name: profile.name,
-                        material: profile.material,
-                        lengthMm: profile.lengthMm || 0,
-                        quantity: profile.quantity,
-                        type: 'profile'
-                    });
-                }
-            });
-
-            return details;
         }
+    });
 
+    // Собираем профили
+    tempProfiles.forEach(profile => {
+        if (profile.name && profile.quantity > 0) {
+            details.push({
+                name: profile.name,
+                material: profile.material,
+                lengthMm: profile.lengthMm || 0,
+                quantity: profile.quantity,
+                type: 'profile'
+            });
+        }
+    });
+
+    return details;
+}
         // ============== МОДАЛЬНОЕ ОКНО ==============
         function openGroupModal() {
             resetEditMode();
