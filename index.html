@@ -2352,22 +2352,20 @@
             } catch(e) { console.error(e); }
 
             for (let i = 0; i < operationsWithDetails.length; i++) {
-                const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
-                const opData = operationsWithDetails[i];
-                
-                const operationName = opData.operation || opData;
-                const detailName = opData.detail || '';
-                const thickness = opData.thickness || '';
-                
-                let displayOperationName = operationName;
-                if (detailName) {
-                    let cleanDetailName = detailName;
-                    if (thickness) {
-                        cleanDetailName = detailName.replace(thickness, '').trim();
-                    }
-                    displayOperationName = `${operationName} (${cleanDetailName})`;
-                    if (thickness) {
-                        displayOperationName += ` ${thickness}`;
+    const opData = operationsWithDetails[i];
+    const detailName = opData.detail || '';
+    
+    // Пропускаем операции для деталей, которых нет в заказе
+    if (detailName && item.details) {
+        const hasDetail = item.details.some(d => d.name === detailName);
+        if (!hasDetail) {
+            continue;
+        }
+    }
+    
+    const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
+    const operationName = opData.operation || opData;
+    const thickness = opData.thickness || '';
                     }
                 }
                 
