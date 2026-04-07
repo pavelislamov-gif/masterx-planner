@@ -684,13 +684,13 @@
     </div>
 
     <div id="rightModalOverlay" class="right-modal-overlay" onclick="closeRightModal()"></div>
-<div id="rightModal" class="right-modal">
-    <div class="right-modal-header" id="rightModalHeader">
-        <h3 id="modalTitle" style="margin:0; color:#ff9800;">🔧 Операция</h3>
-        <button class="right-modal-close" onclick="closeRightModal()">&times;</button>
+    <div id="rightModal" class="right-modal">
+        <div class="right-modal-header">
+            <h3 id="modalTitle">📝 Отчёт по задаче</h3>
+            <button class="right-modal-close" onclick="closeRightModal()">&times;</button>
+        </div>
+        <div id="rightModalContent" class="right-modal-content"></div>
     </div>
-    <div id="rightModalContent" class="right-modal-content"></div>
-</div>
 
     <script src="../js/storage.js"></script>
     <script src="../js/data-loader.js"></script>
@@ -1725,13 +1725,9 @@
             
             // Устанавливаем заголовок модального окна
             const modalTitle = document.getElementById('modalTitle');
-if (modalTitle && task) {
-    let name = task.operation;
-    if (task.detail) {
-        name = name + ' (' + task.detail + ')';
-    }
-    modalTitle.innerHTML = '🔧 ' + name;
-}
+            if (modalTitle) {
+                modalTitle.textContent = currentReportTask.operationDisplay;
+            }
             
             const modal = document.getElementById('rightModal');
             const overlay = document.getElementById('rightModalOverlay');
