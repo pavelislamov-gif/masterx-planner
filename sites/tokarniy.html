@@ -1567,21 +1567,27 @@
                 header.className = `task-header ${statusClass} ${priorityClass}`;
                 header.style.cursor = 'pointer';
                 header.innerHTML = `
-                    <div class="task-header-left">
-                        <div class="task-customer-name">🏢 ${escapeHtml(order.groupName)} | Заказ №${escapeHtml(order.number)} ${priorityBadge}</div>
-                        <div class="task-product-info">
-                            <span class="task-product-name">📦 ${escapeHtml(task.product || item.product)}</span>
-                            <span class="task-size">📏 ${escapeHtml(task.size || item.size?.name || '-')}</span>
-                            <span class="task-quantity">× ${task.sizeQuantity || item.size?.quantity || 1} шт</span>
-                            ${task.ral || item.ral ? `<span class="task-ral">🎨 ${escapeHtml(task.ral || item.ral)}</span>` : ''}
-                            ${task.texture || item.texture ? `<span class="task-texture">🧵 ${escapeHtml(task.texture || item.texture)}</span>` : ''}
-                            ${filesIndicator}
-                        </div>
-                        <div style="display: flex; align-items: center; justify-content: center; min-height: 50px; margin: 10px 0;">
-    <div style="font-size: 14px; font-weight: 600; color: #ff9800; text-align: center;">
-        🔧 ${escapeHtml(task.operation)}${task.detail ? ' (' + escapeHtml(task.detail) + ')' : ''}
+    <div class="task-header-left">
+        <div class="task-customer-name">🏢 ${escapeHtml(order.groupName)} | Заказ №${escapeHtml(order.number)} ${priorityBadge}</div>
+        <div class="task-product-info">
+            <span class="task-product-name">📦 ${escapeHtml(task.product || item.product)}</span>
+            <span class="task-size">📏 ${escapeHtml(task.size || item.size?.name || '-')}</span>
+            <span class="task-quantity">× ${task.sizeQuantity || item.size?.quantity || 1} шт</span>
+            ${task.ral || item.ral ? `<span class="task-ral">🎨 ${escapeHtml(task.ral || item.ral)}</span>` : ''}
+            ${task.texture || item.texture ? `<span class="task-texture">🧵 ${escapeHtml(task.texture || item.texture)}</span>` : ''}
+            ${filesIndicator}
+        </div>
+        <div style="margin: 8px 0; font-size: 14px; font-weight: 600; color: #ff9800; text-align: center;">
+            🔧 ${escapeHtml(task.operation)}${task.detail ? ' (' + escapeHtml(task.detail) + ')' : ''}
+        </div>
     </div>
-                    </div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <span class="task-status-badge ${statusClass}">${statusText}</span>
+        <button class="btn-report-item" onclick="event.stopPropagation(); openRightModalForTask('${task.id}')">📝 Отчёт</button>
+        ${hasFiles ? `<button class="btn-copy-path" onclick="event.stopPropagation(); copyAllFilePaths('${task.id}')">📋 Копировать путь</button>` : ''}
+        <span class="collapse-icon">▼</span>
+    </div>
+`;
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span class="task-status-badge ${statusClass}">${statusText}</span>
                         <button class="btn-report-item" onclick="event.stopPropagation(); openRightModalForTask('${task.id}')">📝 Отчёт</button>
