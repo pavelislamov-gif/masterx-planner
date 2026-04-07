@@ -702,6 +702,29 @@
             margin-left: 5px;
         }
 
+        .bar-chip {
+            background: #1e232b;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            white-space: nowrap;
+            border: 1px solid #2a2f38;
+        }
+
+        .bar-chip .bar-name {
+            color: #ff9800;
+        }
+
+        .bar-chip .bar-length {
+            color: #00d4ff;
+            margin-left: 5px;
+        }
+
+        .bar-chip .bar-quantity {
+            color: #4cd964;
+            margin-left: 5px;
+        }
+
         /* ШАПКА - всегда тёмная */
         header {
             background: linear-gradient(135deg, #1a1e24 0%, #0f1217 100%) !important;
@@ -825,12 +848,15 @@
         }
 
         body.light-theme .detail-chip,
-        body.light-theme .profile-chip {
+        body.light-theme .profile-chip,
+        body.light-theme .bar-chip {
             background: #f1f5f9 !important;
             border-color: #e2e8f0 !important;
         }
 
-        body.light-theme .detail-chip .detail-name {
+        body.light-theme .detail-chip .detail-name,
+        body.light-theme .profile-chip .profile-name,
+        body.light-theme .bar-chip .bar-name {
             color: #f97316 !important;
         }
         
@@ -972,6 +998,12 @@
                             <button type="button" class="btn-outline" onclick="addCustomProfile()" style="margin-top: 5px; width: 100%;">+ Добавить профиль</button>
                         </div>
 
+                        <div id="barsContainer" style="display: none;">
+                            <div class="components-title" style="color: #ff3b3b; font-size: 14px; margin-bottom: 10px;">🥖 ПРУТКИ:</div>
+                            <div id="barsList"></div>
+                            <button type="button" class="btn-outline" onclick="addCustomBar()" style="margin-top: 5px; width: 100%;">+ Добавить пруток</button>
+                        </div>
+
                         <div id="detailsContainer" style="display: none;">
                             <div class="components-title" style="color: #ff3b3b; font-size: 14px; margin-bottom: 10px;">🔧 ДЕТАЛИ:</div>
                             <div id="detailsList"></div>
@@ -1051,6 +1083,7 @@
         let tempBrackets = [];
         let tempLyres = [];
         let tempProfiles = [];
+        let tempBars = [];
         let taskOperationsData = {};
         let editingOrderId = null;
         let editingItemIndex = null;
@@ -1270,54 +1303,78 @@
         }
 
         function getUniqueDetailsFromOperations(productName) {
-    const productOps = taskOperationsData[productName];
-    if (!productOps) {
-        return [];
-    }
-    
-    const detailsMap = new Map();
-    const sites = ['токарно-фрезерный', 'фрезерный', 'слесарный', 'лазерно-гибочный', 'полимерный'];
-    
-    // Ключевые слова для определения профиля
-    const profileKeywords = ['Профиль', 'НПС', 'МП', 'КП', 'Труба', 'НП', 'ABA', 'ТПК', 'Н2248', 'XROLL', 'НПС 2997', 'НПС 2966', 'НПС 2967', 'НПС 3362', 'НП 455015'];
-    
-    for (const site of sites) {
-        const operations = productOps[site] || [];
-        for (const op of operations) {
-            const detailName = op.detail;
-            if (detailName && detailName.trim() !== '') {
-                if (!detailsMap.has(detailName)) {
-                    let material = 'алюминий';
-                    const nameLower = detailName.toLowerCase();
-                    if (nameLower.includes('пвх')) material = 'ПВХ';
-                    else if (nameLower.includes('поликарбонат')) material = 'поликарбонат';
-                    else if (nameLower.includes('aisi') || nameLower.includes('нержавейка')) material = 'нержавейка';
-                    else if (nameLower.includes('сталь')) material = 'сталь';
-                    else if (nameLower.includes('оргстекло') || nameLower.includes('plexiglas')) material = 'оргстекло';
-                    
-                    // Определяем тип: профиль или обычная деталь
-                    let type = 'detail';
-                    for (const keyword of profileKeywords) {
-                        if (detailName.includes(keyword)) {
-                            type = 'profile';
-                            break;
-                        }
+            // Прямой поиск по ключу
+            let productOps = taskOperationsData[productName];
+            
+            // Если не нашли, ищем без учёта регистра и пробелов
+            if (!productOps) {
+                const normalizedInput = productName.toLowerCase().replace(/\s/g, '');
+                for (const [key, value] of Object.entries(taskOperationsData)) {
+                    const normalizedKey = key.toLowerCase().replace(/\s/g, '');
+                    if (normalizedKey === normalizedInput) {
+                        productOps = value;
+                        console.log(`Найдено совпадение: "${key}" для "${productName}"`);
+                        break;
                     }
-                    
-                    detailsMap.set(detailName, {
-                        name: detailName,
-                        material: material,
-                        quantity: 0,
-                        type: type,
-                        lengthMm: 0  // для профилей
-                    });
                 }
             }
+            
+            if (!productOps) {
+                console.warn(`Не найдены операции для изделия: ${productName}`);
+                return [];
+            }
+            
+            const detailsMap = new Map();
+            const sites = ['токарно-фрезерный', 'фрезерный', 'слесарный', 'лазерно-гибочный', 'полимерный'];
+            
+            // Ключевые слова для определения типа детали
+            const profileKeywords = ['Профиль', 'НПС', 'МП', 'КП', 'Труба', 'НП', 'ABA', 'ТПК', 'Н2248', 'XROLL'];
+            const barKeywords = ['Пруток'];
+            
+            for (const site of sites) {
+                const operations = productOps[site] || [];
+                for (const op of operations) {
+                    const detailName = op.detail;
+                    if (detailName && detailName.trim() !== '') {
+                        if (!detailsMap.has(detailName)) {
+                            let material = 'алюминий';
+                            const nameLower = detailName.toLowerCase();
+                            if (nameLower.includes('пвх')) material = 'ПВХ';
+                            else if (nameLower.includes('поликарбонат')) material = 'поликарбонат';
+                            else if (nameLower.includes('aisi') || nameLower.includes('нержавейка')) material = 'нержавейка';
+                            else if (nameLower.includes('сталь')) material = 'сталь';
+                            else if (nameLower.includes('оргстекло') || nameLower.includes('plexiglas')) material = 'оргстекло';
+                            
+                            // Определяем тип детали
+                            let type = 'detail';
+                            for (const keyword of profileKeywords) {
+                                if (detailName.includes(keyword)) {
+                                    type = 'profile';
+                                    break;
+                                }
+                            }
+                            for (const keyword of barKeywords) {
+                                if (detailName.includes(keyword)) {
+                                    type = 'bar';
+                                    break;
+                                }
+                            }
+                            
+                            detailsMap.set(detailName, {
+                                name: detailName,
+                                material: material,
+                                quantity: 0,
+                                type: type,
+                                lengthMm: 0
+                            });
+                        }
+                    }
+                }
+            }
+            
+            console.log(`Найдено деталей для "${productName}":`, Array.from(detailsMap.values()));
+            return Array.from(detailsMap.values());
         }
-    }
-    
-    return Array.from(detailsMap.values());
-}
 
         function getOperationNamesWithDetails(productName, siteKey) {
             const siteColumnMap = {
@@ -1351,7 +1408,8 @@
                 material: 'алюминий',
                 lengthMm: 0,
                 quantity: 1,
-                isCustom: true
+                isCustom: true,
+                type: 'profile'
             });
             renderProfilesList();
         }
@@ -1463,6 +1521,126 @@
             });
         }
 
+        // ============== ПРУТКИ ==============
+        function addCustomBar() {
+            tempBars.push({
+                name: '',
+                material: 'алюминий',
+                lengthMm: 0,
+                quantity: 1,
+                isCustom: true,
+                type: 'bar'
+            });
+            renderBarsList();
+        }
+
+        function removeCustomBar(index) {
+            if (index >= 0 && index < tempBars.length && tempBars[index].isCustom) {
+                tempBars.splice(index, 1);
+                renderBarsList();
+            }
+        }
+
+        function renderBarsList() {
+            const barsList = document.getElementById('barsList');
+            if (!barsList) return;
+
+            if (tempBars.length === 0) {
+                document.getElementById('barsContainer').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('barsContainer').style.display = 'block';
+            let barsHtml = '';
+
+            tempBars.forEach((bar, idx) => {
+                if (bar.isCustom) {
+                    barsHtml += `
+                        <div class="bar-item" data-bar-index="${idx}" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <input type="text" 
+                                   class="bar-name-custom" 
+                                   data-bar-index="${idx}"
+                                   value="${escapeHtml(bar.name)}"
+                                   placeholder="Название прутка"
+                                   style="flex: 2; padding: 6px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <input type="number" 
+                                       class="bar-length-custom" 
+                                       data-bar-index="${idx}"
+                                       value="${bar.lengthMm}" 
+                                       min="0" 
+                                       step="1"
+                                       style="width: 80px; padding: 6px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                                <span style="color: #a0a0a0;">мм</span>
+                                <input type="number" 
+                                       class="bar-qty-custom" 
+                                       data-bar-index="${idx}"
+                                       value="${bar.quantity}" 
+                                       min="0" 
+                                       step="1"
+                                       style="width: 60px; padding: 6px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                                <span style="color: #a0a0a0;">шт</span>
+                                <button class="remove-bar-btn" onclick="removeCustomBar(${idx})" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer;">✕</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    barsHtml += `
+                        <div class="bar-item" data-bar-index="${idx}" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <span style="flex: 2; font-size: 14px;">${escapeHtml(bar.name)}</span>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <input type="number" 
+                                       class="bar-length" 
+                                       data-bar-index="${idx}"
+                                       value="${bar.lengthMm}" 
+                                       min="0" 
+                                       step="1"
+                                       style="width: 80px; padding: 6px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                                <span style="color: #a0a0a0;">мм</span>
+                                <input type="number" 
+                                       class="bar-qty" 
+                                       data-bar-index="${idx}"
+                                       value="${bar.quantity}" 
+                                       min="0" 
+                                       step="1"
+                                       style="width: 60px; padding: 6px; background: #15191f; border: 1px solid #2a2f38; border-radius: 4px; color: #fff; text-align: center;">
+                                <span style="color: #a0a0a0;">шт</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            barsList.innerHTML = barsHtml;
+
+            document.querySelectorAll('#barsList .bar-length, #barsList .bar-length-custom').forEach(input => {
+                const barIdx = parseInt(input.dataset.barIndex);
+                input.addEventListener('change', function() {
+                    if (tempBars[barIdx]) {
+                        tempBars[barIdx].lengthMm = parseInt(this.value) || 0;
+                    }
+                });
+            });
+
+            document.querySelectorAll('#barsList .bar-qty, #barsList .bar-qty-custom').forEach(input => {
+                const barIdx = parseInt(input.dataset.barIndex);
+                input.addEventListener('change', function() {
+                    if (tempBars[barIdx]) {
+                        tempBars[barIdx].quantity = parseInt(this.value) || 0;
+                    }
+                });
+            });
+
+            document.querySelectorAll('#barsList .bar-name-custom').forEach(input => {
+                const barIdx = parseInt(input.dataset.barIndex);
+                input.addEventListener('change', function() {
+                    if (tempBars[barIdx]) {
+                        tempBars[barIdx].name = this.value;
+                    }
+                });
+            });
+        }
+
         // ============== ОБНОВЛЕНИЕ ПРИ ВЫБОРЕ ИЗДЕЛИЯ ==============
         function onNewItemProductChange() {
             const productName = document.getElementById('newItemProduct').value;
@@ -1470,11 +1648,13 @@
             const detailsContainer = document.getElementById('detailsContainer');
             const detailsList = document.getElementById('detailsList');
             const profilesContainer = document.getElementById('profilesContainer');
+            const barsContainer = document.getElementById('barsContainer');
 
             if (!productName) {
                 sizeSelect.innerHTML = '<option value="">Сначала выберите изделие</option>';
                 detailsContainer.style.display = 'none';
-                profilesContainer.style.display = 'none';
+                if (profilesContainer) profilesContainer.style.display = 'none';
+                if (barsContainer) barsContainer.style.display = 'none';
                 return;
             }
 
@@ -1493,26 +1673,12 @@
 
             const allDetails = getUniqueDetailsFromOperations(productName);
             
-            if (allDetails.length === 0) {
-                detailsContainer.style.display = 'none';
-                profilesContainer.style.display = 'none';
-                return;
-            }
+            // Разделяем по типам
+            const regularDetails = allDetails.filter(d => d.type === 'detail');
+            const profiles = allDetails.filter(d => d.type === 'profile');
+            const bars = allDetails.filter(d => d.type === 'bar');
             
-            const regularDetails = [];
-            const profilesFromDetails = [];
-            
-            for (const detail of allDetails) {
-                const name = detail.name || '';
-                if (name.includes('Профиль') || name.includes('профиль') || 
-                    name.includes('НПС') || name.includes('МП') || 
-                    name.includes('КП') || name.includes('Труба')) {
-                    profilesFromDetails.push(detail);
-                } else {
-                    regularDetails.push(detail);
-                }
-            }
-            
+            // Обычные детали
             if (regularDetails.length > 0) {
                 detailsContainer.style.display = 'block';
                 let detailsHtml = '';
@@ -1539,15 +1705,17 @@
                 detailsContainer.style.display = 'none';
             }
             
+            // Профили
             tempProfiles = [];
-            if (profilesFromDetails.length > 0) {
-                profilesFromDetails.forEach(profile => {
+            if (profiles.length > 0) {
+                profiles.forEach(profile => {
                     tempProfiles.push({
                         name: profile.name,
                         material: profile.material,
                         lengthMm: 0,
                         quantity: 0,
-                        isCustom: false
+                        isCustom: false,
+                        type: 'profile'
                     });
                 });
                 renderProfilesList();
@@ -1555,39 +1723,85 @@
             } else {
                 profilesContainer.style.display = 'none';
             }
+            
+            // Прутки
+            tempBars = [];
+            if (bars.length > 0) {
+                bars.forEach(bar => {
+                    tempBars.push({
+                        name: bar.name,
+                        material: bar.material,
+                        lengthMm: 0,
+                        quantity: 0,
+                        isCustom: false,
+                        type: 'bar'
+                    });
+                });
+                renderBarsList();
+                barsContainer.style.display = 'block';
+            } else {
+                barsContainer.style.display = 'none';
+            }
         }
 
         function collectDetailsFromForm() {
-    const details = [];
+            const details = [];
 
-    // Собираем обычные детали
-    document.querySelectorAll('#detailsList .detail-qty').forEach(input => {
-        const qty = parseInt(input.value) || 0;
-        if (qty > 0) {
-            details.push({
-                name: input.dataset.detailName,
-                material: input.dataset.detailMaterial,
-                quantity: qty,
-                type: 'detail'
+            // Обычные детали
+            document.querySelectorAll('#detailsList .detail-qty').forEach(input => {
+                const qty = parseInt(input.value) || 0;
+                if (qty > 0) {
+                    details.push({
+                        name: input.dataset.detailName,
+                        material: input.dataset.detailMaterial,
+                        quantity: qty,
+                        type: 'detail'
+                    });
+                }
             });
-        }
-    });
 
-    // Собираем профили
-    tempProfiles.forEach(profile => {
-        if (profile.name && profile.quantity > 0) {
-            details.push({
-                name: profile.name,
-                material: profile.material,
-                lengthMm: profile.lengthMm || 0,
-                quantity: profile.quantity,
-                type: 'profile'
+            // Профили
+            tempProfiles.forEach(profile => {
+                if (profile.name && profile.quantity > 0) {
+                    details.push({
+                        name: profile.name,
+                        material: profile.material,
+                        lengthMm: profile.lengthMm || 0,
+                        quantity: profile.quantity,
+                        type: 'profile'
+                    });
+                }
             });
-        }
-    });
 
-    return details;
-}
+            // Прутки
+            tempBars.forEach(bar => {
+                if (bar.name && bar.quantity > 0) {
+                    details.push({
+                        name: bar.name,
+                        material: bar.material,
+                        lengthMm: bar.lengthMm || 0,
+                        quantity: bar.quantity,
+                        type: 'bar'
+                    });
+                }
+            });
+
+            return details;
+        }
+
+        function populateNewItemSelects() {
+            const productSelect = document.getElementById('newItemProduct');
+            if (productSelect && productsList.length) {
+                productSelect.innerHTML = '<option value="">Выберите изделие</option>';
+                productsList.forEach(p => {
+                    const option = document.createElement('option');
+                    option.value = p.name;
+                    option.textContent = p.name;
+                    productSelect.appendChild(option);
+                });
+            }
+        }
+
         // ============== МОДАЛЬНОЕ ОКНО ==============
         function openGroupModal() {
             resetEditMode();
@@ -1595,6 +1809,7 @@
             tempBrackets = [];
             tempLyres = [];
             tempProfiles = [];
+            tempBars = [];
             updateItemsListDisplay();
             resetAddItemForm();
             document.getElementById('groupNameInput').value = '';
@@ -1631,10 +1846,13 @@
             document.getElementById('detailsList').innerHTML = '';
             document.getElementById('profilesContainer').style.display = 'none';
             document.getElementById('profilesList').innerHTML = '';
+            document.getElementById('barsContainer').style.display = 'none';
+            document.getElementById('barsList').innerHTML = '';
 
             tempBrackets = [];
             tempLyres = [];
             tempProfiles = [];
+            tempBars = [];
         }
 
         function updateItemsListDisplay() {
@@ -1658,8 +1876,9 @@
 
             let html = '';
             tempItemsList.forEach((item, index) => {
-                const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
+                const regularDetails = (item.details || []).filter(d => d.type !== 'profile' && d.type !== 'bar');
                 const profiles = (item.details || []).filter(d => d.type === 'profile');
+                const bars = (item.details || []).filter(d => d.type === 'bar');
 
                 html += `
                     <div class="item-card" data-item-index="${index}">
@@ -1694,6 +1913,17 @@
                                     `).join('')}
                                 </div>
                             ` : '<div>📐 Профили: — нет —</div>'}
+                            ${bars.length > 0 ? `
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                                    ${bars.map(b => `
+                                        <span class="bar-chip">
+                                            <span class="bar-name">🥖 ${escapeHtml(b.name)}</span>
+                                            <span class="bar-length">${b.lengthMm} мм</span>
+                                            <span class="bar-quantity">× ${b.quantity} шт</span>
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            ` : '<div>🥖 Прутки: — нет —</div>'}
                         </div>
                     </div>
                 `;
@@ -1724,7 +1954,8 @@
                 tempLyres = [];
                 
                 tempProfiles = (item.details || []).filter(d => d.type === 'profile');
-                const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
+                tempBars = (item.details || []).filter(d => d.type === 'bar');
+                const regularDetails = (item.details || []).filter(d => d.type !== 'profile' && d.type !== 'bar');
                 
                 const detailsContainer = document.getElementById('detailsContainer');
                 const detailsList = document.getElementById('detailsList');
@@ -1757,6 +1988,12 @@
                     renderProfilesList();
                 } else {
                     document.getElementById('profilesContainer').style.display = 'none';
+                }
+                
+                if (tempBars.length > 0) {
+                    renderBarsList();
+                } else {
+                    document.getElementById('barsContainer').style.display = 'none';
                 }
                 
                 const addBtn = document.getElementById('addItemBtn');
@@ -1811,19 +2048,6 @@
             }
             
             editingItemIndex = null;
-        }
-
-        function populateNewItemSelects() {
-            const productSelect = document.getElementById('newItemProduct');
-            if (productSelect && productsList.length) {
-                productSelect.innerHTML = '<option value="">Выберите изделие</option>';
-                productsList.forEach(p => {
-                    const option = document.createElement('option');
-                    option.value = p.name;
-                    option.textContent = p.name;
-                    productSelect.appendChild(option);
-                });
-            }
         }
 
         function addItemToGroup() {
@@ -1937,6 +2161,7 @@
             tempBrackets = [];
             tempLyres = [];
             tempProfiles = [];
+            tempBars = [];
             
             order.items.forEach(item => {
                 tempItemsList.push(JSON.parse(JSON.stringify(item)));
@@ -2526,6 +2751,7 @@
                         </div>
                         <div style="display: flex; gap: 8px;">
                             <button class="btn btn-primary" onclick="event.stopPropagation(); showOrderReport(${order.id})" style="background: #0077ff;">📋 Отчёт по заказу</button>
+                            <button class="btn btn-stats" onclick="event.stopPropagation(); showGroupStats(${order.id})" style="background: #9b59b6;">📊 Статистика</button>
                             <button class="btn btn-time-stats" onclick="event.stopPropagation(); showTimeStats(${order.id})">⏱️ Статистика времени</button>
                             <button class="btn btn-info" onclick="event.stopPropagation(); editGroup(${order.id})">✏️ Редактировать состав</button>
                             <button class="btn btn-danger" onclick="event.stopPropagation(); deleteOrder(${order.id})">🗑️ Удалить</button>
@@ -2601,8 +2827,9 @@
                             headerBorderColor = '#ff9800';
                         }
                         
-                        const regularDetails = (item.details || []).filter(d => d.type !== 'profile');
+                        const regularDetails = (item.details || []).filter(d => d.type !== 'profile' && d.type !== 'bar');
                         const profiles = (item.details || []).filter(d => d.type === 'profile');
+                        const bars = (item.details || []).filter(d => d.type === 'bar');
                         
                         const itemDiv = document.createElement('div');
                         itemDiv.style.marginBottom = '20px';
@@ -3142,9 +3369,11 @@
                     hasAnyData = true;
                     
                     const profiles = item.details.filter(d => d.type === 'profile');
-                    const details = item.details.filter(d => d.type !== 'profile');
+                    const bars = item.details.filter(d => d.type === 'bar');
+                    const details = item.details.filter(d => d.type !== 'profile' && d.type !== 'bar');
                     
                     let profilesHtml = '';
+                    let barsHtml = '';
                     let detailsHtml = '';
                     
                     if (profiles.length > 0) {
@@ -3153,6 +3382,14 @@
                             profilesHtml += `<span style="display: inline-block; background: #1e232b; padding: 2px 8px; border-radius: 4px; margin: 2px; font-size: 11px;">${escapeHtml(p.name)} ${p.lengthMm || 0}мм × ${p.quantity} шт</span>`;
                         });
                         profilesHtml += `</div>`;
+                    }
+                    
+                    if (bars.length > 0) {
+                        barsHtml = `<div style="margin-bottom: 10px;"><strong>🥖 Прутки:</strong><br>`;
+                        bars.forEach(b => {
+                            barsHtml += `<span style="display: inline-block; background: #1e232b; padding: 2px 8px; border-radius: 4px; margin: 2px; font-size: 11px;">${escapeHtml(b.name)} ${b.lengthMm || 0}мм × ${b.quantity} шт</span>`;
+                        });
+                        barsHtml += `</div>`;
                     }
                     
                     if (details.length > 0) {
@@ -3204,6 +3441,7 @@
                             </div>
                             <div style="padding: 15px;">
                                 ${profilesHtml}
+                                ${barsHtml}
                                 ${detailsHtml}
                                 ${sitesHtml}
                             </div>
@@ -3451,7 +3689,7 @@
                                     <th style="padding: 10px; text-align: center;">Прогресс</th>
                                     <th style="padding: 10px; text-align: center;">Время (мин)</th>
                                     <th style="padding: 10px; text-align: center;">Время (часы)</th>
-                                </tr>
+                                <tr>
                             </thead>
                             <tbody>
                 `;
@@ -3673,15 +3911,21 @@
             for (const itemKey in itemsData) {
                 const item = itemsData[itemKey];
                 
-                // Профили и детали
+                // Профили, прутки и детали
                 const profiles = item.details.filter(d => d.type === 'profile');
-                const details = item.details.filter(d => d.type !== 'profile');
+                const bars = item.details.filter(d => d.type === 'bar');
+                const details = item.details.filter(d => d.type !== 'profile' && d.type !== 'bar');
                 
                 let profilesHtml = '';
+                let barsHtml = '';
                 let detailsHtml = '';
                 
                 if (profiles.length > 0) {
                     profilesHtml = `<div style="margin-top: 8px;"><strong>📐 Профили:</strong> ${profiles.map(p => `${escapeHtml(p.name)} ${p.lengthMm || 0}мм × ${p.quantity} шт`).join(', ')}</div>`;
+                }
+                
+                if (bars.length > 0) {
+                    barsHtml = `<div style="margin-top: 5px;"><strong>🥖 Прутки:</strong> ${bars.map(b => `${escapeHtml(b.name)} ${b.lengthMm || 0}мм × ${b.quantity} шт`).join(', ')}</div>`;
                 }
                 
                 if (details.length > 0) {
@@ -3699,6 +3943,7 @@
                                 </div>
                             </div>
                             ${profilesHtml}
+                            ${barsHtml}
                             ${detailsHtml}
                         </div>
                         <div style="padding: 15px;">
@@ -3956,6 +4201,8 @@
         window.toggleSquareStatus = toggleSquareStatus;
         window.addCustomProfile = addCustomProfile;
         window.removeCustomProfile = removeCustomProfile;
+        window.addCustomBar = addCustomBar;
+        window.removeCustomBar = removeCustomBar;
         window.onNewItemProductChange = onNewItemProductChange;
         window.closeOrderReportModal = closeOrderReportModal;
         window.showItemReport = showItemReport;
