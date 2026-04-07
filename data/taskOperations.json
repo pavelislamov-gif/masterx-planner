@@ -1393,7 +1393,7 @@
         { "operation": "Покраска", "detail": "Кронштейн Алюминий 2мм", "thickness": "2мм" }
       ]
     },
-    "XEYES mini-1": {
+    "XEYES -1": {
       "токарно-фрезерный": [
         { "operation": "Фрезеровка", "detail": "Профиль 80*60*4", "thickness": null },
         { "operation": "Фрезеровка", "detail": "Профиль 100*40*4", "thickness": null }
@@ -1482,7 +1482,7 @@
         { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
-    "XGLOW mini": {
+    "XGLOW ": {
       "токарно-фрезерный": [],
       "фрезерный": [],
       "слесарный": [
@@ -1632,7 +1632,7 @@
         { "operation": "Покраска", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" }
       ]
     },
-    "XSMART MINI": {
+    "XSMART mini": {
       "токарно-фрезерный": [],
       "фрезерный": [
         { "operation": "Фрезеровка", "detail": "Заглушка Алюминий 3мм", "thickness": "3мм" },
