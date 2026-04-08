@@ -2570,6 +2570,12 @@ body.light-theme .square-status.green {
                     renderOrdersList();
                     updateStatistics();
 
+                    // Меняем внешний вид кнопки на "добавлено"
+            if (button) {
+                button.classList.add('added');
+                button.textContent = '✓';
+            }
+
                     alert(`✅ Операция "${operationName}" удалена с участка`);
                 }
                 return;
