@@ -1508,7 +1508,7 @@
   "токарно-фрезерный": [],
   "фрезерный": [
     { "operation": "Фрезеровка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
-    { "operation": "Фрезеровка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" }
+    { "operation": "Фрезеровка", "detail": "Заглушка правая Алюминий 3мм", "thickness": "3мм" }
   ],
   "слесарный": [
     { "operation": "Раскрой", "detail": "Профиль МП 1928 XGRAY", "thickness": null },
@@ -1520,9 +1520,9 @@
     { "operation": "Нарезка резьбы", "detail": "Профиль планка СЧ 4446", "thickness": null },
     { "operation": "Обработка", "detail": "Профиль планка СЧ 4446", "thickness": null },
     { "operation": "Зенковка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
-    { "operation": "Обработка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
+    { "operation": "Обработка", "detail": "Заглушка правая Алюминий 3мм", "thickness": "3мм" },
     { "operation": "Зенковка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
-    { "operation": "Обработка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
+    { "operation": "Обработка", "detail": "Заглушка правая Алюминий 3мм", "thickness": "3мм" },
     { "operation": "Зенковка", "detail": "Заглушка молуля AISI 1мм", "thickness": "1мм" }
   ],
   "лазерно-гибочный": [
@@ -1532,14 +1532,14 @@
     { "operation": "Покраска", "detail": "Профиль МП 1928 XGRAY", "thickness": null },
     { "operation": "Покраска", "detail": "Профиль планка СЧ 4446", "thickness": null },
     { "operation": "Покраска", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
-    { "operation": "Покраска", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" }
+    { "operation": "Покраска", "detail": "Заглушка правая Алюминий 3мм", "thickness": "3мм" }
   ]
     },
     "XGRAY v.2": {
       "токарно-фрезерный": [],
       "фрезерный": [
         { "operation": "Фрезеровка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
-        { "operation": "Фрезеровка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" }
+        { "operation": "Фрезеровка", "detail": "Заглушка правая Алюминий 3мм", "thickness": "3мм" }
       ],
       "слесарный": [
         { "operation": "Раскрой", "detail": "Профиль МП 1928 XGRAY", "thickness": null },
@@ -1547,9 +1547,9 @@
         { "operation": "Раскрой", "detail": "Профиль модуль НПС 2999 (XGRAY/XYELLOW)", "thickness": null },
         { "operation": "Обработка", "detail": "Профиль модуль НПС 2999 (XGRAY/XYELLOW)", "thickness": null },
         { "operation": "Зенковка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
+        { "operation": "Обработка", "detail": "Заглушка правая Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Обработка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
-        { "operation": "Обработка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
-        { "operation": "Зенковка", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
+        { "operation": "Зенковка", "detail": "Заглушка правая Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Зенковка", "detail": "Заглушка молуля AISI 1мм", "thickness": "1мм" }
       ],
       "лазерно-гибочный": [
@@ -1562,7 +1562,7 @@
       "полимерный": [
         { "operation": "Покраска", "detail": "Профиль МП 1928 XGRAY", "thickness": null },
         { "operation": "Покраска", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
-        { "operation": "Покраска", "detail": "Заглушка левая Алюминий 3мм", "thickness": "3мм" },
+        { "operation": "Покраска", "detail": "Заглушка правая Алюминий 3мм", "thickness": "3мм" },
         { "operation": "Голтовка", "detail": "Лира AISI 1,5мм", "thickness": "1,5мм" },
         { "operation": "Покраска", "detail": "Лира AISI 1,5мм", "thickness": "1,5мм" },
         { "operation": "Голтовка", "detail": "Кронштейн AISI 2мм", "thickness": "2мм" },
