@@ -1444,3 +1444,56 @@ header {
 .size-quantity-row input {
     flex: 1;
 }
+
+/* ============== КНОПКИ НА УЧАСТКАХ ============== */
+/* Кнопка "➕ Доп. задача" - синяя */
+.btn-add-extra {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.btn-add-extra:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(59,130,246,0.4) !important;
+}
+
+/* Кнопка "📎 Добавить файл" - зелёная */
+.btn-file {
+    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.btn-file:hover {
+    background: linear-gradient(135deg, #16a34a, #15803d) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(34,197,94,0.4) !important;
+}
+
+/* Контейнер с кнопками в карточке участка */
+.site-card-content > div:last-child {
+    display: flex !important;
+    gap: 10px !important;
+    margin-top: 10px !important;
+}
+
+.site-card-content > div:last-child button {
+    flex: 1 !important;
+    text-align: center !important;
+}
