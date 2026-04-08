@@ -1497,3 +1497,44 @@ header {
     flex: 1 !important;
     text-align: center !important;
 }
+
+/* ============== КНОПКИ В КАРТОЧКЕ ИЗДЕЛИЯ ПРИ РЕДАКТИРОВАНИИ ============== */
+/* Кнопка "✕ Удалить" - красная с закруглёнными краями */
+.remove-item-btn {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 6px 14px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.remove-item-btn:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(239,68,68,0.4) !important;
+}
+
+/* Кнопка "✏️ Редактировать" - синяя (опционально, для единообразия) */
+.btn-info {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 6px 14px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.btn-info:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(59,130,246,0.4) !important;
+}
