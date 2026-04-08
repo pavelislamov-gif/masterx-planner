@@ -994,10 +994,161 @@ hr {
 .right-modal-overlay.show { display: block; }
 
 /* СВЕТЛАЯ ТЕМА */
-body.light-theme .right-modal {
-    background: linear-gradient(135deg, #ffffff, #f8fafc);
-    border-left: 2px solid #ff9800;
+body.light-theme {
+    background-color: #f0f2f5 !important;
+    color: #1e293b !important;
 }
+
+body.light-theme .container {
+    background-color: #f0f2f5 !important;
+}
+
+body.light-theme .order-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .order-header {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .order-header h3 {
+    color: #1e293b !important;
+}
+
+body.light-theme .site-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .site-card-header {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
+    border-bottom-color: #e2e8f0 !important;
+}
+
+body.light-theme .operation-item {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+
+body.light-theme .square-status {
+    background: #e2e8f0 !important;
+    border-color: #cbd5e1 !important;
+}
+
+body.light-theme .square-status.orange {
+    background-color: #ff9800 !important;
+    border-color: #e65100 !important;
+}
+
+body.light-theme .square-status.green {
+    background-color: #4caf50 !important;
+    border-color: #2e7d32 !important;
+}
+
+body.light-theme .filter-section {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .filter-group select,
+body.light-theme .filter-group input {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+body.light-theme .order-stats {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .stat-item {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .right-modal {
+    background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+    border-left: 2px solid #ff9800 !important;
+}
+
 body.light-theme .right-modal-header {
-    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .right-modal-header h3 {
+    color: #dc2626 !important;
+}
+
+body.light-theme .report-row {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .report-input,
+body.light-theme .report-textarea {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+/* ============== КВАДРАТИК С ПЛЮСОМ (btn-add) ============== */
+/* Обычное состояние — белый квадратик с чёрным плюсом */
+.btn-add {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+.btn-add:hover {
+    background: #f1f5f9 !important;
+    transform: scale(1.02);
+}
+
+/* Состояние "добавлено" — зелёный квадратик с белой галочкой */
+.btn-add.added {
+    background: #22c55e !important;
+    color: white !important;
+    border: none !important;
+}
+
+/* Для тёмной темы (если используется) */
+body.dark-theme .btn-add {
+    background: #2ecc71 !important;
+    color: white !important;
+    border: none !important;
+}
+
+body.dark-theme .btn-add.added {
+    background: #e74c3c !important;
+}
+
+/* Стили для квадратика статуса */
+.square-status {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: #1e232b;
+    border: 1px solid #3a404b;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.square-status.orange {
+    background-color: #ff9800 !important;
+    border-color: #e65100 !important;
+}
+
+.square-status.green {
+    background-color: #4caf50 !important;
+    border-color: #2e7d32 !important;
+}
+
+/* Для светлой темы обычный квадратик статуса */
+body.light-theme .square-status {
+    background: #e2e8f0 !important;
+    border-color: #cbd5e1 !important;
+}
