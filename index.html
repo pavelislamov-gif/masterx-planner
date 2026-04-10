@@ -101,17 +101,55 @@
             </div>
         </div>
 
-        <div id="materialsModal" class="modal">
-            <div class="modal-content" style="max-width: 1000px;">
-                <span class="close" onclick="closeMaterialsModal()">&times;</span>
-                <div id="materialsReport"></div>
-            </div>
-        </div>
-
         <div id="orderReportModal" class="modal">
             <div class="modal-content">
                 <span class="close" onclick="closeOrderReportModal()">&times;</span>
                 <div id="orderReportContent"></div>
+            </div>
+        </div>
+
+        <!-- Модальное окно редактирования изделия -->
+        <div id="editItemModal" class="modal" style="display:none">
+            <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+                <span class="close" onclick="closeEditModal()">&times;</span>
+                <h2 style="color: #dc2626; margin-bottom: 20px;">✏️ Редактирование изделия</h2>
+                
+                <div class="form-group">
+                    <label>📦 Изделие:</label>
+                    <input type="text" id="editProductName" readonly style="background: #f0f0f0; width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                </div>
+                
+                <div class="form-group">
+                    <label>📏 Размер:</label>
+                    <input type="text" id="editSize" readonly style="background: #f0f0f0; width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                </div>
+                
+                <div class="form-group">
+                    <label>🔢 Количество:</label>
+                    <input type="text" id="editQuantity" readonly style="background: #f0f0f0; width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                </div>
+                
+                <div class="form-group">
+                    <label>🎨 RAL:</label>
+                    <input type="text" id="editRal" placeholder="RAL 9003" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                </div>
+                
+                <div class="form-group">
+                    <label>🧵 Текстура:</label>
+                    <select id="editTexture" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        <option value="">Выберите</option>
+                        <option value="матовая">Матовая</option>
+                        <option value="глянцевая">Глянцевая</option>
+                        <option value="муар">Муар</option>
+                    </select>
+                </div>
+                
+                <div id="editDetailsContainer" style="margin-top: 15px;"></div>
+                
+                <div class="form-actions" style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 25px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                    <button class="btn btn-danger" onclick="closeEditModal()">✖️ Отмена</button>
+                    <button class="btn btn-success" onclick="saveEditedItem()">💾 Сохранить изменения</button>
+                </div>
             </div>
         </div>
 
