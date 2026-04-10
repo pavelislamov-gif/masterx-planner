@@ -1,9 +1,11 @@
 // ============== ИМПОРТ ИЗ 1С ==============
+// Этот файл парсит HTML из 1С и создаёт группу через существующую функцию createGroupOrder()
 
 let parsedImportItems = [];
-let selectedConfigs = {};
+let selectedVersions = {};
+let detailsData = {};
 
-// Только известные изделия (остальное игнорируем)
+// Список известных изделий
 const KNOWN_PRODUCTS = [
     'XGRAY', 'XLUMO', 'XVISION', 'XGLOW', 'XLINE', 'XSMART', 
     'XSTRONG', 'XFOCUS', 'XGIRO', 'XWHITE', 'XSLOPE', 'XSPOT', 
@@ -45,17 +47,74 @@ const PRODUCT_VERSIONS = {
     'ACENTO': ['ACENTO 3T', 'ACENTO 4']
 };
 
-// Определяем тип и ключевое слово
+// Получение деталей из техкарты для выбранного изделия
+function getDetailsFromTechCard(productName) {
+    if (!window.taskOperationsData) return [];
+    
+    let productOps = window.taskOperationsData[productName];
+    if (!productOps) {
+        const normalizedInput = productName.toLowerCase();
+        for (const [key, value] of Object.entries(window.taskOperationsData)) {
+            if (key.toLowerCase() === normalizedInput) {
+                productOps = value;
+                break;
+            }
+        }
+    }
+    
+    if (!productOps) return [];
+    
+    const detailsMap = new Map();
+    const sites = ['токарно-фрезерный', 'фрезерный', 'слесарный', 'лазерно-гибочный', 'полимерный'];
+    const profileKeywords = ['Профиль', 'НПС', 'МП', 'КП', 'Труба', 'НП', 'ABA', 'ТПК', 'Н2248', 'XROLL'];
+    const barKeywords = ['Пруток'];
+    
+    for (const site of sites) {
+        const operations = productOps[site] || [];
+        for (const op of operations) {
+            const detailName = op.detail;
+            if (detailName && detailName.trim() !== '') {
+                if (!detailsMap.has(detailName)) {
+                    let material = 'алюминий';
+                    const nameLower = detailName.toLowerCase();
+                    if (nameLower.includes('пвх')) material = 'ПВХ';
+                    else if (nameLower.includes('поликарбонат')) material = 'поликарбонат';
+                    else if (nameLower.includes('aisi') || nameLower.includes('нержавейка')) material = 'нержавейка';
+                    else if (nameLower.includes('сталь')) material = 'сталь';
+                    
+                    let type = 'detail';
+                    for (const keyword of profileKeywords) {
+                        if (detailName.includes(keyword)) {
+                            type = 'profile';
+                            break;
+                        }
+                    }
+                    for (const keyword of barKeywords) {
+                        if (detailName.includes(keyword)) {
+                            type = 'bar';
+                            break;
+                        }
+                    }
+                    
+                    detailsMap.set(detailName, {
+                        name: detailName,
+                        material: material,
+                        quantity: 0,
+                        type: type,
+                        lengthMm: 0
+                    });
+                }
+            }
+        }
+    }
+    
+    return Array.from(detailsMap.values());
+}
+
+// Определение типа изделия
 function detectProductType(name) {
-    // Кронштейн
-    if (name.includes('Кронштейн')) {
-        return { type: 'bracket', keyword: 'Кронштейн' };
-    }
-    // Лира
-    if (name.includes('Лира')) {
-        return { type: 'lyre', keyword: 'Лира' };
-    }
-    // Известные изделия
+    if (name.includes('Кронштейн')) return { type: 'bracket', keyword: 'Кронштейн' };
+    if (name.includes('Лира')) return { type: 'lyre', keyword: 'Лира' };
     for (const product of KNOWN_PRODUCTS) {
         if (name.includes(product)) {
             return { type: 'product', keyword: product };
@@ -64,7 +123,7 @@ function detectProductType(name) {
     return { type: 'unknown', keyword: null };
 }
 
-// ============== ПАРСИНГ HTML ==============
+// Парсинг HTML
 function parse1SReport(htmlString) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlString, 'text/html');
@@ -73,7 +132,6 @@ function parse1SReport(htmlString) {
     const items = [];
     let isDataRow = false;
     
-    // Извлекаем название объекта
     let groupName = '';
     for (const row of rows) {
         const cells = row.querySelectorAll('td');
@@ -106,28 +164,19 @@ function parse1SReport(htmlString) {
         if (!name || name === '' || quantity === 0) continue;
         if (name.includes('Составил') || name.includes('Проверил') || name.includes('Принял')) continue;
         
-        // Определяем тип изделия
         const { type, keyword } = detectProductType(name);
+        if (type === 'unknown') continue;
         
-        // Пропускаем неизвестные изделия
-        if (type === 'unknown') {
-            console.log(`⏭️ Пропущено неизвестное: ${name}`);
-            continue;
-        }
-        
-        // Обработка RAL
         if (!ral || ral === '' || ral === '<SPAN></SPAN>') {
             ral = null;
         } else {
             ral = ral.replace(/\s/g, '');
         }
         
-        // Обработка текстуры
         if (!texture || texture === '' || texture === '<SPAN></SPAN>') {
             texture = null;
         }
         
-        // Извлекаем размер
         const sizeMatch = name.match(/(\d+)/);
         const size = sizeMatch ? sizeMatch[1] : null;
         
@@ -146,7 +195,7 @@ function parse1SReport(htmlString) {
     return { groupName: groupName, items: items };
 }
 
-// ============== ОТОБРАЖЕНИЕ ИНТЕРФЕЙСА ==============
+// Отображение интерфейса выбора версий и деталей
 function renderImportItems(items) {
     const container = document.getElementById('importItemsList');
     if (!container) return;
@@ -174,18 +223,18 @@ function renderImportItems(items) {
         if (item.type === 'product') {
             const versions = PRODUCT_VERSIONS[item.keyword] || [item.keyword];
             html += `
-                <div class="form-group" style="margin-bottom: 0;">
+                <div class="form-group">
                     <label style="font-size: 12px; color: #f97316;">🎯 Версия изделия:</label>
                     <select class="version-select" data-index="${i}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
                         <option value="">-- Выберите версию --</option>
                         ${versions.map(v => `<option value="${v}">${v}</option>`).join('')}
                     </select>
                 </div>
+                <div class="details-container" id="details-${i}" style="display: none; margin-top: 15px; padding-top: 10px; border-top: 1px solid #e2e8f0;"></div>
             `;
         } else {
-            // Кронштейн или Лира
             html += `
-                <div class="form-group" style="margin-bottom: 0;">
+                <div class="form-group">
                     <label style="font-size: 12px; color: #f97316;">🔧 Тип:</label>
                     <select class="version-select" data-index="${i}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
                         <option value="Кронштейн">🔧 Кронштейн</option>
@@ -200,20 +249,111 @@ function renderImportItems(items) {
     
     container.innerHTML = html;
     
+    // Обработчики для выбора версии
     document.querySelectorAll('.version-select').forEach(select => {
         select.addEventListener('change', function() {
             const index = parseInt(this.dataset.index);
             const value = this.value;
-            if (value) {
-                selectedConfigs[index] = value;
+            const item = parsedImportItems[index];
+            
+            if (value && item.type === 'product') {
+                selectedVersions[index] = value;
+                loadAndRenderDetails(index, value, item.quantity);
+            } else if (value) {
+                selectedVersions[index] = value;
             } else {
-                delete selectedConfigs[index];
+                delete selectedVersions[index];
+                const detailsContainer = document.getElementById(`details-${index}`);
+                if (detailsContainer) detailsContainer.style.display = 'none';
             }
         });
     });
 }
 
-// ============== АНАЛИЗ ФАЙЛА ==============
+// Загрузка и отображение деталей для выбранной версии
+function loadAndRenderDetails(index, productName, itemQuantity) {
+    const details = getDetailsFromTechCard(productName);
+    detailsData[index] = details.map(d => ({ ...d, quantity: itemQuantity, lengthMm: 0 }));
+    
+    const container = document.getElementById(`details-${index}`);
+    if (!container) return;
+    
+    const profiles = details.filter(d => d.type === 'profile');
+    const bars = details.filter(d => d.type === 'bar');
+    const regularDetails = details.filter(d => d.type === 'detail');
+    
+    let html = '<div style="margin-top: 10px;">';
+    
+    if (profiles.length > 0) {
+        html += `<div class="components-title" style="color: #f97316; margin: 10px 0 5px 0;">📐 ПРОФИЛИ:</div>`;
+        profiles.forEach((profile, idx) => {
+            html += `
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 6px; background: #f8fafc; border-radius: 6px;">
+                    <span style="flex: 2; font-size: 13px;">${escapeHtml(profile.name)}</span>
+                    <input type="number" class="detail-length" data-detail-idx="${idx}" data-item-idx="${index}" value="${profile.lengthMm}" placeholder="мм" style="width: 80px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                    <span>мм</span>
+                    <input type="number" class="detail-qty" data-detail-idx="${idx}" data-item-idx="${index}" value="${profile.quantity}" placeholder="кол-во" style="width: 70px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                    <span>шт</span>
+                </div>
+            `;
+        });
+    }
+    
+    if (bars.length > 0) {
+        html += `<div class="components-title" style="color: #f97316; margin: 10px 0 5px 0;">🥖 ПРУТКИ:</div>`;
+        bars.forEach((bar, idx) => {
+            html += `
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 6px; background: #f8fafc; border-radius: 6px;">
+                    <span style="flex: 2; font-size: 13px;">${escapeHtml(bar.name)}</span>
+                    <input type="number" class="detail-length" data-detail-idx="${idx}" data-item-idx="${index}" value="${bar.lengthMm}" placeholder="мм" style="width: 80px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                    <span>мм</span>
+                    <input type="number" class="detail-qty" data-detail-idx="${idx}" data-item-idx="${index}" value="${bar.quantity}" placeholder="кол-во" style="width: 70px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                    <span>шт</span>
+                </div>
+            `;
+        });
+    }
+    
+    if (regularDetails.length > 0) {
+        html += `<div class="components-title" style="color: #f97316; margin: 10px 0 5px 0;">🔧 ДЕТАЛИ:</div>`;
+        regularDetails.forEach((detail, idx) => {
+            html += `
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 6px; background: #f8fafc; border-radius: 6px;">
+                    <span style="flex: 2; font-size: 13px;">${escapeHtml(detail.name)}</span>
+                    <input type="number" class="detail-qty" data-detail-idx="${idx}" data-item-idx="${index}" value="${detail.quantity}" placeholder="кол-во" style="width: 100px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                    <span>шт</span>
+                </div>
+            `;
+        });
+    }
+    
+    html += '</div>';
+    container.innerHTML = html;
+    container.style.display = 'block';
+    
+    // Сохраняем изменения в полях
+    document.querySelectorAll('.detail-length').forEach(input => {
+        input.addEventListener('change', function() {
+            const itemIdx = parseInt(this.dataset.itemIdx);
+            const detailIdx = parseInt(this.dataset.detailIdx);
+            if (detailsData[itemIdx] && detailsData[itemIdx][detailIdx]) {
+                detailsData[itemIdx][detailIdx].lengthMm = parseInt(this.value) || 0;
+            }
+        });
+    });
+    
+    document.querySelectorAll('.detail-qty').forEach(input => {
+        input.addEventListener('change', function() {
+            const itemIdx = parseInt(this.dataset.itemIdx);
+            const detailIdx = parseInt(this.dataset.detailIdx);
+            if (detailsData[itemIdx] && detailsData[itemIdx][detailIdx]) {
+                detailsData[itemIdx][detailIdx].quantity = parseInt(this.value) || 0;
+            }
+        });
+    });
+}
+
+// Анализ файла
 async function analyzeImportFile() {
     const fileInput = document.getElementById('importFileInput');
     const file = fileInput.files[0];
@@ -232,7 +372,8 @@ async function analyzeImportFile() {
     }
     
     parsedImportItems = result.items;
-    selectedConfigs = {};
+    selectedVersions = {};
+    detailsData = {};
     
     if (result.groupName) {
         const groupNameInput = document.getElementById('importGroupName');
@@ -244,16 +385,14 @@ async function analyzeImportFile() {
     const confirmBtn = document.getElementById('confirmImportBtn');
     if (previewContainer) previewContainer.style.display = 'block';
     if (confirmBtn) confirmBtn.style.display = 'block';
-    
-    alert(`✅ Найдено ${parsedImportItems.length} изделий для импорта`);
 }
 
-// ============== СОЗДАНИЕ ГРУППЫ ==============
+// Создание группы через существующую функцию
 async function confirmImport() {
     // Проверяем, что все изделия имеют выбранную версию
     const missingConfigs = [];
     for (let i = 0; i < parsedImportItems.length; i++) {
-        if (!selectedConfigs[i]) {
+        if (!selectedVersions[i]) {
             missingConfigs.push(parsedImportItems[i].originalName);
         }
     }
@@ -276,14 +415,31 @@ async function confirmImport() {
     if (confirmBtn) confirmBtn.disabled = true;
     
     try {
-        const orders = window.loadOrdersFromStorage ? window.loadOrdersFromStorage() : [];
+        // Подготавливаем tempItemsList как при ручном добавлении
+        const tempItemsList = [];
         
-        const items = [];
         for (let i = 0; i < parsedImportItems.length; i++) {
             const item = parsedImportItems[i];
-            const selectedValue = selectedConfigs[i];
+            const selectedValue = selectedVersions[i];
+            const isComponent = (item.type !== 'product');
             
-            items.push({
+            // Собираем детали из формы
+            const details = [];
+            if (detailsData[i]) {
+                detailsData[i].forEach(detail => {
+                    if (detail.quantity > 0) {
+                        details.push({
+                            name: detail.name,
+                            material: detail.material,
+                            lengthMm: detail.lengthMm || 0,
+                            quantity: detail.quantity,
+                            type: detail.type
+                        });
+                    }
+                });
+            }
+            
+            tempItemsList.push({
                 product: selectedValue,
                 size: {
                     name: item.size || 'Стандартный',
@@ -291,39 +447,32 @@ async function confirmImport() {
                 },
                 brackets: [],
                 lyres: [],
-                details: [],  // Детали подтянутся из техкарты автоматически
+                details: details,
                 ral: item.ral || '',
                 texture: item.texture || '',
-                isComponent: (item.type !== 'product')  // Кронштейны/Лиры = комплектующие
+                isComponent: isComponent
             });
         }
         
-        const newOrder = {
-            id: Date.now(),
-            groupName: groupName,
-            date: new Date().toISOString().split('T')[0],
-            number: generateOrderNumber(),
-            items: items,
-            status: 'active',
-            tasks: {},
-            extraTasks: [],
-            siteFiles: {}
-        };
+        // Используем существующую глобальную переменную tempItemsList
+        if (window.tempItemsList !== undefined) {
+            window.tempItemsList = tempItemsList;
+        } else {
+            window.tempItemsList = tempItemsList;
+        }
         
-        orders.push(newOrder);
-        if (window.saveOrdersToStorage) window.saveOrdersToStorage(orders);
+        // Заполняем поле с названием группы
+        const groupNameField = document.getElementById('groupNameInput');
+        if (groupNameField) groupNameField.value = groupName;
         
-        // Создаём задачи через существующую функцию (детали подтянутся из техкарты)
-        if (window.createTasksForOrder) {
-            window.createTasksForOrder(newOrder);
+        // Вызываем существующую функцию createGroupOrder
+        if (typeof window.createGroupOrder === 'function') {
+            window.createGroupOrder();
+        } else {
+            throw new Error('Функция createGroupOrder не найдена');
         }
         
         closeImportModal();
-        
-        if (window.renderOrdersList) window.renderOrdersList();
-        if (window.updateStatistics) window.updateStatistics();
-        
-        alert(`✅ Группа "${groupName}" успешно создана!\n📦 Добавлено изделий: ${parsedImportItems.length}`);
         
     } catch (error) {
         console.error('Ошибка:', error);
@@ -332,14 +481,6 @@ async function confirmImport() {
         if (progressDiv) progressDiv.style.display = 'none';
         if (confirmBtn) confirmBtn.disabled = false;
     }
-}
-
-function generateOrderNumber() {
-    const date = new Date();
-    const year = date.getFullYear().toString().slice(-2);
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    return `${day}.${month}.${year}`;
 }
 
 function escapeHtml(str) {
@@ -352,7 +493,7 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
-// ============== ОТКРЫТИЕ/ЗАКРЫТИЕ МОДАЛЬНОГО ОКНА ==============
+// Открытие/закрытие модального окна
 function openImportModal() {
     const modal = document.getElementById('importModal');
     if (modal) {
@@ -368,7 +509,8 @@ function openImportModal() {
         if (confirmBtn) confirmBtn.style.display = 'none';
         
         parsedImportItems = [];
-        selectedConfigs = {};
+        selectedVersions = {};
+        detailsData = {};
     }
 }
 
@@ -385,7 +527,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Экспорт в глобальную область
 window.openImportModal = openImportModal;
 window.closeImportModal = closeImportModal;
 window.analyzeImportFile = analyzeImportFile;
