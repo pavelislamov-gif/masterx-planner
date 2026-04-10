@@ -1,5 +1,5 @@
 // ============== ИМПОРТ ИЗ 1С ==============
-// Парсинг HTML, выбор версий, подстановка деталей, визуальные ? для отсутствующих данных
+// Парсинг HTML, выбор версий, подстановка деталей, автозаполнение длин профилей
 
 let parsedImportItems = [];
 let selectedVersions = {};
@@ -198,12 +198,34 @@ function parse1SReport(htmlString) {
     return { groupName: groupName, items: items };
 }
 
-// Форматирование значения с ? для отсутствующих данных
+// Форматирование значения с ? для отсутствующих данных (только в шапке)
 function formatValue(value, unit = '') {
-    if (!value || value === '' || value === null) {
+    if (!value || value === '' || value === null || value === 0) {
         return '<span style="color: #dc2626; font-weight: bold;">?</span>';
     }
     return `${value}${unit ? ' ' + unit : ''}`;
+}
+
+// Группировка изделий по RAL
+function groupItemsByRal(items) {
+    const grouped = {};
+    for (const item of items) {
+        const ralKey = item.ral || '?';
+        if (!grouped[ralKey]) {
+            grouped[ralKey] = [];
+        }
+        grouped[ralKey].push(item);
+    }
+    const sortedKeys = Object.keys(grouped).sort((a, b) => {
+        if (a === '?') return 1;
+        if (b === '?') return -1;
+        const aNum = parseInt(a);
+        const bNum = parseInt(b);
+        if (isNaN(aNum)) return 1;
+        if (isNaN(bNum)) return -1;
+        return aNum - bNum;
+    });
+    return { grouped, sortedKeys };
 }
 
 // Отображение интерфейса выбора версий и деталей
@@ -211,54 +233,69 @@ function renderImportItems(items) {
     const container = document.getElementById('importItemsList');
     if (!container) return;
     
+    const { grouped, sortedKeys } = groupItemsByRal(items);
     let html = '';
     
-    for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        
-        // Форматируем строку с информацией
-        const quantityDisplay = formatValue(item.quantity, 'шт');
-        const ralDisplay = item.ral ? item.ral : '<span style="color: #dc2626; font-weight: bold;">?</span>';
-        const textureDisplay = item.texture ? item.texture : '<span style="color: #dc2626; font-weight: bold;">?</span>';
-        const sizeDisplay = formatValue(item.size);
+    for (const ralKey of sortedKeys) {
+        const groupItems = grouped[ralKey];
+        const ralDisplay = ralKey === '?' ? '<span style="color: #dc2626;">не указан (?)</span>' : ralKey;
         
         html += `
-            <div class="import-item" data-item-index="${i}" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
-                    <div>
-                        <strong style="font-size: 16px; color: #dc2626;">📦 ${escapeHtml(item.originalName)}</strong>
-                        <div style="font-size: 13px; color: #64748b; margin-top: 5px;">
-                            Кол-во: <strong>${quantityDisplay}</strong>
-                            | RAL: <strong>${ralDisplay}</strong>
-                            | Текстура: <strong>${textureDisplay}</strong>
-                            | Размер: <strong>${sizeDisplay}</strong>
-                        </div>
-                    </div>
+            <div style="margin-bottom: 20px;">
+                <div style="background: #f1f5f9; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; font-weight: bold;">
+                    🎨 RAL: ${ralDisplay}
                 </div>
         `;
         
-        if (item.type === 'product') {
-            const versions = PRODUCT_VERSIONS[item.keyword] || [item.keyword];
+        for (let i = 0; i < groupItems.length; i++) {
+            const item = groupItems[i];
+            const originalIndex = parsedImportItems.findIndex(x => x.id === item.id);
+            
+            const quantityDisplay = formatValue(item.quantity, 'шт');
+            const ralDisplayInline = item.ral ? item.ral : '<span style="color: #dc2626; font-weight: bold;">?</span>';
+            const textureDisplay = item.texture ? item.texture : '<span style="color: #dc2626; font-weight: bold;">?</span>';
+            const sizeDisplay = formatValue(item.size);
+            
             html += `
-                <div class="form-group">
-                    <label style="font-size: 12px; color: #f97316;">🎯 Версия изделия:</label>
-                    <select class="version-select" data-index="${i}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                        <option value="">-- Выберите версию --</option>
-                        ${versions.map(v => `<option value="${v}">${v}</option>`).join('')}
-                    </select>
-                </div>
-                <div class="details-container" id="details-${i}" style="display: none; margin-top: 15px; padding-top: 10px; border-top: 1px solid #e2e8f0;"></div>
+                <div class="import-item" data-item-index="${originalIndex}" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+                        <div>
+                            <strong style="font-size: 16px; color: #dc2626;">📦 ${escapeHtml(item.originalName)}</strong>
+                            <div style="font-size: 13px; color: #64748b; margin-top: 5px;">
+                                Кол-во: <strong>${quantityDisplay}</strong>
+                                | RAL: <strong>${ralDisplayInline}</strong>
+                                | Текстура: <strong>${textureDisplay}</strong>
+                                | Размер: <strong>${sizeDisplay}</strong>
+                            </div>
+                        </div>
+                    </div>
             `;
-        } else {
-            html += `
-                <div class="form-group">
-                    <label style="font-size: 12px; color: #f97316;">🔧 Тип:</label>
-                    <select class="version-select" data-index="${i}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                        <option value="Кронштейн">🔧 Кронштейн</option>
-                        <option value="Лира">🎸 Лира</option>
-                    </select>
-                </div>
-            `;
+            
+            if (item.type === 'product') {
+                const versions = PRODUCT_VERSIONS[item.keyword] || [item.keyword];
+                html += `
+                    <div class="form-group">
+                        <label style="font-size: 12px; color: #f97316;">🎯 Версия изделия:</label>
+                        <select class="version-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <option value="">-- Выберите версию --</option>
+                            ${versions.map(v => `<option value="${v}">${v}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="details-container" id="details-${originalIndex}" style="display: none; margin-top: 15px; padding-top: 10px; border-top: 1px solid #e2e8f0;"></div>
+                `;
+            } else {
+                html += `
+                    <div class="form-group">
+                        <label style="font-size: 12px; color: #f97316;">🔧 Тип:</label>
+                        <select class="version-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <option value="Кронштейн">🔧 Кронштейн</option>
+                            <option value="Лира">🎸 Лира</option>
+                        </select>
+                    </div>
+                `;
+            }
+            
+            html += `</div>`;
         }
         
         html += `</div>`;
@@ -287,31 +324,53 @@ function renderImportItems(items) {
     });
 }
 
-// Загрузка и отображение деталей с ? для отсутствующих значений
+// Загрузка и отображение деталей с автоподстановкой длин профилей
 function loadAndRenderDetails(index, productName, itemQuantity) {
+    const item = parsedImportItems[index];
+    const size = item.size;
+    
+    // Получаем длины профилей из карты соответствия
+    let profileLengths = {};
+    if (window.getProfileLengths) {
+        profileLengths = window.getProfileLengths(productName, size);
+    }
+    
     const details = getDetailsFromTechCard(productName);
-    detailsData[index] = details.map(d => ({ ...d, quantity: itemQuantity, lengthMm: 0 }));
+    
+    // Применяем длины профилей из карты и количество из парсинга
+    detailsData[index] = details.map(d => {
+        let lengthMm = 0;
+        let quantity = itemQuantity;
+        
+        // Если это профиль или пруток и есть соответствие в карте
+        if ((d.type === 'profile' || d.type === 'bar') && profileLengths[d.name]) {
+            lengthMm = profileLengths[d.name];
+        }
+        
+        return {
+            ...d,
+            quantity: quantity,
+            lengthMm: lengthMm
+        };
+    });
     
     const container = document.getElementById(`details-${index}`);
     if (!container) return;
     
-    const profiles = details.filter(d => d.type === 'profile');
-    const bars = details.filter(d => d.type === 'bar');
-    const regularDetails = details.filter(d => d.type === 'detail');
+    const profiles = detailsData[index].filter(d => d.type === 'profile');
+    const bars = detailsData[index].filter(d => d.type === 'bar');
+    const regularDetails = detailsData[index].filter(d => d.type === 'detail');
     
     let html = '<div style="margin-top: 10px;">';
     
     if (profiles.length > 0) {
         html += `<div class="components-title" style="color: #f97316; margin: 10px 0 5px 0;">📐 ПРОФИЛИ:</div>`;
         profiles.forEach((profile, idx) => {
-            const lengthValue = profile.lengthMm || 0;
-            const lengthDisplay = lengthValue > 0 ? lengthValue : '<span style="color: #dc2626;">?</span>';
             html += `
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 6px; background: #f8fafc; border-radius: 6px;">
                     <span style="flex: 2; font-size: 13px;">${escapeHtml(profile.name)}</span>
                     <input type="number" class="detail-length" data-item-idx="${index}" data-detail-idx="${idx}" value="${profile.lengthMm}" placeholder="мм" style="width: 80px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0;">
                     <span>мм</span>
-                    <span style="color: #dc2626; ${lengthValue > 0 ? 'display:none' : ''}">?</span>
                     <input type="number" class="detail-qty" data-item-idx="${index}" data-detail-idx="${idx}" value="${profile.quantity}" placeholder="кол-во" style="width: 70px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0;">
                     <span>шт</span>
                 </div>
@@ -322,13 +381,11 @@ function loadAndRenderDetails(index, productName, itemQuantity) {
     if (bars.length > 0) {
         html += `<div class="components-title" style="color: #f97316; margin: 10px 0 5px 0;">🥖 ПРУТКИ:</div>`;
         bars.forEach((bar, idx) => {
-            const lengthValue = bar.lengthMm || 0;
             html += `
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 6px; background: #f8fafc; border-radius: 6px;">
                     <span style="flex: 2; font-size: 13px;">${escapeHtml(bar.name)}</span>
                     <input type="number" class="detail-length" data-item-idx="${index}" data-detail-idx="${idx}" value="${bar.lengthMm}" placeholder="мм" style="width: 80px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0;">
                     <span>мм</span>
-                    <span style="color: #dc2626; ${lengthValue > 0 ? 'display:none' : ''}">?</span>
                     <input type="number" class="detail-qty" data-item-idx="${index}" data-detail-idx="${idx}" value="${bar.quantity}" placeholder="кол-во" style="width: 70px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0;">
                     <span>шт</span>
                 </div>
@@ -339,13 +396,11 @@ function loadAndRenderDetails(index, productName, itemQuantity) {
     if (regularDetails.length > 0) {
         html += `<div class="components-title" style="color: #f97316; margin: 10px 0 5px 0;">🔧 ДЕТАЛИ:</div>`;
         regularDetails.forEach((detail, idx) => {
-            const qtyValue = detail.quantity || 0;
             html += `
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 6px; background: #f8fafc; border-radius: 6px;">
                     <span style="flex: 2; font-size: 13px;">${escapeHtml(detail.name)}</span>
                     <input type="number" class="detail-qty" data-item-idx="${index}" data-detail-idx="${idx}" value="${detail.quantity}" placeholder="кол-во" style="width: 100px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0;">
                     <span>шт</span>
-                    <span style="color: #dc2626; ${qtyValue > 0 ? 'display:none' : ''}">?</span>
                 </div>
             `;
         });
@@ -363,16 +418,6 @@ function loadAndRenderDetails(index, productName, itemQuantity) {
             if (detailsData[itemIdx] && detailsData[itemIdx][detailIdx]) {
                 detailsData[itemIdx][detailIdx].lengthMm = parseInt(this.value) || 0;
             }
-            // Обновляем отображение ? рядом с полем
-            const parent = this.parentElement;
-            const questionSpan = parent.querySelector('span:last-child');
-            if (questionSpan && questionSpan.textContent === '?') {
-                if (parseInt(this.value) > 0) {
-                    questionSpan.style.display = 'none';
-                } else {
-                    questionSpan.style.display = 'inline';
-                }
-            }
         });
     });
     
@@ -382,16 +427,6 @@ function loadAndRenderDetails(index, productName, itemQuantity) {
             const detailIdx = parseInt(this.dataset.detailIdx);
             if (detailsData[itemIdx] && detailsData[itemIdx][detailIdx]) {
                 detailsData[itemIdx][detailIdx].quantity = parseInt(this.value) || 0;
-            }
-            // Обновляем отображение ? рядом с полем
-            const parent = this.parentElement;
-            const questionSpan = parent.querySelector('span:last-child');
-            if (questionSpan && questionSpan.textContent === '?') {
-                if (parseInt(this.value) > 0) {
-                    questionSpan.style.display = 'none';
-                } else {
-                    questionSpan.style.display = 'inline';
-                }
             }
         });
     });
@@ -459,7 +494,6 @@ async function confirmImport() {
     if (confirmBtn) confirmBtn.disabled = true;
     
     try {
-        // Подготавливаем tempItemsList
         const tempItemsList = [];
         
         for (let i = 0; i < parsedImportItems.length; i++) {
