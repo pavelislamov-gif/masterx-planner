@@ -82,13 +82,37 @@
                     <input type="text" id="importGroupName" placeholder="Например: ЖК Притяжение, секции 1 и паркинг">
                 </div>
 
-                <!-- Кнопка калькулятора -->
-        <div style="display: flex; gap: 10px; align-items: center; margin: 10px 0 15px 0;">
-            <button type="button" class="btn btn-secondary" onclick="openCalculator()" style="background: #6c757d; padding: 8px 16px;">
-                🧮 Калькулятор
-            </button>
-            <span style="font-size: 12px; color: #64748b;">Откроет стандартный калькулятор Windows</span>
+                <!-- Встроенный калькулятор -->
+<div style="background: #f1f5f9; border-radius: 8px; padding: 10px; margin-bottom: 15px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 12px; font-weight: bold; color: #f97316;">🧮 КАЛЬКУЛЯТОР</span>
+        <button type="button" onclick="toggleCalculator()" style="background: none; border: none; cursor: pointer; font-size: 12px; color: #64748b;">▲ Свернуть</button>
+    </div>
+    <div id="calculatorBody" style="display: block;">
+        <input type="text" id="calcDisplay" readonly style="width: 100%; padding: 10px; margin-bottom: 10px; background: white; border: 1px solid #e2e8f0; border-radius: 6px; text-align: right; font-size: 18px; font-weight: bold;">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;">
+            <button type="button" class="calc-btn" data-val="7" style="padding: 8px; background: white; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer;">7</button>
+            <button type="button" class="calc-btn" data-val="8" style="padding: 8px; background: white; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer;">8</button>
+            <button type="button" class="calc-btn" data-val="9" style="padding: 8px; background: white; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer;">9</button>
+            <button type="button" class="calc-btn" data-val="/" style="padding: 8px; background: #fee2e2; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer; color: #dc2626;">÷</button>
+            
+            <button type="button" class="calc-btn" data-val="4" style="padding: 8px; background: white; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer;">4</button>
+            <button type="button" class="calc-btn" data-val="5" style="padding: 8px; background: white; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer;">5</button>
+            <button type="button" class="calc-btn" data-val="6" style="padding: 8px; background: white; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer;">6</button>
+            <button type="button" class="calc-btn" data-val="*" style="padding: 8px; background: #fee2e2; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer; color: #dc2626;">×</button>
+            
+            <button type="button" class="calc-btn" data-val="1" style="padding: 8px; background: white; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer;">1</button>
+            <button type="button" class="calc-btn" data-val="2" style="padding: 8px; background: white; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer;">2</button>
+            <button type="button" class="calc-btn" data-val="3" style="padding: 8px; background: white; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer;">3</button>
+            <button type="button" class="calc-btn" data-val="-" style="padding: 8px; background: #fee2e2; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer; color: #dc2626;">-</button>
+            
+            <button type="button" class="calc-btn" data-val="0" style="padding: 8px; background: white; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer;">0</button>
+            <button type="button" class="calc-btn" data-val="." style="padding: 8px; background: white; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer;">.</button>
+            <button type="button" class="calc-btn" data-val="C" style="padding: 8px; background: #fef3c7; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer; color: #f59e0b;">C</button>
+            <button type="button" class="calc-btn" data-val="=" style="padding: 8px; background: #22c55e; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer; color: white;">=</button>
         </div>
+    </div>
+</div>
                 
                 <button class="btn btn-primary" id="analyzeImportBtn" style="margin-bottom: 20px;">🔍 Анализировать файл</button>
                 
