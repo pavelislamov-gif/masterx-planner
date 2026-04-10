@@ -589,7 +589,12 @@ function escapeHtml(str) {
 
 // Открытие калькулятора Windows
 function openCalculator() {
-    window.open('calc://', '_blank');
+    if (navigator.userAgent.indexOf('Windows') !== -1) {
+        // Показываем подсказку
+        alert('Нажмите Win + R, введите "calc" и нажмите Enter');
+    } else {
+        alert('Калькулятор доступен через Пуск > Калькулятор');
+    }
 }
 
 // Открытие/закрытие модального окна
