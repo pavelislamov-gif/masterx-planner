@@ -589,11 +589,17 @@ function escapeHtml(str) {
 
 // Открытие калькулятора Windows
 function openCalculator() {
-    if (navigator.userAgent.indexOf('Windows') !== -1) {
-        // Показываем подсказку
-        alert('Нажмите Win + R, введите "calc" и нажмите Enter');
-    } else {
-        alert('Калькулятор доступен через Пуск > Калькулятор');
+    const userConfirmed = confirm(
+        'Открыть калькулятор Windows?\n\n' +
+        'Нажмите OK, затем:\n' +
+        '1. Нажмите Win + R\n' +
+        '2. Введите "calc"\n' +
+        '3. Нажмите Enter'
+    );
+    
+    if (userConfirmed) {
+        // Пробуем всё равно открыть
+        window.location.href = 'ms-calc:';
     }
 }
 
