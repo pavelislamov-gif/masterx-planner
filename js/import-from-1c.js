@@ -107,7 +107,7 @@ function getDetailsFromTechCard(productName) {
                         quantity: 0,
                         type: type,
                         lengthMm: 0,
-                        baseQuantity: 1  // базовое количество на одно изделие
+                        baseQuantity: 1
                     });
                 }
             }
@@ -173,19 +173,16 @@ function parse1SReport(htmlString) {
         const { type, keyword } = detectProductType(name);
         if (type === 'unknown') continue;
         
-        // Обработка RAL
         if (!ral || ral === '' || ral === '<SPAN></SPAN>') {
             ral = null;
         } else {
             ral = ral.replace(/\s/g, '');
         }
         
-        // Обработка текстуры
         if (!texture || texture === '' || texture === '<SPAN></SPAN>') {
             texture = null;
         }
         
-        // Извлекаем размер
         const sizeMatch = name.match(/(\d+)/);
         const size = sizeMatch ? sizeMatch[1] : null;
         
@@ -204,7 +201,7 @@ function parse1SReport(htmlString) {
     return { groupName: groupName, items: items };
 }
 
-// Форматирование значения с ? для отсутствующих данных (только в шапке)
+// Форматирование значения с ? для отсутствующих данных
 function formatValue(value, unit = '') {
     if (!value || value === '' || value === null || value === 0) {
         return '<span style="color: #dc2626; font-weight: bold;">?</span>';
@@ -309,7 +306,6 @@ function renderImportItems(items) {
     
     container.innerHTML = html;
     
-    // Обработчики для выбора версии
     document.querySelectorAll('.version-select').forEach(select => {
         select.addEventListener('change', function() {
             const index = parseInt(this.dataset.index);
@@ -330,12 +326,11 @@ function renderImportItems(items) {
     });
 }
 
-// Загрузка и отображение деталей с автоподстановкой длин профилей и умножением количества
+// Загрузка и отображение деталей
 function loadAndRenderDetails(index, productName, itemQuantity) {
     const item = parsedImportItems[index];
     const size = item.size;
     
-    // Получаем длины профилей из карты соответствия
     let profileLengths = {};
     if (window.getProfileLengths) {
         profileLengths = window.getProfileLengths(productName, size);
@@ -343,22 +338,17 @@ function loadAndRenderDetails(index, productName, itemQuantity) {
     
     const details = getDetailsFromTechCard(productName);
     
-    // Применяем длины профилей из карты и умножаем количество
     detailsData[index] = details.map(d => {
         let lengthMm = 0;
         let quantity = 0;
         
-        // Проверяем, является ли деталь исключением (левая/правая заглушка)
         const isException = EXCEPTIONS.some(exception => 
             d.name.toLowerCase().includes(exception.toLowerCase())
         );
         
         if (isException) {
-            // Левая/правая заглушки: количество = количество изделий в заказе (1:1)
             quantity = itemQuantity;
         } else {
-            // Остальные детали: количество = количество изделий × базовое количество
-            // Для заглушек модуля обычно 2 шт на изделие
             let baseQty = 1;
             if (d.name.toLowerCase().includes('модуля') || d.name.toLowerCase().includes('молуля')) {
                 baseQty = 2;
@@ -366,7 +356,6 @@ function loadAndRenderDetails(index, productName, itemQuantity) {
             quantity = itemQuantity * baseQty;
         }
         
-        // Для профилей и прутков подставляем длину из карты
         if ((d.type === 'profile' || d.type === 'bar') && profileLengths[d.name]) {
             lengthMm = profileLengths[d.name];
         }
@@ -434,7 +423,6 @@ function loadAndRenderDetails(index, productName, itemQuantity) {
     container.innerHTML = html;
     container.style.display = 'block';
     
-    // Сохраняем изменения в полях
     document.querySelectorAll('.detail-length').forEach(input => {
         input.addEventListener('change', function() {
             const itemIdx = parseInt(this.dataset.itemIdx);
@@ -492,7 +480,6 @@ async function analyzeImportFile() {
 
 // Создание группы
 async function confirmImport() {
-    // Проверяем, что все изделия имеют выбранную версию
     const missingConfigs = [];
     for (let i = 0; i < parsedImportItems.length; i++) {
         if (!selectedVersions[i]) {
@@ -587,20 +574,65 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
-// Открытие калькулятора Windows
-function openCalculator() {
-    // Пытаемся открыть через ms-calc:
-    window.location.href = 'ms-calc:';
+// ============== ВСТРОЕННЫЙ КАЛЬКУЛЯТОР ==============
+
+let calcExpression = '';
+
+function initCalculator() {
+    const calcDisplay = document.getElementById('calcDisplay');
+    if (!calcDisplay) return;
     
-    // Если не сработало через 500ms, показываем инструкцию
-    setTimeout(() => {
-        if (document.hasFocus()) {
-            alert('Калькулятор не открылся автоматически.\n\nНажмите Win + R, введите "calc" и нажмите Enter');
-        }
-    }, 500);
+    const buttons = document.querySelectorAll('.calc-btn');
+    buttons.forEach(btn => {
+        btn.removeEventListener('click', handleCalcButton);
+        btn.addEventListener('click', handleCalcButton);
+    });
 }
 
-// Открытие/закрытие модального окна
+function handleCalcButton(e) {
+    const val = e.currentTarget.dataset.val;
+    const display = document.getElementById('calcDisplay');
+    if (!display) return;
+    
+    if (val === 'C') {
+        calcExpression = '';
+        display.value = '';
+    } else if (val === '=') {
+        try {
+            let expr = calcExpression.replace(/×/g, '*').replace(/÷/g, '/');
+            const result = eval(expr);
+            if (isNaN(result) || !isFinite(result)) {
+                display.value = 'Ошибка';
+                calcExpression = '';
+            } else {
+                display.value = result;
+                calcExpression = result.toString();
+            }
+        } catch(e) {
+            display.value = 'Ошибка';
+            calcExpression = '';
+        }
+    } else {
+        calcExpression += val;
+        display.value = calcExpression;
+    }
+}
+
+function toggleCalculator() {
+    const body = document.getElementById('calculatorBody');
+    const btn = event.target;
+    if (body) {
+        if (body.style.display === 'none') {
+            body.style.display = 'block';
+            btn.textContent = '▲ Свернуть';
+        } else {
+            body.style.display = 'none';
+            btn.textContent = '▼ Развернуть';
+        }
+    }
+}
+
+// Открытие/закрытие модального окна (ЕДИНСТВЕННАЯ ВЕРСИЯ)
 function openImportModal() {
     const modal = document.getElementById('importModal');
     if (modal) {
@@ -618,6 +650,9 @@ function openImportModal() {
         parsedImportItems = [];
         selectedVersions = {};
         detailsData = {};
+        
+        // Инициализируем калькулятор
+        setTimeout(initCalculator, 100);
     }
 }
 
@@ -634,8 +669,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Экспорт функций
 window.openImportModal = openImportModal;
 window.closeImportModal = closeImportModal;
 window.analyzeImportFile = analyzeImportFile;
 window.confirmImport = confirmImport;
-window.openCalculator = openCalculator;
+window.toggleCalculator = toggleCalculator;
