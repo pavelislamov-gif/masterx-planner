@@ -3,24 +3,66 @@
 let parsedImportItems = [];
 let selectedConfigs = {};
 
-// Список версий изделий (из вашей системы)
-const PRODUCT_VERSIONS = [
-    'XGRAY v.1', 'XGRAY v.2', 'XLUMO', 'XLUMO 1-6', 'XLUMO Двунаправленный', 'XLUMO PROV',
-    'XVISION', 'XGLOW', 'XGLOW mini', 'XLINE', 'XSMART', 'XSMART MINI', 'XSTRONG', 'XFOCUS',
-    'XGIRO', 'XWHITE', 'XSLOPE', 'XSPOT', 'XDISK', 'XPOINT OVHD',
-    'XEYES 130*90 1', 'XEYES 130*90 2', 'XEYES 130*90 3', 'XEYES 130*90 4',
-    'XEYES 130*120 1', 'XEYES 130*120 2', 'XEYES 130*120 3', 'XEYES 130*120 4',
-    'XEYES mini-1', 'XMODULE-2x2', 'XMODULE-6x2', 'XROLL-lite P', 'XROLL-lite K',
-    'XPIXEL BIN v.1', 'XPIXEL BIN v.2', 'XPIXEL BIN v.3', 'XPIXEL OVHD',
-    'XRAY 1', 'XRAY 3', 'XRAY 3-2', 'XRAY 3-GRP', 'XRAY 6', 'XRAY 6 RGBW',
-    'XRAY 6-2 проходной', 'XRAY 6-2 оконечный', 'XRAY 6-T2 BT 180', 'XRAY 6-T2 BT 200 шторка',
-    'XRAY 6-T2 BT 220', 'XRAY 6-T2 BT 220 Шторка х2', 'XRAY 6-T2 BT 240 Шторка', 'XRAY 6-T2 BT 240 Шторка х2',
-    'XRAY 6-T2 BZ 180', 'XRAY 6-T2 BZ 200 Шторка', 'XRAY 6-T2 BZ 220', 'XRAY 6-T2 BZ 220 Шторка х2',
-    'XRAY 6-T2 BZ 240 Шторка', 'XRAY 6-T2 BZ 240 Шторка х2', 'XRAY 6T Накладной', 'XRAY 6T BT 120',
-    'XRAY 6T BT 140 Шторка', 'XRAY 6T BZ 120', 'XRAY 6T BZ 140 Шторка', 'XRAY 6T RGBW BT 150',
-    'XRAY 9', 'XRAY 9S', 'XRAY 12S', 'XRAY 18', 'XRAY 18S', 'XRAY 36', 'XRAY 36S',
-    'ACENTO 3T', 'ACENTO 4'
+// Только известные изделия (остальное игнорируем)
+const KNOWN_PRODUCTS = [
+    'XGRAY', 'XLUMO', 'XVISION', 'XGLOW', 'XLINE', 'XSMART', 
+    'XSTRONG', 'XFOCUS', 'XGIRO', 'XWHITE', 'XSLOPE', 'XSPOT', 
+    'XDISK', 'XPOINT', 'XPIXEL', 'XRAY', 'XEYES', 'XMODULE', 
+    'XROLL', 'ACENTO'
 ];
+
+// Список версий для каждого типа
+const PRODUCT_VERSIONS = {
+    'XGRAY': ['XGRAY v.1', 'XGRAY v.2'],
+    'XLUMO': ['XLUMO', 'XLUMO 1-6', 'XLUMO Двунаправленный', 'XLUMO PROV'],
+    'XVISION': ['XVISION'],
+    'XGLOW': ['XGLOW', 'XGLOW mini'],
+    'XLINE': ['XLINE'],
+    'XSMART': ['XSMART', 'XSMART MINI'],
+    'XSTRONG': ['XSTRONG'],
+    'XFOCUS': ['XFOCUS'],
+    'XGIRO': ['XGIRO'],
+    'XWHITE': ['XWHITE'],
+    'XSLOPE': ['XSLOPE'],
+    'XSPOT': ['XSPOT'],
+    'XDISK': ['XDISK'],
+    'XPOINT': ['XPOINT OVHD'],
+    'XPIXEL': ['XPIXEL BIN v.1', 'XPIXEL BIN v.2', 'XPIXEL BIN v.3', 'XPIXEL OVHD'],
+    'XRAY': ['XRAY 1', 'XRAY 3', 'XRAY 3-2', 'XRAY 3-GRP', 'XRAY 6', 'XRAY 6 RGBW', 
+             'XRAY 6-2 проходной', 'XRAY 6-2 оконечный', 'XRAY 6-T2 BT 180', 'XRAY 6-T2 BT 200 шторка',
+             'XRAY 6-T2 BT 220', 'XRAY 6-T2 BT 220 Шторка х2', 'XRAY 6-T2 BT 240 Шторка', 
+             'XRAY 6-T2 BT 240 Шторка х2', 'XRAY 6-T2 BZ 180', 'XRAY 6-T2 BZ 200 Шторка',
+             'XRAY 6-T2 BZ 220', 'XRAY 6-T2 BZ 220 Шторка х2', 'XRAY 6-T2 BZ 240 Шторка',
+             'XRAY 6-T2 BZ 240 Шторка х2', 'XRAY 6T Накладной', 'XRAY 6T BT 120', 
+             'XRAY 6T BT 140 Шторка', 'XRAY 6T BZ 120', 'XRAY 6T BZ 140 Шторка', 
+             'XRAY 6T RGBW BT 150', 'XRAY 9', 'XRAY 9S', 'XRAY 12S', 'XRAY 18', 
+             'XRAY 18S', 'XRAY 36', 'XRAY 36S'],
+    'XEYES': ['XEYES 130*90 1', 'XEYES 130*90 2', 'XEYES 130*90 3', 'XEYES 130*90 4',
+              'XEYES 130*120 1', 'XEYES 130*120 2', 'XEYES 130*120 3', 'XEYES 130*120 4',
+              'XEYES mini-1'],
+    'XMODULE': ['XMODULE-2x2', 'XMODULE-6x2'],
+    'XROLL': ['XROLL-lite P', 'XROLL-lite K'],
+    'ACENTO': ['ACENTO 3T', 'ACENTO 4']
+};
+
+// Определяем тип и ключевое слово
+function detectProductType(name) {
+    // Кронштейн
+    if (name.includes('Кронштейн')) {
+        return { type: 'bracket', keyword: 'Кронштейн' };
+    }
+    // Лира
+    if (name.includes('Лира')) {
+        return { type: 'lyre', keyword: 'Лира' };
+    }
+    // Известные изделия
+    for (const product of KNOWN_PRODUCTS) {
+        if (name.includes(product)) {
+            return { type: 'product', keyword: product };
+        }
+    }
+    return { type: 'unknown', keyword: null };
+}
 
 // ============== ПАРСИНГ HTML ==============
 function parse1SReport(htmlString) {
@@ -48,7 +90,6 @@ function parse1SReport(htmlString) {
         const cells = row.querySelectorAll('td');
         if (cells.length < 6) continue;
         
-        // Ищем строку с заголовком
         const headerText = cells[1]?.innerText || '';
         if (headerText === 'Номенклатура') {
             isDataRow = true;
@@ -64,7 +105,15 @@ function parse1SReport(htmlString) {
         
         if (!name || name === '' || quantity === 0) continue;
         if (name.includes('Составил') || name.includes('Проверил') || name.includes('Принял')) continue;
-        if (name.includes('Итого') || name.includes('Всего')) continue;
+        
+        // Определяем тип изделия
+        const { type, keyword } = detectProductType(name);
+        
+        // Пропускаем неизвестные изделия
+        if (type === 'unknown') {
+            console.log(`⏭️ Пропущено неизвестное: ${name}`);
+            continue;
+        }
         
         // Обработка RAL
         if (!ral || ral === '' || ral === '<SPAN></SPAN>') {
@@ -82,21 +131,11 @@ function parse1SReport(htmlString) {
         const sizeMatch = name.match(/(\d+)/);
         const size = sizeMatch ? sizeMatch[1] : null;
         
-        // Определяем тип изделия
-        let itemType = 'product';
-        
-        if (name.includes('Кронштейн')) {
-            itemType = 'bracket';
-        } else if (name.includes('Лира')) {
-            itemType = 'lyre';
-        } else if (name.includes('Комплект') || name.includes('коннектор') || name.includes('заглушек')) {
-            itemType = 'component';
-        }
-        
         items.push({
             id: items.length,
             originalName: name,
-            itemType: itemType,
+            type: type,
+            keyword: keyword,
             size: size,
             quantity: quantity,
             ral: ral,
@@ -132,48 +171,25 @@ function renderImportItems(items) {
                 </div>
         `;
         
-        if (item.itemType === 'product') {
+        if (item.type === 'product') {
+            const versions = PRODUCT_VERSIONS[item.keyword] || [item.keyword];
             html += `
                 <div class="form-group" style="margin-bottom: 0;">
                     <label style="font-size: 12px; color: #f97316;">🎯 Версия изделия:</label>
                     <select class="version-select" data-index="${i}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
                         <option value="">-- Выберите версию --</option>
-                        ${PRODUCT_VERSIONS.map(v => `<option value="${v}">${v}</option>`).join('')}
-                    </select>
-                </div>
-            `;
-        } else if (item.itemType === 'bracket') {
-            html += `
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label style="font-size: 12px; color: #f97316;">🔧 Тип кронштейна:</label>
-                    <select class="version-select" data-index="${i}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                        <option value="">-- Выберите тип --</option>
-                        <option value="Кронштейн Y-700">Кронштейн Y-700</option>
-                        <option value="Кронштейн LU-15">Кронштейн LU-15</option>
-                        <option value="Кронштейн PU-10">Кронштейн PU-10</option>
-                        <option value="Кронштейн NP-100-2">Кронштейн NP-100-2</option>
-                    </select>
-                </div>
-            `;
-        } else if (item.itemType === 'lyre') {
-            html += `
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label style="font-size: 12px; color: #f97316;">🎸 Тип лиры:</label>
-                    <select class="version-select" data-index="${i}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                        <option value="">-- Выберите тип --</option>
-                        <option value="Лира Y-700">Лира Y-700</option>
-                        <option value="Лира XSMART">Лира XSMART</option>
-                        <option value="Лира XVISION">Лира XVISION</option>
-                        <option value="Лира XGLOW">Лира XGLOW</option>
+                        ${versions.map(v => `<option value="${v}">${v}</option>`).join('')}
                     </select>
                 </div>
             `;
         } else {
+            // Кронштейн или Лира
             html += `
                 <div class="form-group" style="margin-bottom: 0;">
                     <label style="font-size: 12px; color: #f97316;">🔧 Тип:</label>
                     <select class="version-select" data-index="${i}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                        <option value="component">Комплектующая (без операций)</option>
+                        <option value="Кронштейн">🔧 Кронштейн</option>
+                        <option value="Лира">🎸 Лира</option>
                     </select>
                 </div>
             `;
@@ -184,7 +200,6 @@ function renderImportItems(items) {
     
     container.innerHTML = html;
     
-    // Сохраняем выбранные значения
     document.querySelectorAll('.version-select').forEach(select => {
         select.addEventListener('change', function() {
             const index = parseInt(this.dataset.index);
@@ -212,7 +227,7 @@ async function analyzeImportFile() {
     const result = parse1SReport(text);
     
     if (result.items.length === 0) {
-        alert('Не найдено данных для импорта');
+        alert('Не найдено известных изделий для импорта');
         return;
     }
     
@@ -229,6 +244,8 @@ async function analyzeImportFile() {
     const confirmBtn = document.getElementById('confirmImportBtn');
     if (previewContainer) previewContainer.style.display = 'block';
     if (confirmBtn) confirmBtn.style.display = 'block';
+    
+    alert(`✅ Найдено ${parsedImportItems.length} изделий для импорта`);
 }
 
 // ============== СОЗДАНИЕ ГРУППЫ ==============
@@ -236,9 +253,8 @@ async function confirmImport() {
     // Проверяем, что все изделия имеют выбранную версию
     const missingConfigs = [];
     for (let i = 0; i < parsedImportItems.length; i++) {
-        const item = parsedImportItems[i];
-        if (item.itemType !== 'component' && !selectedConfigs[i]) {
-            missingConfigs.push(item.originalName);
+        if (!selectedConfigs[i]) {
+            missingConfigs.push(parsedImportItems[i].originalName);
         }
     }
     
@@ -260,42 +276,28 @@ async function confirmImport() {
     if (confirmBtn) confirmBtn.disabled = true;
     
     try {
-        // Получаем существующие заказы
         const orders = window.loadOrdersFromStorage ? window.loadOrdersFromStorage() : [];
         
-        // Формируем items для группы
         const items = [];
         for (let i = 0; i < parsedImportItems.length; i++) {
             const item = parsedImportItems[i];
             const selectedValue = selectedConfigs[i];
             
-            let productName = '';
-            let isComponent = false;
-            
-            if (selectedValue === 'component') {
-                productName = item.originalName;
-                isComponent = true;
-            } else {
-                productName = selectedValue;
-                isComponent = false;
-            }
-            
             items.push({
-                product: productName,
+                product: selectedValue,
                 size: {
                     name: item.size || 'Стандартный',
                     quantity: item.quantity
                 },
                 brackets: [],
                 lyres: [],
-                details: [],
+                details: [],  // Детали подтянутся из техкарты автоматически
                 ral: item.ral || '',
                 texture: item.texture || '',
-                isComponent: isComponent
+                isComponent: (item.type !== 'product')  // Кронштейны/Лиры = комплектующие
             });
         }
         
-        // Создаём новую группу
         const newOrder = {
             id: Date.now(),
             groupName: groupName,
@@ -311,14 +313,13 @@ async function confirmImport() {
         orders.push(newOrder);
         if (window.saveOrdersToStorage) window.saveOrdersToStorage(orders);
         
-        // Создаём задачи для заказа
+        // Создаём задачи через существующую функцию (детали подтянутся из техкарты)
         if (window.createTasksForOrder) {
             window.createTasksForOrder(newOrder);
         }
         
         closeImportModal();
         
-        // Обновляем отображение
         if (window.renderOrdersList) window.renderOrdersList();
         if (window.updateStatistics) window.updateStatistics();
         
