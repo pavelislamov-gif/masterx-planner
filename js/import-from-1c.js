@@ -589,18 +589,15 @@ function escapeHtml(str) {
 
 // Открытие калькулятора Windows
 function openCalculator() {
-    const userConfirmed = confirm(
-        'Открыть калькулятор Windows?\n\n' +
-        'Нажмите OK, затем:\n' +
-        '1. Нажмите Win + R\n' +
-        '2. Введите "calc"\n' +
-        '3. Нажмите Enter'
-    );
+    // Пытаемся открыть через ms-calc:
+    window.location.href = 'ms-calc:';
     
-    if (userConfirmed) {
-        // Пробуем всё равно открыть
-        window.location.href = 'ms-calc:';
-    }
+    // Если не сработало через 500ms, показываем инструкцию
+    setTimeout(() => {
+        if (document.hasFocus()) {
+            alert('Калькулятор не открылся автоматически.\n\nНажмите Win + R, введите "calc" и нажмите Enter');
+        }
+    }, 500);
 }
 
 // Открытие/закрытие модального окна
