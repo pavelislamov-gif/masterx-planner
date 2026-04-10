@@ -1,5 +1,7 @@
 // ============== ИМПОРТ ИЗ 1С ==============
 // Парсинг HTML, выбор версий, подстановка деталей, автозаполнение длин профилей
+// Умножение количества деталей на количество изделий в заказе
+// Исключение: левая/правая заглушки - берут количество 1:1
 
 let parsedImportItems = [];
 let selectedVersions = {};
@@ -46,6 +48,9 @@ const PRODUCT_VERSIONS = {
     'XROLL': ['XROLL-lite P', 'XROLL-lite K'],
     'ACENTO': ['ACENTO 3T', 'ACENTO 4']
 };
+
+// Исключения для левой/правой заглушек (не умножаем на количество изделий)
+const EXCEPTIONS = ['левая', 'правая', 'Заглушка левая', 'Заглушка правая', 'левой', 'правой'];
 
 // Получение деталей из техкарты
 function getDetailsFromTechCard(productName) {
@@ -101,7 +106,8 @@ function getDetailsFromTechCard(productName) {
                         material: material,
                         quantity: 0,
                         type: type,
-                        lengthMm: 0
+                        lengthMm: 0,
+                        baseQuantity: 1  // базовое количество на одно изделие
                     });
                 }
             }
@@ -324,7 +330,7 @@ function renderImportItems(items) {
     });
 }
 
-// Загрузка и отображение деталей с автоподстановкой длин профилей
+// Загрузка и отображение деталей с автоподстановкой длин профилей и умножением количества
 function loadAndRenderDetails(index, productName, itemQuantity) {
     const item = parsedImportItems[index];
     const size = item.size;
@@ -337,12 +343,30 @@ function loadAndRenderDetails(index, productName, itemQuantity) {
     
     const details = getDetailsFromTechCard(productName);
     
-    // Применяем длины профилей из карты и количество из парсинга
+    // Применяем длины профилей из карты и умножаем количество
     detailsData[index] = details.map(d => {
         let lengthMm = 0;
-        let quantity = itemQuantity;
+        let quantity = 0;
         
-        // Если это профиль или пруток и есть соответствие в карте
+        // Проверяем, является ли деталь исключением (левая/правая заглушка)
+        const isException = EXCEPTIONS.some(exception => 
+            d.name.toLowerCase().includes(exception.toLowerCase())
+        );
+        
+        if (isException) {
+            // Левая/правая заглушки: количество = количество изделий в заказе (1:1)
+            quantity = itemQuantity;
+        } else {
+            // Остальные детали: количество = количество изделий × базовое количество
+            // Для заглушек модуля обычно 2 шт на изделие
+            let baseQty = 1;
+            if (d.name.toLowerCase().includes('модуля') || d.name.toLowerCase().includes('молуля')) {
+                baseQty = 2;
+            }
+            quantity = itemQuantity * baseQty;
+        }
+        
+        // Для профилей и прутков подставляем длину из карты
         if ((d.type === 'profile' || d.type === 'bar') && profileLengths[d.name]) {
             lengthMm = profileLengths[d.name];
         }
@@ -563,6 +587,11 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
+// Открытие калькулятора Windows
+function openCalculator() {
+    window.open('calc://', '_blank');
+}
+
 // Открытие/закрытие модального окна
 function openImportModal() {
     const modal = document.getElementById('importModal');
@@ -601,3 +630,4 @@ window.openImportModal = openImportModal;
 window.closeImportModal = closeImportModal;
 window.analyzeImportFile = analyzeImportFile;
 window.confirmImport = confirmImport;
+window.openCalculator = openCalculator;
