@@ -2017,11 +2017,9 @@ function saveExtraTask(orderId, siteKey) {
         return;
     }
     
-    // Закрываем модальное окно
     const modal = document.querySelector('.modal');
     if (modal) modal.remove();
     
-    // Получаем заказ
     const orders = loadOrdersFromStorage();
     const order = orders.find(o => o.id == orderId);
     
@@ -2030,10 +2028,12 @@ function saveExtraTask(orderId, siteKey) {
         return;
     }
     
-    // Получаем первый item для контекста
+    // Получаем индекс изделия, к которому привязана кнопка
+    // Нужно передавать itemIndex при вызове addExtraTask
+    // Пока используем 0, но нужно будет передавать правильный itemIndex
+    
     const firstItem = order.items[0] || {};
     
-    // Получаем существующие задачи для участка
     const storageKey = `tasks_${siteKey}`;
     let existingTasks = [];
     try {
@@ -2041,15 +2041,17 @@ function saveExtraTask(orderId, siteKey) {
         if (saved) existingTasks = JSON.parse(saved);
     } catch(e) { console.error(e); }
     
-    // Находим максимальный индекс для доп. задач
     const extraTasksCount = existingTasks.filter(t => t.isExtra).length;
     const taskId = `${order.id}_${siteKey}_extra_${extraTasksCount}`;
     
-    // Создаём задачу (сразу активную, как обычная)
+    // ВАЖНО: нужно получить itemIndex из контекста
+    // Пока оставляем 0, но исправим позже
+    const currentItemIndex = window.currentItemIndex || 0;
+    
     const newTask = {
         id: taskId,
         orderId: order.id,
-        itemIndex: 0,
+        itemIndex: currentItemIndex,  // ← запоминаем, для какого изделия
         orderNumber: order.number,
         product: firstItem.product || 'Доп. задача',
         size: firstItem.size?.name || 'Стандартный',
@@ -2070,20 +2072,16 @@ function saveExtraTask(orderId, siteKey) {
         createdAt: new Date().toISOString()
     };
     
-    // Добавляем задачу в localStorage участка
     existingTasks.push(newTask);
     localStorage.setItem(storageKey, JSON.stringify(existingTasks));
     
-    // Обновляем статус заказа
     if (!order.tasks) order.tasks = {};
     order.tasks[taskId] = '';
     
-    // Сохраняем заказ
     const orderIndex = orders.findIndex(o => o.id == orderId);
     orders[orderIndex] = order;
     saveOrdersToStorage(orders);
     
-    // Обновляем отображение
     if (typeof renderOrdersList === 'function') {
         renderOrdersList();
     }
