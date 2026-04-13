@@ -277,77 +277,54 @@
         }
 
         function saveExtraTask(orderId, siteKey) {
-    const taskName = document.getElementById('extraTaskName')?.value.trim();
-    const quantity = parseInt(document.getElementById('extraTaskQuantity')?.value) || 1;
-    
-    if (!taskName) {
-        alert('Введите название операции');
-        return;
-    }
-    
-    const modal = document.querySelector('.modal');
-    if (modal) modal.remove();
-    
-    const orders = loadOrdersFromStorage();
-    const order = orders.find(o => o.id == orderId);
-    
-    if (!order) {
-        alert('Группа не найдена');
-        return;
-    }
-    
-    const item = order.items[currentExtraTaskItemIndex] || order.items[0] || {};
-    
-    // ============== СОЗДАЁМ ЗАДАЧУ В tasks_${siteKey} ==============
-    function saveExtraTask(orderId, siteKey) {
-    const taskName = document.getElementById('extraTaskName')?.value.trim();
-    const quantity = parseInt(document.getElementById('extraTaskQuantity')?.value) || 1;
-    
-    if (!taskName) {
-        alert('Введите название операции');
-        return;
-    }
-    
-    const modal = document.querySelector('.modal');
-    if (modal) modal.remove();
-    
-    const orders = loadOrdersFromStorage();
-    const order = orders.find(o => o.id == orderId);
-    
-    if (!order) {
-        alert('Группа не найдена');
-        return;
-    }
-    
-    const item = order.items[currentExtraTaskItemIndex] || order.items[0] || {};
-    
-    // ============== СОХРАНЯЕМ ТОЛЬКО КАК ЧЕРНОВИК ==============
-    if (!order.extraTasks) order.extraTasks = [];
-    
-    const exists = order.extraTasks.some(t => t.title === taskName && t.site === siteKey && t.itemIndex === currentExtraTaskItemIndex);
-    if (exists) {
-        alert(`⚠️ Задача "${taskName}" уже создана!`);
-        return;
-    }
-    
-    order.extraTasks.push({
-        id: Date.now(),
-        title: taskName,
-        quantity: quantity,
-        site: siteKey,
-        itemIndex: currentExtraTaskItemIndex,
-        createdAt: new Date().toISOString()
-    });
-    
-    const orderIndex = orders.findIndex(o => o.id == orderId);
-    orders[orderIndex] = order;
-    saveOrdersToStorage(orders);
-    
-    renderOrdersList();
-    updateStatistics();
-    
-    alert(`✅ Черновик задачи "${taskName}" создан! Нажмите + для отправки на участок.`);
-}
+            const taskName = document.getElementById('extraTaskName')?.value.trim();
+            const quantity = parseInt(document.getElementById('extraTaskQuantity')?.value) || 1;
+            
+            if (!taskName) {
+                alert('Введите название операции');
+                return;
+            }
+            
+            const modal = document.querySelector('.modal');
+            if (modal) modal.remove();
+            
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            
+            if (!order) {
+                alert('Группа не найдена');
+                return;
+            }
+            
+            const item = order.items[currentExtraTaskItemIndex] || order.items[0] || {};
+            
+            // ============== СОХРАНЯЕМ ТОЛЬКО КАК ЧЕРНОВИК ==============
+            if (!order.extraTasks) order.extraTasks = [];
+            
+            const exists = order.extraTasks.some(t => t.title === taskName && t.site === siteKey && t.itemIndex === currentExtraTaskItemIndex);
+            if (exists) {
+                alert(`⚠️ Задача "${taskName}" уже создана!`);
+                return;
+            }
+            
+            order.extraTasks.push({
+                id: Date.now(),
+                title: taskName,
+                quantity: quantity,
+                site: siteKey,
+                itemIndex: currentExtraTaskItemIndex,
+                createdAt: new Date().toISOString()
+            });
+            
+            const orderIndex = orders.findIndex(o => o.id == orderId);
+            orders[orderIndex] = order;
+            saveOrdersToStorage(orders);
+            
+            renderOrdersList();
+            updateStatistics();
+            
+            alert(`✅ Черновик задачи "${taskName}" создан! Нажмите + для отправки на участок.`);
+        }
 
         // ============== РАБОТА С ФАЙЛАМИ ==============
         function addSiteFile(orderId, siteKey) {
@@ -1002,7 +979,6 @@
         window.addEventListener('storage', function(e) { if (e.key === 'masterx_orders' || (e.key && e.key.startsWith('tasks_'))) onDataChanged(); });
         function initAutoReload() { startAutoReloadTimer(); trackUserActivity(); }
         initAutoReload();
-        }
 
         document.addEventListener('DOMContentLoaded', initMainPage);
 
