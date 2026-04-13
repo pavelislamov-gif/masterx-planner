@@ -2415,7 +2415,8 @@ function generateOrderNumber() {
             quantity: item.size?.quantity,
             ral: item.ral,
             texture: item.texture,
-            selectedSize: item.size?.name
+            selectedSize: item.size?.name,
+            selectedVersion: item.product
         });
         
         selectedVersions[i] = item.product;
@@ -2427,11 +2428,13 @@ function generateOrderNumber() {
                 quantity: d.quantity,
                 lengthMm: d.lengthMm || 0
             }));
+        } else {
+            detailsData[i] = [];
         }
     }
     
-    // Перерисовываем интерфейс
-    renderImportItems(parsedImportItems);
+    // Перерисовываем интерфейс и загружаем детали
+    renderImportItemsWithData(parsedImportItems);
     
     // Показываем блок с найденными изделиями
     const previewContainer = document.getElementById('importPreviewContainer');
@@ -2446,7 +2449,175 @@ function generateOrderNumber() {
     }
 }
 
-async function saveEditedGroup(orderId) {
+function renderImportItemsWithData(items) {
+    const container = document.getElementById('importItemsList');
+    if (!container) return;
+    
+    const { grouped, sortedKeys } = groupItemsByRal(items);
+    let html = '';
+    
+    for (const ralKey of sortedKeys) {
+        const groupItems = grouped[ralKey];
+        const ralDisplay = ralKey === '?' ? '<span style="color: #dc2626;">не указан (?)</span>' : ralKey;
+        
+        html += `
+            <div style="margin-bottom: 20px;">
+                <div style="background: #f1f5f9; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; font-weight: bold;">
+                    🎨 RAL: ${ralDisplay}
+                </div>
+        `;
+        
+        for (let i = 0; i < groupItems.length; i++) {
+            const item = groupItems[i];
+            const originalIndex = parsedImportItems.findIndex(x => x.id === item.id);
+            const hasSelectedVersion = selectedVersions[originalIndex];
+            
+            const quantityDisplay = formatValue(item.quantity, 'шт');
+            const ralDisplayInline = item.ral ? item.ral : '<span style="color: #dc2626; font-weight: bold;">?</span>';
+            const textureDisplay = item.texture ? item.texture : '<span style="color: #dc2626; font-weight: bold;">?</span>';
+            
+            html += `
+                <div class="import-item" data-item-index="${originalIndex}" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+                        <div>
+                            <strong style="font-size: 16px; color: #dc2626;">📦 ${escapeHtml(item.originalName)}</strong>
+                            <div style="font-size: 13px; color: #64748b; margin-top: 5px;">
+                                Кол-во: <strong>${quantityDisplay}</strong>
+                                | RAL: <strong>${ralDisplayInline}</strong>
+                                | Текстура: <strong>${textureDisplay}</strong>
+                            </div>
+                        </div>
+                    </div>
+            `;
+            
+            if (item.type === 'product') {
+                const versions = PRODUCT_VERSIONS[item.keyword] || [item.keyword];
+                
+                html += `
+                    <div class="form-group">
+                        <label style="font-size: 12px; color: #f97316;">🎯 Версия изделия:</label>
+                        <select class="version-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <option value="">-- Выберите версию --</option>
+                            ${versions.map(v => `<option value="${v}" ${hasSelectedVersion === v ? 'selected' : ''}>${v}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label style="font-size: 12px; color: #f97316;">📏 Размер изделия:</label>
+                        <select class="size-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;" ${!hasSelectedVersion ? 'disabled' : ''}>
+                            <option value="">-- ${!hasSelectedVersion ? 'Сначала выберите версию' : 'Выберите размер'} --</option>
+                        </select>
+                    </div>
+                    <div class="details-container" id="details-${originalIndex}" style="display: ${hasSelectedVersion ? 'block' : 'none'}; margin-top: 15px; padding-top: 10px; border-top: 1px solid #e2e8f0;"></div>
+                `;
+            } else {
+                html += `
+                    <div class="form-group">
+                        <label style="font-size: 12px; color: #f97316;">${item.type === 'bracket' ? '🔧' : '🎸'} Выберите тип по толщине:</label>
+                        <select class="thickness-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <option value="">-- Выберите тип --</option>
+                            ${THICKNESS_OPTIONS.map(opt => `<option value="${opt.productName}" data-product="${opt.productName}" data-item-type="${opt.type}" ${hasSelectedVersion === opt.productName ? 'selected' : ''}>${opt.productName}</option>`).join('')}
+                        </select>
+                    </div>
+                `;
+            }
+            
+            html += `</div>`;
+        }
+        
+        html += `</div>`;
+    }
+    
+    container.innerHTML = html;
+    
+    // Обработчики для выбора версии
+    document.querySelectorAll('.version-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const index = parseInt(this.dataset.index);
+            const value = this.value;
+            const item = parsedImportItems[index];
+            const sizeSelect = document.querySelector(`.size-select[data-index="${index}"]`);
+            
+            if (value && item.type === 'product') {
+                selectedVersions[index] = value;
+                const sizes = getSizesForProduct(value);
+                if (sizeSelect) {
+                    sizeSelect.disabled = false;
+                    sizeSelect.innerHTML = '<option value="">-- Выберите размер --</option>';
+                    sizes.forEach(size => {
+                        const isSelected = (item.selectedSize === size);
+                        sizeSelect.innerHTML += `<option value="${size}" ${isSelected ? 'selected' : ''}>${size}</option>`;
+                    });
+                }
+                // Загружаем детали с выбранным размером
+                loadAndRenderDetails(index, value, item.quantity, item.selectedSize);
+            } else {
+                delete selectedVersions[index];
+                if (sizeSelect) {
+                    sizeSelect.disabled = true;
+                    sizeSelect.innerHTML = '<option value="">-- Сначала выберите версию --</option>';
+                }
+                const detailsContainer = document.getElementById(`details-${index}`);
+                if (detailsContainer) detailsContainer.style.display = 'none';
+            }
+        });
+        
+        // Если уже есть выбранная версия, загружаем размеры и детали
+        if (select.value) {
+            const index = parseInt(select.dataset.index);
+            const value = select.value;
+            const item = parsedImportItems[index];
+            const sizeSelect = document.querySelector(`.size-select[data-index="${index}"]`);
+            
+            if (value && item.type === 'product') {
+                const sizes = getSizesForProduct(value);
+                if (sizeSelect) {
+                    sizeSelect.disabled = false;
+                    sizeSelect.innerHTML = '<option value="">-- Выберите размер --</option>';
+                    sizes.forEach(size => {
+                        const isSelected = (item.selectedSize === size);
+                        sizeSelect.innerHTML += `<option value="${size}" ${isSelected ? 'selected' : ''}>${size}</option>`;
+                    });
+                }
+                // Загружаем детали
+                loadAndRenderDetails(index, value, item.quantity, item.selectedSize);
+            }
+        }
+    });
+    
+    // Обработчики для выбора размера
+    document.querySelectorAll('.size-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const index = parseInt(this.dataset.index);
+            const size = this.value;
+            const productName = selectedVersions[index];
+            const item = parsedImportItems[index];
+            
+            if (size && productName) {
+                parsedImportItems[index].selectedSize = size;
+                loadAndRenderDetails(index, productName, item.quantity, size);
+            }
+        });
+    });
+    
+    // Обработчики для выбора толщины (кронштейны и лиры)
+    document.querySelectorAll('.thickness-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const index = parseInt(this.dataset.index);
+            const selectedOption = this.options[this.selectedIndex];
+            const productName = selectedOption.getAttribute('data-product');
+            const itemType = selectedOption.getAttribute('data-item-type');
+            
+            if (productName) {
+                selectedVersions[index] = productName;
+                console.log(`Выбран: ${productName} (${itemType})`);
+            } else {
+                delete selectedVersions[index];
+            }
+        });
+    });
+}
+
+        async function saveEditedGroup(orderId) {
     console.log('💾 saveEditedGroup вызвана, orderId:', orderId);
     
     // Проверяем, что все изделия имеют выбранную конфигурацию
