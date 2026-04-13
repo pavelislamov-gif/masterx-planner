@@ -2,6 +2,7 @@
 // Парсинг HTML, выбор версий, подстановка деталей, автозаполнение длин профилей
 // Умножение количества деталей на количество изделий в заказе
 // Исключение: левая/правая заглушки - берут количество 1:1
+// Кронштейны и лиры - выбор по толщине
 
 let parsedImportItems = [];
 let selectedVersions = {};
@@ -48,6 +49,35 @@ const PRODUCT_VERSIONS = {
     'XROLL': ['XROLL-lite P', 'XROLL-lite K'],
     'ACENTO': ['ACENTO 3T', 'ACENTO 4']
 };
+
+// Кронштейны по толщине
+const BRACKETS_BY_THICKNESS = {
+    '1,5': 'Кронштейн AISI 1,5мм',
+    '1.5': 'Кронштейн AISI 1,5мм',
+    '1,5мм': 'Кронштейн AISI 1,5мм',
+    '1.5мм': 'Кронштейн AISI 1,5мм',
+    '2': 'Кронштейн AISI 2мм',
+    '2мм': 'Кронштейн AISI 2мм',
+    '3': 'Кронштейн AISI 3мм',
+    '3мм': 'Кронштейн AISI 3мм'
+};
+
+// Лиры по толщине
+const LYRES_BY_THICKNESS = {
+    '1,2': 'Лира AISI 1,2мм',
+    '1.2': 'Лира AISI 1,2мм',
+    '1,2мм': 'Лира AISI 1,2мм',
+    '1.2мм': 'Лира AISI 1,2мм',
+    '1,5': 'Лира AISI 1,5мм',
+    '1.5': 'Лира AISI 1,5мм',
+    '1,5мм': 'Лира AISI 1,5мм',
+    '1.5мм': 'Лира AISI 1,5мм',
+    '2': 'Лира AISI 2мм',
+    '2мм': 'Лира AISI 2мм'
+};
+
+// Список доступных толщин для выбора
+const AVAILABLE_THICKNESS = ['1,5мм', '2мм', '3мм'];
 
 // Исключения для левой/правой заглушек (не умножаем на количество изделий)
 const EXCEPTIONS = ['левая', 'правая', 'Заглушка левая', 'Заглушка правая', 'левой', 'правой'];
@@ -231,6 +261,40 @@ function groupItemsByRal(items) {
     return { grouped, sortedKeys };
 }
 
+// Получение списка размеров для продукта
+function getSizesForProduct(productName) {
+    if (window.productsList) {
+        const product = window.productsList.find(p => p.name === productName);
+        if (product && product.sizes) {
+            return product.sizes;
+        }
+    }
+    
+    const defaultSizes = {
+        'XGRAY v.1': ['116', '216', '316', '416', '516', '612', '712', '812', '912', '1012', '1108', '1208', '1308', '1408', '1508'],
+        'XGRAY v.2': ['116', '216', '316', '416', '516', '612', '712', '812', '912', '1012', '1108', '1208', '1308', '1408', '1508'],
+        'XLUMO': ['125', '250', '300', '375', '500', '600', '625', '700', '750', '800', '875', '900', '1000', '1100', '1125', '1200', '1250', '1300', '1375', '1400', '1500'],
+        'XLUMO 1-6': ['XLUMO-1', 'XLUMO-2', 'XLUMO-3', 'XLUMO-4', 'XLUMO-5', 'XLUMO-6'],
+        'XLUMO Двунаправленный': ['XLUMOx2-1', 'XLUMOx2-2', 'XLUMOx2-3', 'XLUMOx2-4', 'XLUMOx2-5', 'XLUMOx2-6'],
+        'XLUMO PROV': ['125', '250', '375', '500', '625', '750', '875', '1000', '1125', '1250', '1375', '1500'],
+        'XSMART': ['XSMART-2', 'XSMART-3', 'XSMART-4', 'XSMART-5', 'XSMART-6', '500', '1000', '1500'],
+        'XSMART MINI': ['XSMART mini 1', 'XSMART mini 2', 'XSMART mini 3', 'XSMART mini 4', 'XSMART mini 5', 'XSMART mini 6'],
+        'XGLOW': ['510', '1000', '1490'],
+        'XGLOW mini': ['125', '250', '375', '500', '510', '625', '750', '875', '1000', '1125', '1250', '1375', '1490', '1500'],
+        'XVISION': ['110', '125', '210', '250', '310', '375', '410', '500', '510', '600', '625', '700', '750', '800', '875', '900', '1000', '1125', '1250', '1375', '1500'],
+        'XLINE': ['106', '206', '306', '406', '506', '600', '700', '800', '900', '1000', '1094', '1194', '1294', '1394', '1494'],
+        'XGIRO': ['130', '220', '310', '410', '510', '600', '700', '800', '900', '1000'],
+        'XLITE': ['125', '250', '375', '500', '625', '750', '875', '1000', '1125', '1250', '1375', '1500'],
+        'XSTRONG': ['XSTRONG-10', 'XSTRONG-20', 'XSTRONG-30', 'XSTRONG-20PW', 'XSTRONG-30PW', 'XSTRONG-40PW'],
+        'XROLL-lite P': ['205', '305', '405', '505', '600', '700', '800', '900', '1000', '1100', '1200', '1300', '1400', '1496'],
+        'XROLL-lite K': ['205', '305', '405', '505', '600', '700', '800', '900', '1000', '1100', '1200', '1300', '1400', '1496'],
+        'XYELLOW': ['116', '216', '316', '416', '516', '612', '712', '812', '912', '1012', '1108', '1208', '1308', '1408', '1508'],
+        'XBAR-SW': ['1000', '1500']
+    };
+    
+    return defaultSizes[productName] || ['Стандартный'];
+}
+
 // Отображение интерфейса выбора версий и деталей
 function renderImportItems(items) {
     const container = document.getElementById('importItemsList');
@@ -257,7 +321,6 @@ function renderImportItems(items) {
             const quantityDisplay = formatValue(item.quantity, 'шт');
             const ralDisplayInline = item.ral ? item.ral : '<span style="color: #dc2626; font-weight: bold;">?</span>';
             const textureDisplay = item.texture ? item.texture : '<span style="color: #dc2626; font-weight: bold;">?</span>';
-            const sizeDisplay = formatValue(item.size);
             
             html += `
                 <div class="import-item" data-item-index="${originalIndex}" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
@@ -268,7 +331,6 @@ function renderImportItems(items) {
                                 Кол-во: <strong>${quantityDisplay}</strong>
                                 | RAL: <strong>${ralDisplayInline}</strong>
                                 | Текстура: <strong>${textureDisplay}</strong>
-                                | Размер: <strong>${sizeDisplay}</strong>
                             </div>
                         </div>
                     </div>
@@ -276,6 +338,7 @@ function renderImportItems(items) {
             
             if (item.type === 'product') {
                 const versions = PRODUCT_VERSIONS[item.keyword] || [item.keyword];
+                
                 html += `
                     <div class="form-group">
                         <label style="font-size: 12px; color: #f97316;">🎯 Версия изделия:</label>
@@ -284,15 +347,31 @@ function renderImportItems(items) {
                             ${versions.map(v => `<option value="${v}">${v}</option>`).join('')}
                         </select>
                     </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label style="font-size: 12px; color: #f97316;">📏 Размер изделия:</label>
+                        <select class="size-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;" disabled>
+                            <option value="">-- Сначала выберите версию --</option>
+                        </select>
+                    </div>
                     <div class="details-container" id="details-${originalIndex}" style="display: none; margin-top: 15px; padding-top: 10px; border-top: 1px solid #e2e8f0;"></div>
                 `;
-            } else {
+            } else if (item.type === 'bracket') {
                 html += `
                     <div class="form-group">
-                        <label style="font-size: 12px; color: #f97316;">🔧 Тип:</label>
-                        <select class="version-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                            <option value="Кронштейн">🔧 Кронштейн</option>
-                            <option value="Лира">🎸 Лира</option>
+                        <label style="font-size: 12px; color: #f97316;">🔧 Толщина кронштейна:</label>
+                        <select class="thickness-select" data-index="${originalIndex}" data-type="bracket" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <option value="">-- Выберите толщину --</option>
+                            ${AVAILABLE_THICKNESS.map(t => `<option value="${t}">${t}</option>`).join('')}
+                        </select>
+                    </div>
+                `;
+            } else if (item.type === 'lyre') {
+                html += `
+                    <div class="form-group">
+                        <label style="font-size: 12px; color: #f97316;">🎸 Толщина лиры:</label>
+                        <select class="thickness-select" data-index="${originalIndex}" data-type="lyre" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <option value="">-- Выберите толщину --</option>
+                            ${AVAILABLE_THICKNESS.map(t => `<option value="${t}">${t}</option>`).join('')}
                         </select>
                     </div>
                 `;
@@ -306,30 +385,83 @@ function renderImportItems(items) {
     
     container.innerHTML = html;
     
+    // Обработчики для выбора версии
     document.querySelectorAll('.version-select').forEach(select => {
         select.addEventListener('change', function() {
             const index = parseInt(this.dataset.index);
             const value = this.value;
             const item = parsedImportItems[index];
+            const sizeSelect = document.querySelector(`.size-select[data-index="${index}"]`);
             
             if (value && item.type === 'product') {
                 selectedVersions[index] = value;
-                loadAndRenderDetails(index, value, item.quantity);
-            } else if (value) {
-                selectedVersions[index] = value;
+                const sizes = getSizesForProduct(value);
+                if (sizeSelect) {
+                    sizeSelect.disabled = false;
+                    sizeSelect.innerHTML = '<option value="">-- Выберите размер --</option>';
+                    sizes.forEach(size => {
+                        sizeSelect.innerHTML += `<option value="${size}">${size}</option>`;
+                    });
+                }
             } else {
                 delete selectedVersions[index];
+                if (sizeSelect) {
+                    sizeSelect.disabled = true;
+                    sizeSelect.innerHTML = '<option value="">-- Сначала выберите версию --</option>';
+                }
                 const detailsContainer = document.getElementById(`details-${index}`);
                 if (detailsContainer) detailsContainer.style.display = 'none';
+            }
+        });
+    });
+    
+    // Обработчики для выбора размера
+    document.querySelectorAll('.size-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const index = parseInt(this.dataset.index);
+            const size = this.value;
+            const productName = selectedVersions[index];
+            const item = parsedImportItems[index];
+            
+            if (size && productName) {
+                parsedImportItems[index].selectedSize = size;
+                loadAndRenderDetails(index, productName, item.quantity, size);
+            }
+        });
+    });
+    
+    // Обработчики для выбора толщины (кронштейны и лиры)
+    document.querySelectorAll('.thickness-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const index = parseInt(this.dataset.index);
+            const thickness = this.value;
+            const type = this.dataset.type;
+            
+            if (thickness && type === 'bracket') {
+                const productName = BRACKETS_BY_THICKNESS[thickness];
+                if (productName) {
+                    selectedVersions[index] = productName;
+                    console.log(`Выбран кронштейн: ${productName} (толщина ${thickness})`);
+                }
+            } else if (thickness && type === 'lyre') {
+                const productName = LYRES_BY_THICKNESS[thickness];
+                if (productName) {
+                    selectedVersions[index] = productName;
+                    console.log(`Выбрана лира: ${productName} (толщина ${thickness})`);
+                }
+            } else {
+                delete selectedVersions[index];
             }
         });
     });
 }
 
 // Загрузка и отображение деталей
-function loadAndRenderDetails(index, productName, itemQuantity) {
+function loadAndRenderDetails(index, productName, itemQuantity, selectedSize = null) {
     const item = parsedImportItems[index];
-    const size = item.size;
+    const size = selectedSize || item.selectedSize || item.size;
+    
+    console.log(`loadAndRenderDetails: product=${productName}, size=${size}, quantity=${itemQuantity}`);
     
     let profileLengths = {};
     if (window.getProfileLengths) {
@@ -339,7 +471,16 @@ function loadAndRenderDetails(index, productName, itemQuantity) {
     
     const details = getDetailsFromTechCard(productName);
     
-    detailsData[index] = details.map(d => {
+    // Фильтруем детали - убираем кронштейны и лиры из деталей
+    const bracketNames = Object.values(BRACKETS_BY_THICKNESS);
+    const lyreNames = Object.values(LYRES_BY_THICKNESS);
+    const filteredDetails = details.filter(d => {
+        const isBracketOrLyre = bracketNames.some(b => d.name.includes(b)) || 
+                                lyreNames.some(l => d.name.includes(l));
+        return !isBracketOrLyre;
+    });
+    
+    detailsData[index] = filteredDetails.map(d => {
         let lengthMm = 0;
         let quantity = 0;
         
@@ -357,9 +498,8 @@ function loadAndRenderDetails(index, productName, itemQuantity) {
             quantity = itemQuantity * baseQty;
         }
         
-        // Для профилей и прутков: длина = длина_из_карты × количество_изделий
         if ((d.type === 'profile' || d.type === 'bar') && profileLengths[d.name]) {
-            lengthMm = profileLengths[d.name] * itemQuantity;  // ← УМНОЖАЕМ
+            lengthMm = profileLengths[d.name] * itemQuantity;
         }
         
         return {
@@ -490,7 +630,7 @@ async function confirmImport() {
     }
     
     if (missingConfigs.length > 0) {
-        alert(`Выберите версию для следующих изделий:\n${missingConfigs.join('\n')}`);
+        alert(`Выберите конфигурацию для следующих изделий:\n${missingConfigs.join('\n')}`);
         return;
     }
     
@@ -532,7 +672,7 @@ async function confirmImport() {
             tempItemsList.push({
                 product: selectedValue,
                 size: {
-                    name: item.size || 'Стандартный',
+                    name: item.selectedSize || item.size || 'Стандартный',
                     quantity: item.quantity
                 },
                 brackets: [],
@@ -576,65 +716,7 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
-// ============== ВСТРОЕННЫЙ КАЛЬКУЛЯТОР ==============
-
-let calcExpression = '';
-
-function initCalculator() {
-    const calcDisplay = document.getElementById('calcDisplay');
-    if (!calcDisplay) return;
-    
-    const buttons = document.querySelectorAll('.calc-btn');
-    buttons.forEach(btn => {
-        btn.removeEventListener('click', handleCalcButton);
-        btn.addEventListener('click', handleCalcButton);
-    });
-}
-
-function handleCalcButton(e) {
-    const val = e.currentTarget.dataset.val;
-    const display = document.getElementById('calcDisplay');
-    if (!display) return;
-    
-    if (val === 'C') {
-        calcExpression = '';
-        display.value = '';
-    } else if (val === '=') {
-        try {
-            let expr = calcExpression.replace(/×/g, '*').replace(/÷/g, '/');
-            const result = eval(expr);
-            if (isNaN(result) || !isFinite(result)) {
-                display.value = 'Ошибка';
-                calcExpression = '';
-            } else {
-                display.value = result;
-                calcExpression = result.toString();
-            }
-        } catch(e) {
-            display.value = 'Ошибка';
-            calcExpression = '';
-        }
-    } else {
-        calcExpression += val;
-        display.value = calcExpression;
-    }
-}
-
-function toggleCalculator() {
-    const body = document.getElementById('calculatorBody');
-    const btn = event.target;
-    if (body) {
-        if (body.style.display === 'none') {
-            body.style.display = 'block';
-            btn.textContent = '▲ Свернуть';
-        } else {
-            body.style.display = 'none';
-            btn.textContent = '▼ Развернуть';
-        }
-    }
-}
-
-// Открытие/закрытие модального окна (ЕДИНСТВЕННАЯ ВЕРСИЯ)
+// Открытие/закрытие модального окна
 function openImportModal() {
     const modal = document.getElementById('importModal');
     if (modal) {
@@ -652,9 +734,6 @@ function openImportModal() {
         parsedImportItems = [];
         selectedVersions = {};
         detailsData = {};
-        
-        // Инициализируем калькулятор
-        setTimeout(initCalculator, 100);
     }
 }
 
@@ -671,9 +750,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Экспорт функций
 window.openImportModal = openImportModal;
 window.closeImportModal = closeImportModal;
 window.analyzeImportFile = analyzeImportFile;
 window.confirmImport = confirmImport;
-window.toggleCalculator = toggleCalculator;
