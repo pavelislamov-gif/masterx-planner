@@ -1,7 +1,7 @@
 // ============== ИМПОРТ ИЗ 1С ==============
 // Парсинг HTML, выбор версий, подстановка деталей, автозаполнение длин профилей
 // Умножение количества деталей: ×2 для всех, кроме левой/правой заглушек (×1)
-// Кронштейны и лиры - выбор по толщине
+// Кронштейны и лиры - единый выбор по толщине (кронштейн может стать лирой и наоборот)
 
 let parsedImportItems = [];
 let selectedVersions = {};
@@ -49,18 +49,15 @@ const PRODUCT_VERSIONS = {
     'ACENTO': ['ACENTO 3T', 'ACENTO 4']
 };
 
-// Выбор по толщине для кронштейнов
-const BRACKET_THICKNESS = [
-    { thickness: '1,5мм', productName: 'Кронштейн AISI 1,5мм' },
-    { thickness: '2мм', productName: 'Кронштейн AISI 2мм' },
-    { thickness: '3мм', productName: 'Кронштейн AISI 3мм' }
-];
-
-// Выбор по толщине для лир
-const LYRE_THICKNESS = [
-    { thickness: '1,2мм', productName: 'Лира AISI 1,2мм' },
-    { thickness: '1,5мм', productName: 'Лира AISI 1,5мм' },
-    { thickness: '2мм', productName: 'Лира AISI 2мм' }
+// Единый список выбора по толщине (для кронштейнов и лир)
+// При парсинге кронштейна или лиры показывается этот список
+const THICKNESS_OPTIONS = [
+    { thickness: '1,2мм', productName: 'Лира AISI 1,2мм', type: 'lyre' },
+    { thickness: '1,5мм', productName: 'Кронштейн AISI 1,5мм', type: 'bracket' },
+    { thickness: '1,5мм', productName: 'Лира AISI 1,5мм', type: 'lyre' },
+    { thickness: '2мм', productName: 'Кронштейн AISI 2мм', type: 'bracket' },
+    { thickness: '2мм', productName: 'Лира AISI 2мм', type: 'lyre' },
+    { thickness: '3мм', productName: 'Кронштейн AISI 3мм', type: 'bracket' }
 ];
 
 // Исключения для левой/правой заглушек (не умножаем на 2)
@@ -339,23 +336,14 @@ function renderImportItems(items) {
                     </div>
                     <div class="details-container" id="details-${originalIndex}" style="display: none; margin-top: 15px; padding-top: 10px; border-top: 1px solid #e2e8f0;"></div>
                 `;
-            } else if (item.type === 'bracket') {
+            } else {
+                // Для кронштейнов и лир - единый список выбора по толщине
                 html += `
                     <div class="form-group">
-                        <label style="font-size: 12px; color: #f97316;">🔧 Толщина кронштейна:</label>
-                        <select class="thickness-select" data-index="${originalIndex}" data-type="bracket" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        <label style="font-size: 12px; color: #f97316;">${item.type === 'bracket' ? '🔧' : '🎸'} Выберите тип по толщине:</label>
+                        <select class="thickness-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
                             <option value="">-- Выберите толщину --</option>
-                            ${BRACKET_THICKNESS.map(opt => `<option value="${opt.thickness}" data-product="${opt.productName}">${opt.thickness} (${opt.productName})</option>`).join('')}
-                        </select>
-                    </div>
-                `;
-            } else if (item.type === 'lyre') {
-                html += `
-                    <div class="form-group">
-                        <label style="font-size: 12px; color: #f97316;">🎸 Толщина лиры:</label>
-                        <select class="thickness-select" data-index="${originalIndex}" data-type="lyre" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                            <option value="">-- Выберите толщину --</option>
-                            ${LYRE_THICKNESS.map(opt => `<option value="${opt.thickness}" data-product="${opt.productName}">${opt.thickness} (${opt.productName})</option>`).join('')}
+                            ${THICKNESS_OPTIONS.map(opt => `<option value="${opt.thickness}" data-product="${opt.productName}" data-item-type="${opt.type}">${opt.thickness} (${opt.productName})</option>`).join('')}
                         </select>
                     </div>
                 `;
@@ -420,11 +408,11 @@ function renderImportItems(items) {
             const index = parseInt(this.dataset.index);
             const selectedOption = this.options[this.selectedIndex];
             const productName = selectedOption.getAttribute('data-product');
-            const type = this.dataset.type;
+            const itemType = selectedOption.getAttribute('data-item-type');
             
             if (productName) {
                 selectedVersions[index] = productName;
-                console.log(`Выбран ${type === 'bracket' ? 'кронштейн' : 'лира'}: ${productName}`);
+                console.log(`Выбран: ${productName} (${itemType})`);
             } else {
                 delete selectedVersions[index];
             }
@@ -448,12 +436,9 @@ function loadAndRenderDetails(index, productName, itemQuantity, selectedSize = n
     const details = getDetailsFromTechCard(productName);
     
     // Фильтруем детали - убираем кронштейны и лиры из деталей
-    const bracketNames = BRACKET_THICKNESS.map(b => b.productName);
-    const lyreNames = LYRE_THICKNESS.map(l => l.productName);
+    const allThicknessProducts = THICKNESS_OPTIONS.map(opt => opt.productName);
     const filteredDetails = details.filter(d => {
-        const isBracketOrLyre = bracketNames.some(b => d.name.includes(b)) || 
-                                lyreNames.some(l => d.name.includes(l));
-        return !isBracketOrLyre;
+        return !allThicknessProducts.includes(d.name);
     });
     
     detailsData[index] = filteredDetails.map(d => {
