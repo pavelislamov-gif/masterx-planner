@@ -1988,7 +1988,7 @@ function generateOrderNumber() {
         }
 
         function addExtraTask(orderId, siteKey) {
-    // Открываем модальное окно с полями
+    // Открываем модальное окно
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.style.display = 'block';
@@ -2012,12 +2012,6 @@ function generateOrderNumber() {
         </div>
     `;
     document.body.appendChild(modal);
-    
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            modal.remove();
-        }
-    });
 }
 
 function saveExtraTask(orderId, siteKey) {
@@ -2029,9 +2023,11 @@ function saveExtraTask(orderId, siteKey) {
         return;
     }
     
+    // Закрываем модальное окно
     const modal = document.querySelector('.modal');
     if (modal) modal.remove();
     
+    // Получаем заказ
     const orders = loadOrdersFromStorage();
     const order = orders.find(o => o.id == orderId);
     
@@ -2039,6 +2035,9 @@ function saveExtraTask(orderId, siteKey) {
         alert('Группа не найдена');
         return;
     }
+    
+    // Получаем первый item для контекста
+    const firstItem = order.items[0] || {};
     
     // Получаем существующие задачи для участка
     const storageKey = `tasks_${siteKey}`;
@@ -2048,14 +2047,11 @@ function saveExtraTask(orderId, siteKey) {
         if (saved) existingTasks = JSON.parse(saved);
     } catch(e) { console.error(e); }
     
-    // Создаём ID для дополнительной задачи
-    const extraIndex = existingTasks.filter(t => t.isExtra).length;
-    const taskId = `${order.id}_${siteKey}_extra_${extraIndex}_${Date.now()}`;
+    // Находим максимальный индекс для доп. задач
+    const extraTasksCount = existingTasks.filter(t => t.isExtra).length;
+    const taskId = `${order.id}_${siteKey}_extra_${extraTasksCount}`;
     
-    // Получаем первый item для контекста (RAL, текстура и т.д.)
-    const firstItem = order.items[0] || {};
-    
-    // Создаём НЕАКТИВНУЮ задачу (не добавленную на участок)
+    // Создаём задачу (сразу активную, как обычная)
     const newTask = {
         id: taskId,
         orderId: order.id,
@@ -2077,13 +2073,21 @@ function saveExtraTask(orderId, siteKey) {
         date: new Date().toISOString().split('T')[0],
         isExtra: true,
         isPriority: false,
-        createdAt: new Date().toISOString(),
-        isAddedToSite: false  // ← НЕ ДОБАВЛЕНА НА УЧАСТОК
+        createdAt: new Date().toISOString()
     };
     
-    // Сохраняем задачу (она будет отображаться как + в квадратике)
+    // Добавляем задачу в localStorage участка
     existingTasks.push(newTask);
     localStorage.setItem(storageKey, JSON.stringify(existingTasks));
+    
+    // Обновляем статус заказа
+    if (!order.tasks) order.tasks = {};
+    order.tasks[taskId] = '';
+    
+    // Сохраняем заказ
+    const orderIndex = orders.findIndex(o => o.id == orderId);
+    orders[orderIndex] = order;
+    saveOrdersToStorage(orders);
     
     // Обновляем отображение
     if (typeof renderOrdersList === 'function') {
@@ -2093,7 +2097,7 @@ function saveExtraTask(orderId, siteKey) {
         updateStatistics();
     }
     
-    alert(`✅ Дополнительная задача "${taskName}" (${quantity} шт) создана. Нажмите "+" чтобы добавить на участок.`);
+    alert(`✅ Дополнительная задача "${taskName}" (${quantity} шт) добавлена на участок`);
 }
 
         function deleteOrder(orderId) {
