@@ -867,6 +867,68 @@
             }
         }
 
+        function createGroupOrder() {
+    console.log('🔍 createGroupOrder вызвана');
+    
+    const groupName = document.getElementById('groupNameInput').value.trim();
+    if (!groupName) {
+        alert('Введите название группы');
+        return;
+    }
+    
+    if (!window.tempItemsList || window.tempItemsList.length === 0) {
+        alert('Добавьте хотя бы одно изделие');
+        return;
+    }
+    
+    const orders = loadOrdersFromStorage();
+    const newOrder = {
+        id: Date.now(),
+        groupName: groupName,
+        date: new Date().toISOString().split('T')[0],
+        number: generateOrderNumber(),
+        items: JSON.parse(JSON.stringify(window.tempItemsList)),
+        status: 'active',
+        tasks: {},
+        extraTasks: [],
+        siteFiles: {}
+    };
+    
+    orders.push(newOrder);
+    saveOrdersToStorage(orders);
+    
+    // Создаём задачи для заказа
+    if (typeof createTasksForOrder === 'function') {
+        createTasksForOrder(newOrder);
+    }
+    
+    // Закрываем модальное окно импорта, если открыто
+    const importModal = document.getElementById('importModal');
+    if (importModal) importModal.style.display = 'none';
+    
+    // Обновляем отображение
+    if (typeof renderOrdersList === 'function') {
+        renderOrdersList();
+    }
+    if (typeof updateStatistics === 'function') {
+        updateStatistics();
+    }
+    
+    alert(`✅ Группа "${groupName}" успешно создана!`);
+    
+    // Очищаем временные данные
+    window.tempItemsList = [];
+    document.getElementById('groupNameInput').value = '';
+}
+
+function generateOrderNumber() {
+    const date = new Date();
+    const year = date.getFullYear().toString().slice(-2);
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${day}.${month}.${year}`;
+}
+
         // ============== ОТОБРАЖЕНИЕ СПИСКА ГРУПП ==============
         function renderOrdersList() {
             const ordersList = document.getElementById('ordersList');
