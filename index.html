@@ -1530,7 +1530,7 @@ function generateOrderNumber() {
                                     <th style="padding: 10px; text-align: center;">Прогресс</th>
                                     <th style="padding: 10px; text-align: center;">Время (мин)</th>
                                     <th style="padding: 10px; text-align: center;">Время (часы)</th>
-                                </table>
+                                </tr>
                             </thead>
                             <tbody>
                 `;
@@ -2377,294 +2377,410 @@ function generateOrderNumber() {
             location.reload();
         }
 
+        // ============== РЕДАКТИРОВАНИЕ ГРУППЫ ==============
         function editGroup(orderId) {
-    console.log('✏️ editGroup вызвана, orderId:', orderId);
-    
-    const orders = loadOrdersFromStorage();
-    const order = orders.find(o => o.id == orderId);
-    
-    if (!order) {
-        alert('Группа не найдена');
-        return;
-    }
-    
-    // Открываем модальное окно импорта
-    openImportModal();
-    
-    // Заполняем название группы
-    const groupNameInput = document.getElementById('importGroupName');
-    if (groupNameInput) {
-        groupNameInput.value = order.groupName;
-    }
-    
-    // Очищаем старые данные
-    parsedImportItems = [];
-    selectedVersions = {};
-    detailsData = {};
-    
-    // Конвертируем существующие изделия в формат импорта
-    for (let i = 0; i < order.items.length; i++) {
-        const item = order.items[i];
-        
-        parsedImportItems.push({
-            id: i,
-            originalName: item.product,
-            type: item.isComponent ? 'bracket' : 'product',
-            keyword: item.product.split(' ')[0],
-            size: item.size?.name,
-            quantity: item.size?.quantity,
-            ral: item.ral,
-            texture: item.texture,
-            selectedSize: item.size?.name,
-            selectedVersion: item.product
-        });
-        
-        selectedVersions[i] = item.product;
-        
-        // Сохраняем детали
-        if (item.details && item.details.length > 0) {
-            detailsData[i] = item.details.map(d => ({
-                ...d,
-                quantity: d.quantity,
-                lengthMm: d.lengthMm || 0
-            }));
-        } else {
-            detailsData[i] = [];
+            console.log('✏️ editGroup вызвана, orderId:', orderId);
+            
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            
+            if (!order) {
+                alert('Группа не найдена');
+                return;
+            }
+            
+            // Открываем модальное окно импорта
+            openImportModal();
+            
+            // Заполняем название группы
+            const groupNameInput = document.getElementById('importGroupName');
+            if (groupNameInput) {
+                groupNameInput.value = order.groupName;
+            }
+            
+            // Очищаем старые данные
+            parsedImportItems = [];
+            selectedVersions = {};
+            detailsData = {};
+            
+            // Конвертируем существующие изделия в формат импорта
+            for (let i = 0; i < order.items.length; i++) {
+                const item = order.items[i];
+                
+                parsedImportItems.push({
+                    id: i,
+                    originalName: item.product,
+                    type: item.isComponent ? 'bracket' : 'product',
+                    keyword: item.product.split(' ')[0],
+                    size: item.size?.name,
+                    quantity: item.size?.quantity,
+                    ral: item.ral,
+                    texture: item.texture,
+                    selectedSize: item.size?.name,
+                    selectedVersion: item.product
+                });
+                
+                selectedVersions[i] = item.product;
+                
+                // Сохраняем детали
+                if (item.details && item.details.length > 0) {
+                    detailsData[i] = item.details.map(d => ({
+                        ...d,
+                        quantity: d.quantity,
+                        lengthMm: d.lengthMm || 0
+                    }));
+                } else {
+                    detailsData[i] = [];
+                }
+            }
+            
+            // Перерисовываем интерфейс и загружаем детали
+            renderImportItemsWithData(parsedImportItems);
+            
+            // Показываем блок с найденными изделиями
+            const previewContainer = document.getElementById('importPreviewContainer');
+            if (previewContainer) previewContainer.style.display = 'block';
+            
+            // Меняем кнопку на "Сохранить изменения"
+            const confirmBtn = document.getElementById('confirmImportBtn');
+            if (confirmBtn) {
+                confirmBtn.textContent = '💾 Сохранить изменения';
+                confirmBtn.style.display = 'block';
+                confirmBtn.onclick = function() { saveEditedGroup(orderId); };
+            }
         }
-    }
-    
-    // Перерисовываем интерфейс и загружаем детали
-    renderImportItemsWithData(parsedImportItems);
-    
-    // Показываем блок с найденными изделиями
-    const previewContainer = document.getElementById('importPreviewContainer');
-    if (previewContainer) previewContainer.style.display = 'block';
-    
-    // Меняем кнопку на "Сохранить изменения"
-    const confirmBtn = document.getElementById('confirmImportBtn');
-    if (confirmBtn) {
-        confirmBtn.textContent = '💾 Сохранить изменения';
-        confirmBtn.style.display = 'block';
-        confirmBtn.onclick = function() { saveEditedGroup(orderId); };
-    }
-}
 
-function renderImportItemsWithData(items) {
-    const container = document.getElementById('importItemsList');
-    if (!container) return;
-    
-    const { grouped, sortedKeys } = groupItemsByRal(items);
-    let html = '';
-    
-    for (const ralKey of sortedKeys) {
-        const groupItems = grouped[ralKey];
-        const ralDisplay = ralKey === '?' ? '<span style="color: #dc2626;">не указан (?)</span>' : ralKey;
-        
-        html += `
-            <div style="margin-bottom: 20px;">
-                <div style="background: #f1f5f9; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; font-weight: bold;">
-                    🎨 RAL: ${ralDisplay}
-                </div>
-        `;
-        
-        for (let i = 0; i < groupItems.length; i++) {
-            const item = groupItems[i];
-            const originalIndex = parsedImportItems.findIndex(x => x.id === item.id);
-            const hasSelectedVersion = selectedVersions[originalIndex];
+        function renderImportItemsWithData(items) {
+            const container = document.getElementById('importItemsList');
+            if (!container) return;
             
-            const quantityDisplay = formatValue(item.quantity, 'шт');
+            const { grouped, sortedKeys } = groupItemsByRal(items);
+            let html = '';
             
-            html += `
-                <div class="import-item" data-item-index="${originalIndex}" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
-                        <div style="flex: 1;">
-                            <strong style="font-size: 16px; color: #dc2626;">📦 ${escapeHtml(item.originalName)}</strong>
-                            <div style="display: flex; gap: 15px; margin-top: 8px; flex-wrap: wrap;">
-                                <div>
-                                    <label style="font-size: 11px; color: #f97316;">🔢 Кол-во:</label>
-                                    <input type="number" class="edit-quantity" data-index="${originalIndex}" value="${item.quantity}" min="0" step="1" style="width: 80px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0; font-size: 12px;">
-                                    <span>шт</span>
-                                </div>
-                                <div>
-                                    <label style="font-size: 11px; color: #f97316;">🎨 RAL:</label>
-                                    <input type="text" class="edit-ral" data-index="${originalIndex}" value="${item.ral || ''}" placeholder="?" style="width: 100px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0; font-size: 12px;">
-                                </div>
-                                <div>
-                                    <label style="font-size: 11px; color: #f97316;">🧵 Текстура:</label>
-                                    <input type="text" class="edit-texture" data-index="${originalIndex}" value="${item.texture || ''}" placeholder="?" style="width: 120px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0; font-size: 12px;">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-            `;
-            
-            if (item.type === 'product') {
-                const versions = PRODUCT_VERSIONS[item.keyword] || [item.keyword];
+            for (const ralKey of sortedKeys) {
+                const groupItems = grouped[ralKey];
+                const ralDisplay = ralKey === '?' ? '<span style="color: #dc2626;">не указан (?)</span>' : ralKey;
                 
                 html += `
-                    <div class="form-group" style="margin-top: 10px;">
-                        <label style="font-size: 12px; color: #f97316;">🎯 Версия изделия:</label>
-                        <select class="version-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                            <option value="">-- Выберите версию --</option>
-                            ${versions.map(v => `<option value="${v}" ${hasSelectedVersion === v ? 'selected' : ''}>${v}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin-top: 10px;">
-                        <label style="font-size: 12px; color: #f97316;">📏 Размер изделия:</label>
-                        <select class="size-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;" ${!hasSelectedVersion ? 'disabled' : ''}>
-                            <option value="">-- ${!hasSelectedVersion ? 'Сначала выберите версию' : 'Выберите размер'} --</option>
-                        </select>
-                    </div>
-                    <div class="details-container" id="details-${originalIndex}" style="display: ${hasSelectedVersion ? 'block' : 'none'}; margin-top: 15px; padding-top: 10px; border-top: 1px solid #e2e8f0;"></div>
+                    <div style="margin-bottom: 20px;">
+                        <div style="background: #f1f5f9; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; font-weight: bold;">
+                            🎨 RAL: ${ralDisplay}
+                        </div>
                 `;
-            } else {
-                html += `
-                    <div class="form-group" style="margin-top: 10px;">
-                        <label style="font-size: 12px; color: #f97316;">${item.type === 'bracket' ? '🔧' : '🎸'} Выберите тип по толщине:</label>
-                        <select class="thickness-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                            <option value="">-- Выберите тип --</option>
-                            ${THICKNESS_OPTIONS.map(opt => `<option value="${opt.productName}" data-product="${opt.productName}" data-item-type="${opt.type}" ${hasSelectedVersion === opt.productName ? 'selected' : ''}>${opt.productName}</option>`).join('')}
-                        </select>
-                    </div>
-                `;
+                
+                for (let i = 0; i < groupItems.length; i++) {
+                    const item = groupItems[i];
+                    const originalIndex = parsedImportItems.findIndex(x => x.id === item.id);
+                    const hasSelectedVersion = selectedVersions[originalIndex];
+                    
+                    const quantityDisplay = formatValue(item.quantity, 'шт');
+                    
+                    html += `
+                        <div class="import-item" data-item-index="${originalIndex}" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+                                <div style="flex: 1;">
+                                    <strong style="font-size: 16px; color: #dc2626;">📦 ${escapeHtml(item.originalName)}</strong>
+                                    <div style="display: flex; gap: 15px; margin-top: 8px; flex-wrap: wrap;">
+                                        <div>
+                                            <label style="font-size: 11px; color: #f97316;">🔢 Кол-во:</label>
+                                            <input type="number" class="edit-quantity" data-index="${originalIndex}" value="${item.quantity}" min="0" step="1" style="width: 80px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0; font-size: 12px;">
+                                            <span>шт</span>
+                                        </div>
+                                        <div>
+                                            <label style="font-size: 11px; color: #f97316;">🎨 RAL:</label>
+                                            <input type="text" class="edit-ral" data-index="${originalIndex}" value="${item.ral || ''}" placeholder="?" style="width: 100px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0; font-size: 12px;">
+                                        </div>
+                                        <div>
+                                            <label style="font-size: 11px; color: #f97316;">🧵 Текстура:</label>
+                                            <input type="text" class="edit-texture" data-index="${originalIndex}" value="${item.texture || ''}" placeholder="?" style="width: 120px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0; font-size: 12px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    `;
+                    
+                    if (item.type === 'product') {
+                        const versions = PRODUCT_VERSIONS[item.keyword] || [item.keyword];
+                        
+                        html += `
+                            <div class="form-group" style="margin-top: 10px;">
+                                <label style="font-size: 12px; color: #f97316;">🎯 Версия изделия:</label>
+                                <select class="version-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                    <option value="">-- Выберите версию --</option>
+                                    ${versions.map(v => `<option value="${v}" ${hasSelectedVersion === v ? 'selected' : ''}>${v}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-top: 10px;">
+                                <label style="font-size: 12px; color: #f97316;">📏 Размер изделия:</label>
+                                <select class="size-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;" ${!hasSelectedVersion ? 'disabled' : ''}>
+                                    <option value="">-- ${!hasSelectedVersion ? 'Сначала выберите версию' : 'Выберите размер'} --</option>
+                                </select>
+                            </div>
+                            <div class="details-container" id="details-${originalIndex}" style="display: ${hasSelectedVersion ? 'block' : 'none'}; margin-top: 15px; padding-top: 10px; border-top: 1px solid #e2e8f0;"></div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="form-group" style="margin-top: 10px;">
+                                <label style="font-size: 12px; color: #f97316;">${item.type === 'bracket' ? '🔧' : '🎸'} Выберите тип по толщине:</label>
+                                <select class="thickness-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                    <option value="">-- Выберите тип --</option>
+                                    ${THICKNESS_OPTIONS.map(opt => `<option value="${opt.productName}" data-product="${opt.productName}" data-item-type="${opt.type}" ${hasSelectedVersion === opt.productName ? 'selected' : ''}>${opt.productName}</option>`).join('')}
+                                </select>
+                            </div>
+                        `;
+                    }
+                    
+                    html += `</div>`;
+                }
+                
+                html += `</div>`;
             }
             
-            html += `</div>`;
+            container.innerHTML = html;
+            
+            // ============== ОБРАБОТЧИКИ ДЛЯ РЕДАКТИРОВАНИЯ ==============
+            
+            // 1. Редактирование количества
+            document.querySelectorAll('.edit-quantity').forEach(input => {
+                input.addEventListener('change', function() {
+                    const index = parseInt(this.dataset.index);
+                    const newQuantity = parseInt(this.value) || 0;
+                    if (parsedImportItems[index]) {
+                        parsedImportItems[index].quantity = newQuantity;
+                        console.log(`Количество для ${parsedImportItems[index].originalName} изменено на: ${newQuantity}`);
+                        const productName = selectedVersions[index];
+                        if (productName && parsedImportItems[index].type === 'product') {
+                            loadAndRenderDetails(index, productName, newQuantity, parsedImportItems[index].selectedSize);
+                        }
+                    }
+                });
+            });
+            
+            // 2. Редактирование RAL
+            document.querySelectorAll('.edit-ral').forEach(input => {
+                input.addEventListener('change', function() {
+                    const index = parseInt(this.dataset.index);
+                    const newRal = this.value.trim();
+                    if (parsedImportItems[index]) {
+                        parsedImportItems[index].ral = newRal || null;
+                        console.log(`RAL для ${parsedImportItems[index].originalName} изменён на: ${newRal || '?'}`);
+                    }
+                });
+            });
+            
+            // 3. Редактирование текстуры
+            document.querySelectorAll('.edit-texture').forEach(input => {
+                input.addEventListener('change', function() {
+                    const index = parseInt(this.dataset.index);
+                    const newTexture = this.value.trim();
+                    if (parsedImportItems[index]) {
+                        parsedImportItems[index].texture = newTexture || null;
+                        console.log(`Текстура для ${parsedImportItems[index].originalName} изменена на: ${newTexture || '?'}`);
+                    }
+                });
+            });
+            
+            // 4. Обработчики для выбора версии
+            document.querySelectorAll('.version-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    const index = parseInt(this.dataset.index);
+                    const value = this.value;
+                    const item = parsedImportItems[index];
+                    const sizeSelect = document.querySelector(`.size-select[data-index="${index}"]`);
+                    
+                    if (value && item.type === 'product') {
+                        selectedVersions[index] = value;
+                        const sizes = getSizesForProduct(value);
+                        if (sizeSelect) {
+                            sizeSelect.disabled = false;
+                            sizeSelect.innerHTML = '<option value="">-- Выберите размер --</option>';
+                            sizes.forEach(size => {
+                                const isSelected = (item.selectedSize === size);
+                                sizeSelect.innerHTML += `<option value="${size}" ${isSelected ? 'selected' : ''}>${size}</option>`;
+                            });
+                        }
+                        loadAndRenderDetails(index, value, item.quantity, item.selectedSize);
+                    } else {
+                        delete selectedVersions[index];
+                        if (sizeSelect) {
+                            sizeSelect.disabled = true;
+                            sizeSelect.innerHTML = '<option value="">-- Сначала выберите версию --</option>';
+                        }
+                        const detailsContainer = document.getElementById(`details-${index}`);
+                        if (detailsContainer) detailsContainer.style.display = 'none';
+                    }
+                });
+                
+                // Если уже есть выбранная версия, загружаем размеры и детали
+                if (select.value) {
+                    const index = parseInt(select.dataset.index);
+                    const value = select.value;
+                    const item = parsedImportItems[index];
+                    const sizeSelect = document.querySelector(`.size-select[data-index="${index}"]`);
+                    
+                    if (value && item.type === 'product') {
+                        const sizes = getSizesForProduct(value);
+                        if (sizeSelect) {
+                            sizeSelect.disabled = false;
+                            sizeSelect.innerHTML = '<option value="">-- Выберите размер --</option>';
+                            sizes.forEach(size => {
+                                const isSelected = (item.selectedSize === size);
+                                sizeSelect.innerHTML += `<option value="${size}" ${isSelected ? 'selected' : ''}>${size}</option>`;
+                            });
+                        }
+                        loadAndRenderDetails(index, value, item.quantity, item.selectedSize);
+                    }
+                }
+            });
+            
+            // 5. Обработчики для выбора размера
+            document.querySelectorAll('.size-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    const index = parseInt(this.dataset.index);
+                    const size = this.value;
+                    const productName = selectedVersions[index];
+                    const item = parsedImportItems[index];
+                    
+                    if (size && productName) {
+                        parsedImportItems[index].selectedSize = size;
+                        loadAndRenderDetails(index, productName, item.quantity, size);
+                    }
+                });
+            });
+            
+            // 6. Обработчики для выбора толщины (кронштейны и лиры)
+            document.querySelectorAll('.thickness-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    const index = parseInt(this.dataset.index);
+                    const selectedOption = this.options[this.selectedIndex];
+                    const productName = selectedOption.getAttribute('data-product');
+                    const itemType = selectedOption.getAttribute('data-item-type');
+                    
+                    if (productName) {
+                        selectedVersions[index] = productName;
+                        console.log(`Выбран: ${productName} (${itemType})`);
+                    } else {
+                        delete selectedVersions[index];
+                    }
+                });
+            });
         }
-        
-        html += `</div>`;
-    }
-    
-    container.innerHTML = html;
-    
-    // ============== ОБРАБОТЧИКИ ДЛЯ РЕДАКТИРОВАНИЯ ==============
-    
-    // 1. Редактирование количества
-    document.querySelectorAll('.edit-quantity').forEach(input => {
-        input.addEventListener('change', function() {
-            const index = parseInt(this.dataset.index);
-            const newQuantity = parseInt(this.value) || 0;
-            if (parsedImportItems[index]) {
-                parsedImportItems[index].quantity = newQuantity;
-                console.log(`Количество для ${parsedImportItems[index].originalName} изменено на: ${newQuantity}`);
-                // Обновляем детали с новым количеством
-                const productName = selectedVersions[index];
-                if (productName && parsedImportItems[index].type === 'product') {
-                    loadAndRenderDetails(index, productName, newQuantity, parsedImportItems[index].selectedSize);
+
+        async function saveEditedGroup(orderId) {
+            console.log('💾 saveEditedGroup вызвана, orderId:', orderId);
+            
+            // Проверяем, что все изделия имеют выбранную конфигурацию
+            const missingConfigs = [];
+            for (let i = 0; i < parsedImportItems.length; i++) {
+                if (!selectedVersions[i]) {
+                    missingConfigs.push(parsedImportItems[i].originalName);
                 }
             }
-        });
-    });
-    
-    // 2. Редактирование RAL
-    document.querySelectorAll('.edit-ral').forEach(input => {
-        input.addEventListener('change', function() {
-            const index = parseInt(this.dataset.index);
-            const newRal = this.value.trim();
-            if (parsedImportItems[index]) {
-                parsedImportItems[index].ral = newRal || null;
-                console.log(`RAL для ${parsedImportItems[index].originalName} изменён на: ${newRal || '?'}`);
-            }
-        });
-    });
-    
-    // 3. Редактирование текстуры
-    document.querySelectorAll('.edit-texture').forEach(input => {
-        input.addEventListener('change', function() {
-            const index = parseInt(this.dataset.index);
-            const newTexture = this.value.trim();
-            if (parsedImportItems[index]) {
-                parsedImportItems[index].texture = newTexture || null;
-                console.log(`Текстура для ${parsedImportItems[index].originalName} изменена на: ${newTexture || '?'}`);
-            }
-        });
-    });
-    
-    // 4. Обработчики для выбора версии
-    document.querySelectorAll('.version-select').forEach(select => {
-        select.addEventListener('change', function() {
-            const index = parseInt(this.dataset.index);
-            const value = this.value;
-            const item = parsedImportItems[index];
-            const sizeSelect = document.querySelector(`.size-select[data-index="${index}"]`);
             
-            if (value && item.type === 'product') {
-                selectedVersions[index] = value;
-                const sizes = getSizesForProduct(value);
-                if (sizeSelect) {
-                    sizeSelect.disabled = false;
-                    sizeSelect.innerHTML = '<option value="">-- Выберите размер --</option>';
-                    sizes.forEach(size => {
-                        const isSelected = (item.selectedSize === size);
-                        sizeSelect.innerHTML += `<option value="${size}" ${isSelected ? 'selected' : ''}>${size}</option>`;
+            if (missingConfigs.length > 0) {
+                alert(`Выберите конфигурацию для следующих изделий:\n${missingConfigs.join('\n')}`);
+                return;
+            }
+            
+            const groupNameInput = document.getElementById('importGroupName');
+            const groupName = groupNameInput ? groupNameInput.value.trim() : '';
+            if (!groupName) {
+                alert('Введите название группы');
+                return;
+            }
+            
+            const progressDiv = document.getElementById('importProgress');
+            const confirmBtn = document.getElementById('confirmImportBtn');
+            if (progressDiv) progressDiv.style.display = 'block';
+            if (confirmBtn) confirmBtn.disabled = true;
+            
+            try {
+                // Формируем обновлённый список изделий
+                const updatedItems = [];
+                
+                for (let i = 0; i < parsedImportItems.length; i++) {
+                    const item = parsedImportItems[i];
+                    const selectedValue = selectedVersions[i];
+                    const isComponent = (item.type !== 'product');
+                    
+                    const details = [];
+                    if (detailsData[i]) {
+                        detailsData[i].forEach(detail => {
+                            if (detail.quantity > 0) {
+                                details.push({
+                                    name: detail.name,
+                                    material: detail.material,
+                                    lengthMm: detail.lengthMm || 0,
+                                    quantity: detail.quantity,
+                                    type: detail.type
+                                });
+                            }
+                        });
+                    }
+                    
+                    updatedItems.push({
+                        product: selectedValue,
+                        size: {
+                            name: item.selectedSize || item.size || 'Стандартный',
+                            quantity: item.quantity
+                        },
+                        brackets: [],
+                        lyres: [],
+                        details: details,
+                        ral: item.ral || '',
+                        texture: item.texture || '',
+                        isComponent: isComponent
                     });
                 }
-                loadAndRenderDetails(index, value, item.quantity, item.selectedSize);
-            } else {
-                delete selectedVersions[index];
-                if (sizeSelect) {
-                    sizeSelect.disabled = true;
-                    sizeSelect.innerHTML = '<option value="">-- Сначала выберите версию --</option>';
+                
+                // Обновляем заказ
+                const orders = loadOrdersFromStorage();
+                const orderIndex = orders.findIndex(o => o.id == orderId);
+                
+                if (orderIndex === -1) {
+                    alert('Группа не найдена');
+                    return;
                 }
-                const detailsContainer = document.getElementById(`details-${index}`);
-                if (detailsContainer) detailsContainer.style.display = 'none';
-            }
-        });
-        
-        // Если уже есть выбранная версия, загружаем размеры и детали
-        if (select.value) {
-            const index = parseInt(select.dataset.index);
-            const value = select.value;
-            const item = parsedImportItems[index];
-            const sizeSelect = document.querySelector(`.size-select[data-index="${index}"]`);
-            
-            if (value && item.type === 'product') {
-                const sizes = getSizesForProduct(value);
-                if (sizeSelect) {
-                    sizeSelect.disabled = false;
-                    sizeSelect.innerHTML = '<option value="">-- Выберите размер --</option>';
-                    sizes.forEach(size => {
-                        const isSelected = (item.selectedSize === size);
-                        sizeSelect.innerHTML += `<option value="${size}" ${isSelected ? 'selected' : ''}>${size}</option>`;
-                    });
+                
+                orders[orderIndex] = {
+                    ...orders[orderIndex],
+                    groupName: groupName,
+                    items: updatedItems,
+                    date: new Date().toISOString().split('T')[0]
+                };
+                
+                saveOrdersToStorage(orders);
+                
+                // Пересоздаём задачи
+                if (typeof createTasksForOrder === 'function') {
+                    createTasksForOrder(orders[orderIndex]);
                 }
-                loadAndRenderDetails(index, value, item.quantity, item.selectedSize);
+                
+                closeImportModal();
+                
+                if (typeof renderOrdersList === 'function') {
+                    renderOrdersList();
+                }
+                if (typeof updateStatistics === 'function') {
+                    updateStatistics();
+                }
+                
+                alert(`✅ Группа "${groupName}" успешно обновлена!`);
+                
+                // Восстанавливаем кнопку
+                if (confirmBtn) {
+                    confirmBtn.textContent = '✅ Сформировать группу';
+                    confirmBtn.onclick = confirmImport;
+                }
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Ошибка при обновлении группы: ' + error.message);
+            } finally {
+                if (progressDiv) progressDiv.style.display = 'none';
+                if (confirmBtn) confirmBtn.disabled = false;
             }
         }
-    });
-    
-    // 5. Обработчики для выбора размера
-    document.querySelectorAll('.size-select').forEach(select => {
-        select.addEventListener('change', function() {
-            const index = parseInt(this.dataset.index);
-            const size = this.value;
-            const productName = selectedVersions[index];
-            const item = parsedImportItems[index];
-            
-            if (size && productName) {
-                parsedImportItems[index].selectedSize = size;
-                loadAndRenderDetails(index, productName, item.quantity, size);
-            }
-        });
-    });
-    
-    // 6. Обработчики для выбора толщины (кронштейны и лиры)
-    document.querySelectorAll('.thickness-select').forEach(select => {
-        select.addEventListener('change', function() {
-            const index = parseInt(this.dataset.index);
-            const selectedOption = this.options[this.selectedIndex];
-            const productName = selectedOption.getAttribute('data-product');
-            const itemType = selectedOption.getAttribute('data-item-type');
-            
-            if (productName) {
-                selectedVersions[index] = productName;
-                console.log(`Выбран: ${productName} (${itemType})`);
-            } else {
-                delete selectedVersions[index];
-            }
-        });
-    });
-}
 
         // ============== ИНИЦИАЛИЗАЦИЯ ==============
         async function initMainPage() {
@@ -2875,6 +2991,13 @@ function renderImportItemsWithData(items) {
         initAutoReload();
         
         document.addEventListener('DOMContentLoaded', initMainPage);
+        
+        // Экспорт функций в глобальную область
+        window.openImportModal = openImportModal;
+        window.closeImportModal = closeImportModal;
+        window.analyzeImportFile = analyzeImportFile;
+        window.confirmImport = confirmImport;
+        window.saveEditedGroup = saveEditedGroup;
         
     </script>
 </body>
