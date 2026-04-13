@@ -334,6 +334,7 @@ function loadAndRenderDetails(index, productName, itemQuantity) {
     let profileLengths = {};
     if (window.getProfileLengths) {
         profileLengths = window.getProfileLengths(productName, size);
+        console.log('📏 Длины профилей:', profileLengths);
     }
     
     const details = getDetailsFromTechCard(productName);
@@ -356,8 +357,9 @@ function loadAndRenderDetails(index, productName, itemQuantity) {
             quantity = itemQuantity * baseQty;
         }
         
+        // Для профилей и прутков: длина = длина_из_карты × количество_изделий
         if ((d.type === 'profile' || d.type === 'bar') && profileLengths[d.name]) {
-            lengthMm = profileLengths[d.name];
+            lengthMm = profileLengths[d.name] * itemQuantity;  // ← УМНОЖАЕМ
         }
         
         return {
