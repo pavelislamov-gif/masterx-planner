@@ -296,60 +296,15 @@
                 return;
             }
             
-            const item = order.items[currentExtraTaskItemIndex] || order.items[0] || {};
+            if (!order.draftExtraTasks) order.draftExtraTasks = [];
             
-            // Проверяем, нет ли уже такой задачи
-            const storageKey = `tasks_${siteKey}`;
-            let existingTasks = [];
-            try {
-                const saved = localStorage.getItem(storageKey);
-                if (saved) existingTasks = JSON.parse(saved);
-            } catch(e) { console.error(e); }
-            
-            const alreadyExists = existingTasks.some(t => 
-                t.orderId == orderId && 
-                t.itemIndex == currentExtraTaskItemIndex && 
-                t.operation === taskName
-            );
-            
-            if (alreadyExists) {
-                alert(`⚠️ Задача "${taskName}" уже существует!`);
-                return;
-            }
-            
-            // Создаём задачу и сразу отправляем на участок
-            const extraCount = existingTasks.filter(t => t.isExtra === true).length;
-            const taskId = `${order.id}_${siteKey}_extra_${currentExtraTaskItemIndex}_${extraCount}_${Date.now()}`;
-            
-            const newTask = {
-                id: taskId,
-                orderId: order.id,
-                itemIndex: currentExtraTaskItemIndex,
-                orderNumber: order.number,
-                product: item.product,
-                size: item.size?.name || 'Стандартный',
-                sizeQuantity: item.size?.quantity || 1,
-                totalQuantity: quantity,
-                completedQuantity: 0,
-                operation: taskName,
-                detail: '',
-                thickness: '',
-                ral: item.ral || '',
-                texture: item.texture || '',
-                index: existingTasks.length,
-                status: 'pending',
-                executors: [],
-                date: new Date().toISOString().split('T')[0],
-                isExtra: true,
-                isPriority: false,
-                createdAt: new Date().toISOString()
-            };
-            
-            existingTasks.push(newTask);
-            localStorage.setItem(storageKey, JSON.stringify(existingTasks));
-            
-            if (!order.tasks) order.tasks = {};
-            order.tasks[taskId] = 'pending';
+            order.draftExtraTasks.push({
+                id: Date.now(),
+                title: taskName,
+                quantity: quantity,
+                site: siteKey,
+                itemIndex: currentExtraTaskItemIndex
+            });
             
             const orderIndex = orders.findIndex(o => o.id == orderId);
             orders[orderIndex] = order;
@@ -358,7 +313,7 @@
             renderOrdersList();
             updateStatistics();
             
-            alert(`✅ Дополнительная задача "${taskName}" (${quantity} шт) добавлена на участок`);
+            alert(`✅ Задача "${taskName}" создана! Нажмите + для отправки.`);
         }
         // ============== РАБОТА С ФАЙЛАМИ ==============
         function addSiteFile(orderId, siteKey) {
@@ -486,27 +441,8 @@
 
         // ============== ПЕРЕКЛЮЧЕНИЕ СТАТУСА ==============
         function toggleSquareStatus(taskId) {
-            const square = document.querySelector(`.square-status[data-task-id="${taskId}"]`);
-            if (!square) return;
-            let newStatus = '', newColor = '';
-            if (square.classList.contains('orange')) { newStatus = 'completed'; newColor = 'green'; }
-            else if (square.classList.contains('green')) { newStatus = 'pending'; newColor = ''; }
-            else { newStatus = 'in_progress'; newColor = 'orange'; }
-            const parts = taskId.split('_');
-            const orderId = parseInt(parts[0]);
-            const siteKey = parts[1];
-            const orders = loadOrdersFromStorage();
-            const order = orders.find(o => o.id === orderId);
-            if (order) {
-                if (!order.tasks) order.tasks = {};
-                order.tasks[taskId] = newColor;
-                saveOrdersToStorage(orders);
-                const storageKey = `tasks_${siteKey}`;
-                const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
-                const taskIndex = tasks.findIndex(t => t.id === taskId);
-                if (taskIndex !== -1) { tasks[taskIndex].status = newStatus; localStorage.setItem(storageKey, JSON.stringify(tasks)); }
-                renderOrdersList(); updateStatistics();
-            }
+            // Функция отключена - статус задачи меняется только на участке
+            return;
         }
 
         function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName, isPriority = false) {
