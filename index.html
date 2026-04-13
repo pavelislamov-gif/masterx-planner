@@ -614,7 +614,7 @@
             const orders = loadOrdersFromStorage();
             const newOrder = {
                 id: Date.now(), groupName: groupName, date: new Date().toISOString().split('T')[0], number: generateOrderNumber(),
-                items: JSON.parse(JSON.stringify(window.tempItemsList)), status: 'active', tasks: {}, extraTasks: [], siteFiles: {}
+                items: JSON.parse(JSON.stringify(window.tempItemsList)), status: 'active', tasks: {}, extraTasks: [], draftExtraTasks: [], siteFiles: {}
             };
             orders.push(newOrder);
             saveOrdersToStorage(orders);
