@@ -1002,6 +1002,7 @@
         window.addEventListener('storage', function(e) { if (e.key === 'masterx_orders' || (e.key && e.key.startsWith('tasks_'))) onDataChanged(); });
         function initAutoReload() { startAutoReloadTimer(); trackUserActivity(); }
         initAutoReload();
+        }
 
         document.addEventListener('DOMContentLoaded', initMainPage);
 
