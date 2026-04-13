@@ -691,7 +691,7 @@
             <div class="site-card-content">
                 ${operationsHtml}
                 <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <button class="btn-add-extra" style="flex: 1;" onclick="event.stopPropagation(); addExtraTask(${order.id}, '${siteKey}')">➕ Доп. задача</button>
+                    <button class="btn-add-extra" style="flex: 1;" onclick="event.stopPropagation(); addExtraTaskWithIndex(${order.id}, '${siteKey}', ${itemIndex})">➕ Доп. задача</button>
                     <button class="btn-file" style="flex: 1;" onclick="event.stopPropagation(); addSiteFile(${order.id}, '${siteKey}')">📎 Добавить файл</button>
                 </div>
                 ${filesIndicatorHtml}
