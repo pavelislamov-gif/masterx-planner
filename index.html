@@ -609,57 +609,62 @@
 
     // ============== ДОПОЛНИТЕЛЬНЫЕ ЗАДАЧИ (ДОБАВЛЕННЫЕ ВРУЧНУЮ) ==============
     if (order.extraTasks && order.extraTasks.length > 0) {
-        const extraTasksForSite = order.extraTasks.filter(t => t.site === siteKey);
-        for (let e = 0; e < extraTasksForSite.length; e++) {
-            const extraTask = extraTasksForSite[e];
-            const taskId = `${order.id}_${siteKey}_extra_${e}`;
-            
-            let squareClass = '';
-            let isAdded = false;
-            
-            if (order.tasks && order.tasks[taskId]) {
-                const taskStatus = order.tasks[taskId];
-                if (taskStatus === 'green') {
-                    squareClass = 'green';
-                    isAdded = true;
-                    completedCount++;
-                } else if (taskStatus === 'orange') {
-                    squareClass = 'orange';
-                    isAdded = true;
-                } else if (taskStatus === 'pending' || taskStatus === '') {
-                    isAdded = true;
-                }
+    const extraTasksForSite = order.extraTasks.filter(t => t.site === siteKey);
+    for (let e = 0; e < extraTasksForSite.length; e++) {
+        const extraTask = extraTasksForSite[e];
+        const taskId = `${order.id}_${siteKey}_extra_${e}`;
+        
+        // Проверяем, добавлена ли задача на участок
+        const existingTask = tasksFromStorage.find(t => t.id === taskId);
+        const isAddedToSite = existingTask && existingTask.isAddedToSite;
+        
+        let squareClass = '';
+        let isAdded = false;
+        
+        if (order.tasks && order.tasks[taskId]) {
+            const taskStatus = order.tasks[taskId];
+            if (taskStatus === 'green') {
+                squareClass = 'green';
+                isAdded = true;
+                completedCount++;
+            } else if (taskStatus === 'orange') {
+                squareClass = 'orange';
+                isAdded = true;
+            } else if (taskStatus === 'pending' || taskStatus === '') {
+                isAdded = true;
             }
-            
-            const buttonIcon = isAdded ? '✓' : '+';
-            const buttonClass = isAdded ? 'added' : '';
-            
-            operationsHtml += `
-                <div class="operation-item">
-                    <div class="operation-info">
-                        <div class="operation-name">✨ ${escapeHtml(extraTask.title)} (доп.)</div>
-                        <div class="operation-plan">📋 План: ${extraTask.quantity || 1} шт</div>
+        }
+        
+        // Если задача не добавлена на участок, показываем только кнопку +
+        const buttonIcon = (isAddedToSite || isAdded) ? '✓' : '+';
+        const buttonClass = (isAddedToSite || isAdded) ? 'added' : '';
+        
+        operationsHtml += `
+            <div class="operation-item">
+                <div class="operation-info">
+                    <div class="operation-name">✨ ${escapeHtml(extraTask.title)} (доп.)</div>
+                    <div class="operation-plan">📋 План: ${extraTask.quantity || 1} шт</div>
+                </div>
+                <div class="operation-controls">
+                    <div class="square-status ${squareClass}" 
+                         data-task-id="${taskId}"
+                         onclick="event.stopPropagation(); toggleSquareStatus('${taskId}')">
                     </div>
-                    <div class="operation-controls">
-                        <div class="square-status ${squareClass}" 
-                             data-task-id="${taskId}"
-                             onclick="event.stopPropagation(); toggleSquareStatus('${taskId}')">
-                        </div>
-                        <div class="action-buttons">
-                            <button class="action-btn btn-add ${buttonClass}" 
-                                    onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${e}, '${escapeHtml(extraTask.title)}', false)">
-                                ${buttonIcon}
-                            </button>
-                            <button class="action-btn btn-priority" 
-                                    onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${e}, '${escapeHtml(extraTask.title)}', true)">
-                                🔴
-                            </button>
-                        </div>
+                    <div class="action-buttons">
+                        <button class="action-btn btn-add ${buttonClass}" 
+                                onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', 0, ${e}, '${escapeHtml(extraTask.title)}', false)">
+                            ${buttonIcon}
+                        </button>
+                        <button class="action-btn btn-priority" 
+                                onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', 0, ${e}, '${escapeHtml(extraTask.title)}', true)">
+                            🔴
+                        </button>
                     </div>
                 </div>
-            `;
-        }
+            </div>
+        `;
     }
+}
 
     // Если нет ни одной операции
     if (!operationsHtml) {
@@ -817,28 +822,29 @@
             }
 
             const newTask = {
-                id: taskId,
-                orderId: order.id,
-                itemIndex: itemIndex,
-                orderNumber: order.number,
-                product: item.product,
-                size: item.size?.name || 'Стандартный',
-                sizeQuantity: item.size?.quantity || 1,
-                totalQuantity: plannedQuantity,
-                completedQuantity: 0,
-                operation: operationName,
-                detail: detailName,
-                thickness: thickness,
-                ral: item.ral || '',
-                texture: item.texture || '',
-                index: opIndex,
-                status: 'pending',
-                executors: [],
-                date: new Date().toISOString().split('T')[0],
-                isExtra: false,
-                isPriority: isPriority,
-                createdAt: new Date().toISOString()
-            };
+    id: taskId,
+    orderId: order.id,
+    itemIndex: itemIndex,
+    orderNumber: order.number,
+    product: item.product,
+    size: item.size?.name || 'Стандартный',
+    sizeQuantity: item.size?.quantity || 1,
+    totalQuantity: plannedQuantity,
+    completedQuantity: 0,
+    operation: operationName,
+    detail: detailName,
+    thickness: thickness,
+    ral: item.ral || '',
+    texture: item.texture || '',
+    index: opIndex,
+    status: 'pending',
+    executors: [],
+    date: new Date().toISOString().split('T')[0],
+    isExtra: isExtra || false,  // ← добавляем
+    isPriority: isPriority,
+    createdAt: new Date().toISOString(),
+    isAddedToSite: true  // ← при нажатии на + или 🔴, задача добавляется на участок
+};
 
             existingTasks.push(newTask);
             localStorage.setItem(storageKey, JSON.stringify(existingTasks));
@@ -2023,11 +2029,9 @@ function saveExtraTask(orderId, siteKey) {
         return;
     }
     
-    // Закрываем модальное окно
     const modal = document.querySelector('.modal');
     if (modal) modal.remove();
     
-    // Получаем заказ
     const orders = loadOrdersFromStorage();
     const order = orders.find(o => o.id == orderId);
     
@@ -2046,47 +2050,42 @@ function saveExtraTask(orderId, siteKey) {
     
     // Создаём ID для дополнительной задачи
     const extraIndex = existingTasks.filter(t => t.isExtra).length;
-    const taskId = `${orderId}_${siteKey}_extra_${extraIndex}_${Date.now()}`;
+    const taskId = `${order.id}_${siteKey}_extra_${extraIndex}_${Date.now()}`;
     
-    // Создаём новую задачу
+    // Получаем первый item для контекста (RAL, текстура и т.д.)
+    const firstItem = order.items[0] || {};
+    
+    // Создаём НЕАКТИВНУЮ задачу (не добавленную на участок)
     const newTask = {
         id: taskId,
         orderId: order.id,
         itemIndex: 0,
         orderNumber: order.number,
-        product: order.items[0]?.product || 'Доп. задача',
-        size: order.items[0]?.size?.name || 'Стандартный',
-        sizeQuantity: order.items[0]?.size?.quantity || 1,
+        product: firstItem.product || 'Доп. задача',
+        size: firstItem.size?.name || 'Стандартный',
+        sizeQuantity: firstItem.size?.quantity || 1,
         totalQuantity: quantity,
         completedQuantity: 0,
         operation: taskName,
         detail: '',
         thickness: '',
-        ral: order.items[0]?.ral || '',
-        texture: order.items[0]?.texture || '',
+        ral: firstItem.ral || '',
+        texture: firstItem.texture || '',
         index: existingTasks.length,
         status: 'pending',
         executors: [],
         date: new Date().toISOString().split('T')[0],
         isExtra: true,
         isPriority: false,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        isAddedToSite: false  // ← НЕ ДОБАВЛЕНА НА УЧАСТОК
     };
     
-    // Сохраняем задачу
+    // Сохраняем задачу (она будет отображаться как + в квадратике)
     existingTasks.push(newTask);
     localStorage.setItem(storageKey, JSON.stringify(existingTasks));
     
-    // Обновляем статус заказа
-    if (!order.tasks) order.tasks = {};
-    order.tasks[taskId] = '';
-    
-    // Сохраняем заказ
-    const orderIndex = orders.findIndex(o => o.id == orderId);
-    orders[orderIndex] = order;
-    saveOrdersToStorage(orders);
-    
-    // Обновляем отображение на главной странице
+    // Обновляем отображение
     if (typeof renderOrdersList === 'function') {
         renderOrdersList();
     }
@@ -2094,7 +2093,7 @@ function saveExtraTask(orderId, siteKey) {
         updateStatistics();
     }
     
-    alert(`✅ Дополнительная задача "${taskName}" (${quantity} шт) добавлена на участок`);
+    alert(`✅ Дополнительная задача "${taskName}" (${quantity} шт) создана. Нажмите "+" чтобы добавить на участок.`);
 }
 
         function deleteOrder(orderId) {
