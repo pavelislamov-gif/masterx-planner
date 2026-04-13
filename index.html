@@ -607,19 +607,15 @@
         }
     }
 
-    // ============== ДОПОЛНИТЕЛЬНЫЕ ЗАДАЧИ (ДОБАВЛЕННЫЕ ВРУЧНУЮ) ==============
-    if (order.extraTasks && order.extraTasks.length > 0) {
-    const extraTasksForSite = order.extraTasks.filter(t => t.site === siteKey);
-    for (let e = 0; e < extraTasksForSite.length; e++) {
-        const extraTask = extraTasksForSite[e];
-        const taskId = `${order.id}_${siteKey}_extra_${e}`;
-        
-        // Проверяем, добавлена ли задача на участок
-        const existingTask = tasksFromStorage.find(t => t.id === taskId);
-        const isAddedToSite = existingTask && existingTask.isAddedToSite;
+    // ============== ДОПОЛНИТЕЛЬНЫЕ ЗАДАЧИ (из tasksFromStorage) ==============
+    const extraTasksFromStorage = tasksFromStorage.filter(t => t.isExtra === true && t.orderId == order.id);
+    for (let e = 0; e < extraTasksFromStorage.length; e++) {
+        const extraTask = extraTasksFromStorage[e];
+        const taskId = extraTask.id;
         
         let squareClass = '';
         let isAdded = false;
+        let plannedQuantity = extraTask.totalQuantity || 1;
         
         if (order.tasks && order.tasks[taskId]) {
             const taskStatus = order.tasks[taskId];
@@ -635,15 +631,14 @@
             }
         }
         
-        // Если задача не добавлена на участок, показываем только кнопку +
-        const buttonIcon = (isAddedToSite || isAdded) ? '✓' : '+';
-        const buttonClass = (isAddedToSite || isAdded) ? 'added' : '';
+        const buttonIcon = isAdded ? '✓' : '+';
+        const buttonClass = isAdded ? 'added' : '';
         
         operationsHtml += `
             <div class="operation-item">
                 <div class="operation-info">
-                    <div class="operation-name">✨ ${escapeHtml(extraTask.title)} (доп.)</div>
-                    <div class="operation-plan">📋 План: ${extraTask.quantity || 1} шт</div>
+                    <div class="operation-name">✨ ${escapeHtml(extraTask.operation)} (доп.)</div>
+                    <div class="operation-plan">📋 План: ${plannedQuantity} шт</div>
                 </div>
                 <div class="operation-controls">
                     <div class="square-status ${squareClass}" 
@@ -652,11 +647,11 @@
                     </div>
                     <div class="action-buttons">
                         <button class="action-btn btn-add ${buttonClass}" 
-                                onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', 0, ${e}, '${escapeHtml(extraTask.title)}', false)">
+                                onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', 0, ${e}, '${escapeHtml(extraTask.operation)}', false)">
                             ${buttonIcon}
                         </button>
                         <button class="action-btn btn-priority" 
-                                onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', 0, ${e}, '${escapeHtml(extraTask.title)}', true)">
+                                onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', 0, ${e}, '${escapeHtml(extraTask.operation)}', true)">
                             🔴
                         </button>
                     </div>
@@ -664,14 +659,13 @@
             </div>
         `;
     }
-}
 
     // Если нет ни одной операции
     if (!operationsHtml) {
         return null;
     }
 
-    const totalOperations = (operationsWithDetails?.length || 0) + (order.extraTasks?.filter(t => t.site === siteKey).length || 0);
+    const totalOperations = (operationsWithDetails?.length || 0) + extraTasksFromStorage.length;
 
     const files = order.siteFiles?.[siteKey] || [];
     const hasFiles = files.length > 0;
