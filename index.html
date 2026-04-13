@@ -298,7 +298,7 @@
             
             const item = order.items[currentExtraTaskItemIndex] || order.items[0] || {};
             
-            // Проверяем дубликат
+            // Проверяем, нет ли уже такой задачи
             const storageKey = `tasks_${siteKey}`;
             let existingTasks = [];
             try {
