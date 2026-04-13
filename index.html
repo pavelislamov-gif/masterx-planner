@@ -299,52 +299,45 @@
     const item = order.items[currentExtraTaskItemIndex] || order.items[0] || {};
     
     // ============== СОЗДАЁМ ЗАДАЧУ В tasks_${siteKey} ==============
-    const storageKey = `tasks_${siteKey}`;
-    let existingTasks = [];
-    try {
-        const saved = localStorage.getItem(storageKey);
-        if (saved) existingTasks = JSON.parse(saved);
-    } catch(e) { console.error(e); }
+    function saveExtraTask(orderId, siteKey) {
+    const taskName = document.getElementById('extraTaskName')?.value.trim();
+    const quantity = parseInt(document.getElementById('extraTaskQuantity')?.value) || 1;
     
-    const extraTasksCount = existingTasks.filter(t => t.isExtra).length;
-    const taskId = `${order.id}_${siteKey}_extra_${extraTasksCount}_${Date.now()}`;
-    
-    const newTask = {
-        id: taskId,
-        orderId: order.id,
-        itemIndex: currentExtraTaskItemIndex,
-        orderNumber: order.number,
-        product: item.product || 'Доп. задача',
-        size: item.size?.name || 'Стандартный',
-        sizeQuantity: item.size?.quantity || 1,
-        totalQuantity: quantity,
-        completedQuantity: 0,
-        operation: taskName,
-        detail: '',
-        thickness: '',
-        ral: item.ral || '',
-        texture: item.texture || '',
-        index: existingTasks.length,
-        status: 'pending',
-        executors: [],
-        date: new Date().toISOString().split('T')[0],
-        isExtra: true,
-        isPriority: false,
-        createdAt: new Date().toISOString()
-    };
-    
-    existingTasks.push(newTask);
-    localStorage.setItem(storageKey, JSON.stringify(existingTasks));
-    
-    // ============== ОБНОВЛЯЕМ order.tasks ==============
-    if (!order.tasks) order.tasks = {};
-    order.tasks[taskId] = '';
-    
-    // ============== УДАЛЯЕМ ИЗ order.extraTasks (чтобы не дублировать) ==============
-    // (опционально: можно оставить для совместимости, но лучше удалить)
-    if (order.extraTasks) {
-        order.extraTasks = order.extraTasks.filter(t => t.title !== taskName || t.site !== siteKey);
+    if (!taskName) {
+        alert('Введите название операции');
+        return;
     }
+    
+    const modal = document.querySelector('.modal');
+    if (modal) modal.remove();
+    
+    const orders = loadOrdersFromStorage();
+    const order = orders.find(o => o.id == orderId);
+    
+    if (!order) {
+        alert('Группа не найдена');
+        return;
+    }
+    
+    const item = order.items[currentExtraTaskItemIndex] || order.items[0] || {};
+    
+    // ============== СОХРАНЯЕМ ТОЛЬКО КАК ЧЕРНОВИК ==============
+    if (!order.extraTasks) order.extraTasks = [];
+    
+    const exists = order.extraTasks.some(t => t.title === taskName && t.site === siteKey && t.itemIndex === currentExtraTaskItemIndex);
+    if (exists) {
+        alert(`⚠️ Задача "${taskName}" уже создана!`);
+        return;
+    }
+    
+    order.extraTasks.push({
+        id: Date.now(),
+        title: taskName,
+        quantity: quantity,
+        site: siteKey,
+        itemIndex: currentExtraTaskItemIndex,
+        createdAt: new Date().toISOString()
+    });
     
     const orderIndex = orders.findIndex(o => o.id == orderId);
     orders[orderIndex] = order;
@@ -353,7 +346,7 @@
     renderOrdersList();
     updateStatistics();
     
-    alert(`✅ Дополнительная задача "${taskName}" (${quantity} шт) добавлена на участок`);
+    alert(`✅ Черновик задачи "${taskName}" создан! Нажмите + для отправки на участок.`);
 }
 
         // ============== РАБОТА С ФАЙЛАМИ ==============
