@@ -870,7 +870,23 @@
         function createGroupOrder() {
     console.log('🔍 createGroupOrder вызвана');
     
-    const groupName = document.getElementById('groupNameInput').value.trim();
+    // Пробуем получить название группы из разных мест
+    let groupName = '';
+    
+    // Сначала пробуем из поля импорта
+    const importGroupName = document.getElementById('importGroupName');
+    if (importGroupName && importGroupName.value) {
+        groupName = importGroupName.value.trim();
+    }
+    
+    // Если нет, пробуем из старого поля (на всякий случай)
+    if (!groupName) {
+        const oldGroupName = document.getElementById('groupNameInput');
+        if (oldGroupName && oldGroupName.value) {
+            groupName = oldGroupName.value.trim();
+        }
+    }
+    
     if (!groupName) {
         alert('Введите название группы');
         return;
@@ -902,7 +918,7 @@
         createTasksForOrder(newOrder);
     }
     
-    // Закрываем модальное окно импорта, если открыто
+    // Закрываем модальное окно импорта
     const importModal = document.getElementById('importModal');
     if (importModal) importModal.style.display = 'none';
     
@@ -918,7 +934,6 @@
     
     // Очищаем временные данные
     window.tempItemsList = [];
-    document.getElementById('groupNameInput').value = '';
 }
 
 function generateOrderNumber() {
