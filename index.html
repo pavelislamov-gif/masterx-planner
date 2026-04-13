@@ -91,7 +91,7 @@
     <script src="js/import-from-1c.js"></script>
 
     <script>
-        // ============== ОСТАВШИЕСЯ ФУНКЦИИ ==============
+        // ============== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==============
         let productsList = [];
         let taskOperationsData = {};
         const MAIN_STORAGE_KEY = 'main_open_cards';
@@ -104,25 +104,152 @@
             'polimerniy': '🎨 Полимерный участок'
         };
 
-        // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ОТКРЫТЫХ КАРТОЧЕК ==============
-        function saveMainOpenCardsState() { const openCards = []; document.querySelectorAll('.order-card').forEach(card => { const content = card.querySelector('.order-content'); if (content && content.style.display !== 'none') { openCards.push(card.dataset.orderId); } }); localStorage.setItem(MAIN_STORAGE_KEY, JSON.stringify(openCards)); }
-        function restoreMainOpenCardsState() { const savedOpenCards = localStorage.getItem(MAIN_STORAGE_KEY); if (!savedOpenCards) return; const openCardsIds = JSON.parse(savedOpenCards); openCardsIds.forEach(orderId => { const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`); if (card) { const content = card.querySelector('.order-content'); if (content) content.style.display = 'block'; } }); }
-        function saveMainOpenItemsState() { const openItems = []; document.querySelectorAll('.order-card').forEach(card => { const orderId = card.dataset.orderId; card.querySelectorAll('.item-content').forEach((itemContent, idx) => { if (itemContent.style.display !== 'none') { openItems.push({ orderId, itemIndex: idx }); } }); }); localStorage.setItem(MAIN_ITEMS_STORAGE_KEY, JSON.stringify(openItems)); }
-        function restoreMainOpenItemsState() { const savedOpenItems = localStorage.getItem(MAIN_ITEMS_STORAGE_KEY); if (!savedOpenItems) return; const openItemsIds = JSON.parse(savedOpenItems); openItemsIds.forEach(({ orderId, itemIndex }) => { const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`); if (card) { const itemHeader = card.querySelectorAll('.item-header')[itemIndex]; const itemContent = card.querySelectorAll('.item-content')[itemIndex]; if (itemHeader && itemContent) itemContent.style.display = 'block'; } }); }
+        // ============== СОХРАНЕНИЕ СОСТОЯНИЯ ==============
+        function saveMainOpenCardsState() {
+            const openCards = [];
+            document.querySelectorAll('.order-card').forEach(card => {
+                const content = card.querySelector('.order-content');
+                if (content && content.style.display !== 'none') openCards.push(card.dataset.orderId);
+            });
+            localStorage.setItem(MAIN_STORAGE_KEY, JSON.stringify(openCards));
+        }
 
-        function getGroupStatus(order) { if (!order.tasks || Object.keys(order.tasks).length === 0) return 'gray'; let hasInProgress = false; let allCompleted = true; Object.values(order.tasks).forEach(status => { if (status === 'in_progress' || status === 'orange') { hasInProgress = true; allCompleted = false; } if (status === 'pending' || status === '') { allCompleted = false; } if (status !== 'completed' && status !== 'green') { allCompleted = false; } }); if (allCompleted && Object.keys(order.tasks).length > 0) return 'green'; if (hasInProgress) return 'orange'; return 'gray'; }
+        function restoreMainOpenCardsState() {
+            const saved = localStorage.getItem(MAIN_STORAGE_KEY);
+            if (!saved) return;
+            JSON.parse(saved).forEach(orderId => {
+                const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
+                if (card) {
+                    const content = card.querySelector('.order-content');
+                    if (content) content.style.display = 'block';
+                }
+            });
+        }
 
-        async function loadTaskOperations() { try { const response = await fetch('data/taskOperations.json?_=' + Date.now()); if (response.ok) { const data = await response.json(); taskOperationsData = data.operations || {}; window.taskOperationsData = taskOperationsData; console.log('✅ Загружены операции из taskOperations.json'); } else { console.warn('taskOperations.json не найден'); taskOperationsData = {}; } } catch(e) { console.error('Ошибка загрузки taskOperations.json:', e); taskOperationsData = {}; } }
+        function saveMainOpenItemsState() {
+            const openItems = [];
+            document.querySelectorAll('.order-card').forEach(card => {
+                const orderId = card.dataset.orderId;
+                card.querySelectorAll('.item-content').forEach((itemContent, idx) => {
+                    if (itemContent.style.display !== 'none') openItems.push({ orderId, itemIndex: idx });
+                });
+            });
+            localStorage.setItem(MAIN_ITEMS_STORAGE_KEY, JSON.stringify(openItems));
+        }
 
-        function normalizeDetailName(name) { if (!name) return ''; return String(name).toLowerCase().replace(/\d+(?:[.,]\d+)?(?:-?\d+)?\s*мм/gi, '').replace(/aisi/gi, '').replace(/сталь/gi, '').replace(/алюминий/gi, '').replace(/нержавейка/gi, '').replace(/пвх/gi, '').replace(/поликарбонат/gi, '').replace(/\s+/g, ' ').trim(); }
-        
-        function getDetailQuantity(item, operationDetailName) { if (!operationDetailName || !item?.details) return 0; const normalizedOp = normalizeDetailName(operationDetailName); for (const detail of item.details) { const normalizedDetail = normalizeDetailName(detail.name); if (normalizedDetail === normalizedOp) return detail.quantity; } for (const detail of item.details) { const normalizedDetail = normalizeDetailName(detail.name); if (normalizedOp.includes(normalizedDetail) || normalizedDetail.includes(normalizedOp)) return detail.quantity; } return 0; }
-        
-        function updateTaskQuantitiesFromDetails(orderId) { const orders = loadOrdersFromStorage(); const order = orders.find(o => o.id == orderId); if (!order || !order.items) return false; const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy']; let anyUpdated = false; order.items.forEach((item, itemIndex) => { sites.forEach(siteKey => { const storageKey = `tasks_${siteKey}`; const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]'); let siteUpdated = false; tasks.forEach(task => { if (task.orderId == orderId && task.itemIndex == itemIndex && task.detail) { const newQuantity = getDetailQuantity(item, task.detail); if (newQuantity > 0 && newQuantity !== task.totalQuantity) { task.totalQuantity = newQuantity; siteUpdated = true; anyUpdated = true; } } }); if (siteUpdated) localStorage.setItem(storageKey, JSON.stringify(tasks)); }); }); if (anyUpdated) { renderOrdersList(); updateStatistics(); } return anyUpdated; }
+        function restoreMainOpenItemsState() {
+            const saved = localStorage.getItem(MAIN_ITEMS_STORAGE_KEY);
+            if (!saved) return;
+            JSON.parse(saved).forEach(({ orderId, itemIndex }) => {
+                const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
+                if (card) {
+                    const itemHeader = card.querySelectorAll('.item-header')[itemIndex];
+                    const itemContent = card.querySelectorAll('.item-content')[itemIndex];
+                    if (itemHeader && itemContent) itemContent.style.display = 'block';
+                }
+            });
+        }
 
-        function getOperationNamesWithDetails(productName, siteKey) { const siteColumnMap = { 'tokarniy': 'токарно-фрезерный', 'frezerniy': 'фрезерный', 'slesarniy': 'слесарный', 'lazerno': 'лазерно-гибочный', 'polimerniy': 'полимерный' }; const siteColumn = siteColumnMap[siteKey]; if (!siteColumn) return []; let productOps = taskOperationsData[productName]; if (!productOps) { const normalizedInput = productName.toLowerCase(); for (const [key, value] of Object.entries(taskOperationsData)) { if (key.toLowerCase() === normalizedInput) { productOps = value; console.log(`✅ Найдено совпадение: "${key}" для "${productName}"`); break; } } } if (productOps && productOps[siteColumn]) return productOps[siteColumn]; return []; }
+        // ============== СТАТУС ГРУППЫ ==============
+        function getGroupStatus(order) {
+            if (!order.tasks || Object.keys(order.tasks).length === 0) return 'gray';
+            let hasInProgress = false, allCompleted = true;
+            Object.values(order.tasks).forEach(status => {
+                if (status === 'in_progress' || status === 'orange') { hasInProgress = true; allCompleted = false; }
+                if (status === 'pending' || status === '') allCompleted = false;
+                if (status !== 'completed' && status !== 'green') allCompleted = false;
+            });
+            if (allCompleted && Object.keys(order.tasks).length > 0) return 'green';
+            if (hasInProgress) return 'orange';
+            return 'gray';
+        }
 
-        function escapeHtml(str) { if (!str) return ''; return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+        // ============== ЗАГРУЗКА ОПЕРАЦИЙ ==============
+        async function loadTaskOperations() {
+            try {
+                const response = await fetch('data/taskOperations.json?_=' + Date.now());
+                if (response.ok) {
+                    const data = await response.json();
+                    taskOperationsData = data.operations || {};
+                    window.taskOperationsData = taskOperationsData;
+                    console.log('✅ Загружены операции из taskOperations.json');
+                } else {
+                    console.warn('taskOperations.json не найден');
+                    taskOperationsData = {};
+                }
+            } catch(e) {
+                console.error('Ошибка загрузки taskOperations.json:', e);
+                taskOperationsData = {};
+            }
+        }
+
+        // ============== ВСПОМОГАТЕЛЬНЫЕ ==============
+        function normalizeDetailName(name) {
+            if (!name) return '';
+            return String(name).toLowerCase().replace(/\d+(?:[.,]\d+)?(?:-?\d+)?\s*мм/gi, '').replace(/aisi/gi, '').replace(/сталь/gi, '').replace(/алюминий/gi, '').replace(/нержавейка/gi, '').replace(/пвх/gi, '').replace(/поликарбонат/gi, '').replace(/\s+/g, ' ').trim();
+        }
+
+        function getDetailQuantity(item, operationDetailName) {
+            if (!operationDetailName || !item?.details) return 0;
+            const normalizedOp = normalizeDetailName(operationDetailName);
+            for (const detail of item.details) {
+                if (normalizeDetailName(detail.name) === normalizedOp) return detail.quantity;
+            }
+            for (const detail of item.details) {
+                if (normalizedOp.includes(normalizeDetailName(detail.name))) return detail.quantity;
+            }
+            return 0;
+        }
+
+        function updateTaskQuantitiesFromDetails(orderId) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order || !order.items) return false;
+            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+            let anyUpdated = false;
+            order.items.forEach((item, itemIndex) => {
+                sites.forEach(siteKey => {
+                    const storageKey = `tasks_${siteKey}`;
+                    const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                    let siteUpdated = false;
+                    tasks.forEach(task => {
+                        if (task.orderId == orderId && task.itemIndex == itemIndex && task.detail) {
+                            const newQuantity = getDetailQuantity(item, task.detail);
+                            if (newQuantity > 0 && newQuantity !== task.totalQuantity) {
+                                task.totalQuantity = newQuantity;
+                                siteUpdated = true;
+                                anyUpdated = true;
+                            }
+                        }
+                    });
+                    if (siteUpdated) localStorage.setItem(storageKey, JSON.stringify(tasks));
+                });
+            });
+            if (anyUpdated) { renderOrdersList(); updateStatistics(); }
+            return anyUpdated;
+        }
+
+        function getOperationNamesWithDetails(productName, siteKey) {
+            const siteColumnMap = { 'tokarniy': 'токарно-фрезерный', 'frezerniy': 'фрезерный', 'slesarniy': 'слесарный', 'lazerno': 'лазерно-гибочный', 'polimerniy': 'полимерный' };
+            const siteColumn = siteColumnMap[siteKey];
+            if (!siteColumn) return [];
+            let productOps = taskOperationsData[productName];
+            if (!productOps) {
+                const normalizedInput = productName.toLowerCase();
+                for (const [key, value] of Object.entries(taskOperationsData)) {
+                    if (key.toLowerCase() === normalizedInput) {
+                        productOps = value;
+                        break;
+                    }
+                }
+            }
+            return (productOps && productOps[siteColumn]) ? productOps[siteColumn] : [];
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
 
         // ============== ДОПОЛНИТЕЛЬНЫЕ ЗАДАЧИ ==============
         let currentExtraTaskItemIndex = 0;
@@ -144,13 +271,17 @@
             document.body.appendChild(modal);
         }
 
-        function addExtraTaskWithIndex(orderId, siteKey, itemIndex) { currentExtraTaskItemIndex = itemIndex; addExtraTask(orderId, siteKey); }
+        function addExtraTaskWithIndex(orderId, siteKey, itemIndex) {
+            currentExtraTaskItemIndex = itemIndex;
+            addExtraTask(orderId, siteKey);
+        }
 
         function saveExtraTask(orderId, siteKey) {
             const taskName = document.getElementById('extraTaskName')?.value.trim();
             const quantity = parseInt(document.getElementById('extraTaskQuantity')?.value) || 1;
             if (!taskName) { alert('Введите название операции'); return; }
-            const modal = document.querySelector('.modal'); if (modal) modal.remove();
+            const modal = document.querySelector('.modal');
+            if (modal) modal.remove();
             const orders = loadOrdersFromStorage();
             const order = orders.find(o => o.id == orderId);
             if (!order) { alert('Группа не найдена'); return; }
@@ -179,10 +310,48 @@
             alert(`✅ Дополнительная задача "${taskName}" (${quantity} шт) добавлена на участок`);
         }
 
-        // ============== ОСТАЛЬНЫЕ ФУНКЦИИ ==============
-        function addSiteFile(orderId, siteKey) { const orders = loadOrdersFromStorage(); const order = orders.find(o => o.id == orderId); if (!order) { alert('Группа не найдена'); return; } const modal = document.createElement('div'); modal.className = 'modal'; modal.style.display = 'block'; modal.style.zIndex = '3000'; modal.innerHTML = `<div class="modal-content" style="max-width: 500px;"><span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span><h3 style="color: #dc2626; margin-bottom: 20px;">📎 Добавить файл/ссылку</h3><div class="form-group"><label>📁 Название файла (необязательно):</label><input type="text" id="fileNameInput" placeholder="Например: Чертеж детали"></div><div class="form-group"><label>🔗 Путь к файлу или ссылка:</label><input type="text" id="filePathInput" placeholder="\\\\server\\share\\file.pdf  или  https://..."><small style="color: #64748b; font-size: 10px;">Поддерживаются: сетевые пути, локальные пути, URL</small></div><div class="form-group"><label>💬 Комментарий (необязательно):</label><textarea id="fileCommentInput" rows="2" placeholder="Дополнительная информация..."></textarea></div><div style="display: flex; gap: 10px; justify-content: flex-end;"><button class="btn btn-danger" onclick="this.closest('.modal').remove()">Отмена</button><button class="btn btn-success" onclick="saveSiteFile(${orderId}, '${siteKey}')">💾 Сохранить</button></div></div>`; document.body.appendChild(modal); modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); }); }
-        function saveSiteFile(orderId, siteKey) { const fileName = document.getElementById('fileNameInput')?.value.trim(); const filePath = document.getElementById('filePathInput')?.value.trim(); const comment = document.getElementById('fileCommentInput')?.value.trim(); if (!filePath) { alert('Введите путь к файлу или ссылку'); return; } const orders = loadOrdersFromStorage(); const order = orders.find(o => o.id == orderId); if (!order) { alert('Группа не найдена'); return; } if (!order.siteFiles) order.siteFiles = {}; if (!order.siteFiles[siteKey]) order.siteFiles[siteKey] = []; order.siteFiles[siteKey].push({ id: Date.now(), name: fileName || filePath.split(/[\\/]/).pop() || 'Файл', path: filePath, comment: comment || '', createdAt: new Date().toISOString() }); saveOrdersToStorage(orders); const modal = document.querySelector('.modal'); if (modal) modal.remove(); renderOrdersList(); alert('✅ Файл добавлен!'); }
-        function clearAllSiteFiles(orderId, siteKey) { if (!confirm('Удалить все прикреплённые файлы для этого участка?')) return; const orders = loadOrdersFromStorage(); const order = orders.find(o => o.id == orderId); if (!order) return; if (order.siteFiles && order.siteFiles[siteKey]) { delete order.siteFiles[siteKey]; saveOrdersToStorage(orders); renderOrdersList(); alert('✅ Все файлы удалены'); } }
+        // ============== РАБОТА С ФАЙЛАМИ ==============
+        function addSiteFile(orderId, siteKey) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) { alert('Группа не найдена'); return; }
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.style.zIndex = '3000';
+            modal.innerHTML = `<div class="modal-content" style="max-width: 500px;"><span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span><h3 style="color: #dc2626; margin-bottom: 20px;">📎 Добавить файл/ссылку</h3><div class="form-group"><label>📁 Название файла (необязательно):</label><input type="text" id="fileNameInput" placeholder="Например: Чертеж детали"></div><div class="form-group"><label>🔗 Путь к файлу или ссылка:</label><input type="text" id="filePathInput" placeholder="\\\\server\\share\\file.pdf  или  https://..."><small style="color: #64748b; font-size: 10px;">Поддерживаются: сетевые пути, локальные пути, URL</small></div><div class="form-group"><label>💬 Комментарий (необязательно):</label><textarea id="fileCommentInput" rows="2" placeholder="Дополнительная информация..."></textarea></div><div style="display: flex; gap: 10px; justify-content: flex-end;"><button class="btn btn-danger" onclick="this.closest('.modal').remove()">Отмена</button><button class="btn btn-success" onclick="saveSiteFile(${orderId}, '${siteKey}')">💾 Сохранить</button></div></div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+        }
+
+        function saveSiteFile(orderId, siteKey) {
+            const fileName = document.getElementById('fileNameInput')?.value.trim();
+            const filePath = document.getElementById('filePathInput')?.value.trim();
+            const comment = document.getElementById('fileCommentInput')?.value.trim();
+            if (!filePath) { alert('Введите путь к файлу или ссылку'); return; }
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) { alert('Группа не найдена'); return; }
+            if (!order.siteFiles) order.siteFiles = {};
+            if (!order.siteFiles[siteKey]) order.siteFiles[siteKey] = [];
+            order.siteFiles[siteKey].push({ id: Date.now(), name: fileName || filePath.split(/[\\/]/).pop() || 'Файл', path: filePath, comment: comment || '', createdAt: new Date().toISOString() });
+            saveOrdersToStorage(orders);
+            const modal = document.querySelector('.modal');
+            if (modal) modal.remove();
+            renderOrdersList();
+            alert('✅ Файл добавлен!');
+        }
+
+        function clearAllSiteFiles(orderId, siteKey) {
+            if (!confirm('Удалить все прикреплённые файлы для этого участка?')) return;
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) return;
+            if (order.siteFiles && order.siteFiles[siteKey]) delete order.siteFiles[siteKey];
+            saveOrdersToStorage(orders);
+            renderOrdersList();
+            alert('✅ Все файлы удалены');
+        }
 
         // ============== СОЗДАНИЕ СТРОКИ УЧАСТКА ==============
         function createSiteRow(name, order, itemIndex, siteKey) {
@@ -210,14 +379,24 @@
                         displayOperationName = `${operationName} (${cleanDetailName})`;
                         if (thickness) displayOperationName += ` ${thickness}`;
                     }
-                    let squareClass = '';
-                    let isAdded = false;
-                    let plannedQuantity = 1;
-                    if (detailName && item.details) { const foundDetail = item.details.find(d => d.name === detailName); if (foundDetail && foundDetail.quantity > 0) plannedQuantity = foundDetail.quantity; }
+                    let squareClass = '', isAdded = false, plannedQuantity = 1;
+                    if (detailName && item.details) {
+                        const foundDetail = item.details.find(d => d.name === detailName);
+                        if (foundDetail && foundDetail.quantity > 0) plannedQuantity = foundDetail.quantity;
+                    }
                     const existingTask = tasksFromStorage.find(t => t.id === taskId);
                     if (existingTask && existingTask.totalQuantity && plannedQuantity === 1) plannedQuantity = existingTask.totalQuantity;
-                    if (order.tasks && order.tasks[taskId]) { const taskStatus = order.tasks[taskId]; if (taskStatus === 'green') { squareClass = 'green'; isAdded = true; completedCount++; } else if (taskStatus === 'orange') { squareClass = 'orange'; isAdded = true; } else if (taskStatus === 'pending' || taskStatus === '') { isAdded = true; } }
-                    if (existingTask && !isAdded) { isAdded = true; if (existingTask.status === 'completed') { squareClass = 'green'; completedCount++; } else if (existingTask.status === 'in_progress') { squareClass = 'orange'; } }
+                    if (order.tasks && order.tasks[taskId]) {
+                        const taskStatus = order.tasks[taskId];
+                        if (taskStatus === 'green') { squareClass = 'green'; isAdded = true; completedCount++; }
+                        else if (taskStatus === 'orange') { squareClass = 'orange'; isAdded = true; }
+                        else if (taskStatus === 'pending' || taskStatus === '') { isAdded = true; }
+                    }
+                    if (existingTask && !isAdded) {
+                        isAdded = true;
+                        if (existingTask.status === 'completed') { squareClass = 'green'; completedCount++; }
+                        else if (existingTask.status === 'in_progress') { squareClass = 'orange'; }
+                    }
                     const buttonIcon = isAdded ? '✓' : '+';
                     const buttonClass = isAdded ? 'added' : '';
                     operationsHtml += `<div class="operation-item"><div class="operation-info"><div class="operation-name">${escapeHtml(displayOperationName)}</div><div class="operation-plan">📋 План: ${plannedQuantity} шт</div></div><div class="operation-controls"><div class="square-status ${squareClass}" data-task-id="${taskId}" onclick="event.stopPropagation(); toggleSquareStatus('${taskId}')"></div><div class="action-buttons"><button class="action-btn btn-add ${buttonClass}" onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', false)">${buttonIcon}</button><button class="action-btn btn-priority" onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', true)">🔴</button></div></div></div>`;
@@ -229,10 +408,13 @@
             for (let e = 0; e < extraTasksFromStorage.length; e++) {
                 const extraTask = extraTasksFromStorage[e];
                 const taskId = extraTask.id;
-                let squareClass = '';
-                let isAdded = false;
-                let plannedQuantity = extraTask.totalQuantity || 1;
-                if (order.tasks && order.tasks[taskId]) { const taskStatus = order.tasks[taskId]; if (taskStatus === 'green') { squareClass = 'green'; isAdded = true; completedCount++; } else if (taskStatus === 'orange') { squareClass = 'orange'; isAdded = true; } else if (taskStatus === 'pending' || taskStatus === '') { isAdded = true; } }
+                let squareClass = '', isAdded = false, plannedQuantity = extraTask.totalQuantity || 1;
+                if (order.tasks && order.tasks[taskId]) {
+                    const taskStatus = order.tasks[taskId];
+                    if (taskStatus === 'green') { squareClass = 'green'; isAdded = true; completedCount++; }
+                    else if (taskStatus === 'orange') { squareClass = 'orange'; isAdded = true; }
+                    else if (taskStatus === 'pending' || taskStatus === '') { isAdded = true; }
+                }
                 const buttonIcon = isAdded ? '✓' : '+';
                 const buttonClass = isAdded ? 'added' : '';
                 operationsHtml += `<div class="operation-item"><div class="operation-info"><div class="operation-name">✨ ${escapeHtml(extraTask.operation)} (доп.)</div><div class="operation-plan">📋 План: ${plannedQuantity} шт</div></div><div class="operation-controls"><div class="square-status ${squareClass}" data-task-id="${taskId}" onclick="event.stopPropagation(); toggleSquareStatus('${taskId}')"></div><div class="action-buttons"><button class="action-btn btn-add ${buttonClass}" onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${e}, '${escapeHtml(extraTask.operation)}', false)">${buttonIcon}</button><button class="action-btn btn-priority" onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${e}, '${escapeHtml(extraTask.operation)}', true)">🔴</button></div></div></div>`;
@@ -246,9 +428,31 @@
             if (hasFiles) { filesIndicatorHtml = `<div class="file-indicator"><span>📎 Файлы: ${files.length} шт</span><button class="btn-sm" style="background: #dc2626; padding: 2px 8px; font-size: 9px;" onclick="event.stopPropagation(); clearAllSiteFiles(${order.id}, '${siteKey}')">✕ Очистить</button></div>`; }
             return `<div class="site-card"><div class="site-card-header"><div class="site-name">${name}</div><div class="site-stats"><span class="completed">${completedCount}</span>/<span class="total">${totalOperations}</span></div></div><div class="site-card-content">${operationsHtml}<div style="display: flex; gap: 8px; margin-top: 8px;"><button class="btn-add-extra" style="flex: 1;" onclick="event.stopPropagation(); addExtraTaskWithIndex(${order.id}, '${siteKey}', ${itemIndex})">➕ Доп. задача</button><button class="btn-file" style="flex: 1;" onclick="event.stopPropagation(); addSiteFile(${order.id}, '${siteKey}')">📎 Добавить файл</button></div>${filesIndicatorHtml}</div></div>`;
         }
-        
+
         // ============== ПЕРЕКЛЮЧЕНИЕ СТАТУСА ==============
-        function toggleSquareStatus(taskId) { const square = document.querySelector(`.square-status[data-task-id="${taskId}"]`); if (!square) return; let newStatus = '', newColor = ''; if (square.classList.contains('orange')) { newStatus = 'completed'; newColor = 'green'; } else if (square.classList.contains('green')) { newStatus = 'pending'; newColor = ''; } else { newStatus = 'in_progress'; newColor = 'orange'; } const parts = taskId.split('_'); const orderId = parseInt(parts[0]); const siteKey = parts[1]; const orders = loadOrdersFromStorage(); const order = orders.find(o => o.id === orderId); if (order) { if (!order.tasks) order.tasks = {}; order.tasks[taskId] = newColor; saveOrdersToStorage(orders); const storageKey = `tasks_${siteKey}`; const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]'); const taskIndex = tasks.findIndex(t => t.id === taskId); if (taskIndex !== -1) { tasks[taskIndex].status = newStatus; localStorage.setItem(storageKey, JSON.stringify(tasks)); } renderOrdersList(); updateStatistics(); } }
+        function toggleSquareStatus(taskId) {
+            const square = document.querySelector(`.square-status[data-task-id="${taskId}"]`);
+            if (!square) return;
+            let newStatus = '', newColor = '';
+            if (square.classList.contains('orange')) { newStatus = 'completed'; newColor = 'green'; }
+            else if (square.classList.contains('green')) { newStatus = 'pending'; newColor = ''; }
+            else { newStatus = 'in_progress'; newColor = 'orange'; }
+            const parts = taskId.split('_');
+            const orderId = parseInt(parts[0]);
+            const siteKey = parts[1];
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                if (!order.tasks) order.tasks = {};
+                order.tasks[taskId] = newColor;
+                saveOrdersToStorage(orders);
+                const storageKey = `tasks_${siteKey}`;
+                const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                const taskIndex = tasks.findIndex(t => t.id === taskId);
+                if (taskIndex !== -1) { tasks[taskIndex].status = newStatus; localStorage.setItem(storageKey, JSON.stringify(tasks)); }
+                renderOrdersList(); updateStatistics();
+            }
+        }
 
         function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName, isPriority = false) {
             const orders = loadOrdersFromStorage();
@@ -258,33 +462,27 @@
             const taskId = `${order.id}_${siteKey}_${itemIndex}_${opIndex}`;
             let existingTasks = [];
             try { const saved = localStorage.getItem(storageKey); if (saved) existingTasks = JSON.parse(saved); } catch(e) { console.error(e); }
-            const taskExists = existingTasks.some(t => t.id === taskId);
-            if (taskExists) {
+            if (existingTasks.some(t => t.id === taskId)) {
                 if (confirm(`❓ Удалить операцию "${operationName}" с участка?`)) {
-                    const filteredTasks = existingTasks.filter(t => t.id !== taskId);
-                    localStorage.setItem(storageKey, JSON.stringify(filteredTasks));
+                    localStorage.setItem(storageKey, JSON.stringify(existingTasks.filter(t => t.id !== taskId)));
                     if (order.tasks && order.tasks[taskId]) delete order.tasks[taskId];
                     const newStatus = getGroupStatus(order);
                     order.status = newStatus === 'green' ? 'completed' : (newStatus === 'orange' ? 'active' : 'pending');
                     const orderIndex = orders.findIndex(o => o.id == orderId);
                     orders[orderIndex] = order;
                     saveOrdersToStorage(orders);
-                    renderOrdersList();
-                    updateStatistics();
+                    renderOrdersList(); updateStatistics();
                     alert(`✅ Операция "${operationName}" удалена с участка`);
                 }
                 return;
             }
             const item = order.items[itemIndex];
-            let plannedQuantity = 1;
-            let detailName = '';
-            let thickness = '';
+            let plannedQuantity = 1, detailName = '', thickness = '';
             const siteColumnMap = { 'tokarniy': 'токарно-фрезерный', 'frezerniy': 'фрезерный', 'slesarniy': 'слесарный', 'lazerno': 'лазерно-гибочный', 'polimerniy': 'полимерный' };
             const siteColumn = siteColumnMap[siteKey];
             const productOps = taskOperationsData[item.product];
             if (productOps && siteColumn && productOps[siteColumn]) {
-                const opsForSite = productOps[siteColumn] || [];
-                const opData = opsForSite[opIndex];
+                const opData = productOps[siteColumn][opIndex];
                 if (opData) {
                     detailName = opData.detail || '';
                     thickness = opData.thickness || '';
@@ -294,7 +492,14 @@
                     }
                 }
             }
-            const newTask = { id: taskId, orderId: order.id, itemIndex: itemIndex, orderNumber: order.number, product: item.product, size: item.size?.name || 'Стандартный', sizeQuantity: item.size?.quantity || 1, totalQuantity: plannedQuantity, completedQuantity: 0, operation: operationName, detail: detailName, thickness: thickness, ral: item.ral || '', texture: item.texture || '', index: opIndex, status: 'pending', executors: [], date: new Date().toISOString().split('T')[0], isExtra: false, isPriority: isPriority, createdAt: new Date().toISOString() };
+            const newTask = {
+                id: taskId, orderId: order.id, itemIndex: itemIndex, orderNumber: order.number,
+                product: item.product, size: item.size?.name || 'Стандартный', sizeQuantity: item.size?.quantity || 1,
+                totalQuantity: plannedQuantity, completedQuantity: 0, operation: operationName,
+                detail: detailName, thickness: thickness, ral: item.ral || '', texture: item.texture || '',
+                index: opIndex, status: 'pending', executors: [], date: new Date().toISOString().split('T')[0],
+                isExtra: false, isPriority: isPriority, createdAt: new Date().toISOString()
+            };
             existingTasks.push(newTask);
             localStorage.setItem(storageKey, JSON.stringify(existingTasks));
             if (!order.tasks) order.tasks = {};
@@ -306,14 +511,73 @@
             saveOrdersToStorage(orders);
             if (button) { button.classList.add('added'); button.textContent = '✓'; }
             alert(`✅ ${isPriority ? 'ПРИОРИТЕТНАЯ ' : ''}Операция "${operationName}" добавлена на участок с планом ${plannedQuantity} шт${detailName ? ` (деталь: ${detailName})` : ''}`);
-            renderOrdersList();
-            updateStatistics();
+            renderOrdersList(); updateStatistics();
         }
 
-        function syncAllTasksToOrders() { const orders = loadOrdersFromStorage(); const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy']; let updated = false; orders.forEach(order => { if (!order.tasks) order.tasks = {}; const activeTaskIds = new Set(); sites.forEach(site => { const storageKey = `tasks_${site}`; const tasksJson = localStorage.getItem(storageKey); if (tasksJson) { let tasks = JSON.parse(tasksJson); const uniqueTasks = []; const seen = new Set(); for (const task of tasks) { const detail = task.detail || ''; const key = `${task.orderId}_${task.itemIndex}_${task.operation}_${detail}`; if (!seen.has(key)) { seen.add(key); uniqueTasks.push(task); } } if (uniqueTasks.length !== tasks.length) { tasks = uniqueTasks; localStorage.setItem(storageKey, JSON.stringify(tasks)); } tasks.forEach(task => { if (task.orderId == order.id) { const taskId = `${order.id}_${site}_${task.itemIndex}_${task.index}`; activeTaskIds.add(taskId); let squareColor = ''; if (task.status === 'completed') squareColor = 'green'; else if (task.status === 'in_progress') squareColor = 'orange'; if (squareColor && order.tasks[taskId] !== squareColor) { order.tasks[taskId] = squareColor; updated = true; } } }); } }); for (const taskId in order.tasks) { if (!activeTaskIds.has(taskId)) { delete order.tasks[taskId]; updated = true; } } }); if (updated) saveOrdersToStorage(orders); }
+        function syncAllTasksToOrders() {
+            const orders = loadOrdersFromStorage();
+            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+            let updated = false;
+            orders.forEach(order => {
+                if (!order.tasks) order.tasks = {};
+                const activeTaskIds = new Set();
+                sites.forEach(site => {
+                    const storageKey = `tasks_${site}`;
+                    const tasksJson = localStorage.getItem(storageKey);
+                    if (tasksJson) {
+                        let tasks = JSON.parse(tasksJson);
+                        const uniqueTasks = [], seen = new Set();
+                        for (const task of tasks) {
+                            const key = `${task.orderId}_${task.itemIndex}_${task.operation}_${task.detail || ''}`;
+                            if (!seen.has(key)) { seen.add(key); uniqueTasks.push(task); }
+                        }
+                        if (uniqueTasks.length !== tasks.length) localStorage.setItem(storageKey, JSON.stringify(uniqueTasks));
+                        uniqueTasks.forEach(task => {
+                            if (task.orderId == order.id) {
+                                const taskId = `${order.id}_${site}_${task.itemIndex}_${task.index}`;
+                                activeTaskIds.add(taskId);
+                                let squareColor = '';
+                                if (task.status === 'completed') squareColor = 'green';
+                                else if (task.status === 'in_progress') squareColor = 'orange';
+                                if (squareColor && order.tasks[taskId] !== squareColor) { order.tasks[taskId] = squareColor; updated = true; }
+                            }
+                        });
+                    }
+                });
+                for (const taskId in order.tasks) { if (!activeTaskIds.has(taskId)) { delete order.tasks[taskId]; updated = true; } }
+            });
+            if (updated) saveOrdersToStorage(orders);
+        }
 
-        function createGroupOrder() { console.log('createGroupOrder вызвана'); let groupName = ''; const importGroupName = document.getElementById('importGroupName'); if (importGroupName && importGroupName.value) groupName = importGroupName.value.trim(); if (!groupName) { const oldGroupName = document.getElementById('groupNameInput'); if (oldGroupName && oldGroupName.value) groupName = oldGroupName.value.trim(); } if (!groupName) { alert('Введите название группы'); return; } if (!window.tempItemsList || window.tempItemsList.length === 0) { alert('Добавьте хотя бы одно изделие'); return; } const orders = loadOrdersFromStorage(); const newOrder = { id: Date.now(), groupName: groupName, date: new Date().toISOString().split('T')[0], number: generateOrderNumber(), items: JSON.parse(JSON.stringify(window.tempItemsList)), status: 'active', tasks: {}, extraTasks: [], siteFiles: {} }; orders.push(newOrder); saveOrdersToStorage(orders); if (typeof createTasksForOrder === 'function') createTasksForOrder(newOrder); const importModal = document.getElementById('importModal'); if (importModal) importModal.style.display = 'none'; if (typeof renderOrdersList === 'function') renderOrdersList(); if (typeof updateStatistics === 'function') updateStatistics(); alert(`✅ Группа "${groupName}" успешно создана!`); window.tempItemsList = []; }
-        function generateOrderNumber() { const date = new Date(); const year = date.getFullYear().toString().slice(-2); const month = (date.getMonth() + 1).toString().padStart(2, '0'); const day = date.getDate().toString().padStart(2, '0'); return `${day}.${month}.${year}`; }
+        function createGroupOrder() {
+            let groupName = '';
+            const importGroupName = document.getElementById('importGroupName');
+            if (importGroupName && importGroupName.value) groupName = importGroupName.value.trim();
+            if (!groupName) { const oldGroupName = document.getElementById('groupNameInput'); if (oldGroupName && oldGroupName.value) groupName = oldGroupName.value.trim(); }
+            if (!groupName) { alert('Введите название группы'); return; }
+            if (!window.tempItemsList || window.tempItemsList.length === 0) { alert('Добавьте хотя бы одно изделие'); return; }
+            const orders = loadOrdersFromStorage();
+            const newOrder = {
+                id: Date.now(), groupName: groupName, date: new Date().toISOString().split('T')[0], number: generateOrderNumber(),
+                items: JSON.parse(JSON.stringify(window.tempItemsList)), status: 'active', tasks: {}, extraTasks: [], siteFiles: {}
+            };
+            orders.push(newOrder);
+            saveOrdersToStorage(orders);
+            if (typeof createTasksForOrder === 'function') createTasksForOrder(newOrder);
+            const importModal = document.getElementById('importModal');
+            if (importModal) importModal.style.display = 'none';
+            renderOrdersList(); updateStatistics();
+            alert(`✅ Группа "${groupName}" успешно создана!`);
+            window.tempItemsList = [];
+        }
+
+        function generateOrderNumber() {
+            const date = new Date();
+            const year = date.getFullYear().toString().slice(-2);
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${day}.${month}.${year}`;
+        }
 
         // ============== ОТОБРАЖЕНИЕ СПИСКА ГРУПП ==============
         function renderOrdersList() {
@@ -322,7 +586,15 @@
             const freshOrdersData = loadOrdersFromStorage() || [];
             const searchText = document.getElementById('searchInput')?.value?.toLowerCase() || '';
             const statusFilter = document.getElementById('statusFilter')?.value || 'all';
-            let filteredOrders = freshOrdersData.filter(order => { if (!order.groupName) return false; const matchSearch = order.groupName.toLowerCase().includes(searchText) || (order.items && order.items.some(item => item.product && item.product.toLowerCase().includes(searchText))); if (!matchSearch) return false; const groupStatus = getGroupStatus(order); if (statusFilter === 'active') return groupStatus === 'orange' || groupStatus === 'gray'; if (statusFilter === 'completed') return groupStatus === 'green'; return true; });
+            let filteredOrders = freshOrdersData.filter(order => {
+                if (!order.groupName) return false;
+                const matchSearch = order.groupName.toLowerCase().includes(searchText) || (order.items && order.items.some(item => item.product && item.product.toLowerCase().includes(searchText)));
+                if (!matchSearch) return false;
+                const groupStatus = getGroupStatus(order);
+                if (statusFilter === 'active') return groupStatus === 'orange' || groupStatus === 'gray';
+                if (statusFilter === 'completed') return groupStatus === 'green';
+                return true;
+            });
             ordersList.innerHTML = '';
             if (filteredOrders.length === 0) { ordersList.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">Нет групп</div></div>`; return; }
             filteredOrders.forEach(order => {
@@ -354,7 +626,11 @@
                                         const siteKey = parts[1];
                                         const storageKey = `tasks_${siteKey}`;
                                         const saved = localStorage.getItem(storageKey);
-                                        if (saved) { const tasks = JSON.parse(saved); const existingTask = tasks.find(t => t.id === taskId); if (existingTask && existingTask.executors && existingTask.executors.length > 0) hasAnyExecutor = true; }
+                                        if (saved) {
+                                            const tasks = JSON.parse(saved);
+                                            const existingTask = tasks.find(t => t.id === taskId);
+                                            if (existingTask && existingTask.executors && existingTask.executors.length > 0) hasAnyExecutor = true;
+                                        }
                                         if (taskStatus !== 'green' && taskStatus !== 'completed') allTasksCompleted = false;
                                     }
                                 }
@@ -401,20 +677,191 @@
             restoreMainOpenCardsState();
             restoreMainOpenItemsState();
         }
-        
-        function editGroupName(orderId) { const orders = loadOrdersFromStorage(); const order = orders.find(o => o.id == orderId); if (!order) { alert('Группа не найдена'); return; } const newName = prompt('Введите новое название заказчика:', order.groupName); if (!newName || newName.trim() === '') return; if (newName === order.groupName) return; order.groupName = newName.trim(); const orderIndex = orders.findIndex(o => o.id == orderId); orders[orderIndex] = order; saveOrdersToStorage(orders); renderOrdersList(); updateStatistics(); alert(`✅ Название заказчика изменено на "${newName}"`); }
-        function updateStatistics() { const orders = loadOrdersFromStorage() || []; const totalOrders = orders.length; const totalItems = orders.reduce((sum, order) => sum + (order.items ? order.items.length : 0), 0); let activeTasks = 0, completedTasks = 0; orders.forEach(order => { if (order.tasks) { Object.values(order.tasks).forEach(status => { if (status === 'in_progress' || status === 'orange') activeTasks++; if (status === 'completed' || status === 'green') completedTasks++; }); } }); document.getElementById('totalOrders').textContent = totalOrders; document.getElementById('totalItems').textContent = totalItems; document.getElementById('activeTasks').textContent = activeTasks; document.getElementById('completedTasks').textContent = completedTasks; }
-        function exportOrders() { const orders = loadOrdersFromStorage() || []; if (orders.length === 0) { alert('Нет групп для экспорта'); return; } const exportData = { exportDate: new Date().toISOString(), version: '1.0', orders: orders }; const dataStr = JSON.stringify(exportData, null, 2); const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr); const date = new Date(); const fileName = `masterx_groups_${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')}.json`; const linkElement = document.createElement('a'); linkElement.setAttribute('href', dataUri); linkElement.setAttribute('download', fileName); linkElement.click(); alert(`✅ Экспортировано ${orders.length} групп`); }
-        function importOrders() { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = async (e) => { const file = e.target.files[0]; if (!file) return; try { const text = await file.text(); const data = JSON.parse(text); if (!data.orders || !Array.isArray(data.orders)) { alert('❌ Неверный формат файла'); return; } let existingOrders = loadOrdersFromStorage(); const existingIds = new Set(existingOrders.map(o => o.id)); let importedCount = 0, skippedCount = 0; for (const importedOrder of data.orders) { if (existingIds.has(importedOrder.id)) { if (confirm(`Группа "${importedOrder.groupName}" уже существует. Перезаписать?`)) { existingOrders = existingOrders.filter(o => o.id !== importedOrder.id); existingOrders.push(importedOrder); importedCount++; } else { skippedCount++; } } else { existingOrders.push(importedOrder); importedCount++; } } saveOrdersToStorage(existingOrders); renderOrdersList(); updateStatistics(); saveMainOpenCardsState(); saveMainOpenItemsState(); alert(`✅ Импорт завершён!\n📦 Импортировано: ${importedCount} групп\n⏭️ Пропущено: ${skippedCount}`); } catch (error) { console.error('❌ Ошибка импорта:', error); alert('❌ Ошибка при импорте файла'); } }; input.click(); }
 
-        function showMaterialsReport(orderId) { const orders = loadOrdersFromStorage() || []; const order = orders.find(o => o.id == orderId); if (!order) { alert('Группа не найдена'); return; } if (!window.materialsReport) { alert('Отчет по материалам не доступен'); return; } const modal = document.getElementById('materialsModal'); const reportDiv = document.getElementById('materialsReport'); if (!modal || !reportDiv) return; reportDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Загрузка отчета...</p></div>'; modal.style.display = 'block'; window.materialsReport.generateReport(order).then(html => { reportDiv.innerHTML = html; }).catch(err => { console.error(err); reportDiv.innerHTML = '<div class="error">Ошибка загрузки отчета</div>'; }); }
+        // ============== ПРОЧИЕ ФУНКЦИИ ==============
+        function editGroupName(orderId) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) { alert('Группа не найдена'); return; }
+            const newName = prompt('Введите новое название заказчика:', order.groupName);
+            if (!newName || newName.trim() === '') return;
+            if (newName === order.groupName) return;
+            order.groupName = newName.trim();
+            const orderIndex = orders.findIndex(o => o.id == orderId);
+            orders[orderIndex] = order;
+            saveOrdersToStorage(orders);
+            renderOrdersList();
+            updateStatistics();
+            alert(`✅ Название заказчика изменено на "${newName}"`);
+        }
+
+        function updateStatistics() {
+            const orders = loadOrdersFromStorage() || [];
+            const totalOrders = orders.length;
+            const totalItems = orders.reduce((sum, order) => sum + (order.items ? order.items.length : 0), 0);
+            let activeTasks = 0, completedTasks = 0;
+            orders.forEach(order => {
+                if (order.tasks) {
+                    Object.values(order.tasks).forEach(status => {
+                        if (status === 'in_progress' || status === 'orange') activeTasks++;
+                        if (status === 'completed' || status === 'green') completedTasks++;
+                    });
+                }
+            });
+            document.getElementById('totalOrders').textContent = totalOrders;
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('activeTasks').textContent = activeTasks;
+            document.getElementById('completedTasks').textContent = completedTasks;
+        }
+
+        function exportOrders() {
+            const orders = loadOrdersFromStorage() || [];
+            if (orders.length === 0) { alert('Нет групп для экспорта'); return; }
+            const exportData = { exportDate: new Date().toISOString(), version: '1.0', orders: orders };
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+            const date = new Date();
+            const fileName = `masterx_groups_${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')}.json`;
+            const link = document.createElement('a');
+            link.href = dataUri;
+            link.download = fileName;
+            link.click();
+            alert(`✅ Экспортировано ${orders.length} групп`);
+        }
+
+        function importOrders() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                try {
+                    const text = await file.text();
+                    const data = JSON.parse(text);
+                    if (!data.orders || !Array.isArray(data.orders)) { alert('❌ Неверный формат файла'); return; }
+                    let existingOrders = loadOrdersFromStorage();
+                    const existingIds = new Set(existingOrders.map(o => o.id));
+                    let importedCount = 0, skippedCount = 0;
+                    for (const importedOrder of data.orders) {
+                        if (existingIds.has(importedOrder.id)) {
+                            if (confirm(`Группа "${importedOrder.groupName}" уже существует. Перезаписать?`)) {
+                                existingOrders = existingOrders.filter(o => o.id !== importedOrder.id);
+                                existingOrders.push(importedOrder);
+                                importedCount++;
+                            } else skippedCount++;
+                        } else { existingOrders.push(importedOrder); importedCount++; }
+                    }
+                    saveOrdersToStorage(existingOrders);
+                    renderOrdersList();
+                    updateStatistics();
+                    saveMainOpenCardsState();
+                    saveMainOpenItemsState();
+                    alert(`✅ Импорт завершён!\n📦 Импортировано: ${importedCount} групп\n⏭️ Пропущено: ${skippedCount}`);
+                } catch (error) { console.error('❌ Ошибка импорта:', error); alert('❌ Ошибка при импорте файла'); }
+            };
+            input.click();
+        }
+
+        function showMaterialsReport(orderId) {
+            const orders = loadOrdersFromStorage() || [];
+            const order = orders.find(o => o.id == orderId);
+            if (!order) { alert('Группа не найдена'); return; }
+            if (!window.materialsReport) { alert('Отчет по материалам не доступен'); return; }
+            const modal = document.getElementById('materialsModal');
+            const reportDiv = document.getElementById('materialsReport');
+            if (!modal || !reportDiv) return;
+            reportDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Загрузка отчета...</p></div>';
+            modal.style.display = 'block';
+            window.materialsReport.generateReport(order).then(html => { reportDiv.innerHTML = html; }).catch(err => { console.error(err); reportDiv.innerHTML = '<div class="error">Ошибка загрузки отчета</div>'; });
+        }
+
         function closeMaterialsModal() { document.getElementById('materialsModal').style.display = 'none'; }
 
-        function getSiteNameShort(siteKey) { const names = { 'tokarniy': '🔧 Токарный', 'slesarniy': '🔨 Слесарный', 'frezerniy': '⚙️ Фрезерный', 'lazerno': '✨ Лазерно-гибочный', 'polimerniy': '🎨 Полимерный' }; return names[siteKey] || siteKey; }
-        function getAllGroupTasks(orderId) { const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy']; const allTasks = []; sites.forEach(site => { const storageKey = `tasks_${site}`; const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]'); const groupTasks = tasks.filter(t => t.orderId == orderId); groupTasks.forEach(task => { allTasks.push({ ...task, site }); }); }); return allTasks; }
-        function collectWorkStats(allTasks) { const workStats = {}; allTasks.forEach(task => { const opKey = `${task.site}_${task.operation}_${task.detail || ''}`; if (!workStats[opKey]) { workStats[opKey] = { operation: task.operation, detail: task.detail || '-', site: task.site, siteName: siteNamesFull[task.site] || task.site, totalTime: 0, count: 0, avgTime: 0, minTime: Infinity, maxTime: 0, completedCount: 0, totalQuantity: task.totalQuantity || 1, completedQuantity: task.completedQuantity || 0 }; } if (task.status === 'completed') workStats[opKey].completedCount++; if (task.executors && task.executors.length > 0) { task.executors.forEach(exec => { if (exec.workTime && exec.workTime > 0) { workStats[opKey].totalTime += exec.workTime; workStats[opKey].count++; workStats[opKey].minTime = Math.min(workStats[opKey].minTime, exec.workTime); workStats[opKey].maxTime = Math.max(workStats[opKey].maxTime, exec.workTime); } }); } }); Object.values(workStats).forEach(stat => { if (stat.count > 0) stat.avgTime = Math.round(stat.totalTime / stat.count); else { stat.avgTime = 0; stat.minTime = 0; stat.maxTime = 0; } }); return workStats; }
-        function collectSiteStats(allTasks, workStats) { const siteStats = {}; allTasks.forEach(task => { if (!siteStats[task.site]) siteStats[task.site] = { siteKey: task.site, siteName: siteNamesFull[task.site] || task.site, totalTasks: 0, completedTasks: 0, totalTime: 0, operations: [] }; siteStats[task.site].totalTasks++; if (task.status === 'completed') siteStats[task.site].completedTasks++; }); Object.values(workStats).forEach(stat => { if (siteStats[stat.site]) { siteStats[stat.site].totalTime += stat.totalTime; siteStats[stat.site].operations.push(stat); } }); return siteStats; }
-        function showGroupStats(orderId) { const orders = loadOrdersFromStorage(); const order = orders.find(o => o.id == orderId); if (!order) { alert('Группа не найдена'); return; } const allTasks = getAllGroupTasks(orderId); const workStats = collectWorkStats(allTasks); const siteStats = collectSiteStats(allTasks, workStats); const totalOperations = allTasks.length; const completedOperations = allTasks.filter(t => t.status === 'completed').length; const totalWorkTime = Object.values(workStats).reduce((sum, s) => sum + s.totalTime, 0); const totalWorkHours = Math.round(totalWorkTime / 60 * 10) / 10; let statsHtml = `<div style="padding: 20px;"><div style="margin-bottom: 20px; border-bottom: 2px solid #dc2626; padding-bottom: 15px;"><div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;"><div><h2 style="color: #dc2626; margin: 0;">📊 СТАТИСТИКА ПО ГРУППЕ</h2><h3 style="margin: 5px 0 0 0;">${escapeHtml(order.groupName)}</h3></div><div style="text-align: right;"><div style="font-size: 14px; color: #64748b;">Заказ №${order.number || '---'}</div><div style="font-size: 12px; color: #64748b;">Дата: ${order.date}</div></div></div></div><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;"><div style="background: #ffffff; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid #e2e8f0;"><div style="font-size: 28px; font-weight: 700; color: #f97316;">${totalOperations}</div><div style="font-size: 11px; color: #64748b;">Всего операций</div></div><div style="background: #ffffff; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid #e2e8f0;"><div style="font-size: 28px; font-weight: 700; color: #10b981;">${completedOperations}</div><div style="font-size: 11px; color: #64748b;">Выполнено</div></div><div style="background: #ffffff; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid #e2e8f0;"><div style="font-size: 28px; font-weight: 700; color: #00bcd4;">${totalWorkTime}</div><div style="font-size: 11px; color: #64748b;">Общее время (мин)</div></div><div style="background: #ffffff; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid #e2e8f0;"><div style="font-size: 28px; font-weight: 700; color: #9b59b6;">${totalWorkHours}</div><div style="font-size: 11px; color: #64748b;">Общее время (часы)</div></div></div>`; if (Object.keys(siteStats).length > 0) { statsHtml += `<h4 style="color: #f97316; margin-bottom: 15px;">🏭 СТАТИСТИКА ПО УЧАСТКАМ</h4><div style="overflow-x: auto; margin-bottom: 25px;"><table style="width: 100%; border-collapse: collapse;"><thead><tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;"><th style="padding: 10px; text-align: left;">Участок</th><th style="padding: 10px; text-align: center;">Операций</th><th style="padding: 10px; text-align: center;">Выполнено</th><th style="padding: 10px; text-align: center;">Прогресс</th><th style="padding: 10px; text-align: center;">Время (мин)</th><th style="padding: 10px; text-align: center;">Время (часы)</th></tr></thead><tbody>`; const sortedSites = Object.values(siteStats).sort((a, b) => b.totalTime - a.totalTime); sortedSites.forEach(site => { const progress = site.totalTasks > 0 ? Math.round((site.completedTasks / site.totalTasks) * 100) : 0; const siteHours = Math.round(site.totalTime / 60 * 10) / 10; statsHtml += `<tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px;"><strong>${site.siteName}</strong></td><td style="padding: 8px; text-align: center;">${site.totalTasks}</td><td style="padding: 8px; text-align: center; color: #10b981;">${site.completedTasks}</td><td style="padding: 8px; text-align: center;"><div style="background: #e2e8f0; border-radius: 10px; height: 20px; width: 100px; display: inline-block; overflow: hidden;"><div style="background: #10b981; width: ${progress}%; height: 100%; border-radius: 10px;"></div></div><span style="margin-left: 8px; font-size: 11px;">${progress}%</span></td><td style="padding: 8px; text-align: center; color: #00bcd4;">${site.totalTime}</td><td style="padding: 8px; text-align: center;">${siteHours}</td></tr>`; }); statsHtml += `</tbody></table></div>`; } else { statsHtml += `<div style="text-align: center; padding: 40px; background: #f8fafc; border-radius: 8px;"><div style="font-size: 48px; margin-bottom: 10px;">📭</div><p>Нет данных по выполненным операциям</p><p style="font-size: 11px; color: #64748b;">Статистика появится после завершения операций на участках</p></div>`; } statsHtml += `<div style="display: flex; justify-content: center; gap: 12px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e2e8f0;"><button class="btn btn-success" onclick="exportStatsToExcel()">📊 Экспорт в Excel</button><button class="btn btn-primary" onclick="printStatsReport()">🖨️ Распечатать</button><button class="btn btn-danger" onclick="closeStatsModal()">✖️ Закрыть</button></div></div>`; window.currentStatsData = { orderName: order.groupName, orderNumber: order.number, orderDate: order.date, totalOperations, completedOperations, totalWorkTime, totalWorkHours, siteStats: Object.values(siteStats), workStats: Object.values(workStats) }; window.currentStatsHtml = statsHtml; const modal = document.createElement('div'); modal.id = 'statsModal'; modal.className = 'modal'; modal.style.display = 'block'; modal.style.zIndex = '10001'; modal.innerHTML = `<div class="modal-content" style="max-width: 1000px; max-height: 85vh; overflow-y: auto;"><span class="close" onclick="closeStatsModal()">&times;</span>${statsHtml}</div>`; document.body.appendChild(modal); }
+        function getSiteNameShort(siteKey) {
+            const names = { 'tokarniy': '🔧 Токарный', 'slesarniy': '🔨 Слесарный', 'frezerniy': '⚙️ Фрезерный', 'lazerno': '✨ Лазерно-гибочный', 'polimerniy': '🎨 Полимерный' };
+            return names[siteKey] || siteKey;
+        }
+
+        function getAllGroupTasks(orderId) {
+            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+            const allTasks = [];
+            sites.forEach(site => {
+                const storageKey = `tasks_${site}`;
+                const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                allTasks.push(...tasks.filter(t => t.orderId == orderId).map(task => ({ ...task, site })));
+            });
+            return allTasks;
+        }
+
+        function collectWorkStats(allTasks) {
+            const workStats = {};
+            allTasks.forEach(task => {
+                const opKey = `${task.site}_${task.operation}_${task.detail || ''}`;
+                if (!workStats[opKey]) {
+                    workStats[opKey] = { operation: task.operation, detail: task.detail || '-', site: task.site, siteName: siteNamesFull[task.site] || task.site, totalTime: 0, count: 0, avgTime: 0, minTime: Infinity, maxTime: 0, completedCount: 0, totalQuantity: task.totalQuantity || 1, completedQuantity: task.completedQuantity || 0 };
+                }
+                if (task.status === 'completed') workStats[opKey].completedCount++;
+                if (task.executors && task.executors.length > 0) {
+                    task.executors.forEach(exec => {
+                        if (exec.workTime && exec.workTime > 0) {
+                            workStats[opKey].totalTime += exec.workTime;
+                            workStats[opKey].count++;
+                            workStats[opKey].minTime = Math.min(workStats[opKey].minTime, exec.workTime);
+                            workStats[opKey].maxTime = Math.max(workStats[opKey].maxTime, exec.workTime);
+                        }
+                    });
+                }
+            });
+            Object.values(workStats).forEach(stat => { if (stat.count > 0) stat.avgTime = Math.round(stat.totalTime / stat.count); else { stat.avgTime = 0; stat.minTime = 0; stat.maxTime = 0; } });
+            return workStats;
+        }
+
+        function collectSiteStats(allTasks, workStats) {
+            const siteStats = {};
+            allTasks.forEach(task => {
+                if (!siteStats[task.site]) siteStats[task.site] = { siteKey: task.site, siteName: siteNamesFull[task.site] || task.site, totalTasks: 0, completedTasks: 0, totalTime: 0, operations: [] };
+                siteStats[task.site].totalTasks++;
+                if (task.status === 'completed') siteStats[task.site].completedTasks++;
+            });
+            Object.values(workStats).forEach(stat => { if (siteStats[stat.site]) { siteStats[stat.site].totalTime += stat.totalTime; siteStats[stat.site].operations.push(stat); } });
+            return siteStats;
+        }
+
+        function showGroupStats(orderId) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) { alert('Группа не найдена'); return; }
+            const allTasks = getAllGroupTasks(orderId);
+            const workStats = collectWorkStats(allTasks);
+            const siteStats = collectSiteStats(allTasks, workStats);
+            const totalOperations = allTasks.length;
+            const completedOperations = allTasks.filter(t => t.status === 'completed').length;
+            const totalWorkTime = Object.values(workStats).reduce((sum, s) => sum + s.totalTime, 0);
+            const totalWorkHours = Math.round(totalWorkTime / 60 * 10) / 10;
+            let statsHtml = `<div style="padding: 20px;"><div style="margin-bottom: 20px; border-bottom: 2px solid #dc2626; padding-bottom: 15px;"><div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;"><div><h2 style="color: #dc2626; margin: 0;">📊 СТАТИСТИКА ПО ГРУППЕ</h2><h3 style="margin: 5px 0 0 0;">${escapeHtml(order.groupName)}</h3></div><div style="text-align: right;"><div style="font-size: 14px; color: #64748b;">Заказ №${order.number || '---'}</div><div style="font-size: 12px; color: #64748b;">Дата: ${order.date}</div></div></div></div><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;"><div style="background: #ffffff; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid #e2e8f0;"><div style="font-size: 28px; font-weight: 700; color: #f97316;">${totalOperations}</div><div style="font-size: 11px; color: #64748b;">Всего операций</div></div><div style="background: #ffffff; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid #e2e8f0;"><div style="font-size: 28px; font-weight: 700; color: #10b981;">${completedOperations}</div><div style="font-size: 11px; color: #64748b;">Выполнено</div></div><div style="background: #ffffff; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid #e2e8f0;"><div style="font-size: 28px; font-weight: 700; color: #00bcd4;">${totalWorkTime}</div><div style="font-size: 11px; color: #64748b;">Общее время (мин)</div></div><div style="background: #ffffff; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid #e2e8f0;"><div style="font-size: 28px; font-weight: 700; color: #9b59b6;">${totalWorkHours}</div><div style="font-size: 11px; color: #64748b;">Общее время (часы)</div></div></div>`;
+            if (Object.keys(siteStats).length > 0) {
+                statsHtml += `<h4 style="color: #f97316; margin-bottom: 15px;">🏭 СТАТИСТИКА ПО УЧАСТКАМ</h4><div style="overflow-x: auto; margin-bottom: 25px;"><table style="width: 100%; border-collapse: collapse;"><thead><tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;"><th style="padding: 10px; text-align: left;">Участок</th><th style="padding: 10px; text-align: center;">Операций</th><th style="padding: 10px; text-align: center;">Выполнено</th><th style="padding: 10px; text-align: center;">Прогресс</th><th style="padding: 10px; text-align: center;">Время (мин)</th><th style="padding: 10px; text-align: center;">Время (часы)</th></tr></thead><tbody>`;
+                const sortedSites = Object.values(siteStats).sort((a, b) => b.totalTime - a.totalTime);
+                sortedSites.forEach(site => {
+                    const progress = site.totalTasks > 0 ? Math.round((site.completedTasks / site.totalTasks) * 100) : 0;
+                    const siteHours = Math.round(site.totalTime / 60 * 10) / 10;
+                    statsHtml += `<tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px;"><strong>${site.siteName}</strong></td><td style="padding: 8px; text-align: center;">${site.totalTasks}</td><td style="padding: 8px; text-align: center; color: #10b981;">${site.completedTasks}</td><td style="padding: 8px; text-align: center;"><div style="background: #e2e8f0; border-radius: 10px; height: 20px; width: 100px; display: inline-block; overflow: hidden;"><div style="background: #10b981; width: ${progress}%; height: 100%; border-radius: 10px;"></div></div><span style="margin-left: 8px; font-size: 11px;">${progress}%</span></td><td style="padding: 8px; text-align: center; color: #00bcd4;">${site.totalTime}</td><td style="padding: 8px; text-align: center;">${siteHours}</td></tr>`;
+                });
+                statsHtml += `</tbody></table></div>`;
+            } else { statsHtml += `<div style="text-align: center; padding: 40px; background: #f8fafc; border-radius: 8px;"><div style="font-size: 48px; margin-bottom: 10px;">📭</div><p>Нет данных по выполненным операциям</p><p style="font-size: 11px; color: #64748b;">Статистика появится после завершения операций на участках</p></div>`; }
+            statsHtml += `<div style="display: flex; justify-content: center; gap: 12px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e2e8f0;"><button class="btn btn-success" onclick="exportStatsToExcel()">📊 Экспорт в Excel</button><button class="btn btn-primary" onclick="printStatsReport()">🖨️ Распечатать</button><button class="btn btn-danger" onclick="closeStatsModal()">✖️ Закрыть</button></div></div>`;
+            window.currentStatsData = { orderName: order.groupName, orderNumber: order.number, orderDate: order.date, totalOperations, completedOperations, totalWorkTime, totalWorkHours, siteStats: Object.values(siteStats), workStats: Object.values(workStats) };
+            window.currentStatsHtml = statsHtml;
+            const modal = document.createElement('div');
+            modal.id = 'statsModal';
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.style.zIndex = '10001';
+            modal.innerHTML = `<div class="modal-content" style="max-width: 1000px; max-height: 85vh; overflow-y: auto;"><span class="close" onclick="closeStatsModal()">&times;</span>${statsHtml}</div>`;
+            document.body.appendChild(modal);
+        }
+
         function closeStatsModal() { const modal = document.getElementById('statsModal'); if (modal) modal.remove(); }
         function printStatsReport() { const printWindow = window.open('', '_blank'); printWindow.document.write(`<html><head><title>Статистика по группе</title><style>body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: white; color: black; } table { border-collapse: collapse; width: 100%; margin-bottom: 20px; } th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background: #f0f0f0; } .btn { display: none; }</style></head><body>${window.currentStatsHtml.replace(/<button[^>]*>.*?<\/button>/gs, '')}</body></html>`); printWindow.print(); printWindow.close(); }
         function exportStatsToExcel() { const data = window.currentStatsData; if (!data) { alert('Нет данных для экспорта'); return; } let csv = []; csv.push(`"Статистика по группе: ${data.orderName}"`); csv.push(`"Заказ №: ${data.orderNumber}", "Дата: ${data.orderDate}"`); csv.push([]); csv.push(`"ОБЩАЯ СТАТИСТИКА"`); csv.push(`"Всего операций","${data.totalOperations}"`); csv.push(`"Выполнено операций","${data.completedOperations}"`); csv.push(`"Общее время (минуты)","${data.totalWorkTime}"`); csv.push(`"Общее время (часы)","${data.totalWorkHours}"`); csv.push([]); csv.push(`"СТАТИСТИКА ПО УЧАСТКАМ"`); csv.push(`"Участок","Операций","Выполнено","Прогресс %","Время (мин)","Время (часы)"`); data.siteStats.forEach(site => { const progress = site.totalTasks > 0 ? Math.round((site.completedTasks / site.totalTasks) * 100) : 0; const hours = Math.round(site.totalTime / 60 * 10) / 10; csv.push(`"${site.siteName}","${site.totalTasks}","${site.completedTasks}","${progress}","${site.totalTime}","${hours}"`); }); const csvContent = csv.join('\n'); const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `statistics_${data.orderName}_${data.orderNumber}.csv`; link.click(); alert(`✅ Статистика экспортирована в файл: statistics_${data.orderName}_${data.orderNumber}.csv`); }
@@ -424,7 +871,27 @@
         function printTimeStatsReport() { const printWindow = window.open('', '_blank'); printWindow.document.write(`<html><head><title>Отчёт по времени</title><style>body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: white; color: black; } .btn { display: none; } table { border-collapse: collapse; width: 100%; } td, th { border: 1px solid #ddd; padding: 8px; } th { background: #f0f0f0; }</style></head><body>${window.currentTimeStatsHtml.replace(/<button[^>]*>.*?<\/button>/gs, '')}</body></html>`); printWindow.print(); printWindow.close(); }
         function exportTimeStatsToExcel() { const itemsData = window.currentTimeStatsData; if (!itemsData) { alert('Нет данных для экспорта'); return; } let csv = []; csv.push(`"Отчёт по времени выполнения"`); csv.push([]); csv.push(`"Изделие","Размер","Кол-во","RAL","Текстура","Участок","Операция","Деталь","Исполнитель","Кол-во","Время начала","Время окончания","Время (сек)"`); for (const itemKey in itemsData) { const item = itemsData[itemKey]; for (const site in item.sitesData) { const siteData = item.sitesData[site]; for (const opKey in siteData.operations) { const op = siteData.operations[opKey]; for (const record of op.records) { const startTimeStr = record.startTime.toLocaleTimeString('ru-RU'); const endTimeStr = record.endTime.toLocaleTimeString('ru-RU'); csv.push(`"${item.product}","${item.size}","${item.quantity}","${item.ral}","${item.texture}","${siteData.siteName}","${op.operation}","${op.detail}","${record.executor}","${record.quantity}","${startTimeStr}","${endTimeStr}","${record.workSeconds}"`); } } } } } const csvContent = csv.join('\n'); const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `time_stats.csv`; link.click(); alert(`✅ Статистика времени экспортирована в файл: time_stats.csv`); }
 
-        function deleteOrder(orderId) { if (!confirm('Удалить группу? Все связанные задачи также будут удалены.')) return; let orders = loadOrdersFromStorage(); orders = orders.filter(o => o.id !== orderId); saveOrdersToStorage(orders); const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy']; sites.forEach(site => { const key = `tasks_${site}`; const tasks = localStorage.getItem(key); if (tasks) { let tasksArr = JSON.parse(tasks); tasksArr = tasksArr.filter(t => t.orderId !== orderId); localStorage.setItem(key, JSON.stringify(tasksArr)); } }); saveMainOpenCardsState(); saveMainOpenItemsState(); renderOrdersList(); updateStatistics(); alert('✅ Группа удалена'); }
+        function deleteOrder(orderId) {
+            if (!confirm('Удалить группу? Все связанные задачи также будут удалены.')) return;
+            let orders = loadOrdersFromStorage();
+            orders = orders.filter(o => o.id !== orderId);
+            saveOrdersToStorage(orders);
+            const sites = ['tokarniy', 'slesarniy', 'frezerniy', 'lazerno', 'polimerniy'];
+            sites.forEach(site => {
+                const key = `tasks_${site}`;
+                const tasks = localStorage.getItem(key);
+                if (tasks) {
+                    let tasksArr = JSON.parse(tasks);
+                    tasksArr = tasksArr.filter(t => t.orderId !== orderId);
+                    localStorage.setItem(key, JSON.stringify(tasksArr));
+                }
+            });
+            saveMainOpenCardsState();
+            saveMainOpenItemsState();
+            renderOrdersList();
+            updateStatistics();
+            alert('✅ Группа удалена');
+        }
 
         function showItemReport(orderId, itemIndex) { const orders = loadOrdersFromStorage(); const order = orders.find(o => o.id == orderId); if (!order || !order.items[itemIndex]) { alert('Изделие не найдено'); return; } const item = order.items[itemIndex]; const allReports = JSON.parse(localStorage.getItem('material_reports') || '[]'); const itemKey = `${order.id}_item${itemIndex}_${item.product}_${item.size?.name || ''}_${item.ral || ''}`; const itemReports = allReports.filter(report => { if (report.isItemReport && report.itemKey === itemKey) return true; if (report.isItemReport && report.orderId == orderId && report.product === item.product && report.size === item.size?.name) return true; if (report.taskId) { const parts = report.taskId.split('_'); return parts.length >= 3 && parts[0] == orderId && parts[2] == itemIndex; } return false; }); const siteNames = { 'polimerniy': ' ПОЛИМЕРНЫЙ УЧАСТОК', 'slesarniy': ' СЛЕСАРНЫЙ УЧАСТОК', 'frezerniy': ' ФРЕЗЕРНЫЙ УЧАСТОК', 'tokarniy': ' ТОКАРНЫЙ УЧАСТОК', 'lazerno': ' ЛАЗЕРНО-ГИБОЧНЫЙ УЧАСТОК' }; const reportsBySite = {}; itemReports.forEach(report => { if (report.siteKey && report.rows && report.rows.length > 0) { if (!reportsBySite[report.siteKey]) reportsBySite[report.siteKey] = []; reportsBySite[report.siteKey].push(...report.rows); } }); let html = `<div style="padding: 12px;"><div style="margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;"><div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;"><h2 style="color: #dc2626; margin: 0; font-size: 18px;">📋 ОТЧЁТ ПО ИЗДЕЛИЮ</h2><h3 style="margin: 0; font-size: 16px;">${escapeHtml(item.product)}</h3></div><div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; font-size: 12px; color: #64748b;"><span>📁 ${escapeHtml(order.groupName)}</span><span>📏 ${escapeHtml(item.size?.name || '-')} × ${item.size?.quantity || 0} шт</span><span>🎨 ${escapeHtml(item.ral || '-')} / ${escapeHtml(item.texture || '-')}</span></div></div>`; if (Object.keys(reportsBySite).length === 0) { html += `<div style="text-align: center; padding: 20px; background: #f8fafc; border-radius: 8px;"><div style="font-size: 32px; margin-bottom: 8px;">📭</div><p>Нет отчётов по этому изделию</p><p style="font-size: 11px; color: #64748b;">Отчёты создаются на участках через кнопку "Отчёт"</p></div>`; } else { for (const [siteKey, rows] of Object.entries(reportsBySite)) { let rowsHtml = ''; rows.forEach(row => { const расход = row.расход || 0; const единица = row.единица || 'гр'; const количество = row.количество || 0; const комментарий = row.комментарий || ''; const материал = row.материал || row.material || 'Материал'; let text = `📦 ${escapeHtml(материал)}: 📊 Расход ${расход} ${единица}, 📦 Кол-во ${количество} шт`; if (комментарий) text += `, 💬 ${комментарий}`; rowsHtml += `<div style="padding: 4px 0; font-size: 12px; border-bottom: 1px solid #e2e8f0;">${escapeHtml(text)}</div>`; }); html += `<div style="margin-bottom: 10px; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;"><div style="background: linear-gradient(135deg, #f8fafc, #f1f5f9); padding: 5px 10px;"><h4 style="margin: 0; color: #dc2626; font-size: 12px;">${siteNames[siteKey] || siteKey}</h4></div><div style="padding: 5px 8px;">${rowsHtml}</div></div>`; } } html += `<div style="display: flex; justify-content: center; gap: 12px; margin-top: 12px; padding-top: 8px; border-top: 1px solid #e2e8f0;"><button class="btn btn-sm btn-primary" onclick="printCurrentReport()">🖨️ Распечатать</button><button class="btn btn-sm btn-danger" onclick="closeOrderReportModal()">✖️ Закрыть</button></div></div>`; const modal = document.getElementById('orderReportModal'); const contentDiv = document.getElementById('orderReportContent'); contentDiv.innerHTML = html; modal.style.display = 'block'; window.currentReportHtml = html; }
         function closeOrderReportModal() { document.getElementById('orderReportModal').style.display = 'none'; }
@@ -440,10 +907,24 @@
 
         function renderImportItemsWithData(items) { const container = document.getElementById('importItemsList'); if (!container) return; const { grouped, sortedKeys } = groupItemsByRal(items); let html = ''; for (const ralKey of sortedKeys) { const groupItems = grouped[ralKey]; const ralDisplay = ralKey === '?' ? '<span style="color: #dc2626;">не указан (?)</span>' : ralKey; html += `<div style="margin-bottom: 20px;"><div style="background: #f1f5f9; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; font-weight: bold;">🎨 RAL: ${ralDisplay}</div>`; for (let i = 0; i < groupItems.length; i++) { const item = groupItems[i]; const originalIndex = parsedImportItems.findIndex(x => x.id === item.id); const hasSelectedVersion = selectedVersions[originalIndex]; const quantityDisplay = formatValue(item.quantity, 'шт'); html += `<div class="import-item" data-item-index="${originalIndex}" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px;"><div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;"><div style="flex: 1;"><strong style="font-size: 16px; color: #dc2626;">📦 ${escapeHtml(item.originalName)}</strong><div style="display: flex; gap: 15px; margin-top: 8px; flex-wrap: wrap;"><div><label style="font-size: 11px; color: #f97316;">🔢 Кол-во:</label><input type="number" class="edit-quantity" data-index="${originalIndex}" value="${item.quantity}" min="0" step="1" style="width: 80px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0; font-size: 12px;"><span>шт</span></div><div><label style="font-size: 11px; color: #f97316;">🎨 RAL:</label><input type="text" class="edit-ral" data-index="${originalIndex}" value="${item.ral || ''}" placeholder="?" style="width: 100px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0; font-size: 12px;"></div><div><label style="font-size: 11px; color: #f97316;">🧵 Текстура:</label><input type="text" class="edit-texture" data-index="${originalIndex}" value="${item.texture || ''}" placeholder="?" style="width: 120px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0; font-size: 12px;"></div></div></div></div>`; if (item.type === 'product') { const versions = PRODUCT_VERSIONS[item.keyword] || [item.keyword]; html += `<div class="form-group" style="margin-top: 10px;"><label style="font-size: 12px; color: #f97316;">🎯 Версия изделия:</label><select class="version-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;"><option value="">-- Выберите версию --</option>${versions.map(v => `<option value="${v}" ${hasSelectedVersion === v ? 'selected' : ''}>${v}</option>`).join('')}</select></div><div class="form-group" style="margin-top: 10px;"><label style="font-size: 12px; color: #f97316;">📏 Размер изделия:</label><select class="size-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;" ${!hasSelectedVersion ? 'disabled' : ''}><option value="">-- ${!hasSelectedVersion ? 'Сначала выберите версию' : 'Выберите размер'} --</option></select></div><div class="details-container" id="details-${originalIndex}" style="display: ${hasSelectedVersion ? 'block' : 'none'}; margin-top: 15px; padding-top: 10px; border-top: 1px solid #e2e8f0;"></div>`; } else { html += `<div class="form-group" style="margin-top: 10px;"><label style="font-size: 12px; color: #f97316;">${item.type === 'bracket' ? '🔧' : '🎸'} Выберите тип по толщине:</label><select class="thickness-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;"><option value="">-- Выберите тип --</option>${THICKNESS_OPTIONS.map(opt => `<option value="${opt.productName}" data-product="${opt.productName}" data-item-type="${opt.type}" ${hasSelectedVersion === opt.productName ? 'selected' : ''}>${opt.productName}</option>`).join('')}</select></div>`; } html += `</div>`; } html += `</div>`; } container.innerHTML = html; document.querySelectorAll('.edit-quantity').forEach(input => { input.addEventListener('change', function() { const index = parseInt(this.dataset.index); const newQuantity = parseInt(this.value) || 0; if (parsedImportItems[index]) { parsedImportItems[index].quantity = newQuantity; const productName = selectedVersions[index]; if (productName && parsedImportItems[index].type === 'product') loadAndRenderDetails(index, productName, newQuantity, parsedImportItems[index].selectedSize); } }); }); document.querySelectorAll('.edit-ral').forEach(input => { input.addEventListener('change', function() { const index = parseInt(this.dataset.index); const newRal = this.value.trim(); if (parsedImportItems[index]) parsedImportItems[index].ral = newRal || null; }); }); document.querySelectorAll('.edit-texture').forEach(input => { input.addEventListener('change', function() { const index = parseInt(this.dataset.index); const newTexture = this.value.trim(); if (parsedImportItems[index]) parsedImportItems[index].texture = newTexture || null; }); }); document.querySelectorAll('.version-select').forEach(select => { select.addEventListener('change', function() { const index = parseInt(this.dataset.index); const value = this.value; const item = parsedImportItems[index]; const sizeSelect = document.querySelector(`.size-select[data-index="${index}"]`); if (value && item.type === 'product') { selectedVersions[index] = value; const sizes = getSizesForProduct(value); if (sizeSelect) { sizeSelect.disabled = false; sizeSelect.innerHTML = '<option value="">-- Выберите размер --</option>'; sizes.forEach(size => { const isSelected = (item.selectedSize === size); sizeSelect.innerHTML += `<option value="${size}" ${isSelected ? 'selected' : ''}>${size}</option>`; }); } loadAndRenderDetails(index, value, item.quantity, item.selectedSize); } else { delete selectedVersions[index]; if (sizeSelect) { sizeSelect.disabled = true; sizeSelect.innerHTML = '<option value="">-- Сначала выберите версию --</option>'; } const detailsContainer = document.getElementById(`details-${index}`); if (detailsContainer) detailsContainer.style.display = 'none'; } }); if (select.value) { const index = parseInt(select.dataset.index); const value = select.value; const item = parsedImportItems[index]; const sizeSelect = document.querySelector(`.size-select[data-index="${index}"]`); if (value && item.type === 'product') { const sizes = getSizesForProduct(value); if (sizeSelect) { sizeSelect.disabled = false; sizeSelect.innerHTML = '<option value="">-- Выберите размер --</option>'; sizes.forEach(size => { const isSelected = (item.selectedSize === size); sizeSelect.innerHTML += `<option value="${size}" ${isSelected ? 'selected' : ''}>${size}</option>`; }); } loadAndRenderDetails(index, value, item.quantity, item.selectedSize); } } }); document.querySelectorAll('.size-select').forEach(select => { select.addEventListener('change', function() { const index = parseInt(this.dataset.index); const size = this.value; const productName = selectedVersions[index]; const item = parsedImportItems[index]; if (size && productName) { parsedImportItems[index].selectedSize = size; loadAndRenderDetails(index, productName, item.quantity, size); } }); }); document.querySelectorAll('.thickness-select').forEach(select => { select.addEventListener('change', function() { const index = parseInt(this.dataset.index); const selectedOption = this.options[this.selectedIndex]; const productName = selectedOption.getAttribute('data-product'); const itemType = selectedOption.getAttribute('data-item-type'); if (productName) { selectedVersions[index] = productName; console.log(`Выбран: ${productName} (${itemType})`); } else { delete selectedVersions[index]; } }); }); }
 
-        async function saveEditedGroup(orderId) { console.log('saveEditedGroup вызвана', orderId); const missingConfigs = []; for (let i = 0; i < parsedImportItems.length; i++) { if (!selectedVersions[i]) missingConfigs.push(parsedImportItems[i].originalName); } if (missingConfigs.length > 0) { alert(`Выберите конфигурацию для следующих изделий:\n${missingConfigs.join('\n')}`); return; } const groupNameInput = document.getElementById('importGroupName'); const groupName = groupNameInput ? groupNameInput.value.trim() : ''; if (!groupName) { alert('Введите название группы'); return; } const progressDiv = document.getElementById('importProgress'); const confirmBtn = document.getElementById('confirmImportBtn'); if (progressDiv) progressDiv.style.display = 'block'; if (confirmBtn) confirmBtn.disabled = true; try { const updatedItems = []; for (let i = 0; i < parsedImportItems.length; i++) { const item = parsedImportItems[i]; const selectedValue = selectedVersions[i]; const isComponent = (item.type !== 'product'); const details = []; if (detailsData[i]) { detailsData[i].forEach(detail => { if (detail.quantity > 0) details.push({ name: detail.name, material: detail.material, lengthMm: detail.lengthMm || 0, quantity: detail.quantity, type: detail.type }); }); } updatedItems.push({ product: selectedValue, size: { name: item.selectedSize || item.size || 'Стандартный', quantity: item.quantity }, brackets: [], lyres: [], details: details, ral: item.ral || '', texture: item.texture || '', isComponent: isComponent }); } const orders = loadOrdersFromStorage(); const orderIndex = orders.findIndex(o => o.id == orderId); if (orderIndex === -1) { alert('Группа не найдена'); return; } orders[orderIndex] = { ...orders[orderIndex], groupName: groupName, items: updatedItems, date: new Date().toISOString().split('T')[0] }; saveOrdersToStorage(orders); if (typeof createTasksForOrder === 'function') createTasksForOrder(orders[orderIndex]); closeImportModal(); if (typeof renderOrdersList === 'function') renderOrdersList(); if (typeof updateStatistics === 'function') updateStatistics(); alert(`✅ Группа "${groupName}" успешно обновлена!`); if (confirmBtn) { confirmBtn.textContent = '✅ Сформировать группу'; confirmBtn.onclick = confirmImport; } } catch (error) { console.error('Ошибка:', error); alert('Ошибка при обновлении группы: ' + error.message); } finally { if (progressDiv) progressDiv.style.display = 'none'; if (confirmBtn) confirmBtn.disabled = false; } }
+        async function saveEditedGroup(orderId) { console.log('saveEditedGroup вызвана', orderId); const missingConfigs = []; for (let i = 0; i < parsedImportItems.length; i++) { if (!selectedVersions[i]) missingConfigs.push(parsedImportItems[i].originalName); } if (missingConfigs.length > 0) { alert(`Выберите конфигурацию для следующих изделий:\n${missingConfigs.join('\n')}`); return; } const groupNameInput = document.getElementById('importGroupName'); const groupName = groupNameInput ? groupNameInput.value.trim() : ''; if (!groupName) { alert('Введите название группы'); return; } const progressDiv = document.getElementById('importProgress'); const confirmBtn = document.getElementById('confirmImportBtn'); if (progressDiv) progressDiv.style.display = 'block'; if (confirmBtn) confirmBtn.disabled = true; try { const updatedItems = []; for (let i = 0; i < parsedImportItems.length; i++) { const item = parsedImportItems[i]; const selectedValue = selectedVersions[i]; const isComponent = (item.type !== 'product'); const details = []; if (detailsData[i]) { detailsData[i].forEach(detail => { if (detail.quantity > 0) details.push({ name: detail.name, material: detail.material, lengthMm: detail.lengthMm || 0, quantity: detail.quantity, type: detail.type }); }); } updatedItems.push({ product: selectedValue, size: { name: item.selectedSize || item.size || 'Стандартный', quantity: item.quantity }, brackets: [], lyres: [], details: details, ral: item.ral || '', texture: item.texture || '', isComponent: isComponent }); } const orders = loadOrdersFromStorage(); const orderIndex = orders.findIndex(o => o.id == orderId); if (orderIndex === -1) { alert('Группа не найдена'); return; } orders[orderIndex] = { ...orders[orderIndex], groupName: groupName, items: updatedItems, date: new Date().toISOString().split('T')[0] }; saveOrdersToStorage(orders); if (typeof createTasksForOrder === 'function') createTasksForOrder(orders[orderIndex]); closeImportModal(); renderOrdersList(); updateStatistics(); alert(`✅ Группа "${groupName}" успешно обновлена!`); if (confirmBtn) { confirmBtn.textContent = '✅ Сформировать группу'; confirmBtn.onclick = confirmImport; } } catch (error) { console.error('Ошибка:', error); alert('Ошибка при обновлении группы: ' + error.message); } finally { if (progressDiv) progressDiv.style.display = 'none'; if (confirmBtn) confirmBtn.disabled = false; } }
 
-        async function initMainPage() { productsList = await loadProducts() || []; await loadTaskOperations(); syncAllTasksToOrders(); const orders = loadOrdersFromStorage(); orders.forEach(order => { updateTaskQuantitiesFromDetails(order.id); }); renderOrdersList(); updateStatistics(); window.addEventListener('beforeunload', function() { saveMainOpenCardsState(); saveMainOpenItemsState(); }); document.getElementById('searchInput')?.addEventListener('input', function() { renderOrdersList(); updateStatistics(); }); document.getElementById('statusFilter')?.addEventListener('change', function() { renderOrdersList(); updateStatistics(); }); window.addEventListener('storage', function(e) { if (e.key === 'masterx_orders') { renderOrdersList(); updateStatistics(); } }); }
+        // ============== ИНИЦИАЛИЗАЦИЯ ==============
+        async function initMainPage() {
+            productsList = await loadProducts() || [];
+            await loadTaskOperations();
+            syncAllTasksToOrders();
+            const orders = loadOrdersFromStorage();
+            orders.forEach(order => { updateTaskQuantitiesFromDetails(order.id); });
+            renderOrdersList();
+            updateStatistics();
+            window.addEventListener('beforeunload', () => { saveMainOpenCardsState(); saveMainOpenItemsState(); });
+            document.getElementById('searchInput')?.addEventListener('input', () => { renderOrdersList(); updateStatistics(); });
+            document.getElementById('statusFilter')?.addEventListener('change', () => { renderOrdersList(); updateStatistics(); });
+            window.addEventListener('storage', (e) => { if (e.key === 'masterx_orders') { renderOrdersList(); updateStatistics(); } });
+        }
 
+        // ============== АВТООБНОВЛЕНИЕ ==============
         const AUTO_RELOAD_INTERVAL = 15 * 60 * 1000;
         const WARNING_BEFORE_RELOAD = 2 * 60 * 1000;
         let reloadTimer = null, warningTimer = null, countdownInterval = null, warningShown = false, countdownSeconds = 120;
@@ -461,8 +942,10 @@
         window.addEventListener('storage', function(e) { if (e.key === 'masterx_orders' || (e.key && e.key.startsWith('tasks_'))) onDataChanged(); });
         function initAutoReload() { startAutoReloadTimer(); trackUserActivity(); }
         initAutoReload();
+
         document.addEventListener('DOMContentLoaded', initMainPage);
-        
+
+        // ЭКСПОРТ ФУНКЦИЙ
         window.openImportModal = openImportModal;
         window.closeImportModal = closeImportModal;
         window.analyzeImportFile = analyzeImportFile;
