@@ -343,7 +343,7 @@ function renderImportItems(items) {
                         <label style="font-size: 12px; color: #f97316;">${item.type === 'bracket' ? '🔧' : '🎸'} Выберите тип по толщине:</label>
                         <select class="thickness-select" data-index="${originalIndex}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
                             <option value="">-- Выберите толщину --</option>
-                            ${THICKNESS_OPTIONS.map(opt => `<option value="${opt.thickness}" data-product="${opt.productName}" data-item-type="${opt.type}">${opt.thickness} (${opt.productName})</option>`).join('')}
+                            ${THICKNESS_OPTIONS.map(opt => `<option value="${opt.productName}" data-product="${opt.productName}" data-item-type="${opt.type}">${opt.productName}</option>`).join('')}
                         </select>
                     </div>
                 `;
