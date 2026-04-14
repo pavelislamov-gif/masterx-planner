@@ -174,7 +174,6 @@ header {
 
 .operation-item.extra-task .operation-name {
     color: #b45309;
-    font-weight: 500;
 }
 
 .btn-add-extra {
@@ -183,13 +182,7 @@ header {
     border: none;
     border-radius: 6px;
     padding: 6px 12px;
-    font-size: 12px;
     cursor: pointer;
-    font-weight: 500;
-}
-
-.btn-add-extra:hover {
-    background: linear-gradient(135deg, #d97706, #b45309);
 }
 
 /* ============== КНОПКИ ДОБАВЛЕНИЯ ОПЕРАЦИЙ (КВАДРАТИКИ) ============== */
