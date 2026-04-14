@@ -164,6 +164,34 @@ header {
     font-size: 12px;
 }
 
+/* Дополнительные задачи */
+.operation-item.extra-task {
+    background: #fef3c7;
+    border-left: 3px solid #f59e0b;
+    margin-top: 8px;
+    border-radius: 6px;
+}
+
+.operation-item.extra-task .operation-name {
+    color: #b45309;
+    font-weight: 500;
+}
+
+.btn-add-extra {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-add-extra:hover {
+    background: linear-gradient(135deg, #d97706, #b45309);
+}
+
 /* ============== КНОПКИ ДОБАВЛЕНИЯ ОПЕРАЦИЙ (КВАДРАТИКИ) ============== */
 .action-btn {
     width: 28px;
