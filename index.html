@@ -154,6 +154,40 @@
             </div>
         </div>
 
+        <!-- Модальное окно добавления дополнительной задачи -->
+        <div id="extraTaskModal" class="modal" style="display:none">
+            <div class="modal-content" style="max-width: 500px;">
+                <span class="close" onclick="closeExtraTaskModal()">&times;</span>
+                <h2 style="color: #dc2626; margin-bottom: 20px;">➕ Добавление дополнительной задачи</h2>
+                
+                <div class="form-group">
+                    <label>📝 Название задачи:</label>
+                    <input type="text" id="extraTaskName" placeholder="Например: Дополнительная сварка" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                </div>
+                
+                <div class="form-group">
+                    <label>🔢 Количество (план):</label>
+                    <input type="number" id="extraTaskQuantity" value="1" min="1" step="1" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                </div>
+                
+                <div class="form-group">
+                    <label>🏭 Участок:</label>
+                    <select id="extraTaskSite" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        <option value="tokarniy">🔧 Токарный</option>
+                        <option value="slesarniy">🔨 Слесарный</option>
+                        <option value="frezerniy">⚙️ Фрезерный</option>
+                        <option value="lazerno">✨ Лазерно-гибочный</option>
+                        <option value="polimerniy">🎨 Полимерный</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions" style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 25px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                    <button class="btn btn-danger" onclick="closeExtraTaskModal()">✖️ Отмена</button>
+                    <button class="btn btn-success" onclick="createExtraTask()">✅ Создать задачу</button>
+                </div>
+            </div>
+        </div>
+
         <div id="ordersList" class="orders-list"></div>
     </div>
 
@@ -165,7 +199,7 @@
     <script src="js/import-from-1c.js"></script>
 
     <script>
-        // ============== ОСТАВШИЕСЯ ФУНКЦИИ (без ручного создания групп) ==============
+        // ============== ОСТАВШИЕСЯ ФУНКЦИИ ==============
         
         let productsList = [];
         let taskOperationsData = {};
@@ -504,12 +538,9 @@
 
             const operationsWithDetails = getOperationNamesWithDetails(item.product, siteKey);
 
-            if (!operationsWithDetails || operationsWithDetails.length === 0) {
-                return null;
-            }
-
             let operationsHtml = '';
             let completedCount = 0;
+            let totalCount = 0;
 
             let tasksFromStorage = [];
             const storageKey = `tasks_${siteKey}`;
@@ -518,94 +549,138 @@
                 if (saved) tasksFromStorage = JSON.parse(saved);
             } catch(e) { console.error(e); }
 
-            for (let i = 0; i < operationsWithDetails.length; i++) {
-                const opData = operationsWithDetails[i];
-                const detailName = opData.detail || '';
-                
-                const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
-                const operationName = opData.operation || opData;
-                const thickness = opData.thickness || '';
-                
-                let displayOperationName = operationName;
-                if (detailName) {
-                    let cleanDetailName = detailName;
-                    if (thickness) {
-                        cleanDetailName = detailName.replace(thickness, '').trim();
+            // ========== ОСНОВНЫЕ ОПЕРАЦИИ ==========
+            if (operationsWithDetails && operationsWithDetails.length > 0) {
+                for (let i = 0; i < operationsWithDetails.length; i++) {
+                    const opData = operationsWithDetails[i];
+                    const detailName = opData.detail || '';
+                    
+                    const taskId = `${order.id}_${siteKey}_${itemIndex}_${i}`;
+                    const operationName = opData.operation || opData;
+                    const thickness = opData.thickness || '';
+                    
+                    let displayOperationName = operationName;
+                    if (detailName) {
+                        let cleanDetailName = detailName;
+                        if (thickness) {
+                            cleanDetailName = detailName.replace(thickness, '').trim();
+                        }
+                        displayOperationName = `${operationName} (${cleanDetailName})`;
+                        if (thickness) {
+                            displayOperationName += ` ${thickness}`;
+                        }
                     }
-                    displayOperationName = `${operationName} (${cleanDetailName})`;
-                    if (thickness) {
-                        displayOperationName += ` ${thickness}`;
+                    
+                    let squareClass = '';
+                    let isAdded = false;
+                    let plannedQuantity = 1;
+                    
+                    if (detailName && item.details) {
+                        const foundDetail = item.details.find(d => d.name === detailName);
+                        if (foundDetail && foundDetail.quantity > 0) {
+                            plannedQuantity = foundDetail.quantity;
+                        }
                     }
+                    
+                    const existingTask = tasksFromStorage.find(t => t.id === taskId);
+                    
+                    if (existingTask && existingTask.totalQuantity && plannedQuantity === 1) {
+                        plannedQuantity = existingTask.totalQuantity;
+                    }
+                    
+                    if (order.tasks && order.tasks[taskId]) {
+                        const taskStatus = order.tasks[taskId];
+                        if (taskStatus === 'green') {
+                            squareClass = 'green';
+                            isAdded = true;
+                            completedCount++;
+                        } else if (taskStatus === 'orange') {
+                            squareClass = 'orange';
+                            isAdded = true;
+                        } else if (taskStatus === 'pending' || taskStatus === '') {
+                            isAdded = true;
+                        }
+                    }
+                    
+                    if (existingTask && !isAdded) {
+                        isAdded = true;
+                        if (existingTask.status === 'completed') {
+                            squareClass = 'green';
+                            completedCount++;
+                        } else if (existingTask.status === 'in_progress') {
+                            squareClass = 'orange';
+                        }
+                    }
+                    
+                    const buttonIcon = isAdded ? '✓' : '+';
+                    const buttonClass = isAdded ? 'added' : '';
+                    
+                    operationsHtml += `
+                        <div class="operation-item">
+                            <div class="operation-info">
+                                <div class="operation-name">${escapeHtml(displayOperationName)}</div>
+                                <div class="operation-plan">📋 План: ${plannedQuantity} шт</div>
+                            </div>
+                            <div class="operation-controls">
+                                <div class="square-status ${squareClass}" data-task-id="${taskId}"></div>
+                                <div class="action-buttons">
+                                    <button class="action-btn btn-add ${buttonClass}" 
+                                            onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', false)">
+                                        ${buttonIcon}
+                                    </button>
+                                    <button class="action-btn btn-priority" 
+                                            onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', true)">
+                                        🔴
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    totalCount++;
                 }
+            }
+
+            // ========== ДОПОЛНИТЕЛЬНЫЕ ЗАДАЧИ ==========
+            let extraTasksHtml = '';
+            const extraTasks = (order.extraTasks || []).filter(t => t.site === siteKey);
+
+            for (const extraTask of extraTasks) {
+                const taskId = `${order.id}_${siteKey}_extra_${extraTask.id}`;
                 
+                // Получаем статус квадратика
                 let squareClass = '';
-                let isAdded = false;
-                let plannedQuantity = 1;
-                
-                if (detailName && item.details) {
-                    const foundDetail = item.details.find(d => d.name === detailName);
-                    if (foundDetail && foundDetail.quantity > 0) {
-                        plannedQuantity = foundDetail.quantity;
-                    }
-                }
-                
-                const existingTask = tasksFromStorage.find(t => t.id === taskId);
-                
-                if (existingTask && existingTask.totalQuantity && plannedQuantity === 1) {
-                    plannedQuantity = existingTask.totalQuantity;
-                }
-                
                 if (order.tasks && order.tasks[taskId]) {
-                    const taskStatus = order.tasks[taskId];
-                    if (taskStatus === 'green') {
-                        squareClass = 'green';
-                        isAdded = true;
-                        completedCount++;
-                    } else if (taskStatus === 'orange') {
-                        squareClass = 'orange';
-                        isAdded = true;
-                    } else if (taskStatus === 'pending' || taskStatus === '') {
-                        isAdded = true;
-                    }
+                    const status = order.tasks[taskId];
+                    if (status === 'green') squareClass = 'green';
+                    else if (status === 'orange') squareClass = 'orange';
                 }
                 
-                if (existingTask && !isAdded) {
-                    isAdded = true;
-                    if (existingTask.status === 'completed') {
-                        squareClass = 'green';
-                        completedCount++;
-                    } else if (existingTask.status === 'in_progress') {
-                        squareClass = 'orange';
-                    }
-                }
+                const isOnSite = extraTask.isOnSite || false;
+                const buttonIcon = isOnSite ? '✓' : '+';
+                const buttonClass = isOnSite ? 'added' : '';
                 
-                const buttonIcon = isAdded ? '✓' : '+';
-                const buttonClass = isAdded ? 'added' : '';
-                
-                operationsHtml += `
-                    <div class="operation-item">
+                extraTasksHtml += `
+                    <div class="operation-item extra-task">
                         <div class="operation-info">
-                            <div class="operation-name">${escapeHtml(displayOperationName)}</div>
-                            <div class="operation-plan">📋 План: ${plannedQuantity} шт</div>
+                            <div class="operation-name">➕ ${escapeHtml(extraTask.name)}</div>
+                            <div class="operation-plan">📋 План: ${extraTask.quantity} шт</div>
                         </div>
                         <div class="operation-controls">
-                            <div class="square-status ${squareClass}" 
-                                 data-task-id="${taskId}"
-                                 onclick="event.stopPropagation(); toggleSquareStatus('${taskId}')">
-                            </div>
+                            <div class="square-status ${squareClass}" data-task-id="${taskId}"></div>
                             <div class="action-buttons">
                                 <button class="action-btn btn-add ${buttonClass}" 
-                                        onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', false)">
+                                        onclick="event.stopPropagation(); ${isOnSite ? `removeExtraTaskFromSite(${order.id}, '${siteKey}', ${extraTask.id})` : `addExtraTaskToSite(${order.id}, '${siteKey}', ${extraTask.id})`}">
                                     ${buttonIcon}
                                 </button>
                                 <button class="action-btn btn-priority" 
-                                        onclick="event.stopPropagation(); toggleSiteOperation(this, ${order.id}, '${siteKey}', ${itemIndex}, ${i}, '${escapeHtml(operationName)}', true)">
+                                        onclick="event.stopPropagation(); setExtraTaskPriority(${order.id}, '${siteKey}', ${extraTask.id})">
                                     🔴
                                 </button>
                             </div>
                         </div>
                     </div>
                 `;
+                totalCount++;
             }
 
             const files = order.siteFiles?.[siteKey] || [];
@@ -621,18 +696,21 @@
                 `;
             }
 
+            if (totalCount === 0) return null;
+
             return `
                 <div class="site-card">
                     <div class="site-card-header">
                         <div class="site-name">${name}</div>
                         <div class="site-stats">
-                            <span class="completed">${completedCount}</span>/<span class="total">${operationsWithDetails.length}</span>
+                            <span class="completed">${completedCount}</span>/<span class="total">${totalCount}</span>
                         </div>
                     </div>
                     <div class="site-card-content">
                         ${operationsHtml}
+                        ${extraTasksHtml}
                         <div style="display: flex; gap: 8px; margin-top: 8px;">
-                            <button class="btn-add-extra" style="flex: 1;" onclick="event.stopPropagation(); addExtraTask(${order.id}, '${siteKey}')">➕ Доп. задача</button>
+                            <button class="btn-add-extra" style="flex: 1;" onclick="event.stopPropagation(); openExtraTaskModal(${order.id}, '${siteKey}')">➕ Доп. задача</button>
                             <button class="btn-file" style="flex: 1;" onclick="event.stopPropagation(); addSiteFile(${order.id}, '${siteKey}')">📎 Добавить файл</button>
                         </div>
                         ${filesIndicatorHtml}
@@ -641,49 +719,6 @@
             `;
         }
         
-        // ============== ПЕРЕКЛЮЧЕНИЕ СТАТУСА КВАДРАТИКА ==============
-        function toggleSquareStatus(taskId) {
-            const square = document.querySelector(`.square-status[data-task-id="${taskId}"]`);
-            if (!square) return;
-            
-            let newStatus = '';
-            let newColor = '';
-            
-            if (square.classList.contains('orange')) {
-                newStatus = 'completed';
-                newColor = 'green';
-            } else if (square.classList.contains('green')) {
-                newStatus = 'pending';
-                newColor = '';
-            } else {
-                newStatus = 'in_progress';
-                newColor = 'orange';
-            }
-            
-            const parts = taskId.split('_');
-            const orderId = parseInt(parts[0]);
-            const siteKey = parts[1];
-            
-            const orders = loadOrdersFromStorage();
-            const order = orders.find(o => o.id === orderId);
-            if (order) {
-                if (!order.tasks) order.tasks = {};
-                order.tasks[taskId] = newColor;
-                saveOrdersToStorage(orders);
-                
-                const storageKey = `tasks_${siteKey}`;
-                const tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
-                const taskIndex = tasks.findIndex(t => t.id === taskId);
-                if (taskIndex !== -1) {
-                    tasks[taskIndex].status = newStatus;
-                    localStorage.setItem(storageKey, JSON.stringify(tasks));
-                }
-                
-                renderOrdersList();
-                updateStatistics();
-            }
-        }
-
         // ============== ПЕРЕКЛЮЧЕНИЕ ОПЕРАЦИИ ==============
         function toggleSiteOperation(button, orderId, siteKey, itemIndex, opIndex, operationName, isPriority = false) {
             const orders = loadOrdersFromStorage();
@@ -804,6 +839,200 @@
             updateStatistics();
         }
 
+        // ============== ДОПОЛНИТЕЛЬНЫЕ ЗАДАЧИ ==============
+
+        let currentExtraTaskOrderId = null;
+        let currentExtraTaskSiteKey = null;
+
+        function openExtraTaskModal(orderId, siteKey) {
+            currentExtraTaskOrderId = orderId;
+            currentExtraTaskSiteKey = siteKey;
+            
+            const modal = document.getElementById('extraTaskModal');
+            if (!modal) return;
+            
+            document.getElementById('extraTaskName').value = '';
+            document.getElementById('extraTaskQuantity').value = '1';
+            document.getElementById('extraTaskSite').value = siteKey;
+            
+            modal.style.display = 'block';
+        }
+
+        function closeExtraTaskModal() {
+            const modal = document.getElementById('extraTaskModal');
+            if (modal) modal.style.display = 'none';
+            currentExtraTaskOrderId = null;
+            currentExtraTaskSiteKey = null;
+        }
+
+        function createExtraTask() {
+            const taskName = document.getElementById('extraTaskName')?.value.trim();
+            const quantity = parseInt(document.getElementById('extraTaskQuantity')?.value) || 1;
+            const siteKey = document.getElementById('extraTaskSite')?.value;
+            
+            if (!taskName) {
+                alert('Введите название задачи');
+                return;
+            }
+            
+            if (quantity < 1) {
+                alert('Количество должно быть не менее 1');
+                return;
+            }
+            
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == currentExtraTaskOrderId);
+            
+            if (!order) {
+                alert('Группа не найдена');
+                closeExtraTaskModal();
+                return;
+            }
+            
+            const extraTaskId = Date.now();
+            const taskId = `${order.id}_${siteKey}_extra_${extraTaskId}`;
+            
+            if (!order.extraTasks) order.extraTasks = [];
+            order.extraTasks.push({
+                id: extraTaskId,
+                name: taskName,
+                quantity: quantity,
+                site: siteKey,
+                createdAt: new Date().toISOString(),
+                isOnSite: false
+            });
+            
+            if (!order.tasks) order.tasks = {};
+            order.tasks[taskId] = 'pending';
+            
+            const orderIndex = orders.findIndex(o => o.id == currentExtraTaskOrderId);
+            orders[orderIndex] = order;
+            saveOrdersToStorage(orders);
+            
+            closeExtraTaskModal();
+            renderOrdersList();
+            updateStatistics();
+            
+            alert(`✅ Дополнительная задача "${taskName}" создана!\n📌 Нажмите "+" чтобы отправить на участок.`);
+        }
+
+        function addExtraTaskToSite(orderId, siteKey, extraTaskId) {
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            
+            if (!order) {
+                alert('Группа не найдена');
+                return;
+            }
+            
+            const extraTask = order.extraTasks.find(t => t.id == extraTaskId);
+            if (!extraTask) {
+                alert('Задача не найдена');
+                return;
+            }
+            
+            if (extraTask.isOnSite) {
+                alert('Задача уже на участке');
+                return;
+            }
+            
+            const taskId = `${order.id}_${siteKey}_extra_${extraTask.id}`;
+            const storageKey = `tasks_${siteKey}`;
+            let existingTasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            
+            if (existingTasks.some(t => t.id === taskId)) {
+                alert('Задача уже существует на участке');
+                return;
+            }
+            
+            const newTask = {
+                id: taskId,
+                orderId: order.id,
+                itemIndex: -1,
+                orderNumber: order.number,
+                product: extraTask.name,
+                size: 'Доп. задача',
+                sizeQuantity: 1,
+                totalQuantity: extraTask.quantity,
+                completedQuantity: 0,
+                operation: extraTask.name,
+                detail: '',
+                thickness: '',
+                ral: '',
+                texture: '',
+                index: -1,
+                status: 'pending',
+                executors: [],
+                date: new Date().toISOString().split('T')[0],
+                isExtra: true,
+                extraTaskId: extraTask.id,
+                createdAt: new Date().toISOString(),
+                isPriority: false
+            };
+            
+            existingTasks.push(newTask);
+            localStorage.setItem(storageKey, JSON.stringify(existingTasks));
+            
+            extraTask.isOnSite = true;
+            extraTask.addedToSiteAt = new Date().toISOString();
+            
+            const orderIndex = orders.findIndex(o => o.id == orderId);
+            orders[orderIndex] = order;
+            saveOrdersToStorage(orders);
+            
+            renderOrdersList();
+            updateStatistics();
+            
+            alert(`✅ Задача "${extraTask.name}" отправлена на участок!`);
+        }
+
+        function removeExtraTaskFromSite(orderId, siteKey, extraTaskId) {
+            if (!confirm('Удалить дополнительную задачу с участка?')) return;
+            
+            const orders = loadOrdersFromStorage();
+            const order = orders.find(o => o.id == orderId);
+            
+            if (!order) return;
+            
+            const extraTask = order.extraTasks.find(t => t.id == extraTaskId);
+            if (!extraTask) return;
+            
+            const taskId = `${order.id}_${siteKey}_extra_${extraTask.id}`;
+            const storageKey = `tasks_${siteKey}`;
+            let tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            
+            tasks = tasks.filter(t => t.id !== taskId);
+            localStorage.setItem(storageKey, JSON.stringify(tasks));
+            
+            extraTask.isOnSite = false;
+            extraTask.removedFromSiteAt = new Date().toISOString();
+            
+            const orderIndex = orders.findIndex(o => o.id == orderId);
+            orders[orderIndex] = order;
+            saveOrdersToStorage(orders);
+            
+            renderOrdersList();
+            updateStatistics();
+            
+            alert(`✅ Задача "${extraTask.name}" удалена с участка`);
+        }
+
+        function setExtraTaskPriority(orderId, siteKey, extraTaskId) {
+            const storageKey = `tasks_${siteKey}`;
+            let tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            
+            const taskId = `${orderId}_${siteKey}_extra_${extraTaskId}`;
+            const taskIndex = tasks.findIndex(t => t.id === taskId);
+            
+            if (taskIndex !== -1) {
+                tasks[taskIndex].isPriority = !tasks[taskIndex].isPriority;
+                localStorage.setItem(storageKey, JSON.stringify(tasks));
+                alert(tasks[taskIndex].isPriority ? '🔴 Задача отмечена как приоритетная' : '⚪ Приоритет снят');
+            }
+            
+            renderOrdersList();
+        }
+
         // ============== СИНХРОНИЗАЦИЯ ЗАДАЧ ==============
         function syncAllTasksToOrders() {
             const orders = loadOrdersFromStorage();
@@ -868,81 +1097,74 @@
         }
 
         function createGroupOrder() {
-    console.log('🔍 createGroupOrder вызвана');
-    
-    // Пробуем получить название группы из разных мест
-    let groupName = '';
-    
-    // Сначала пробуем из поля импорта
-    const importGroupName = document.getElementById('importGroupName');
-    if (importGroupName && importGroupName.value) {
-        groupName = importGroupName.value.trim();
-    }
-    
-    // Если нет, пробуем из старого поля (на всякий случай)
-    if (!groupName) {
-        const oldGroupName = document.getElementById('groupNameInput');
-        if (oldGroupName && oldGroupName.value) {
-            groupName = oldGroupName.value.trim();
+            console.log('🔍 createGroupOrder вызвана');
+            
+            let groupName = '';
+            
+            const importGroupName = document.getElementById('importGroupName');
+            if (importGroupName && importGroupName.value) {
+                groupName = importGroupName.value.trim();
+            }
+            
+            if (!groupName) {
+                const oldGroupName = document.getElementById('groupNameInput');
+                if (oldGroupName && oldGroupName.value) {
+                    groupName = oldGroupName.value.trim();
+                }
+            }
+            
+            if (!groupName) {
+                alert('Введите название группы');
+                return;
+            }
+            
+            if (!window.tempItemsList || window.tempItemsList.length === 0) {
+                alert('Добавьте хотя бы одно изделие');
+                return;
+            }
+            
+            const orders = loadOrdersFromStorage();
+            const newOrder = {
+                id: Date.now(),
+                groupName: groupName,
+                date: new Date().toISOString().split('T')[0],
+                number: generateOrderNumber(),
+                items: JSON.parse(JSON.stringify(window.tempItemsList)),
+                status: 'active',
+                tasks: {},
+                extraTasks: [],
+                siteFiles: {}
+            };
+            
+            orders.push(newOrder);
+            saveOrdersToStorage(orders);
+            
+            if (typeof createTasksForOrder === 'function') {
+                createTasksForOrder(newOrder);
+            }
+            
+            const importModal = document.getElementById('importModal');
+            if (importModal) importModal.style.display = 'none';
+            
+            if (typeof renderOrdersList === 'function') {
+                renderOrdersList();
+            }
+            if (typeof updateStatistics === 'function') {
+                updateStatistics();
+            }
+            
+            alert(`✅ Группа "${groupName}" успешно создана!`);
+            
+            window.tempItemsList = [];
         }
-    }
-    
-    if (!groupName) {
-        alert('Введите название группы');
-        return;
-    }
-    
-    if (!window.tempItemsList || window.tempItemsList.length === 0) {
-        alert('Добавьте хотя бы одно изделие');
-        return;
-    }
-    
-    const orders = loadOrdersFromStorage();
-    const newOrder = {
-        id: Date.now(),
-        groupName: groupName,
-        date: new Date().toISOString().split('T')[0],
-        number: generateOrderNumber(),
-        items: JSON.parse(JSON.stringify(window.tempItemsList)),
-        status: 'active',
-        tasks: {},
-        extraTasks: [],
-        siteFiles: {}
-    };
-    
-    orders.push(newOrder);
-    saveOrdersToStorage(orders);
-    
-    // Создаём задачи для заказа
-    if (typeof createTasksForOrder === 'function') {
-        createTasksForOrder(newOrder);
-    }
-    
-    // Закрываем модальное окно импорта
-    const importModal = document.getElementById('importModal');
-    if (importModal) importModal.style.display = 'none';
-    
-    // Обновляем отображение
-    if (typeof renderOrdersList === 'function') {
-        renderOrdersList();
-    }
-    if (typeof updateStatistics === 'function') {
-        updateStatistics();
-    }
-    
-    alert(`✅ Группа "${groupName}" успешно создана!`);
-    
-    // Очищаем временные данные
-    window.tempItemsList = [];
-}
 
-function generateOrderNumber() {
-    const date = new Date();
-    const year = date.getFullYear().toString().slice(-2);
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    return `${day}.${month}.${year}`;
-}
+        function generateOrderNumber() {
+            const date = new Date();
+            const year = date.getFullYear().toString().slice(-2);
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${day}.${month}.${year}`;
+        }
 
         // ============== ОТОБРАЖЕНИЕ СПИСКА ГРУПП ==============
         function renderOrdersList() {
@@ -1921,33 +2143,6 @@ function generateOrderNumber() {
             alert(`✅ Статистика времени экспортирована в файл: time_stats.csv`);
         }
 
-        function addExtraTask(orderId, siteKey) {
-            const taskDescription = prompt('Введите описание дополнительной задачи:');
-            if (!taskDescription) return;
-
-            let orders = loadOrdersFromStorage();
-            const order = orders.find(o => o.id == orderId);
-
-            if (!order) {
-                alert('Группа не найдена');
-                return;
-            }
-
-            if (!order.extraTasks) order.extraTasks = [];
-
-            order.extraTasks.push({
-                title: taskDescription,
-                description: taskDescription,
-                site: siteKey,
-                createdAt: new Date().toISOString()
-            });
-
-            saveOrdersToStorage(orders);
-            renderOrdersList();
-            updateStatistics();
-            alert('✅ Дополнительная задача добавлена');
-        }
-
         function deleteOrder(orderId) {
             if (!confirm('Удалить группу? Все связанные задачи также будут удалены.')) return;
 
@@ -2389,21 +2584,17 @@ function generateOrderNumber() {
                 return;
             }
             
-            // Открываем модальное окно импорта
             openImportModal();
             
-            // Заполняем название группы
             const groupNameInput = document.getElementById('importGroupName');
             if (groupNameInput) {
                 groupNameInput.value = order.groupName;
             }
             
-            // Очищаем старые данные
             parsedImportItems = [];
             selectedVersions = {};
             detailsData = {};
             
-            // Конвертируем существующие изделия в формат импорта
             for (let i = 0; i < order.items.length; i++) {
                 const item = order.items[i];
                 
@@ -2422,7 +2613,6 @@ function generateOrderNumber() {
                 
                 selectedVersions[i] = item.product;
                 
-                // Сохраняем детали
                 if (item.details && item.details.length > 0) {
                     detailsData[i] = item.details.map(d => ({
                         ...d,
@@ -2434,14 +2624,11 @@ function generateOrderNumber() {
                 }
             }
             
-            // Перерисовываем интерфейс и загружаем детали
             renderImportItemsWithData(parsedImportItems);
             
-            // Показываем блок с найденными изделиями
             const previewContainer = document.getElementById('importPreviewContainer');
             if (previewContainer) previewContainer.style.display = 'block';
             
-            // Меняем кнопку на "Сохранить изменения"
             const confirmBtn = document.getElementById('confirmImportBtn');
             if (confirmBtn) {
                 confirmBtn.textContent = '💾 Сохранить изменения';
@@ -2538,16 +2725,12 @@ function generateOrderNumber() {
             
             container.innerHTML = html;
             
-            // ============== ОБРАБОТЧИКИ ДЛЯ РЕДАКТИРОВАНИЯ ==============
-            
-            // 1. Редактирование количества
             document.querySelectorAll('.edit-quantity').forEach(input => {
                 input.addEventListener('change', function() {
                     const index = parseInt(this.dataset.index);
                     const newQuantity = parseInt(this.value) || 0;
                     if (parsedImportItems[index]) {
                         parsedImportItems[index].quantity = newQuantity;
-                        console.log(`Количество для ${parsedImportItems[index].originalName} изменено на: ${newQuantity}`);
                         const productName = selectedVersions[index];
                         if (productName && parsedImportItems[index].type === 'product') {
                             loadAndRenderDetails(index, productName, newQuantity, parsedImportItems[index].selectedSize);
@@ -2556,31 +2739,26 @@ function generateOrderNumber() {
                 });
             });
             
-            // 2. Редактирование RAL
             document.querySelectorAll('.edit-ral').forEach(input => {
                 input.addEventListener('change', function() {
                     const index = parseInt(this.dataset.index);
                     const newRal = this.value.trim();
                     if (parsedImportItems[index]) {
                         parsedImportItems[index].ral = newRal || null;
-                        console.log(`RAL для ${parsedImportItems[index].originalName} изменён на: ${newRal || '?'}`);
                     }
                 });
             });
             
-            // 3. Редактирование текстуры
             document.querySelectorAll('.edit-texture').forEach(input => {
                 input.addEventListener('change', function() {
                     const index = parseInt(this.dataset.index);
                     const newTexture = this.value.trim();
                     if (parsedImportItems[index]) {
                         parsedImportItems[index].texture = newTexture || null;
-                        console.log(`Текстура для ${parsedImportItems[index].originalName} изменена на: ${newTexture || '?'}`);
                     }
                 });
             });
             
-            // 4. Обработчики для выбора версии
             document.querySelectorAll('.version-select').forEach(select => {
                 select.addEventListener('change', function() {
                     const index = parseInt(this.dataset.index);
@@ -2611,7 +2789,6 @@ function generateOrderNumber() {
                     }
                 });
                 
-                // Если уже есть выбранная версия, загружаем размеры и детали
                 if (select.value) {
                     const index = parseInt(select.dataset.index);
                     const value = select.value;
@@ -2633,7 +2810,6 @@ function generateOrderNumber() {
                 }
             });
             
-            // 5. Обработчики для выбора размера
             document.querySelectorAll('.size-select').forEach(select => {
                 select.addEventListener('change', function() {
                     const index = parseInt(this.dataset.index);
@@ -2648,7 +2824,6 @@ function generateOrderNumber() {
                 });
             });
             
-            // 6. Обработчики для выбора толщины (кронштейны и лиры)
             document.querySelectorAll('.thickness-select').forEach(select => {
                 select.addEventListener('change', function() {
                     const index = parseInt(this.dataset.index);
@@ -2658,7 +2833,6 @@ function generateOrderNumber() {
                     
                     if (productName) {
                         selectedVersions[index] = productName;
-                        console.log(`Выбран: ${productName} (${itemType})`);
                     } else {
                         delete selectedVersions[index];
                     }
@@ -2667,9 +2841,6 @@ function generateOrderNumber() {
         }
 
         async function saveEditedGroup(orderId) {
-            console.log('💾 saveEditedGroup вызвана, orderId:', orderId);
-            
-            // Проверяем, что все изделия имеют выбранную конфигурацию
             const missingConfigs = [];
             for (let i = 0; i < parsedImportItems.length; i++) {
                 if (!selectedVersions[i]) {
@@ -2695,7 +2866,6 @@ function generateOrderNumber() {
             if (confirmBtn) confirmBtn.disabled = true;
             
             try {
-                // Формируем обновлённый список изделий
                 const updatedItems = [];
                 
                 for (let i = 0; i < parsedImportItems.length; i++) {
@@ -2733,7 +2903,6 @@ function generateOrderNumber() {
                     });
                 }
                 
-                // Обновляем заказ
                 const orders = loadOrdersFromStorage();
                 const orderIndex = orders.findIndex(o => o.id == orderId);
                 
@@ -2751,7 +2920,6 @@ function generateOrderNumber() {
                 
                 saveOrdersToStorage(orders);
                 
-                // Пересоздаём задачи
                 if (typeof createTasksForOrder === 'function') {
                     createTasksForOrder(orders[orderIndex]);
                 }
@@ -2767,7 +2935,6 @@ function generateOrderNumber() {
                 
                 alert(`✅ Группа "${groupName}" успешно обновлена!`);
                 
-                // Восстанавливаем кнопку
                 if (confirmBtn) {
                     confirmBtn.textContent = '✅ Сформировать группу';
                     confirmBtn.onclick = confirmImport;
@@ -2992,7 +3159,6 @@ function generateOrderNumber() {
         
         document.addEventListener('DOMContentLoaded', initMainPage);
         
-        // Экспорт функций в глобальную область
         window.openImportModal = openImportModal;
         window.closeImportModal = closeImportModal;
         window.analyzeImportFile = analyzeImportFile;
